@@ -27,18 +27,40 @@ import "Summary";
 import "Wizard";
 import "Label";
 
-#include "s390/zfcp/wizards.ycp";
-#include "s390/dasd/wizards.ycp";
+import "DASDController";
+import "ZFCPController";
+
+
+UI::OpenDialog (`Label (_("Detecting available controllers")));
+
+boolean have_dasd = size (DASDController::GetControllers ()) > 0;
+boolean have_zfcp = size (ZFCPController::GetControllers ()) > 0;
+
+y2milestone ("Have DASD: %1, have zFCP: %2", have_dasd, have_zfcp);
+
+UI::CloseDialog ();
+
+if (have_dasd && ! have_zfcp)
+{
+    y2milestone ("Having DASD-only system");
+    return WFM::call ("dasd");
+}
+else if (have_zfcp && ! have_dasd)
+{
+    y2milestone ("Having zFCP-only system");
+    return WFM::call ("zfcp");
+}
+
 
 /* Initialization dialog caption */
 string caption = _("S/390 Disk Controller Configuration");
 /* Initialization dialog contents */
 term contents = `HBox (`HWeight (999, `HStretch ()), `VBox (
     `VStretch (),
-    `HWeight (1, `PushButton (`id (`dasd), `opt (`hstretch ()),
+    `HWeight (1, `PushButton (`id (`dasd), `opt (`hstretch),
 	_("Configure &DASD disks"))),
     `VSpacing (2),
-    `HWeight (1, `PushButton (`id (`zfcp), `opt (`hstretch ()),
+    `HWeight (1, `PushButton (`id (`zfcp), `opt (`hstretch),
 	_("Configure &ZFCP disks"))),
     `VStretch ()
 ), `HWeight (999, `HStretch ()));

@@ -15,6 +15,7 @@
 module "ZFCPController";
 textdomain "s390";
 
+import "Arch";
 import "Progress";
 import "Report";
 import "Summary";
@@ -24,13 +25,9 @@ global map<integer,map<string,any> > devices = $[];
 
 global map<integer, boolean> selected = $[];
 
-global string filter_min = "0x0000";
-
-global string filter_max = "0xffff";
-
 global map<string, any> previous_settings = $[];
 
-
+list<map<string,any> > controllers = nil;
 
 /**
  * Prototypes
@@ -157,6 +154,20 @@ global list Summary() {
 global map AutoPackages() {
     // TODO FIXME: your code here...
     return $[ "install":[], "remove":[] ];
+}
+
+global define list<map<string,any> > GetControllers () {
+    if (controllers == nil)
+    {
+	controllers = (list<map<string,any> >)SCR::Read (.probe.storage);
+	if (Arch::i386)
+	    controllers = [$["bus":"None", "class_id":1, "device":"zFCP controller", "device_id":268081, "drivers":[$["active":true, "modprobe":true, "modules":[["zfcp", ""]]]], "model":"IBM zFCP controller", "old_unique_key":"ESHv.6czr7zOIMz1", "resource":$["io":[$["active":true, "length":3, "mode":"rw", "start":64000]]], "sub_class_id":0, "sub_device_id":268082, "unique_key":"rdCR.AbUgA7O1gK4", "vendor":"IBM", "vendor_id":286721], $["bus":"None", "class_id":1, "device":"DASD", "model":"IBM DASD", "old_unique_key":"98ht.T2MB916psk1", "sub_class_id":128, "unique_key":"rdCR.T2MB916psk1", "vendor":"IBM"]];
+	controllers = filter (map<string,any> c, controllers, {
+	    return c["device"]:"" == "zFCP controller";
+	});
+	y2milestone ("Found %1 zfcp controllers", size (controllers));
+    }
+    return controllers;
 }
 
 /* EOF */
