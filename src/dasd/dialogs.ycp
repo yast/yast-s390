@@ -233,6 +233,7 @@ define symbol DASDDialog() {
 
 	if (ret == `filter) {
 	    ReloadDASDDialog ();
+	    ret = nil;
 	    continue;
 	}
 	else if (ret == `table || ret == `select)
