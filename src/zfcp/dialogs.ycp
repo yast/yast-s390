@@ -22,19 +22,25 @@ import "ZFCPController";
 
 include "s390/zfcp/helps.ycp";
 
-    define string FourDigitHex(integer i) ``{
-        string s = tohexstring(i);
-        string zeros = "";
+/**
+ * Translate integer number to its hexadecimal representation with leading
+ * 0x and exactliy 4 hexadecimal numbers
+ * @param i integer integer number
+ * @return string hexadecimal number
+ */
+define string FourDigitHex(integer i) ``{
+    string s = tohexstring(i);
+    string zeros = "";
 
-        integer l = 6 - size(s);
+    integer l = 6 - size(s);
 
-        while (l > 0) {
-            zeros = zeros + "0";
-            l = l - 1;
-        }
-
-        return substring(s, 0, 2) + zeros + substring(s, 2);
+    while (l > 0) {
+	zeros = zeros + "0";
+	l = l - 1;
     }
+
+    return substring(s, 0, 2) + zeros + substring(s, 2);
+}
 
 /**
  * Report error occured during device activation
@@ -117,28 +123,9 @@ define list<term> GetZFCPDiskItems() ``{
 }
 
 define void ReloadZFCPDialog () ``{
-
-    UI::OpenDialog (`Label (_("Reading configured ZFCP disks")));
-
-    list<map<string,any> > disks = (list<map<string,any> >)
-	SCR::Read (.probe.disk);
-
-    // FIXME remove after testing
-    if (! Arch::s390)
-	disks = [$["bus":"None", "class_id":262, "dev_name":"/dev/dasda", "dev_num":$["major":94, "minor":0, "range":4, "type":"b"], "device":"DASD", "device_id":276880, "model":"IBM DASD", "old_unique_key":"N5EP.J4gQoPlOYuE", "prog_if":1, "resource":$["disk_log_geo":[$["cylinders":3338, "heads":15, "sectors":12]], "io":[$["active":true, "length":1, "mode":"rw", "start":336]], "size":[$["unit":"sectors", "x":4806720, "y":512]]], "sub_class_id":0, "sub_device_id":275344, "unique_key":"6eUF.ALFATSt_U8F", "vendor":"IBM", "vendor_id":286721], $["bus":"None", "class_id":262, "device":"DASD", "device_id":276880, "model":"IBM DASD", "old_unique_key":"q1eL.rOENMk3aQ50", "prog_if":1, "resource":$["io":[$["active":false, "length":1, "mode":"rw", "start":400]]], "sub_class_id":0, "sub_device_id":275344, "unique_key":"rdCR.ALFATSt_U8F", "vendor":"IBM", "vendor_id":286721], $["bus":"None", "class_id":262, "device":"DASD", "device_id":276880, "model":"IBM DASD", "old_unique_key":"q1eL.rOENMk3aQ50", "prog_if":1, "resource":$["io":[$["active":false, "length":1, "mode":"rw", "start":401]]], "sub_class_id":0, "sub_device_id":275344, "unique_key":"rdCR.ALFATSt_U8F", "vendor":"IBM", "vendor_id":286721], $["bus":"None", "class_id":262, "device":"DASD", "device_id":276880, "model":"IBM DASD", "old_unique_key":"q1eL.rOENMk3aQ50", "prog_if":1, "resource":$["io":[$["active":false, "length":1, "mode":"rw", "start":413]]], "sub_class_id":0, "sub_device_id":275344, "unique_key":"rdCR.ALFATSt_U8F", "vendor":"IBM", "vendor_id":286721], $["bus":"None", "class_id":262, "device":"DASD", "device_id":276880, "model":"IBM DASD", "old_unique_key":"q1eL.rOENMk3aQ50", "prog_if":1, "resource":$["io":[$["active":false, "length":1, "mode":"rw", "start":414]]], "sub_class_id":0, "sub_device_id":275344, "unique_key":"rdCR.ALFATSt_U8F", "vendor":"IBM", "vendor_id":286721], $["bus":"None", "class_id":262, "dev_name":"/dev/dasdb", "dev_names":["/dev/dasdb"], "dev_num":$["major":94, "minor":4, "range":4, "type":"b"], "device":"DASD", "device_id":276880, "model":"IBM DASD", "old_unique_key":"qGUT.J4gQoPlOYuE", "prog_if":1, "resource":$["disk_log_geo":[$["cylinders":10017, "heads":15, "sectors":0]], "io":[$["active":true, "length":1, "mode":"rw", "start":4242]], "size":[$["unit":"sectors", "x":0, "y":512]]], "sub_class_id":0, "sub_device_id":275344, "unique_key":"ZpkJ.ALFATSt_U8F", "vendor":"IBM", "vendor_id":286721], $["bus":"SCSI", "channel":0, "class_id":262, "controller_id":"0.0.fa00", "dev_name":"/dev/fcp-0.0.fa00_0x5005076300c590a9:0x0000000000000000", "dev_names":["/dev/sda", "/dev/fcp-0.0.fa00_0x5005076300c590a9:0x0000000000000000"], "dev_num":$["major":8, "minor":0, "range":16, "type":"b"], "device":"2105F20", "fcp_lun":"0x0", "host":0, "id":1, "lun":1, "model":"IBM 2105F20", "old_unique_key":"vfuo.2InDh6NoMG4", "resource":$["disk_log_geo":[$["cylinders":1016, "heads":93, "sectors":62]], "size":[$["unit":"sectors", "x":5859392, "y":512]]], "rev":".307", "sub_class_id":0, "unique_key":"Gwc0.IAfQSX+HcV7", "vendor":"IBM", "wwpn":"0x5005076300c590a9"], $["bus":"SCSI", "channel":0, "class_id":262, "controller_id":"0.0.fa00", "dev_name":"/dev/fcp-0.0.fa00_0x5005076300c590a9:0x0001000000000000", "dev_names":["/dev/sdb", "/dev/fcp-0.0.fa00_0x5005076300c590a9:0x0001000000000000"], "dev_num":$["major":8, "minor":16, "range":16, "type":"b"], "device":"2105F20", "fcp_lun":"0x1000000000000", "host":0, "id":1, "lun":2, "model":"IBM 2105F20", "old_unique_key":"cQuI.Bd3fUGTSEdB", "resource":$["disk_log_geo":[$["cylinders":1016, "heads":93, "sectors":62]], "size":[$["unit":"sectors", "x":5859392, "y":512]]], "rev":".307", "sub_class_id":0, "unique_key":"j5t4.RVxrFh5yTsE", "vendor":"IBM", "wwpn":"0x5005076300c590a9"]];
-
-    disks = filter (map<string,any> d, disks, ``(
-	d["bus"]:"" == "SCSI"
-    ));
-    integer index = -1;
-    ZFCPController::devices = listmap (map<string,any> d, disks, ``{
-	index = index + 1;
-	return $[ index : d ];
-    });
+    ZFCPController::ProbeDisks ();
 
     list<term> items = GetZFCPDiskItems ();
-
-    UI::CloseDialog ();
 
     UI::ChangeWidget(`id(`table), `Items, items);
     UI::ChangeWidget (`id (`delete), `Enabled, size (items) > 0);
@@ -189,12 +176,13 @@ define symbol ZFCPDialog () ``{
 
     any ret = nil;
 
+    integer selected = 0;
+
     while (ret == nil)
     {
 	ret = UI::UserInput();
 
-	integer selected = (integer)
-	    UI::QueryWidget (`id (`table), `CurrentItem);
+	selected = (integer) UI::QueryWidget (`id (`table), `CurrentItem);
 
 /*	else if (ret == `table)
 	{
@@ -234,6 +222,15 @@ define symbol ZFCPDialog () ``{
 	    ret = nil;
 	}
     }
+    if (ret == `add)
+    {
+	map<string,any> descr = ZFCPController::devices[selected]:$[];
+	string dev_name = (string)(descr["dev_name"]:"");
+	string channel = descr["controller_id"]:"unknown";
+	string wwpn = descr["wwpn"]:"unknown";
+	if (wwpn != "unknown")
+	    ZFCPController::previous_settings["wwpn"] = wwpn;
+    }
     return (symbol) ret;
 }
 
@@ -259,11 +256,24 @@ define symbol AddZFCPDiskDialog () ``{
     });
     fcp_lun = tohexstring (new_lun);
 
+    list<string>items = maplist (map<string,any> c,
+	ZFCPController::GetControllers (),
+    ``{
+	string channel = FourDigitHex (c["resource", "io", 0, "start"]:0);
+	string lcss = FourDigitHex (c["lcss"]:0);
+	channel = sformat ("%1.%2.%3",
+	    substring (lcss, 4, 1),
+	    substring (lcss, 5, 1),
+	    substring (channel, 2, 4));
+	return channel;
+    });
+
     /* Dialog content */
     term content = `HBox (`HStretch (), `VBox(
 	`VStretch (),
-	`TextEntry(`id(`channel), _("&Channel-Number"),
-	    ZFCPController::previous_settings["channel"]:""),
+	`ComboBox (`id(`channel), `opt (`editable, `hstretch),
+	    _("&Channel Number"),
+	    items),
 	`TextEntry(`id(`wwpn), _("&WWPN"),
 	    ZFCPController::previous_settings["wwpn"]:""),
 	`VSpacing (2),

@@ -161,13 +161,36 @@ global define list<map<string,any> > GetControllers () {
     {
 	controllers = (list<map<string,any> >)SCR::Read (.probe.storage);
 	if (Arch::i386)
-	    controllers = [$["bus":"None", "class_id":1, "device":"zFCP controller", "device_id":268081, "drivers":[$["active":true, "modprobe":true, "modules":[["zfcp", ""]]]], "model":"IBM zFCP controller", "old_unique_key":"ESHv.6czr7zOIMz1", "resource":$["io":[$["active":true, "length":3, "mode":"rw", "start":64000]]], "sub_class_id":0, "sub_device_id":268082, "unique_key":"rdCR.AbUgA7O1gK4", "vendor":"IBM", "vendor_id":286721], $["bus":"None", "class_id":1, "device":"DASD", "model":"IBM DASD", "old_unique_key":"98ht.T2MB916psk1", "sub_class_id":128, "unique_key":"rdCR.T2MB916psk1", "vendor":"IBM"]];
+	    controllers = [$["bus":"None", "class_id":1, "cu_model":3, "dev_model":3, "device":"zFCP controller", "device_id":268081, "drivers":[$["active":true, "modprobe":true, "modules":[["zfcp", ""]]]], "lcss":0, "model":"IBM zFCP controller", "old_unique_key":"ESHv.6czr7zOIMz1", "resource":$["io":[$["active":true, "length":3, "mode":"rw", "start":64000]]], "sub_class_id":0, "sub_device_id":268082, "unique_key":"rdCR.AbUgA7O1gK4", "vendor":"IBM", "vendor_id":286721], $["bus":"None", "class_id":1, "device":"DASD", "model":"IBM DASD", "old_unique_key":"98ht.T2MB916psk1", "sub_class_id":128, "unique_key":"rdCR.T2MB916psk1", "vendor":"IBM"]];
+
 	controllers = filter (map<string,any> c, controllers, {
 	    return c["device"]:"" == "zFCP controller";
 	});
 	y2milestone ("Found %1 zfcp controllers", size (controllers));
     }
     return controllers;
+}
+
+global define void ProbeDisks () {
+    UI::OpenDialog (`Label (_("Reading configured ZFCP disks")));
+
+    list<map<string,any> > disks = (list<map<string,any> >)
+	SCR::Read (.probe.disk);
+
+    // FIXME remove after testing
+    if (! Arch::s390)
+	disks = [$["bus":"SCSI", "channel":0, "class_id":262, "controller_id":"0.0.fa00", "dev_name":"/dev/fcp-0.0.fa00_0x5005076300c590a9:0x0000000000000000", "dev_names":["/dev/sda", "/dev/fcp-0.0.fa00_0x5005076300c590a9:0x0000000000000000"], "dev_num":$["major":8, "minor":0, "range":16, "type":"b"], "device":"2105F20", "fcp_lun":"0x0", "host":0, "id":1, "lun":1, "model":"IBM 2105F20", "old_unique_key":"vfuo.2InDh6NoMG4", "resource":$["disk_log_geo":[$["cylinders":1016, "heads":93, "sectors":62]], "size":[$["unit":"sectors", "x":5859392, "y":512]]], "rev":".307", "sub_class_id":0, "unique_key":"Gwc0.IAfQSX+HcV7", "vendor":"IBM", "wwpn":"0x5005076300c590a9"], $["bus":"SCSI", "channel":0, "class_id":262, "controller_id":"0.0.fa00", "dev_name":"/dev/fcp-0.0.fa00_0x5005076300c590a9:0x0001000000000000", "dev_names":["/dev/sdb", "/dev/fcp-0.0.fa00_0x5005076300c590a9:0x0001000000000000"], "dev_num":$["major":8, "minor":16, "range":16, "type":"b"], "device":"2105F20", "fcp_lun":"0x1000000000000", "host":0, "id":1, "lun":2, "model":"IBM 2105F20", "old_unique_key":"cQuI.Bd3fUGTSEdB", "resource":$["disk_log_geo":[$["cylinders":1016, "heads":93, "sectors":62]], "size":[$["unit":"sectors", "x":5859392, "y":512]]], "rev":".307", "sub_class_id":0, "unique_key":"j5t4.RVxrFh5yTsE", "vendor":"IBM", "wwpn":"0x5005076300c590a9"]];
+
+    disks = filter (map<string,any> d, disks, ``(
+	d["bus"]:"" == "SCSI"
+    ));
+    integer index = -1;
+    ZFCPController::devices = listmap (map<string,any> d, disks, ``{
+	index = index + 1;
+	return $[ index : d ];
+    });
+
+    UI::CloseDialog ();
 }
 
 /* EOF */
