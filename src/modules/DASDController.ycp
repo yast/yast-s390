@@ -15,6 +15,7 @@
 module "DASDController";
 textdomain "s390";
 
+import "Mode";
 import "Progress";
 import "Report";
 import "Summary";
@@ -29,7 +30,14 @@ global string filter_min = "0x0000";
 
 global string filter_max = "0xffff";
 
-list<map<string,any> > controllers = nil;
+global map<string, boolean> diag = $[];
+
+
+global define void ActivateDisk (string channel, boolean diag);
+global define void ProbeDisks ();
+global define void FormatDisks (list<string> disks_list, integer par,
+    boolean interactive);
+global define string GetPartitionInfo (string disk);
 
 
 
@@ -86,21 +94,6 @@ global boolean Available () {
     return true;
 }
 
-// Settings: Define all variables needed for configuration of controller
-// TODO FIXME: Define all the variables necessary to hold
-// TODO FIXME: the configuration here (with the appropriate
-// TODO FIXME: description)
-// TODO FIXME: For example:
-//   /**
-//    * List of the configured cards.
-//    */
-//   list cards = [];
-//
-//   /**
-//    * Some additional parameter needed for the configuration.
-//    */
-//   boolean additional_parameter = true;
-
 /**
  * Read all controller settings
  * @return true on success
@@ -125,7 +118,49 @@ global boolean Write() {
  * @return boolean True on success
  */
 global boolean Import (map settings) {
-    // TODO FIXME: your code here (fill the above mentioned variables)...
+    if (Mode::config)
+    {
+	integer index = -1;
+	devices = listmap (map<string,any> d, settings["devices"]:[], {
+	    index = index + 1;
+	    return $[ index : d ];
+	});
+    }
+    else if (Mode::initial)
+    {
+	// activate all disks first
+	map<string,boolean> to_format = $[];
+	foreach (map d, settings["devices"]:[], {
+	    boolean format = d["format"]:false;
+	    boolean do_diag = d["diag"]:false;
+	    string channel = d["channel_id"]:"";
+	    if (channel != "")
+	    {
+		to_format[channel] = format;
+		ActivateDisk (channel, do_diag);
+	    }
+	});
+
+	// now probe all disks to get the mapping between channel and device
+	ProbeDisks ();
+
+	// now map the channels of the disks to format to devices
+	list<string> format_list = [];
+	foreach (integer i, map<string,any> d, devices, {
+	    string channel = d["channel"]:"";
+	    string device = d["dev_name"]:"";
+	    if (channel != "" && device != "")
+	    {
+		if (to_format[channel]:false)
+		    format_list = add (format_list, device);
+	    }
+	});
+	y2milestone ("Disks to format: %1", format_list);
+
+	// now format the disks
+	if (size (format_list) > 0)
+	    FormatDisks (format_list, 8, true);
+    }
     return true;
 }
 
@@ -135,7 +170,15 @@ global boolean Import (map settings) {
  * @return map Dumped settings (later acceptable by Import ())
  */
 global map Export () {
-    // TODO FIXME: your code here (return the above mentioned variables)...
+    if (Mode::config)
+    {
+	list l = maplist (integer i, map<string,any> d, devices, {
+	    return d;
+	});
+	return $[
+	    "devices" : l,
+	];
+    }
     return $[];
 }
 
@@ -144,18 +187,31 @@ global map Export () {
  * @return summary of the current configuration
  */
 global list Summary() {
-    // TODO FIXME: your code here...
-    /* Configuration summary text for autoyast */
-    return [ _("Configuration summary ..."), [] ];
-}
-
-/**
- * Create an overview table with all configured cards
- * @return table items
- */
-global list Overview() {
-    // TODO FIXME: your code here...
-    return [];
+    list<string> ret = maplist (integer index, map<string,any> d, devices, {
+	string s = "";
+	if (Arch::architecture == "s390_64")
+	{
+	    // summary text, %1 is channel ID (number),
+	    // %2 is Yes or No
+	    s = sformat (_("Channel ID: %1, Format: %2"),
+		d["channel_id"]:"",
+		d["format"]:false ? _("Yes") : _("No")
+	    );
+	}
+	else
+	{
+	    // summary text, %1 is channel ID (number),
+	    // %2 and %3 are Yes or No
+	    s = sformat (_("Channel ID: %1, Format: %2, Use DIAG: %3"),
+		d["channel_id"]:"",
+		d["format"]:false ? _("Yes") : _("No"),
+		d["diag"]:false ? _("Yes") : _("No")
+	    );
+	}
+	return s;
+    });
+    y2milestone ("Summary: %1", ret);
+    return ret;
 }
 
 /**
@@ -165,24 +221,26 @@ global list Overview() {
  * @return map with 2 lists.
  */
 global map AutoPackages() {
-    // TODO FIXME: your code here...
     return $[ "install":[], "remove":[] ];
 }
 
-global define list<map<string,any> > GetControllers () {
-    if (controllers == nil)
-    {
-	controllers = (list<map<string,any> >)SCR::Read (.probe.storage);
-	if (Arch::i386)
-	    controllers = [$["bus":"None", "class_id":1, "detail":$["cu_model":3, "dev_model":3, "lcss":0], "device":"zFCP controller", "device_id":268081, "drivers":[$["active":true, "modprobe":true, "modules":[["zfcp", ""]]]], "model":"IBM zFCP controller", "old_unique_key":"ESHv.6czr7zOIMz1", "resource":$["io":[$["active":true, "length":3, "mode":"rw", "start":64000]]], "sub_class_id":0, "sub_device_id":268082, "unique_key":"rdCR.AbUgA7O1gK4", "vendor":"IBM", "vendor_id":286721], $["bus":"None", "class_id":1, "device":"DASD", "model":"IBM DASD", "old_unique_key":"98ht.T2MB916psk1", "sub_class_id":128, "unique_key":"rdCR.T2MB916psk1", "vendor":"IBM"]];
+/**
+ * Check if DASD subsystem is available
+ */
+global define boolean IsAvailable () {
+    list<map<string,any> > disks = (list<map<string,any> >)
+	SCR::Read (.probe.disk);
 
-	controllers = filter (map<string,any> c, controllers, {
-	    return c["device"]:"" == "DASD";
-	});
-	y2milestone ("Found %1 dasd controllers", size (controllers));
-    }
-    return controllers;
+    disks = filter (map<string,any> d, disks, ``(
+	tolower (d["device"]:"") == "dasd"
+    ));
+
+    integer count = size (disks);
+    y2milestone ("Detected %1 DASD disks", count);
+
+    return (count > 0);
 }
+
 
 /**
  * Translate integer number to its hexadecimal representation with leading
@@ -205,15 +263,14 @@ global define string FourDigitHex(integer i) ``{
 }
 
 global define void ProbeDisks () {
+    if (Mode::config)
+	return;
+
     // popup label
-    UI::OpenDialog (`Label (_("Reading configured DASD disks")));
+    UI::OpenDialog (`Label (_("Reading Configured DASD Disks")));
 
     list<map<string,any> > disks = (list<map<string,any> >)
 	SCR::Read (.probe.disk);
-
-    // FIXME remove after testing
-    if (! Arch::s390)
-	disks = [$["bus":"None", "class_id":262, "detail":$["cu_model":233, "dev_model":12, "lcss":0], "dev_name":"/dev/dasda", "dev_num":$["major":94, "minor":0, "range":4, "type":"b"], "device":"DASD", "device_id":276880, "model":"IBM DASD", "old_unique_key":"N5EP.J4gQoPlOYuE", "prog_if":1, "resource":$["disk_log_geo":[$["cylinders":3338, "heads":15, "sectors":12]], "io":[$["active":true, "length":1, "mode":"rw", "start":336]], "size":[$["unit":"sectors", "x":4806720, "y":512]]], "sub_class_id":0, "sub_device_id":275344, "unique_key":"6eUF.ALFATSt_U8F", "vendor":"IBM", "vendor_id":286721], $["bus":"None", "class_id":262, "detail":$["cu_model":233, "dev_model":10, "lcss":0], "device":"DASD", "device_id":276880, "model":"IBM DASD", "old_unique_key":"q1eL.rOENMk3aQ50", "prog_if":1, "resource":$["io":[$["active":false, "length":1, "mode":"rw", "start":400]]], "sub_class_id":0, "sub_device_id":275344, "unique_key":"rdCR.ALFATSt_U8F", "vendor":"IBM", "vendor_id":286721], $["bus":"None", "class_id":262, "detail":$["cu_model":233, "dev_model":10, "lcss":0], "device":"DASD", "device_id":276880, "model":"IBM DASD", "old_unique_key":"q1eL.rOENMk3aQ50", "prog_if":1, "resource":$["io":[$["active":false, "length":1, "mode":"rw", "start":401]]], "sub_class_id":0, "sub_device_id":275344, "unique_key":"rdCR.ALFATSt_U8F", "vendor":"IBM", "vendor_id":286721], $["bus":"None", "class_id":262, "detail":$["cu_model":233, "dev_model":10, "lcss":0], "device":"DASD", "device_id":276880, "model":"IBM DASD", "old_unique_key":"q1eL.rOENMk3aQ50", "prog_if":1, "resource":$["io":[$["active":false, "length":1, "mode":"rw", "start":413]]], "sub_class_id":0, "sub_device_id":275344, "unique_key":"rdCR.ALFATSt_U8F", "vendor":"IBM", "vendor_id":286721], $["bus":"None", "class_id":262, "detail":$["cu_model":233, "dev_model":10, "lcss":0], "device":"DASD", "device_id":276880, "model":"IBM DASD", "old_unique_key":"q1eL.rOENMk3aQ50", "prog_if":1, "resource":$["io":[$["active":false, "length":1, "mode":"rw", "start":414]]], "sub_class_id":0, "sub_device_id":275344, "unique_key":"rdCR.ALFATSt_U8F", "vendor":"IBM", "vendor_id":286721], $["bus":"None", "class_id":262, "detail":$["cu_model":233, "dev_model":12, "lcss":0], "dev_name":"/dev/dasdb", "dev_names":["/dev/dasdb"], "dev_num":$["major":94, "minor":4, "range":4, "type":"b"], "device":"DASD", "device_id":276880, "model":"IBM DASD", "old_unique_key":"qGUT.J4gQoPlOYuE", "prog_if":1, "resource":$["disk_log_geo":[$["cylinders":10017, "heads":15, "sectors":0]], "io":[$["active":true, "length":1, "mode":"rw", "start":4242]], "size":[$["unit":"sectors", "x":0, "y":512]]], "sub_class_id":0, "sub_device_id":275344, "unique_key":"ZpkJ.ALFATSt_U8F", "vendor":"IBM", "vendor_id":286721]];
 
     disks = filter (map<string,any> d, disks, ``(
 	tolower (d["device"]:"") == "dasd"
@@ -227,14 +284,228 @@ global define void ProbeDisks () {
 	    substring (lcss, 5, 1),
 	    substring (channel, 2, 4));
 	d["channel"] = channel;
+	boolean active = (boolean)(d["resource", "io", 0, "active"]:false);
+	if (active)
+	{
+	    string device = d["dev_name"]:"";
+	    boolean formatted = 0 == SCR::Execute (.target.bash, sformat (
+		    "dd if=%1 of=/dev/null bs=512 count=1", device));
+	    d["formatted"] = formatted;
+	    d["partition_info"] = GetPartitionInfo (device);
+	}
 	return d;
     });
+    integer index = -1;
     DASDController::devices = listmap (map<string,any> d, disks, ``{
-	integer id = (integer)(d["resource", "io", 0, "start"]:0);
-	return $[ id : d ];
+	index = index + 1;
+	return $[ index : d ];
     });
 
     UI::CloseDialog ();
+}
+
+/**
+ * Report error occured during device activation
+ * @param id integer chanel id of the device
+ * @param ret integer exit code of the operation
+ */
+define void ReportActivationError (any id, integer ret) {
+    if (ret != 0)
+    {
+	if (ret == 1)
+	    Report::Error (sformat (
+		// error report, %1 is device identification
+		_("%1: sysfs not mounted."), id));
+	else if (ret == 2)
+	    Report::Error (sformat (
+		// error report, %1 is device identification
+		_("%1: Invalid status for <online>"), id));
+	else if (ret == 3)
+	    Report::Error (sformat (
+		// error report, %1 is device identification
+		_("%1: No device found for <ccwid>"), id));
+	else if (ret == 4)
+	    Report::Error (sformat (
+		// error report, %1 is device identification
+		_("%1: Could not change state of the device"), id));
+	else
+	    Report::Error (sformat (
+		// error report, %1 is device identification, %2 is integer code
+		_("%1: Unknown error %2"), id, ret));
+    }
+}
+
+global define void ActivateDisk (string channel, boolean diag) {
+    if (! Arch::s390_32)
+	diag = false;
+    string command = sformat (
+	"/sbin/dasd_configure %1 %2 %3",
+	channel,
+	1,
+	diag ? 1 : 0
+    );
+    y2milestone ("Running command %1", command);
+    integer ret = (integer)SCR::Execute (.target.bash, command);
+    ReportActivationError (channel, ret);
+}
+
+global define void DeactivateDisk (string channel, boolean diag) {
+    if (! Arch::s390_32)
+	diag = false;
+    string command = sformat (
+	"/sbin/dasd_configure %1 %2 %3",
+	channel,
+	0,
+	diag ? 1 : 0
+    );
+    y2milestone ("Running command %1", command);
+    integer ret = (integer)SCR::Execute (.target.bash, command);
+    ReportActivationError (channel, ret);
+}
+
+global define void FormatDisks (list<string> disks_list, integer par,
+    boolean interactive)
+{
+    if (par > size (disks_list))
+	par = size (disks_list);
+
+    map<integer,string> disks = $[];
+    list<string> disks_cmd = [];
+    integer index = -1;
+    foreach (string device, disks_list, ``{
+	index = index + 1;
+	disks[index] = device;
+	disks_cmd = add (disks_cmd, sformat ("-f %1", device));
+    });
+    string disks_param = mergestring (disks_cmd, " ");
+    string command = sformat (
+	"/sbin/dasdfmt -Y -P %2 -b 4096 -y -m 1 %1", disks_param, par);
+
+    y2milestone ("Running command %1", command);
+    index = 0;
+    term contents = `VBox (`HSpacing (70));
+    index = 0;
+    while (index < par)
+    {
+	contents = add (contents, `ProgressBar (`id (index), " ", 100, 0));
+	index = index + 1;
+    }
+    UI::OpenDialog (contents);
+    map<integer,integer> cylinders = $[];
+    map<integer,integer> done = $[];
+    // start formatting on background
+    any ret = SCR::Execute (.background.run_output, command);
+    y2milestone ("Background start returned %1", ret);
+    // get the sizes of all disks
+    index = 0;
+    while (index < size (disks))
+    {
+	y2milestone ("Running first formatting cycle");
+	sleep (500);
+	if (! (boolean)SCR::Read (.background.isrunning))
+	{
+	    UI::CloseDialog ();
+	    integer iret = (integer)SCR::Read (.background.status);
+	    // error report, %1 is exit code of the command (integer)
+	    Report::Error (sformat (_("Disks formatting failed. Exit code: %1"),
+		iret));
+	    return;
+	}
+	list new_lines = (list) SCR::Read (.background.newout);
+	foreach (any line, new_lines, {
+			integer siz = tointeger (line);
+			if (siz == 0)
+			    siz = 999999999;
+			cylinders[index] = siz;
+			index = index + 1;
+		    });
+    }
+    y2milestone ("Sizes of disks: %1", cylinders);
+    list<integer> last_step = [];
+    while ((boolean)SCR::Read (.background.isrunning))
+    {
+y2milestone ("Running next round");
+		    sleep (1000);
+		    string buffer = (string)
+			SCR::Read (.background.buffer_out);
+		    list<string> progress = splitstring (buffer, "|");
+		    map<integer,integer> this_step = $[];
+		    foreach (string d, progress, {
+			if (d != "")
+			{
+			    integer i = tointeger (d);
+			    this_step[i] = this_step[i]:0 + 1;
+			}
+		    });
+		    foreach (integer k, integer v, this_step, {
+			done[k] = done[k]:0 + v;
+		    });
+		    this_step = filter (integer k, integer v, this_step, {
+			return done[k]:0 < cylinders[k]:0;
+		    });
+		    integer difference = size (last_step) - size (this_step);
+		    index = -1;
+		    while (difference > 0)
+		    {
+			index = index + 1;
+			if (! haskey (this_step, last_step[index]:0))
+			{
+			    difference = difference - 1;
+			    this_step[last_step[index]:0] = 0;
+			}
+		    }
+		    index = 0;
+		    integer siz = size (this_step);
+		    foreach (integer k, integer v, this_step, {
+			UI::ChangeWidget (`id (index), `Label, sformat (
+			    // progress bar, %1 is device name, %2 and %3
+			    // integers,
+		    // eg. Formatting /dev/dasda: cylinder 123 of 12334 done
+			    _("Formatting %1: cylinder %2 of %3 done"),
+			    disks[k]:"",
+			    done[k]:0,
+			    cylinders[k]:0));
+			UI::ChangeWidget (`id (index), `Value,
+			    100 * done[k]:0 / cylinders[k]:1);
+			UI::ChangeWidget (`id (index), `Enabled, true);
+			index = index + 1;
+		    });
+		    while (index < par)
+		    {
+			UI::ChangeWidget (`id (index), `Label, "");
+			UI::ChangeWidget (`id (index), `Value, 0);
+			UI::ChangeWidget (`id (index), `Enabled, false);
+			index = index + 1;
+		    }
+		}
+		UI::CloseDialog ();
+		integer iret = (integer)SCR::Read (.background.status);
+    if (iret != 0)
+    {
+	// error report, %1 is exit code of the command (integer)
+	Report::Error (sformat (_("Disks formatting failed. Exit code: %1"),
+	    iret));
+    }
+}
+
+global define string GetPartitionInfo (string disk) {
+    map outmap = (map)SCR::Execute (.target.bash_output, sformat (
+	"/sbin/fdasd -p $1", disk));
+    if (outmap["exit"]:0 != 0)
+	return "--";
+    string out = outmap["stdout"]:"";
+
+    string regexp = "^[ \t]*([^ \t]+)[ \t]+([0-9]+)[ \t]+([0-9]+)[ \t]+([0-9]+)[ \t]+([^ \t]+)[ \t]+([^ \t]+([ \t]+[^ \t]+))*[ \t]*$";
+
+    list<string> l = splitstring (out, "\n");
+    l = filter (string s, l, {
+	return regexpmatch (s, regexp);
+    });
+    l = maplist (string s, l, {
+	list tokens = regexptokenize (s, regexp);
+	return sformat ("%1 (%2)", tokens[0]:"", tokens[5]:"");
+    });
+    return mergestring (l, ", ");
 }
 
 /* EOF */

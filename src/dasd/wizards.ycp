@@ -20,6 +20,7 @@ include "s390/dasd/dialogs.ycp";
 symbol MainDASDSequence () {
     map aliases = $[
 	"main"		: ``(DASDDialog ()),
+	"add"		: ``(AddDASDDiskDialog ())
     ];
 
     map sequence = $[
@@ -27,6 +28,11 @@ symbol MainDASDSequence () {
 	"main" : $[
 	    `abort	: `abort,
 	    `next	: `next,
+	    `add	: "add",
+	],
+	"add" : $[
+	    `abort	: `abort,
+	    `next	: "main",
 	],
     ];
 

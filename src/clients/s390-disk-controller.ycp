@@ -31,10 +31,10 @@ import "DASDController";
 import "ZFCPController";
 
 // popup label
-UI::OpenDialog (`Label (_("Detecting available controllers")));
+UI::OpenDialog (`Label (_("Detecting Available Controllers")));
 
-boolean have_dasd = size (DASDController::GetControllers ()) > 0;
-boolean have_zfcp = size (ZFCPController::GetControllers ()) > 0;
+boolean have_dasd = DASDController::IsAvailable ();
+boolean have_zfcp = ZFCPController::IsAvailable ();
 
 y2milestone ("Have DASD: %1, have zFCP: %2", have_dasd, have_zfcp);
 
@@ -59,11 +59,11 @@ term contents = `HBox (`HWeight (999, `HStretch ()), `VBox (
     `VStretch (),
     `HWeight (1, `PushButton (`id (`dasd), `opt (`hstretch),
 	// push button
-	_("Configure &DASD disks"))),
+	_("Configure &DASD Disks"))),
     `VSpacing (2),
     `HWeight (1, `PushButton (`id (`zfcp), `opt (`hstretch),
 	// push button
-	_("Configure &ZFCP disks"))),
+	_("Configure &ZFCP Disks"))),
     `VStretch ()
 ), `HWeight (999, `HStretch ()));
 

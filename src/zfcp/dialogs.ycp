@@ -13,6 +13,7 @@ textdomain "s390";
 
 import "Arch";
 import "Label";
+import "Mode";
 import "Popup";
 import "Progress";
 import "Report";
@@ -42,48 +43,6 @@ define string FourDigitHex(integer i) ``{
     return substring(s, 0, 2) + zeros + substring(s, 2);
 }
 
-/**
- * Report error occured during device activation
- * @param id integer chanel id of the device
- * @param ret integer exit code of the operation
- */
-define void ReportActivationError (string id, integer ret) {
-    if (ret != 0)
-    {
-
-	if (ret == 1)
-	    // error report, %1 is device identification
-	    Report::Error (sformat (_("%1: sysfs not mounted"), id));
-	else if (ret == 2)
-	    // error report, %1 is device identification
-	    Report::Error (sformat (_("%1: invalid value for <online>"), id));
-	else if (ret == 3)
-	    // error report, %1 is device identification
-	    Report::Error (sformat (_("%1: device <ccwid> does not exist"), id));
-	else if (ret == 4)
-	    // error report, %1 is device identification
-	    Report::Error (sformat (_("%1: module zfcp could not be loaded"), id));
-	else if (ret == 5)
-	    // error report, %1 is device identification
-	    Report::Error (sformat (_("%1: adapter status could not be changed"), id));
-	else if (ret == 6)
-	    // error report, %1 is device identification
-	   Report::Error (sformat (_("%1: wwpn ports still active"), id));
-	else if (ret == 7)
-	    // error report, %1 is device identification
-	    Report::Error (sformat (_("%1: SCSI disk could not be deactivated"), id));
-	else if (ret == 8)
-	    // error report, %1 is device identification
-	    Report::Error (sformat (_("%1: FCP LUN could not be deregistered"), id));
-	else if (ret == 9)
-	    // error report, %1 is device identification
-	    Report::Error (sformat (_("%1: FCP WWPN could not be deregistered"), id));
-	else
-	    Report::Error (sformat (
-		// error report, %1 is device identification, %2 is integer code
-		_("%1: Unknown error %2"), id, ret));
-    }
-}
 /**
  * Read settings dialog
  * @return `abort if aborted and `next otherwise
@@ -145,10 +104,10 @@ define void ReloadZFCPDialog () ``{
 define void DisplayZFCPDialog () {
 
     /* Minimal text for the help */
-    string help = _("Dialog for SCSI disks selection.");
+    string help = ZFCP_HELPS["disk_selection"]:"";
 
     /* Dialog caption */
-    string caption = _("Detected SCSI disks");
+    string caption = _("Configured ZFCP Disks");
 
         list<term> items = GetZFCPDiskItems();
 
@@ -159,7 +118,7 @@ define void DisplayZFCPDialog () {
 		`id(`table), `opt(`keepSorting, `notify),
 		`header(
 		    // table header
-		    `Right(_("Channel number")),
+		    `Right(_("Channel Number")),
 		    // table header
 		    `Right(_("WWPN")),
 		    // table header
@@ -170,13 +129,12 @@ define void DisplayZFCPDialog () {
 	),
 	`HBox(
 	    `PushButton(`id(`add), Label::AddButton ()),
-//                `PushButton(`id(`change), "&Change"),
 	    `PushButton(`id(`delete), Label::DeleteButton ()),
 	    `HStretch ()
 	)
     );
 
-    y2milestone("Content: %1\n", content);
+    y2debug("Content: %1\n", content);
         /* Apply the settings */
     Wizard::SetContentsButtons(caption, content, help, Label::BackButton(), Label::NextButton());
     Wizard::HideBackButton();
@@ -197,11 +155,16 @@ define symbol ZFCPDialog () ``{
 
 	selected = (integer) UI::QueryWidget (`id (`table), `CurrentItem);
 
-/*	else if (ret == `table)
+	if (ret == `abort || ret == `cancel)
 	{
-	    ret = nil;
-	}*/
-	if (ret == `delete)
+	    // yes-no popup
+	    if (! Popup::YesNo (_("Really leave the ZFCP disk configuration without saving?
+All changes will be lost.")))
+	    {
+		ret = nil;
+	    }
+	}
+	else if (ret == `delete)
 	{
 	    map<string,any> descr = ZFCPController::devices[selected]:$[];
 	    string dev_name = (string)(descr["dev_name"]:"");
@@ -215,24 +178,16 @@ define symbol ZFCPDialog () ``{
 		ret = nil;
 		continue;
 	    }
-	    string command = sformat (
-		"/sbin/zfcp_disk_configure %1 %2 %3 %4",
-		channel,
-		wwpn,
-		fcp_lun,
-		0
-	    );
-	    boolean run = true;
-	    if (! Popup::YesNo (sformat ("Execute command %1", command)))
+	    if (Mode::config)
 	    {
-		run = false;
+		ZFCPController::devices
+		    = remove (ZFCPController::devices, selected);
 	    }
-	    if (run)
+	    else
 	    {
-		integer ret = (integer)SCR::Execute (.target.bash, command);
-		ReportActivationError (channel, ret);
-		ReloadZFCPDialog ();
+		ZFCPController::DeactivateDisk (channel, wwpn, fcp_lun);
 	    }
+	    ReloadZFCPDialog ();
 	    ret = nil;
 	}
     }
@@ -250,10 +205,10 @@ define symbol ZFCPDialog () ``{
 
 define symbol AddZFCPDiskDialog () ``{
     /* Minimal text for the help */
-    string help = _("Dialog for SCSI disk configuration.");
+    string help = ZFCP_HELPS["disk_add"]:"";
 
     /* Dialog caption */
-    string caption = _("Add New SCSI Disk");
+    string caption = _("Add New ZFCP Disk");
 
     string fcp_lun = ZFCPController::previous_settings["fcp_lun"]:"";
     integer i_lun = tointeger (fcp_lun);
@@ -270,17 +225,31 @@ define symbol AddZFCPDiskDialog () ``{
     });
     fcp_lun = tohexstring (new_lun);
 
-    list<string>items = maplist (map<string,any> c,
-	ZFCPController::GetControllers (),
-    ``{
-	string channel = FourDigitHex (c["resource", "io", 0, "start"]:0);
-	string lcss = FourDigitHex (c["detail", "lcss"]:0);
-	channel = sformat ("%1.%2.%3",
-	    substring (lcss, 4, 1),
-	    substring (lcss, 5, 1),
-	    substring (channel, 2, 4));
-	return channel;
-    });
+    list<string>items = [];
+    if (Mode::config)
+    {
+	items = maplist (integer index, map<string,any> d,
+	    ZFCPController::devices,
+	{
+	    return d["detail", "controller_id"]:"";
+	});
+	items = toset (items);
+	items = filter (string i, items, ``(i != "" && i != nil));
+    }
+    else
+    {
+	items = maplist (map<string,any> c,
+	    ZFCPController::GetControllers (),
+	``{
+	    string channel = FourDigitHex (c["resource", "io", 0, "start"]:0);
+	    string lcss = FourDigitHex (c["detail", "lcss"]:0);
+	    channel = sformat ("%1.%2.%3",
+		substring (lcss, 4, 1),
+		substring (lcss, 5, 1),
+		substring (channel, 2, 4));
+	    return channel;
+	});
+    }
 
     /* Dialog content */
     term content = `HBox (`HStretch (), `VBox(
@@ -304,7 +273,22 @@ define symbol AddZFCPDiskDialog () ``{
     Wizard::RestoreBackButton ();
     Wizard::RestoreAbortButton ();
 
-    any ret = UI::UserInput();
+    any ret = nil;
+
+    while (ret == nil)
+    {
+	ret = UI::UserInput();
+
+	if (ret == `abort || ret == `cancel)
+	{
+	    // yes-no popup
+	    if (! Popup::YesNo (_("Really leave the ZFCP disk configuration without saving?
+All changes will be lost.")))
+	    {
+		ret = nil;
+	    }
+	}
+    }
 
     if (ret == `next)
     {
@@ -314,22 +298,22 @@ define symbol AddZFCPDiskDialog () ``{
 	ZFCPController::previous_settings["wwpm"] = wwpn;
 	ZFCPController::previous_settings["fcp_lun"] = lun;
 	ZFCPController::previous_settings["channel"] = channel;
-	string command = sformat (
-	    "/sbin/zfcp_disk_configure %1 %2 %3 %4",
-	    channel,
-	    wwpn,
-	    lun,
-	    1
-	);
-	boolean run = true;
-	if (! Popup::YesNo (sformat ("Execute command %1", command)))
+	if (Mode::config)
 	{
-	    run = false;
+	    map<string,any> m = $[
+		"controller_id" : channel,
+		"wwpn" : wwpn,
+		"fcp_lun" : lun,
+	    ];
+	    m = $["detail" : m ];
+	    integer index = -1;
+	    while (haskey (ZFCPController::devices, index))
+		index = index + 1;
+	    ZFCPController::devices[index] = m;
 	}
-	if (run)
+	else
 	{
-	    integer ret = (integer)SCR::Execute (.target.bash, command);
-	    ReportActivationError (channel, ret);
+	    ZFCPController::ActivateDisk (channel, wwpn, lun);
 	}
     }
 

@@ -1,4 +1,27 @@
 -------------------------------------------------------------------
+Tue May  4 15:39:03 CEST 2004 - jsrain@suse.cz
+
+- merged texts from proofreading
+- 2.9.5
+
+-------------------------------------------------------------------
+Mon May  3 15:46:08 CEST 2004 - jsrain@suse.cz
+
+- added autoinstallation support for DASD disks (#39806)
+- displaying all required information for DASD disks (#39806)
+- allow to set the DIAG mode on 31-bit S390 (#39806)
+- 2.9.4
+
+-------------------------------------------------------------------
+Thu Apr 29 16:26:24 CEST 2004 - jsrain@suse.cz
+
+- activate zfcp adapter before activating any disk of it (#39339)
+- offer DASD disks setup on mixed (DASD+ZFCP) system (#39338)
+- added AI support for ZFCP disks
+- added help texts
+- 2.9.3
+
+-------------------------------------------------------------------
 Fri Apr  2 16:14:42 CEST 2004 - jsrain@suse.de
 
 - changed license to GPL

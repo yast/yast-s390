@@ -11,13 +11,13 @@ X-SuSE-YaST-Call=dasd
 X-SuSE-YaST-Group=Hardware
 X-SuSE-YaST-Argument=
 X-SuSE-YaST-RootOnly=true
-X-SuSE-YaST-AutoInst=
+X-SuSE-YaST-AutoInst=all
 X-SuSE-YaST-Geometry=
 X-SuSE-YaST-SortKey=
-X-SuSE-YaST-AutoInstResource= dasd
+X-SuSE-YaST-AutoInstResource=dasd
 
 Icon=dasd
 Exec=/sbin/yast2 dasd 
 
-Name=Dasd
+Name=DASD
 GenericName=Configure dasd
