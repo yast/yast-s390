@@ -183,5 +183,57 @@ global define list<map<string,any> > GetControllers () {
     return controllers;
 }
 
+/**
+ * Translate integer number to its hexadecimal representation with leading
+ * 0x and exactliy 4 hexadecimal numbers
+ * @param i integer integer number
+ * @return string hexadecimal number
+ */
+define string FourDigitHex(integer i) ``{
+    string s = tohexstring(i);
+    string zeros = "";
+
+    integer l = 6 - size(s);
+
+    while (l > 0) {
+	zeros = zeros + "0";
+	l = l - 1;
+    }
+
+    return substring(s, 0, 2) + zeros + substring(s, 2);
+}
+
+global define void ProbeDisks () {
+
+    UI::OpenDialog (`Label (_("Reading configured DASD disks")));
+
+    list<map<string,any> > disks = (list<map<string,any> >)
+	SCR::Read (.probe.disk);
+
+    // FIXME remove after testing
+    if (! Arch::s390)
+	disks = [$["bus":"None", "class_id":262, "cu_model":233, "dev_model":12, "dev_name":"/dev/dasda", "dev_num":$["major":94, "minor":0, "range":4, "type":"b"], "device":"DASD", "device_id":276880, "lcss":0, "model":"IBM DASD", "old_unique_key":"N5EP.J4gQoPlOYuE", "prog_if":1, "resource":$["disk_log_geo":[$["cylinders":3338, "heads":15, "sectors":12]], "io":[$["active":true, "length":1, "mode":"rw", "start":336]], "size":[$["unit":"sectors", "x":4806720, "y":512]]], "sub_class_id":0, "sub_device_id":275344, "unique_key":"6eUF.ALFATSt_U8F", "vendor":"IBM", "vendor_id":286721], $["bus":"None", "class_id":262, "cu_model":233, "dev_model":10, "device":"DASD", "device_id":276880, "lcss":0, "model":"IBM DASD", "old_unique_key":"q1eL.rOENMk3aQ50", "prog_if":1, "resource":$["io":[$["active":false, "length":1, "mode":"rw", "start":400]]], "sub_class_id":0, "sub_device_id":275344, "unique_key":"rdCR.ALFATSt_U8F", "vendor":"IBM", "vendor_id":286721], $["bus":"None", "class_id":262, "cu_model":233, "dev_model":10, "device":"DASD", "device_id":276880, "lcss":0, "model":"IBM DASD", "old_unique_key":"q1eL.rOENMk3aQ50", "prog_if":1, "resource":$["io":[$["active":false, "length":1, "mode":"rw", "start":401]]], "sub_class_id":0, "sub_device_id":275344, "unique_key":"rdCR.ALFATSt_U8F", "vendor":"IBM", "vendor_id":286721], $["bus":"None", "class_id":262, "cu_model":233, "dev_model":10, "device":"DASD", "device_id":276880, "lcss":0, "model":"IBM DASD", "old_unique_key":"q1eL.rOENMk3aQ50", "prog_if":1, "resource":$["io":[$["active":false, "length":1, "mode":"rw", "start":413]]], "sub_class_id":0, "sub_device_id":275344, "unique_key":"rdCR.ALFATSt_U8F", "vendor":"IBM", "vendor_id":286721], $["bus":"None", "class_id":262, "cu_model":233, "dev_model":10, "device":"DASD", "device_id":276880, "lcss":0, "model":"IBM DASD", "old_unique_key":"q1eL.rOENMk3aQ50", "prog_if":1, "resource":$["io":[$["active":false, "length":1, "mode":"rw", "start":414]]], "sub_class_id":0, "sub_device_id":275344, "unique_key":"rdCR.ALFATSt_U8F", "vendor":"IBM", "vendor_id":286721], $["bus":"None", "class_id":262, "cu_model":233, "dev_model":12, "dev_name":"/dev/dasdb", "dev_names":["/dev/dasdb"], "dev_num":$["major":94, "minor":4, "range":4, "type":"b"], "device":"DASD", "device_id":276880, "lcss":0, "model":"IBM DASD", "old_unique_key":"qGUT.J4gQoPlOYuE", "prog_if":1, "resource":$["disk_log_geo":[$["cylinders":10017, "heads":15, "sectors":0]], "io":[$["active":true, "length":1, "mode":"rw", "start":4242]], "size":[$["unit":"sectors", "x":0, "y":512]]], "sub_class_id":0, "sub_device_id":275344, "unique_key":"ZpkJ.ALFATSt_U8F", "vendor":"IBM", "vendor_id":286721]];
+
+    disks = filter (map<string,any> d, disks, ``(
+	issubstring (d["dev_name"]:"", "dasd")
+    ));
+    disks = maplist (map<string,any> d, disks, ``{
+	string channel = FourDigitHex (d["resource", "io", 0, "start"]:0);
+	string lcss = FourDigitHex (d["lcss"]:0);
+	channel = sformat ("%1.%2.%3",
+	    substring (lcss, 4, 1),
+	    substring (lcss, 5, 1),
+	    substring (channel, 2, 4));
+	d["channel"] = channel;
+	return d;
+    });
+    DASDController::devices = listmap (map<string,any> d, disks, ``{
+	integer id = (integer)(d["resource", "io", 0, "start"]:0);
+	return $[ id : d ];
+    });
+
+    UI::CloseDialog ();
+}
+
 /* EOF */
 }
