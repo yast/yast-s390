@@ -6,6 +6,7 @@ Wed Mar 10 11:11:20 CET 2004 - jsrain@suse.de
 - fixed .spec file (use ExclusiveArch)
 - fixed parameters of dasd_configure script
 - better defaults for new ZFCP disk, combo box for channels
+- adapted to changed structure of hwinfo's output
 
 -------------------------------------------------------------------
 Mon Mar  8 17:54:03 CET 2004 - jsrain@suse.de
