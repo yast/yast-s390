@@ -69,7 +69,7 @@ term contents = `HBox (`HWeight (999, `HStretch ()), `VBox (
 `Label(_("Initializing..."));
 
 Wizard::CreateDialog();
-Wizard::SetDesktopIcon("dasd");
+Wizard::SetDesktopIcon("disk");
 Wizard::SetContentsButtons(caption, contents, "",
     Label::BackButton(), Label::FinishButton());
 
