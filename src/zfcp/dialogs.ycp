@@ -178,7 +178,7 @@ All changes will be lost.")))
 		ret = nil;
 		continue;
 	    }
-	    if (Mode::config)
+	    if (Mode::config ())
 	    {
 		ZFCPController::devices
 		    = remove (ZFCPController::devices, selected);
@@ -226,7 +226,7 @@ define symbol AddZFCPDiskDialog () ``{
     fcp_lun = tohexstring (new_lun);
 
     list<string>items = [];
-    if (Mode::config)
+    if (Mode::config ())
     {
 	items = maplist (integer index, map<string,any> d,
 	    ZFCPController::devices,
@@ -298,7 +298,7 @@ All changes will be lost.")))
 	ZFCPController::previous_settings["wwpm"] = wwpn;
 	ZFCPController::previous_settings["fcp_lun"] = lun;
 	ZFCPController::previous_settings["channel"] = channel;
-	if (Mode::config)
+	if (Mode::config ())
 	{
 	    map<string,any> m = $[
 		"controller_id" : channel,

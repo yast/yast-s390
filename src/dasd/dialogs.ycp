@@ -91,7 +91,7 @@ define list<term> GetDASDDiskItems(integer min_chan, integer max_chan) ``{
 	});
     }
 
-    if (Mode::config)
+    if (Mode::config ())
     {
 	y2milestone ("Current disks: %1", devices);
 	items = (list<term>) maplist (integer k, map<string,any> d, devices, {
@@ -177,7 +177,7 @@ define list<term> GetDASDDiskItems(integer min_chan, integer max_chan) ``{
  */
 define void DisplayDASDDialog() {
 
-    string help_key = Mode::config
+    string help_key = Mode::config ()
 	? "disk_selection_config"
 	: "disk_selection";
 
@@ -206,7 +206,7 @@ define void DisplayDASDDialog() {
     // table header
     header = add (header, _("Partition Information"));
 
-    if (Mode::config)
+    if (Mode::config ())
     {
 	header = `header(
 	    // table header
@@ -248,7 +248,7 @@ define void DisplayDASDDialog() {
 	    )
 	),
 	`Table(`id(`table), `opt (`notify), header, []),
-	Mode::config
+	Mode::config ()
 	    ? `HBox (
 		// push button
 		`PushButton (`id (`add), _("A&dd New Disk")),
@@ -511,9 +511,9 @@ All data on the disks will be lost!<br>
 }
 
 define symbol AddDASDDiskDialog () ``{
-    if (! Mode::config)
+    if (! Mode::config ())
     {
-	y2error ("DASD Add Disk dialog shouldn't be run in Mode::config");
+	y2error ("DASD Add Disk dialog shouldn't be run in Mode::config ()");
 	return `back;
     }
 

@@ -18,6 +18,7 @@ textdomain "s390";
 import "Mode";
 import "Progress";
 import "Report";
+import "Stage";
 import "Summary";
 import "Arch";
 
@@ -118,7 +119,7 @@ global boolean Write() {
  * @return boolean True on success
  */
 global boolean Import (map settings) {
-    if (Mode::config)
+    if (Mode::config ())
     {
 	integer index = -1;
 	devices = listmap (map<string,any> d, settings["devices"]:[], {
@@ -126,7 +127,7 @@ global boolean Import (map settings) {
 	    return $[ index : d ];
 	});
     }
-    else if (Mode::initial)
+    else if (Stage::initial ())
     {
 	// activate all disks first
 	map<string,boolean> to_format = $[];
@@ -170,7 +171,7 @@ global boolean Import (map settings) {
  * @return map Dumped settings (later acceptable by Import ())
  */
 global map Export () {
-    if (Mode::config)
+    if (Mode::config ())
     {
 	list l = maplist (integer i, map<string,any> d, devices, {
 	    return d;
@@ -263,7 +264,7 @@ global define string FourDigitHex(integer i) ``{
 }
 
 global define void ProbeDisks () {
-    if (Mode::config)
+    if (Mode::config ())
 	return;
 
     // popup label
@@ -490,7 +491,7 @@ y2milestone ("Running next round");
 
 global define string GetPartitionInfo (string disk) {
     map outmap = (map)SCR::Execute (.target.bash_output, sformat (
-	"/sbin/fdasd -p $1", disk));
+	"/sbin/fdasd -p %1", disk));
     if (outmap["exit"]:0 != 0)
 	return "--";
     string out = outmap["stdout"]:"";

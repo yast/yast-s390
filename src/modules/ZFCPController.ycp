@@ -19,6 +19,7 @@ import "Arch";
 import "Mode";
 import "Progress";
 import "Report";
+import "Stage";
 import "Summary";
 
 
@@ -112,7 +113,7 @@ global boolean Write() {
  * @return boolean True on success
  */
 global boolean Import (map settings) {
-    if (Mode::config)
+    if (Mode::config ())
     {
 	integer index = -1;
 	devices = listmap (map d, settings["devices"]:[], {
@@ -127,7 +128,7 @@ global boolean Import (map settings) {
 	    return $[ index : m ];
 	});
     }
-    else if (Mode::initial)
+    else if (Stage::initial ())
     {
 	foreach (map d, settings["devices"]:[], {
 	    ActivateDisk (d["controller_id"]:"", d["wwpn"]:"", d["fcp_lun"]:"");
@@ -142,7 +143,7 @@ global boolean Import (map settings) {
  * @return map Dumped settings (later acceptable by Import ())
  */
 global map Export () {
-    if (Mode::config)
+    if (Mode::config ())
     {
 	list<map<string,any> > l = maplist (integer k, map<string,any> v,
 	    devices,
@@ -221,7 +222,7 @@ global define list<map<string,any> > GetControllers () {
 
 
 global define void ProbeDisks () {
-    if (Mode::config)
+    if (Mode::config ())
 	return;
 
     // popup label
