@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Mar 11 11:39:35 CET 2004 - jsrain@suse.de
+
+- fixed detection of unconfigured DASD disks
+
+-------------------------------------------------------------------
 Wed Mar 10 11:11:20 CET 2004 - jsrain@suse.de
 
 - added checking of DASD-only/zFCP-only/mixed system
