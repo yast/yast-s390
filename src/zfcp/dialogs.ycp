@@ -202,8 +202,7 @@ define void DisplayZFCPDialog () {
         /* Apply the settings */
     Wizard::SetContentsButtons(caption, content, help, Label::BackButton(), Label::NextButton());
     Wizard::HideBackButton();
-    Wizard::ReplaceAbortButton (
-	`PushButton (`id (`abort), Label::CancelButton ()));
+    Wizard::SetAbortButton(`abort, Label::CancelButton() );
 }
 
 define symbol ZFCPDialog () ``{

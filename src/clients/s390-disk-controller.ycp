@@ -50,7 +50,7 @@ Wizard::CreateDialog();
 Wizard::SetContentsButtons(caption, contents, "",
     Label::BackButton(), Label::FinishButton());
 
-Wizard::ReplaceBackButton (`VBox ());
+Wizard::HideBackButton();
 
 any ret = nil;
 while (ret == nil)

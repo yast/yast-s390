@@ -210,8 +210,7 @@ define void DisplayDASDDialog() {
     /* Apply the settings */
     Wizard::SetContents(caption, content, help, true, true);
     Wizard::HideBackButton();
-    Wizard::ReplaceAbortButton (
-	`PushButton (`id (`abort), Label::CancelButton ()));
+    Wizard::SetAbortButton(`abort, Label::CancelButton() );
 }
 
 
