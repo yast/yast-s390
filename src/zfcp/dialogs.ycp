@@ -201,7 +201,7 @@ define void DisplayZFCPDialog () {
     y2milestone("Content: %1\n", content);
         /* Apply the settings */
     Wizard::SetContentsButtons(caption, content, help, Label::BackButton(), Label::NextButton());
-    Wizard::ReplaceBackButton(`VSpacing (0));
+    Wizard::HideBackButton();
     Wizard::ReplaceAbortButton (
 	`PushButton (`id (`abort), Label::CancelButton ()));
 }

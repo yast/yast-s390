@@ -209,7 +209,7 @@ define void DisplayDASDDialog() {
 
     /* Apply the settings */
     Wizard::SetContents(caption, content, help, true, true);
-    Wizard::ReplaceBackButton(`VSpacing (0));
+    Wizard::HideBackButton();
     Wizard::ReplaceAbortButton (
 	`PushButton (`id (`abort), Label::CancelButton ()));
 }
