@@ -190,7 +190,7 @@ global define list<map<string,any> > GetControllers () {
  * @param i integer integer number
  * @return string hexadecimal number
  */
-define string FourDigitHex(integer i) ``{
+global define string FourDigitHex(integer i) ``{
     string s = tohexstring(i);
     string zeros = "";
 

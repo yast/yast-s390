@@ -46,7 +46,7 @@ define list<integer> ListSelectedDASD () ``{
  * @param id integer chanel id of the device
  * @param ret integer exit code of the operation
  */
-define void ReportActivationError (integer id, integer ret) {
+define void ReportActivationError (any id, integer ret) {
     if (ret != 0)
     {
 	if (ret == 1)
@@ -116,25 +116,41 @@ define list<term> GetDASDDiskItems(integer min_chan, integer max_chan) ``{
 	boolean active = (boolean)(d["resource", "io", 0, "active"]:false);
 	integer channel = (integer)(d["resource", "io", 0, "start"]:0);
 	string str_channel = (string)(d["channel"]:"");
-	string type = d["type"]:"type";
 	string access = toupper ((string)(d["resource", "io", 0, "mode"]:"RO"));
-	boolean diag = d["diag"]:false;
-	string formatted = (boolean)(d["formatted"]:false)
+	boolean diag = d["diag"]:false; // TODO
+	string formatted = (boolean)(d["formatted"]:false) // TODO
 	    ? _("Yes")
 	    : _("No");
-	string partition_info = d["partitions"]:"";
+	string partition_info = d["partitions"]:""; // TODO
+	string device = d["dev_name"]:"";
+
+	string s1 = substring (DASDController::FourDigitHex (d["device_id"]:0), 2);
+	string s3 = substring (DASDController::FourDigitHex (d["sub_device_id"]:0), 2);
+
+	string type = toupper (sformat ("%1/%2, %3/%4",
+	    s1,
+	    substring (
+		DASDController::FourDigitHex (d["detail", "cu_model"]:0),
+		4),
+	    s3,
+	    substring (
+		DASDController::FourDigitHex (d["detail", "dev_model"]:0),
+		4)
+	));
+
 	boolean activate = d["activate"]:false;
 	if (!active) {
 	    type = "--";
 	    access = "--";
 	    formatted = "--";
 	    partition_info = "--";
+	    device = "--";
 	}
 	string selected = DASDController::selected[channel]:false
 	    ? UI::Glyph (`CheckMark)
 	    : "-";
 
-	term t = `item (`id (channel), selected, str_channel,
+	term t = `item (`id (channel), selected, str_channel, device,
 	    type ,access);
 	if (Arch::s390_32)
 	    t = add (t, diag);
@@ -158,12 +174,19 @@ define void DisplayDASDDialog() {
     term header = `header(
 	_("Sel."),
 	`Right(_("Channel")),
+	_("Device"),
 	_("Type"),
 	_("Access type"));
     if (Arch::s390_32)
 	header = add (header, _("Use DIAG"));
     header = add (header, _("Formatted"));
     header = add (header, _("Partition information"));
+
+    list actions = [
+	`item (`id (`activate), _("&Activate")),
+	`item (`id(`deactivate), _("&Deactivate")),
+	`item (`id(`format), _("&Format")),
+    ];
 
     /* Dialog content */
     term content = `VBox(
@@ -178,13 +201,8 @@ define void DisplayDASDDialog() {
 	`Table(`id(`table), `opt (`notify), header, []),
 	`HBox (
 	    `PushButton (`id (`select), _("&Select/Deselect")),
-	    `HStretch ()
-	),
-	`HBox(
-	    `PushButton(`id(`activate), _("&Activate")),
-	    `PushButton(`id(`deactivate), _("&Deactivate")),
 	    `HStretch (),
-	    `PushButton(`id(`format), _("&Format"))
+	    `MenuButton (`id (`operation), _("Perform &Action"), actions)
 	)
     );
 
@@ -324,22 +342,163 @@ define symbol DASDDialog() {
 		ret = nil;
 		continue;
 	    }
+	    integer par = 8;
+	    map<integer,string> disks = $[];
+	    list<string> disks_cmd = [];
+	    integer index = -1;
 	    foreach (integer id, to_activate, ``{
-		y2error ("TODO: Format disk");
-		// FIXME: Call some script to format disk
-		// TODO progress bar
-/*                integer steps = 100;
-                Progress::Simple("Format", "Formating disks in progress.", 100, "");
-
-                integer sl = 2500 / steps;
-                do {
-                    Progress::NextStep();
-                    sleep(sl);
-                    steps = steps - 1;
-                } while(steps > 0); 
-                Progress::Finish();
-*/
+		string device = DASDController::devices[id, "dev_name"]:"";
+		index = index + 1;
+		disks[index] = device;
+		disks_cmd = add (disks_cmd, sformat ("-f %1", device));
 	    });
+	    if (par > size (disks_cmd))
+		par = size (disks_cmd);
+	    // check if disks are R/W and active
+	    string problem = "";
+	    foreach (integer id, to_activate, {
+		boolean active = (boolean)
+		    (DASDController::devices[id, "resource", "io", 0, "active"]:false);
+		string access = toupper (
+		    (string)(DASDController::devices[id, "resource", "io", 0, "mode"]:"RO"));
+		if (! active)
+		{
+		    problem = sformat (_("Disk %1 is not active"),
+			DASDController::devices[id, "channel"]:"");
+		}
+		else if (tolower (access) != "rw")
+		{
+		    problem = sformat (
+			_("Disk %1 is not accessible for writing"),
+			DASDController::devices[id, "channel"]:"");
+		}
+	    });
+	    if (problem != "")
+	    {
+		Popup::Message (problem);
+		ret = nil;
+		continue;
+	    }
+	    boolean cancel = false;
+	    UI::OpenDialog (`VBox (
+		`IntField (`id (`par),
+		    _("Parallell Formatted Disks"), 1, par, par),
+		`HBox (
+		    `HStretch (),
+		    `PushButton (`id (`ok), Label::OKButton ()),
+		    `PushButton (`id (`cancel), Label::CancelButton ()),
+		    `HStretch ()
+		)
+	    ));
+	    ret = UI::UserInput ();
+	    par = (integer)UI::QueryWidget (`id (`par), `Value);
+	    UI::CloseDialog ();
+	    if (ret == `cancel)
+	    {
+		UI::SetFocus (`table);
+		ret = nil;
+		continue;
+	    }
+	    string disks_param = mergestring (disks_cmd, " ");
+	    string command = sformat (
+		"/sbin/dasdfmt -Y -P %2 -b 4096 -y -m 1 %1", disks_param, par);
+	    boolean run = true;
+	    if (! Popup::YesNo (sformat (_("Execute command %1"), command)))
+	    {
+		run = false;
+	    }
+	    if (run)
+	    {
+		term contents = `VBox (`HSpacing (70));
+		index = 0;
+		while (index < par)
+		{
+		    contents = add (contents, `ProgressBar (`id (index),
+			" ", 100, 0));
+		    index = index + 1;
+		}
+		UI::OpenDialog (contents);
+		map<integer,integer> cylinders = $[];
+		map<integer,integer> done = $[];
+		// start formatting on background
+		SCR::Execute (.background.run_output, command);
+		// get the sizes of all disks
+		index = 0;
+		while (index < size (disks))
+		{
+		    sleep (500);
+		    list new_lines = (list)
+			SCR::Read (.background.newout);
+		    foreach (any line, new_lines, {
+			integer siz = tointeger (line);
+			if (siz == 0)
+			    siz = 999999999;
+			cylinders[index] = siz;
+			index = index + 1;
+		    });
+		}
+		y2milestone ("Sizes of disks: %1", cylinders);
+		list<integer> last_step = [];
+		while ((boolean)SCR::Read (.background.isrunning))
+		{
+		    sleep (1000);
+		    string buffer = (string)
+			SCR::Read (.background.buffer_out);
+		    list<string> progress = splitstring (buffer, "|");
+		    map<integer,integer> this_step = $[];
+		    foreach (string d, progress, {
+			if (d != "")
+			{
+			    integer i = tointeger (d);
+			    this_step[i] = this_step[i]:0 + 1;
+			}
+		    });
+		    foreach (integer k, integer v, this_step, {
+			done[k] = done[k]:0 + v;
+		    });
+		    this_step = filter (integer k, integer v, this_step, {
+			return done[k]:0 < cylinders[k]:0;
+		    });
+		    integer difference = size (last_step) - size (this_step);
+		    index = -1;
+		    while (difference > 0)
+		    {
+			index = index + 1;
+			if (! haskey (this_step, last_step[index]:0))
+			{
+			    difference = difference - 1;
+			    this_step[last_step[index]:0] = 0;
+			}
+		    }
+		    index = 0;
+		    integer siz = size (this_step);
+		    foreach (integer k, integer v, this_step, {
+			UI::ChangeWidget (`id (index), `Label, sformat (
+			    _("Formatting %1: cylinder %2 of %3 done"),
+			    disks[k]:"",
+			    done[k]:0,
+			    cylinders[k]:0));
+			UI::ChangeWidget (`id (index), `Value,
+			    100 * done[k]:0 / cylinders[k]:1);
+			UI::ChangeWidget (`id (index), `Enabled, true);
+			index = index + 1;
+		    });
+		    while (index < par)
+		    {
+			UI::ChangeWidget (`id (index), `Label, "");
+			UI::ChangeWidget (`id (index), `Value, 0);
+			UI::ChangeWidget (`id (index), `Enabled, false);
+			index = index + 1;
+		    }
+		}
+		UI::CloseDialog ();
+		integer ret = (integer)SCR::Read (.background.status);
+		if (ret != 0)
+		{
+		    Report::Error (sformat (_("Disks formatting failed: %1"),
+			ret));
+		}
+	    }
 	    ReloadDASDDialog ();
 	    UI::SetFocus (`table);
 	    ret = nil;
