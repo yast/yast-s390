@@ -123,16 +123,20 @@ define list<term> GetDASDDiskItems(integer min_chan, integer max_chan) ``{
 	    : _("No");
 	string partition_info = d["partitions"]:""; // TODO
 	string device = d["dev_name"]:"";
-
-	string s1 = substring (DASDController::FourDigitHex (d["device_id"]:0), 2);
-	string s3 = substring (DASDController::FourDigitHex (d["sub_device_id"]:0), 2);
-
 	string type = toupper (sformat ("%1/%2, %3/%4",
-	    s1,
+	    substring (
+		DASDController::FourDigitHex (
+		    d["device_id"]:0 & tointeger ("0xffff")
+		),
+		2),
 	    substring (
 		DASDController::FourDigitHex (d["detail", "cu_model"]:0),
 		4),
-	    s3,
+	    substring (
+		DASDController::FourDigitHex (
+		    d["sub_device_id"]:0 & tointeger ("0xffff")
+		),
+		2),
 	    substring (
 		DASDController::FourDigitHex (d["detail", "dev_model"]:0),
 		4)
