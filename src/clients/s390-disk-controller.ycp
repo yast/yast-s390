@@ -1,0 +1,83 @@
+/**
+ * File:	clients/controller.ycp
+ * Package:	Configuration of controller
+ * Summary:	Main file
+ * Authors:	Jiri Srain <jsrain@suse.cz>
+ *
+ * $Id$
+ *
+ * Main file for controller configuration. Uses all other files.
+ */
+
+{
+
+/***
+ * <h3>Configuration of controller</h3>
+ */
+
+textdomain "s390";
+
+/* The main () */
+y2milestone ("----------------------------------------");
+y2milestone ("S/390 Controller module started");
+
+import "Progress";
+import "Report";
+import "Summary";
+import "Wizard";
+import "Label";
+
+#include "s390/zfcp/wizards.ycp";
+#include "s390/dasd/wizards.ycp";
+
+/* Initialization dialog caption */
+string caption = _("S/390 Disk Controller Configuration");
+/* Initialization dialog contents */
+term contents = `HBox (`HWeight (999, `HStretch ()), `VBox (
+    `VStretch (),
+    `HWeight (1, `PushButton (`id (`dasd), `opt (`hstretch ()),
+	_("Configure &DASD disks"))),
+    `VSpacing (2),
+    `HWeight (1, `PushButton (`id (`zfcp), `opt (`hstretch ()),
+	_("Configure &ZFCP disks"))),
+    `VStretch ()
+), `HWeight (999, `HStretch ()));
+
+
+`Label(_("Initializing..."));
+
+Wizard::CreateDialog();
+Wizard::SetContentsButtons(caption, contents, "",
+    Label::BackButton(), Label::FinishButton());
+
+Wizard::ReplaceBackButton (`VBox ());
+
+any ret = nil;
+while (ret == nil)
+{
+    ret = UI::UserInput ();
+    if (ret == `dasd)
+    {
+	WFM::call ("dasd");
+	ret = nil;
+    }
+    else if (ret == `zfcp)
+    {
+	WFM::call ("zfcp");
+	ret = nil;
+    }
+}
+
+UI::CloseDialog();
+return ret;
+
+y2debug("ret=%1", ret);
+
+/* Finish */
+y2milestone("S/390 controller module finished");
+y2milestone("----------------------------------------");
+
+return ret;
+
+/* EOF */
+}

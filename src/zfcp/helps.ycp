@@ -14,7 +14,7 @@ textdomain "s390";
 /**
  * All helps are here
  */
-map HELPS = $[
+map ZFCP_HELPS = $[
 
     /* Read dialog help 1/2 */
     "read" : _("<p><b><big>Initializing controller Configuration</big></b><br>

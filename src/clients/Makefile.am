@@ -6,7 +6,8 @@ client_DATA =			\
 	zfcp.ycp		\
 	zfcp_auto.ycp		\
 	dasd.ycp		\
-	dasd_auto.ycp
+	dasd_auto.ycp		\
+	s390-disk-controller.ycp
 
 desktop_DATA =			\
 	zfcp.desktop		\

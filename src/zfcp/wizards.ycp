@@ -17,7 +17,7 @@ import "Wizard";
 include "s390/zfcp/dialogs.ycp";
 
 
-symbol MainSequence () {
+symbol MainZFCPSequence () {
     map aliases = $[
 	"main"		: ``(ZFCPDialog ()),
 	"add"		: ``(AddZFCPDiskDialog ())
@@ -47,7 +47,7 @@ any ZFCPSequence() {
 
     map aliases = $[
 	"read"	: [ ``( ReadDialog() ), true ],
-	"main"	:   ``( MainSequence() ),
+	"main"	:   ``( MainZFCPSequence() ),
 	"write"	: [ ``( WriteDialog() ), true ]
     ];
 
@@ -91,7 +91,7 @@ any ZFCPAutoSequence() {
     Wizard::SetContentsButtons(caption, contents, "",
 	    Label::BackButton(), Label::NextButton());
 
-    any ret = MainSequence();
+    any ret = MainZFCPSequence();
 
     UI::CloseDialog();
     return ret;

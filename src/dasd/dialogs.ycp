@@ -11,13 +11,14 @@
 
 textdomain "s390";
 
-
-import "Wizard";
-import "Sequencer";
-import "Label";
-import "Progress";
-import "DASDController";
 import "Arch";
+import "DASDController";
+import "Label";
+import "Popup";
+import "Progress";
+import "Report";
+import "Sequencer";
+import "Wizard";
 
 include "s390/dasd/helps.ycp";
 
@@ -93,7 +94,7 @@ define void ReportActivationError (integer id, integer ret) {
  * @return `abort if aborted and `next otherwise
  */
 symbol ReadDialog() {
-    Wizard::RestoreHelp(HELPS["read"]:"");
+    Wizard::RestoreHelp(DASD_HELPS["read"]:"");
     // Controller::AbortFunction = PollAbort;
     boolean ret = DASDController::Read();
     return ret ? `next : `abort;
@@ -104,7 +105,7 @@ symbol ReadDialog() {
  * @return `abort if aborted and `next otherwise
  */
 symbol WriteDialog() {
-    Wizard::RestoreHelp(HELPS["write"]:"");
+    Wizard::RestoreHelp(DASD_HELPS["write"]:"");
     // Controller::AbortFunction = PollAbort;
     boolean ret = DASDController::Write();
     return ret ? `next : `abort;
@@ -194,6 +195,10 @@ define void DisplayDASDDialog() {
 	    )
 	),
 	`Table(`id(`table), `opt (`notify), header, []),
+	`HBox (
+	    `PushButton (`id (`select), _("&Select/Deselect")),
+	    `HStretch ()
+	),
 	`HBox(
 	    `PushButton(`id(`activate), _("&Activate")),
 	    `PushButton(`id(`deactivate), _("&Deactivate")),
@@ -204,7 +209,9 @@ define void DisplayDASDDialog() {
 
     /* Apply the settings */
     Wizard::SetContents(caption, content, help, true, true);
-
+    Wizard::ReplaceBackButton(`VSpacing (0));
+    Wizard::ReplaceAbortButton (
+	`PushButton (`id (`abort), Label::CancelButton ()));
 }
 
 
@@ -212,6 +219,13 @@ define void DisplayDASDDialog() {
  * Redraw the contents of the widgets in the DASD Dialog
  */
 define void ReloadDASDDialog () ``{
+    DASDController::filter_min = (string)
+	UI::QueryWidget(`min_chan, `Value);
+    DASDController::filter_max = (string)
+	UI::QueryWidget(`max_chan, `Value);
+
+    UI::OpenDialog (`Label (_("Reading configured DASD disks")));
+
     list<map<string,any> > disks = (list<map<string,any> >)
 	SCR::Read (.probe.disk);
 
@@ -227,15 +241,14 @@ define void ReloadDASDDialog () ``{
 	return $[ id : d ];
     });
 
-    string DASDController::filter_min = (string)
-	UI::QueryWidget(`min_chan, `Value);
-    string DASDController::filter_max = (string)
-	UI::QueryWidget(`max_chan, `Value);
+    list<term> items = GetDASDDiskItems (
+	tointeger(DASDController::filter_min),
+	tointeger(DASDController::filter_max));
 
-    UI::ChangeWidget(`id(`table), `Items,
-	GetDASDDiskItems (
-	    tointeger(DASDController::filter_min),
-	    tointeger(DASDController::filter_max)));
+    UI::CloseDialog ();
+
+    UI::ChangeWidget(`id(`table), `Items, items);
+    UI::SetFocus (`table);
 }
 
 /**
@@ -258,7 +271,7 @@ define symbol DASDDialog() {
 	    ReloadDASDDialog ();
 	    continue;
 	}
-	else if (ret == `table)
+	else if (ret == `table || ret == `select)
 	{
 	    DASDController::selected[selected]
 		= ! DASDController::selected[selected]:false;
@@ -267,18 +280,35 @@ define symbol DASDDialog() {
 		    ? UI::Glyph (`CheckMark)
 		    : "-");
 	    ret = nil;
+	    UI::SetFocus (`table);
 	    continue;
 	}
 	else if (ret == `activate)
 	{
 	    list<integer>to_activate = ListSelectedDASD ();
+	    if (0 == size (to_activate))
+	    {
+		Popup::Message (_("No disk selected."));
+		ret = nil;
+		continue;
+	    }
 	    foreach (integer id, to_activate, ``{
-		integer ret = (integer)SCR::Execute (.target.bash, sformat (
-		    "dasd_configure %1 %2 %3",
+		string command = sformat (
+		    "/sbin/dasd_configure %1 %2 %3",
 		    id,
 		    1,
-		    0));
-		ReportActivationError (id, ret);
+		    0
+		);
+		boolean run = true;
+		if (! Popup::YesNo (sformat (_("Execute command %1"), command)))
+		{
+		    run = false;
+		}
+		if (run)
+		{
+		    integer ret = (integer)SCR::Execute (.target.bash, command);
+		    ReportActivationError (id, ret);
+		}
 	    });
 
 	    ReloadDASDDialog ();
@@ -290,13 +320,29 @@ define symbol DASDDialog() {
 	else if (ret == `deactivate)
 	{
 	    list<integer>to_activate = ListSelectedDASD ();
+	    if (0 == size (to_activate))
+	    {
+		Popup::Message (_("No disk selected."));
+		ret = nil;
+		continue;
+	    }
 	    foreach (integer id, to_activate, ``{
-		integer ret = (integer)SCR::Execute (.target.bash, sformat (
-		    "dasd_configure %1 %2 %3",
+		string command = sformat (
+		    "/sbin/dasd_configure %1 %2 %3",
 		    id,
 		    0,
-		    0));
-		ReportActivationError (id, ret);
+		    0
+		);
+		boolean run = true;
+		if (! Popup::YesNo (sformat (_("Execute command %1"), command)))
+		{
+		    run = false;
+		}
+		if (run)
+		{
+		    integer ret = (integer)SCR::Execute (.target.bash, command);
+		    ReportActivationError (id, ret);
+		}
 	    });
 
 	    ReloadDASDDialog ();
@@ -307,7 +353,14 @@ define symbol DASDDialog() {
 	else if (ret == `format)
 	{
 	    list<integer>to_activate = ListSelectedDASD ();
+	    if (0 == size (to_activate))
+	    {
+		Popup::Message (_("No disk selected."));
+		ret = nil;
+		continue;
+	    }
 	    foreach (integer id, to_activate, ``{
+		y2error ("TODO: Format disk");
 		// FIXME: Call some script to format disk
 		// TODO progress bar
 /*                integer steps = 100;
@@ -323,6 +376,7 @@ define symbol DASDDialog() {
 */
 	    });
 	    ReloadDASDDialog ();
+	    UI::SetFocus (`table);
 	    ret = nil;
 
 	}

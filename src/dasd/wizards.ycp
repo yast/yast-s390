@@ -17,7 +17,7 @@ import "Wizard";
 include "s390/dasd/dialogs.ycp";
 
 
-symbol MainSequence () {
+symbol MainDASDSequence () {
     map aliases = $[
 	"main"		: ``(DASDDialog ()),
     ];
@@ -41,7 +41,7 @@ any DASDSequence() {
 
     map aliases = $[
 	"read"	: [ ``( ReadDialog() ), true ],
-	"main"	:   ``( MainSequence() ),
+	"main"	:   ``( MainDASDSequence() ),
 	"write"	: [ ``( WriteDialog() ), true ]
     ];
 
@@ -85,7 +85,7 @@ any DASDAutoSequence() {
     Wizard::SetContentsButtons(caption, contents, "",
 	    Label::BackButton(), Label::NextButton());
 
-    any ret = MainSequence();
+    any ret = MainDASDSequence();
 
     UI::CloseDialog();
     return ret;
