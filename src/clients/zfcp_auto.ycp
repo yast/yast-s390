@@ -63,6 +63,15 @@ else if (func == "Import") {
 else if (func == "Export") {
     ret = ZFCPController::Export();
 }
+/* did configuration change */
+else if (func == "GetModified") {
+    ret = ZFCPController::modified;
+}
+/* set configuration as changed */
+else if (func == "SetModified") {
+    ZFCPController::modified = true;
+    ret = true;
+}
 /* Return needed packages */
 else if (func == "Packages") {
     ret = ZFCPController::AutoPackages();

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Sep  3 14:40:11 CEST 2004 - jsrain@suse.cz
+
+- added GetModified and SetModified functions to _auto clients
+
+-------------------------------------------------------------------
 Tue May  4 15:39:03 CEST 2004 - jsrain@suse.cz
 
 - merged texts from proofreading
