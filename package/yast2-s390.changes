@@ -1,7 +1,7 @@
 -------------------------------------------------------------------
 Fri Nov  5 13:14:47 CET 2004 - jsrain@suse.cz
 
-- fixed problems when formatting >26 DASDs
+- fixed problems when formatting >26 DASDs (#47699)
 
 -------------------------------------------------------------------
 Wed Oct 27 15:17:43 CEST 2004 - jsrain@suse.cz
