@@ -51,18 +51,23 @@ define void ReportActivationError (any id, integer ret) {
     {
 	if (ret == 1)
 	    Report::Error (sformat (
+		// error report, %1 is device identification
 		_("%1: sysfs not mounted."), id));
 	else if (ret == 2)
 	    Report::Error (sformat (
+		// error report, %1 is device identification
 		_("%1: Invalid status for <online>"), id));
 	else if (ret == 3)
 	    Report::Error (sformat (
+		// error report, %1 is device identification
 		_("%1: No device found for <ccwid>"), id));
 	else if (ret == 4)
 	    Report::Error (sformat (
+		// error report, %1 is device identification
 		_("%1: Could not change state of the device"), id));
 	else
 	    Report::Error (sformat (
+		// error report, %1 is device identification, %2 is integer code
 		_("%1: Unknown error %2"), id, ret));
     }
 }
@@ -119,7 +124,9 @@ define list<term> GetDASDDiskItems(integer min_chan, integer max_chan) ``{
 	string access = toupper ((string)(d["resource", "io", 0, "mode"]:"RO"));
 	boolean diag = d["diag"]:false; // TODO
 	string formatted = (boolean)(d["formatted"]:false) // TODO
+	    // table cell
 	    ? _("Yes")
+	    // table cell
 	    : _("No");
 	string partition_info = d["partitions"]:""; // TODO
 	string device = d["dev_name"]:"";
@@ -176,36 +183,52 @@ define void DisplayDASDDialog() {
     string caption = _("DASD Disks Management");
 
     term header = `header(
+	// table header
 	_("Sel."),
+	// table header
 	`Right(_("Channel")),
+	// table header
 	_("Device"),
+	// table header
 	_("Type"),
+	// table header
 	_("Access type"));
     if (Arch::s390_32)
+	// table header
 	header = add (header, _("Use DIAG"));
+    // table header
     header = add (header, _("Formatted"));
+    // table header
     header = add (header, _("Partition information"));
 
     list actions = [
+	// menuy button id
 	`item (`id (`activate), _("&Activate")),
+	// menuy button id
 	`item (`id(`deactivate), _("&Deactivate")),
+	// menuy button id
 	`item (`id(`format), _("&Format")),
     ];
 
     /* Dialog content */
     term content = `VBox(
 	`HBox(
+	    // text entry
 	    `TextEntry(`id(`min_chan), _("Mi&nimal channel"), "0x0000"),
+	    // text entry
 	    `TextEntry(`id(`max_chan), _("Ma&ximal channel"), "0xffff"),
 	    `VBox (
 		`Label (""),
+		// push button
 		`PushButton (`id (`filter), _("&Filter"))
 	    )
 	),
 	`Table(`id(`table), `opt (`notify), header, []),
 	`HBox (
+	    // pudh button
 	    `PushButton (`id (`select), _("&Select/Deselect")),
 	    `HStretch (),
+	    // menu button
 	    `MenuButton (`id (`operation), _("Perform &Action"), actions)
 	)
     );
@@ -287,7 +310,7 @@ define symbol DASDDialog() {
 		    0
 		);
 		boolean run = true;
-		if (! Popup::YesNo (sformat (_("Execute command %1"), command)))
+		if (! Popup::YesNo (sformat ("Execute command %1", command)))
 		{
 		    run = false;
 		}
@@ -309,6 +332,7 @@ define symbol DASDDialog() {
 	    list<integer>to_activate = ListSelectedDASD ();
 	    if (0 == size (to_activate))
 	    {
+		// error popup message
 		Popup::Message (_("No disk selected."));
 		ret = nil;
 		continue;
@@ -321,7 +345,7 @@ define symbol DASDDialog() {
 		    0
 		);
 		boolean run = true;
-		if (! Popup::YesNo (sformat (_("Execute command %1"), command)))
+		if (! Popup::YesNo (sformat ("Execute command %1", command)))
 		{
 		    run = false;
 		}
@@ -367,12 +391,14 @@ define symbol DASDDialog() {
 		    (string)(DASDController::devices[id, "resource", "io", 0, "mode"]:"RO"));
 		if (! active)
 		{
+		    // error report, %1 is device identification
 		    problem = sformat (_("Disk %1 is not active"),
 			DASDController::devices[id, "channel"]:"");
 		}
 		else if (tolower (access) != "rw")
 		{
 		    problem = sformat (
+			// error report, %1 is device identification
 			_("Disk %1 is not accessible for writing"),
 			DASDController::devices[id, "channel"]:"");
 		}
@@ -386,6 +412,7 @@ define symbol DASDDialog() {
 	    boolean cancel = false;
 	    UI::OpenDialog (`VBox (
 		`IntField (`id (`par),
+		    // integer field (count of disks formatted at parallely)
 		    _("Parallell Formatted Disks"), 1, par, par),
 		`HBox (
 		    `HStretch (),
@@ -407,7 +434,7 @@ define symbol DASDDialog() {
 	    string command = sformat (
 		"/sbin/dasdfmt -Y -P %2 -b 4096 -y -m 1 %1", disks_param, par);
 	    boolean run = true;
-	    if (! Popup::YesNo (sformat (_("Execute command %1"), command)))
+	    if (! Popup::YesNo (sformat ("Execute command %1", command)))
 	    {
 		run = false;
 	    }
@@ -478,6 +505,9 @@ define symbol DASDDialog() {
 		    integer siz = size (this_step);
 		    foreach (integer k, integer v, this_step, {
 			UI::ChangeWidget (`id (index), `Label, sformat (
+			    // progress bar, %1 is device name, %2 and %3
+			    // integers,
+		    // eg. Formatting /dev/dasda: cylinder 123 of 12334 done
 			    _("Formatting %1: cylinder %2 of %3 done"),
 			    disks[k]:"",
 			    done[k]:0,
@@ -499,7 +529,8 @@ define symbol DASDDialog() {
 		integer ret = (integer)SCR::Read (.background.status);
 		if (ret != 0)
 		{
-		    Report::Error (sformat (_("Disks formatting failed: %1"),
+		    // error report, %1 is exit code of the command (integer)
+		    Report::Error (sformat (_("Disks formatting failed. Exit code: %1"),
 			ret));
 		}
 	    }

@@ -30,7 +30,7 @@ import "Label";
 import "DASDController";
 import "ZFCPController";
 
-
+// popup label
 UI::OpenDialog (`Label (_("Detecting available controllers")));
 
 boolean have_dasd = size (DASDController::GetControllers ()) > 0;
@@ -58,9 +58,11 @@ string caption = _("S/390 Disk Controller Configuration");
 term contents = `HBox (`HWeight (999, `HStretch ()), `VBox (
     `VStretch (),
     `HWeight (1, `PushButton (`id (`dasd), `opt (`hstretch),
+	// push button
 	_("Configure &DASD disks"))),
     `VSpacing (2),
     `HWeight (1, `PushButton (`id (`zfcp), `opt (`hstretch),
+	// push button
 	_("Configure &ZFCP disks"))),
     `VStretch ()
 ), `HWeight (999, `HStretch ()));

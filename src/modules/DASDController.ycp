@@ -205,7 +205,7 @@ global define string FourDigitHex(integer i) ``{
 }
 
 global define void ProbeDisks () {
-
+    // popup label
     UI::OpenDialog (`Label (_("Reading configured DASD disks")));
 
     list<map<string,any> > disks = (list<map<string,any> >)

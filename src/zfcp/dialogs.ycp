@@ -52,25 +52,35 @@ define void ReportActivationError (string id, integer ret) {
     {
 
 	if (ret == 1)
+	    // error report, %1 is device identification
 	    Report::Error (sformat (_("%1: sysfs not mounted"), id));
 	else if (ret == 2)
+	    // error report, %1 is device identification
 	    Report::Error (sformat (_("%1: invalid value for <online>"), id));
 	else if (ret == 3)
+	    // error report, %1 is device identification
 	    Report::Error (sformat (_("%1: device <ccwid> does not exist"), id));
 	else if (ret == 4)
+	    // error report, %1 is device identification
 	    Report::Error (sformat (_("%1: module zfcp could not be loaded"), id));
 	else if (ret == 5)
+	    // error report, %1 is device identification
 	    Report::Error (sformat (_("%1: adapter status could not be changed"), id));
 	else if (ret == 6)
+	    // error report, %1 is device identification
 	   Report::Error (sformat (_("%1: wwpn ports still active"), id));
 	else if (ret == 7)
+	    // error report, %1 is device identification
 	    Report::Error (sformat (_("%1: SCSI disk could not be deactivated"), id));
 	else if (ret == 8)
+	    // error report, %1 is device identification
 	    Report::Error (sformat (_("%1: FCP LUN could not be deregistered"), id));
 	else if (ret == 9)
+	    // error report, %1 is device identification
 	    Report::Error (sformat (_("%1: FCP WWPN could not be deregistered"), id));
 	else
 	    Report::Error (sformat (
+		// error report, %1 is device identification, %2 is integer code
 		_("%1: Unknown error %2"), id, ret));
     }
 }
@@ -148,17 +158,20 @@ define void DisplayZFCPDialog () {
 	    `Table(
 		`id(`table), `opt(`keepSorting, `notify),
 		`header(
+		    // table header
 		    `Right(_("Channel number")),
-		    `Right(_("wwpn")),
+		    // table header
+		    `Right(_("WWPN")),
+		    // table header
 		    `Right(_("zfcp-LUN"))
 		),
 		[]
 	    )
 	),
 	`HBox(
-	    `PushButton(`id(`add), _("&Add")),
+	    `PushButton(`id(`add), Label::AddButton ()),
 //                `PushButton(`id(`change), "&Change"),
-	    `PushButton(`id(`delete), _("&Delete")),
+	    `PushButton(`id(`delete), Label::DeleteButton ()),
 	    `HStretch ()
 	)
     );
@@ -196,7 +209,8 @@ define symbol ZFCPDialog () ``{
 	    string wwpn = descr["detail", "wwpn"]:"unknown";
 	    string fcp_lun = descr["detail", "fcp_lun"]:"unknown";
 
-	    if (! Popup::YesNo (sformat (_("Remove disk %1"), dev_name)))
+	    // popup qestion, %1 is device name (eg. /dev/sda)
+	    if (! Popup::YesNo (sformat (_("Remove disk %1?"), dev_name)))
 	    {
 		ret = nil;
 		continue;
@@ -209,7 +223,7 @@ define symbol ZFCPDialog () ``{
 		0
 	    );
 	    boolean run = true;
-	    if (! Popup::YesNo (sformat (_("Execute command %1"), command)))
+	    if (! Popup::YesNo (sformat ("Execute command %1", command)))
 	    {
 		run = false;
 	    }
@@ -272,12 +286,15 @@ define symbol AddZFCPDiskDialog () ``{
     term content = `HBox (`HStretch (), `VBox(
 	`VStretch (),
 	`ComboBox (`id(`channel), `opt (`editable, `hstretch),
+	    // combo box
 	    _("&Channel Number"),
 	    items),
 	`VSpacing (2),
+	// text entry
 	`TextEntry(`id(`wwpn), _("&WWPN"),
 	    ZFCPController::previous_settings["wwpn"]:""),
 	`VSpacing (2),
+	// text entry
 	`TextEntry(`id(`fcp_lun), _("&FCP-LUN"), fcp_lun),
 	`VStretch ()
     ), `HStretch ());
@@ -305,7 +322,7 @@ define symbol AddZFCPDiskDialog () ``{
 	    1
 	);
 	boolean run = true;
-	if (! Popup::YesNo (sformat (_("Execute command %1"), command)))
+	if (! Popup::YesNo (sformat ("Execute command %1", command)))
 	{
 	    run = false;
 	}

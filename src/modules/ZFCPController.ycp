@@ -172,6 +172,7 @@ global define list<map<string,any> > GetControllers () {
 }
 
 global define void ProbeDisks () {
+    // popup label
     UI::OpenDialog (`Label (_("Reading configured ZFCP disks")));
 
     list<map<string,any> > disks = (list<map<string,any> >)
