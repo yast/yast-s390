@@ -62,7 +62,8 @@ any DASDSequence() {
     ];
 
     Wizard::CreateDialog();
-
+    Wizard::SetDesktopIcon("dasd");
+    
     any ret = Sequencer::Run(aliases, sequence);
 
     UI::CloseDialog();
@@ -82,6 +83,7 @@ any DASDAutoSequence() {
     term contents = `Label(_("Initializing..."));
 
     Wizard::CreateDialog();
+    Wizard::SetDesktopIcon("dasd");
     Wizard::SetContentsButtons(caption, contents, "",
 	    Label::BackButton(), Label::NextButton());
 

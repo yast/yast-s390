@@ -68,6 +68,7 @@ any ZFCPSequence() {
     ];
 
     Wizard::CreateDialog();
+    Wizard::SetDesktopIcon("zfcp");
 
     any ret = Sequencer::Run(aliases, sequence);
 
@@ -88,6 +89,7 @@ any ZFCPAutoSequence() {
     term contents = `Label(_("Initializing..."));
 
     Wizard::CreateDialog();
+    Wizard::SetDesktopIcon("zfcp");
     Wizard::SetContentsButtons(caption, contents, "",
 	    Label::BackButton(), Label::NextButton());
 
