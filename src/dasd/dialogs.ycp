@@ -1,0 +1,336 @@
+/**
+ * File:	include/controller/dialogs.ycp
+ * Package:	Configuration of controller
+ * Summary:	Dialogs definitions
+ * Authors:	Jiri Srain <jsrain@suse.cz>
+ *
+ * $Id$
+ */
+
+{
+
+textdomain "s390";
+
+
+import "Wizard";
+import "Sequencer";
+import "Label";
+import "Progress";
+import "DASDController";
+import "Arch";
+
+include "s390/dasd/helps.ycp";
+
+/**
+ * Translate integer number to its hexadecimal representation with leading
+ * 0x and exactliy 4 hexadecimal numbers
+ * @param i integer integer number
+ * @return string hexadecimal number
+ */
+define string FourDigitHex(integer i) ``{
+    string s = tohexstring(i);
+    string zeros = "";
+
+    integer l = 6 - size(s);
+
+    while (l > 0) {
+	zeros = zeros + "0";
+	l = l - 1;
+    }
+
+    return substring(s, 0, 2) + zeros + substring(s, 2);
+}
+
+/**
+ * List DASD devices that are currently being selected
+ * @return list of IDs of sellected DASD devices
+ */
+define list<integer> ListSelectedDASD () ``{
+    map<integer, boolean> sel_list = (map<integer, boolean>)filter (
+	integer k, boolean v, DASDController::selected,
+    ``(
+	v == true
+    ));
+    list<integer> to_activate = maplist (integer k, boolean v, sel_list, ``(k));
+    y2milestone ("Selected list: %1", to_activate);
+    return to_activate;
+}
+
+
+// --------------------------------------------------------------------------
+
+
+/**
+ * Report error occured during device activation
+ * @param id integer chanel id of the device
+ * @param ret integer exit code of the operation
+ */
+define void ReportActivationError (integer id, integer ret) {
+    if (ret != 0)
+    {
+	if (ret == 1)
+	    Report::Error (sformat (
+		_("%1: sysfs not mounted."), id));
+	else if (ret == 2)
+	    Report::Error (sformat (
+		_("%1: Invalid status for <online>"), id));
+	else if (ret == 3)
+	    Report::Error (sformat (
+		_("%1: No device found for <ccwid>"), id));
+	else if (ret == 4)
+	    Report::Error (sformat (
+		_("%1: Could not change state of the device"), id));
+	else
+	    Report::Error (sformat (
+		_("%1: Unknown error %2"), id, ret));
+    }
+}
+
+// now real dialogs
+
+/**
+ * Read settings dialog
+ * @return `abort if aborted and `next otherwise
+ */
+symbol ReadDialog() {
+    Wizard::RestoreHelp(HELPS["read"]:"");
+    // Controller::AbortFunction = PollAbort;
+    boolean ret = DASDController::Read();
+    return ret ? `next : `abort;
+}
+
+/**
+ * Write settings dialog
+ * @return `abort if aborted and `next otherwise
+ */
+symbol WriteDialog() {
+    Wizard::RestoreHelp(HELPS["write"]:"");
+    // Controller::AbortFunction = PollAbort;
+    boolean ret = DASDController::Write();
+    return ret ? `next : `abort;
+}
+
+/**
+ * Get the list of items for the table of DASD devices
+ * @param min_chan integer minimal channel number
+ * @param max_chan integer maximal channel number
+ * @return a list of terms for the table
+ */
+define list<term> GetDASDDiskItems(integer min_chan, integer max_chan) ``{
+    integer id = 0;
+
+    list<term> items = [];
+
+    map<integer,map<string,any> > devices = DASDController::devices;
+
+    if (min_chan >= 0)
+    {
+	devices = (map<integer,map<string,any> >)filter (
+	    integer k, map<string,any> d, devices,
+        ``{
+	    return (k >= min_chan && k <= max_chan);
+	});
+    }
+    items = (list<term>) maplist (integer k, map<string,any> d, devices, ``{
+	boolean active = (boolean)(d["resource", "io", 0, "active"]:false);
+	integer channel = (integer)(d["resource", "io", 0, "start"]:0);
+	string type = d["type"]:"type";
+	string access = toupper ((string)(d["resource", "io", 0, "mode"]:"RO"));
+	boolean diag = d["diag"]:false;
+	string formatted = (boolean)(d["formatted"]:false)
+	    ? _("Yes")
+	    : _("No");
+	string partition_info = d["partitions"]:"";
+	boolean activate = d["activate"]:false;
+	if (!active) {
+	    type = "--";
+	    access = "--";
+	    formatted = "--";
+	    partition_info = "--";
+	}
+	string selected = DASDController::selected[channel]:false
+	    ? UI::Glyph (`CheckMark)
+	    : "-";
+
+	term t = `item (`id (channel), selected, FourDigitHex (channel),
+	    type ,access);
+	if (Arch::s390_32)
+	    t = add (t, access);
+	t = add (t, formatted);
+	t = add (t, partition_info);
+	return t;
+    });
+    return items;
+}
+
+/**
+ * Draw the DASD dialog
+ */
+define void DisplayDASDDialog() {
+    /* Minimal text for the help */
+    string help = _("TODO Temporary dialog for DSDA disks configuration.");
+
+    /* Dialog caption */
+    string caption = _("DASD Disks Management");
+
+    term header = `header(
+	_("Sel."),
+	`Right(_("Channel")),
+	_("Type"),
+	_("Access type"));
+    if (Arch::s390_32)
+	header = add (header, _("Use DIAG"));
+    header = add (header, _("Formatted"));
+    header = add (header, _("Partition information"));
+
+    /* Dialog content */
+    term content = `VBox(
+	`HBox(
+	    `TextEntry(`id(`min_chan), _("Mi&nimal channel"), "0x0000"),
+	    `TextEntry(`id(`max_chan), _("Ma&ximal channel"), "0xffff"),
+	    `VBox (
+		`Label (""),
+		`PushButton (`id (`filter), _("&Filter"))
+	    )
+	),
+	`Table(`id(`table), `opt (`notify), header, []),
+	`HBox(
+	    `PushButton(`id(`activate), _("&Activate")),
+	    `PushButton(`id(`deactivate), _("&Deactivate")),
+	    `HStretch (),
+	    `PushButton(`id(`format), _("&Format"))
+	)
+    );
+
+    /* Apply the settings */
+    Wizard::SetContents(caption, content, help, true, true);
+
+}
+
+
+/**
+ * Redraw the contents of the widgets in the DASD Dialog
+ */
+define void ReloadDASDDialog () ``{
+    list<map<string,any> > disks = (list<map<string,any> >)
+	SCR::Read (.probe.disk);
+
+    // FIXME remove after testing
+    if (! Arch::s390)
+	disks = [$["bus":"SCSI", "class_id":262, "dev_name":"/dev/fcp-0.0.fa00_0x5005076300c590a9:0x0000000000000000", "dev_names":["/dev/sda", "/dev/fcp-0.0.fa00_0x5005076300c590a9:0x0000000000000000"], "dev_num":$["major":8, "minor":0, "range":16, "type":"b"], "device":"2105F20", "model":"IBM 2105F20", "old_unique_key":"vfuo.2InDh6NoMG4", "resource":$["disk_log_geo":[$["cylinders":1016, "heads":93, "sectors":62]], "size":[$["unit":"sectors", "x":5859392, "y":512]]], "rev":".307", "sub_class_id":0, "unique_key":"Gwc0.IAfQSX+HcV7", "vendor":"IBM"], $["bus":"SCSI", "class_id":262, "dev_name":"/dev/fcp-0.0.fa00_0x5005076300c590a9:0x0001000000000000", "dev_names":["/dev/sdb", "/dev/fcp-0.0.fa00_0x5005076300c590a9:0x0001000000000000"], "dev_num":$["major":8, "minor":16, "range":16, "type":"b"], "device":"2105F20", "model":"IBM 2105F20", "old_unique_key":"cQuI.Bd3fUGTSEdB", "resource":$["disk_log_geo":[$["cylinders":1016, "heads":93, "sectors":62]], "size":[$["unit":"sectors", "x":5859392, "y":512]]], "rev":".307", "sub_class_id":0, "unique_key":"j5t4.RVxrFh5yTsE", "vendor":"IBM"], $["bus":"None", "class_id":262, "dev_name":"/dev/dasda", "dev_num":$["major":94, "minor":0, "range":4, "type":"b"], "device":"S390 Disk", "model":"S390 Disk", "old_unique_key":"uP6Y.HbKChfRvG13", "resource":$["disk_log_geo":[$["cylinders":3338, "heads":15, "sectors":12]], "io":[$["active":true, "length":1, "mode":"rw", "start":336]], "size":[$["unit":"sectors", "x":4806720, "y":512]]], "sub_class_id":0, "unique_key":"6eUF.HbKChfRvG13"]];
+
+    disks = filter (map<string,any> d, disks, ``(
+	issubstring (d["dev_name"]:"", "dasd")
+    ));
+    DASDController::devices = listmap (map<string,any> d, disks, ``{
+	integer id = (integer)(d["resource", "io", 0, "start"]:0);
+	return $[ id : d ];
+    });
+
+    string DASDController::filter_min = (string)
+	UI::QueryWidget(`min_chan, `Value);
+    string DASDController::filter_max = (string)
+	UI::QueryWidget(`max_chan, `Value);
+
+    UI::ChangeWidget(`id(`table), `Items,
+	GetDASDDiskItems (
+	    tointeger(DASDController::filter_min),
+	    tointeger(DASDController::filter_max)));
+}
+
+/**
+ * Run the dialog for DASD disks configuration
+ * @return symbol for wizard sequencer
+ */
+define symbol DASDDialog() {
+    DisplayDASDDialog ();
+    ReloadDASDDialog ();
+    any ret = nil;
+
+    while (ret == nil)
+    {
+	ret = UI::UserInput();
+
+	integer selected = (integer)
+	    UI::QueryWidget (`id (`table), `CurrentItem);
+
+	if (ret == `filter) {
+	    ReloadDASDDialog ();
+	    continue;
+	}
+	else if (ret == `table)
+	{
+	    DASDController::selected[selected]
+		= ! DASDController::selected[selected]:false;
+	    UI::ChangeWidget (`id (`table), `Item (selected, 0),
+		DASDController::selected[selected]:false
+		    ? UI::Glyph (`CheckMark)
+		    : "-");
+	    ret = nil;
+	    continue;
+	}
+	else if (ret == `activate)
+	{
+	    list<integer>to_activate = ListSelectedDASD ();
+	    foreach (integer id, to_activate, ``{
+		integer ret = (integer)SCR::Execute (.target.bash, sformat (
+		    "dasd_configure %1 %2 %3",
+		    id,
+		    1,
+		    0));
+		ReportActivationError (id, ret);
+	    });
+
+	    ReloadDASDDialog ();
+
+//	    UI::ChangeWidget(`id(`table), `CurrentItem, ids_to_activate[0]:nil);
+	    ret = nil;
+
+	}
+	else if (ret == `deactivate)
+	{
+	    list<integer>to_activate = ListSelectedDASD ();
+	    foreach (integer id, to_activate, ``{
+		integer ret = (integer)SCR::Execute (.target.bash, sformat (
+		    "dasd_configure %1 %2 %3",
+		    id,
+		    0,
+		    0));
+		ReportActivationError (id, ret);
+	    });
+
+	    ReloadDASDDialog ();
+
+//	    UI::ChangeWidget(`id(`table), `CurrentItem, ids_to_activate[0]:nil);
+	    ret = nil;
+	}
+	else if (ret == `format)
+	{
+	    list<integer>to_activate = ListSelectedDASD ();
+	    foreach (integer id, to_activate, ``{
+		// FIXME: Call some script to format disk
+		// TODO progress bar
+/*                integer steps = 100;
+                Progress::Simple("Format", "Formating disks in progress.", 100, "");
+
+                integer sl = 2500 / steps;
+                do {
+                    Progress::NextStep();
+                    sleep(sl);
+                    steps = steps - 1;
+                } while(steps > 0); 
+                Progress::Finish();
+*/
+	    });
+	    ReloadDASDDialog ();
+	    ret = nil;
+
+	}
+
+    }
+    return (symbol)ret;
+}
+
+// EOF
+}
+

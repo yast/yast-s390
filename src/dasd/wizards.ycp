@@ -1,0 +1,95 @@
+/**
+ * File:	include/controller/wizards.ycp
+ * Package:	Configuration of controller
+ * Summary:	Wizards definitions
+ * Authors:	Jiri Srain <jsrain@suse.cz>
+ *
+ * $Id$
+ */
+
+{
+
+textdomain "s390";
+
+import "Sequencer";
+import "Wizard";
+
+include "s390/dasd/dialogs.ycp";
+
+
+symbol MainSequence () {
+    map aliases = $[
+	"main"		: ``(DASDDialog ()),
+    ];
+
+    map sequence = $[
+	"ws_start"	: "main",
+	"main" : $[
+	    `abort	: `abort,
+	    `next	: `next,
+	],
+    ];
+
+    return Sequencer::Run (aliases, sequence);
+}
+
+/**
+ * Whole configuration of controller
+ * @return sequence result
+ */
+any DASDSequence() {
+
+    map aliases = $[
+	"read"	: [ ``( ReadDialog() ), true ],
+	"main"	:   ``( MainSequence() ),
+	"write"	: [ ``( WriteDialog() ), true ]
+    ];
+
+    map sequence = $[
+	"ws_start" : "read",
+	"read" : $[
+	    `abort	: `abort,
+	    `next	: "main"
+	],
+	"main" : $[
+	    `abort	: `abort,
+	    `next	: "write"
+	],
+	"write" : $[
+	    `abort	: `abort,
+	    `next	: `next
+	]
+    ];
+
+    Wizard::CreateDialog();
+
+    any ret = Sequencer::Run(aliases, sequence);
+
+    UI::CloseDialog();
+    return ret;
+}
+
+/**
+ * Whole configuration of controller but without reading and writing.
+ * For use with autoinstallation.
+ * @return sequence result
+ */
+any DASDAutoSequence() {
+
+    /* Initialization dialog caption */
+    string caption = _("Controller Configuration");
+    /* Initialization dialog contents */
+    term contents = `Label(_("Initializing..."));
+
+    Wizard::CreateDialog();
+    Wizard::SetContentsButtons(caption, contents, "",
+	    Label::BackButton(), Label::NextButton());
+
+    any ret = MainSequence();
+
+    UI::CloseDialog();
+    return ret;
+}
+
+/* EOF */
+}

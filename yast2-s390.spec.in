@@ -1,0 +1,30 @@
+@HEADER-COMMENT@
+# neededforbuild yast2-devel-packages
+
+@HEADER@
+Requires:	yast2
+
+BuildArchitectures:	noarch
+
+Summary:	Configuration of s390
+
+%description
+-
+
+@PREP@
+
+@BUILD@
+
+@INSTALL@
+
+@CLEAN@
+
+%files
+%defattr(-,root,root)
+%dir @yncludedir@/s390
+@yncludedir@/s390/*
+@clientdir@/s390.ycp
+@clientdir@/s390_*.ycp
+@moduledir@/S390.*
+@desktopdir@/s390.desktop
+%doc @docdir@

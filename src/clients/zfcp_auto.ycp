@@ -1,0 +1,98 @@
+/**
+ * File:	clients/controller_auto.ycp
+ * Package:	Configuration of controller
+ * Summary:	Client for autoinstallation
+ * Authors:	Jiri Srain <jsrain@suse.cz>
+ *
+ * $Id$
+ *
+ * This is a client for autoinstallation. It takes its arguments,
+ * goes through the configuration and return the setting.
+ * Does not do any changes to the configuration.
+ */
+
+/**
+ * @param function to execute
+ * @param map/list of controller settings
+ * @return map edited settings, Summary or boolean on success depending on called function
+ * @example map mm = $[ "FAIL_DELAY" : "77" ];
+ * @example map ret = WFM::CallFunction ("controller_auto", [ "Summary", mm ]);
+ */
+
+{
+
+textdomain "s390";
+
+y2milestone("----------------------------------------");
+y2milestone("DADS auto started");
+
+import "ZFCPController";
+include "z390/zfcp/wizards.ycp";
+
+any ret = nil;
+string func = "";
+map param = $[];
+
+/* Check arguments */
+if(size(WFM::Args()) > 0 && is(WFM::Args(0), string)) {
+    func = (string)WFM::Args(0);
+    if(size(WFM::Args()) > 1 && is(WFM::Args(1), map))
+	param = (map) WFM::Args(1);
+}
+y2debug("func=%1", func);
+y2debug("param=%1", param);
+
+/* Create a summary*/
+if(func == "Summary") {
+    ret = select(ZFCPController::Summary(), 0, "");
+}
+/* Reset configuration */
+else if (func == "Reset") {
+    ZFCPController::Import($[]);
+    ret = $[];
+}
+/* Change configuration (run AutoSequence) */
+else if (func == "Change") {
+    ret = ZFCPControllerAutoSequence();
+}
+/* Import configuration */
+else if (func == "Import") {
+    ret = ZFCPController::Import(param);
+}
+/* Return actual state */
+else if (func == "Export") {
+    ret = ZFCPController::Export();
+}
+/* Return needed packages */
+else if (func == "Packages") {
+    ret = ZFCPController::AutoPackages();
+}
+/* Read current state */
+else if (func == "Read") {
+    import "Progress";
+    Progress::off();
+    ret = ZFCPController::Read();
+    Progress::on();
+}
+/* Write givven settings */
+else if (func == "Write") {
+    import "Progress";
+    Progress::off();
+    ZFCPController::write_only = true;
+    ret = ZFCPController::Write();
+    Progress::on();
+}
+/* Unknown function */
+else {
+    y2error("Unknown function: %1", func);
+    ret = false;
+}
+
+y2debug("ret=%1", ret);
+y2milestone("ZFCP auto finished");
+y2milestone("----------------------------------------");
+
+return ret;
+
+/* EOF */
+}
