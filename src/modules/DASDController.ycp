@@ -289,8 +289,14 @@ global define void ProbeDisks () {
 	if (active)
 	{
 	    string device = d["dev_name"]:"";
-	    boolean formatted = 0 == SCR::Execute (.target.bash, sformat (
-		    "dd if=%1 of=/dev/null bs=512 count=1", device));
+	    map scr_out = (map)SCR::Execute (.target.bash_output, sformat (
+		    "dasdview -x -f %1 | grep formatted", device));
+	    boolean formatted = false;
+	    if (scr_out["exit"]:0 == 0)
+	    {
+		string out = scr_out["stdout"]:"";
+		formatted = ! regexpmatch (toupper (out), "NOT[ \t]*FORMATTED");
+	    }
 	    d["formatted"] = formatted;
 	    d["partition_info"] = GetPartitionInfo (device);
 	}

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Nov 18 13:43:01 CET 2004 - jsrain@suse.cz
+
+- using dasdview to detect if a DASD disk is formatted (#42986)
+
+-------------------------------------------------------------------
 Fri Nov  5 13:14:47 CET 2004 - jsrain@suse.cz
 
 - fixed problems when formatting >26 DASDs (#47699)
