@@ -302,6 +302,39 @@ global define void ProbeDisks () {
 	return $[ index : d ];
     });
 
+DASDController::devices = (map<integer,map<string,any> >)
+	SCR::Read (.target.ycp, "/root/dasddevices.ycp");
+/*
+$[
+0:$[
+"bus":"None",
+"bus_hwcfg":"none",
+"channel":"0.0.0150",
+"class_id":262,
+"detail":$["cu_model":233, "dev_model":10, "lcss":0],
+"dev_name":"/dev/dasda",
+"dev_names":["/dev/dasda"],
+"dev_num":$["major":94, "minor":0, "range":4, "type":"b"],
+"device":"DASD",
+"device_id":276880,
+"driver":"io_subchannel",
+"drivers":[$["active":true, "modprobe":true, "modules":[["dasd_eckd_mod", ""]]]],
+"formatted":true,
+"model":"IBM DASD",
+"old_unique_key":"N5EP.J4gQoPlOYuE",
+"partition_info":"--",
+"prog_if":1,
+"resource":$["disk_log_geo":[$["cylinders":3339, "heads":15, "sectors":12]], "io":[$["active":true, "length":1, "mode":"rw", "start":336]], "size":[$["unit":"sectors", "x":601020, "y":4096]]],
+"sub_class_id":0,
+"sub_device_id":275344,
+"sysfs_bus_id":"0.0.0150",
+"unique_key":"kNlH.ALFATSt_U8F",
+"vendor":"IBM",
+"vendor_id":286721
+],
+];
+*/
+
     UI::CloseDialog ();
 }
 
@@ -422,15 +455,23 @@ global define void FormatDisks (list<string> disks_list, integer par,
 		    });
     }
     y2milestone ("Sizes of disks: %1", cylinders);
+    y2milestone ("Disks to format: %1", disks);
     list<integer> last_step = [];
+    string last_rest = "";
     while ((boolean)SCR::Read (.background.isrunning))
     {
-y2milestone ("Running next round");
 		    sleep (1000);
-		    string buffer = (string)
-			SCR::Read (.background.buffer_out);
+		    string buffer = sformat ("%1",
+			SCR::Read (.background.buffer_out));
+		    buffer = last_rest + buffer;
 		    list<string> progress = splitstring (buffer, "|");
 		    map<integer,integer> this_step = $[];
+		    if ((boolean)SCR::Read (.background.isrunning))
+		    {
+			integer last = size (progress) - 1;
+			last_rest = progress[last]:"";
+			progress = remove (progress, last);
+		    }
 		    foreach (string d, progress, {
 			if (d != "")
 			{
