@@ -21,3 +21,4 @@ Exec=/sbin/yast2 zfcp
 
 Name=Zfcp
 GenericName=Configure zfcp
+X-KDE-SubstituteUID=true

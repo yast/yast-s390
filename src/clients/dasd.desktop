@@ -21,3 +21,4 @@ Exec=/sbin/yast2 dasd
 
 Name=DASD
 GenericName=Configure dasd
+X-KDE-SubstituteUID=true
