@@ -4,7 +4,7 @@
 @HEADER@
 Requires:	yast2 s390-tools
 
-BuildArchitectures:	noarch
+BuildArchitectures:	s390 s390x
 
 Summary:	Configuration of s390
 
