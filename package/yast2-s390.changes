@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Sep  6 13:31:47 CEST 2004 - jsrain@suse.cz
+
+- ask for confirmation before formatting the DASD disks (#44376)
+
+-------------------------------------------------------------------
 Fri Sep  3 14:40:11 CEST 2004 - jsrain@suse.cz
 
 - added GetModified and SetModified functions to _auto clients

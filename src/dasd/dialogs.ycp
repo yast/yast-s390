@@ -473,6 +473,31 @@ define symbol DASDDialog() {
 		ret = nil;
 		continue;
 	    }
+
+	    // final confirmation before formatting the discs
+	    list<string> channels = maplist (integer id, to_activate, {
+		return DASDController::devices[id, "channel"]:"";
+	    });
+	    string channels_str = mergestring (channels, ", ");
+	    if (! Popup::AnyQuestionRichText (
+		Popup::NoHeadline (),
+		sformat (_("Really format following discs?<br>
+All data on the disks will be lost!<br>
+%1"),
+		    channels_str),
+		60,
+		20,
+		Label::YesButton (),
+		Label::NoButton (),
+		`focus_no
+	    ))
+	    {
+		UI::SetFocus (`table);
+		ret = nil;
+		continue;
+	    }
+	    // final confirmation -- end
+
 	    list<string> devices = maplist (integer id, to_activate, ``{
 		return DASDController::devices[id, "dev_name"]:"";
 	    });
