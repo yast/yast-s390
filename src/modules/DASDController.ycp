@@ -189,7 +189,7 @@ global map Export () {
 global list Summary() {
     list<string> ret = maplist (integer index, map<string,any> d, devices, {
 	string s = "";
-	if (Arch::architecture == "s390_64")
+	if (Arch::architecture () == "s390_64")
 	{
 	    // summary text, %1 is channel ID (number),
 	    // %2 is Yes or No
@@ -336,7 +336,7 @@ define void ReportActivationError (any id, integer ret) {
 }
 
 global define void ActivateDisk (string channel, boolean diag) {
-    if (! Arch::s390_32)
+    if (! Arch::s390_32 ())
 	diag = false;
     string command = sformat (
 	"/sbin/dasd_configure %1 %2 %3",
@@ -350,7 +350,7 @@ global define void ActivateDisk (string channel, boolean diag) {
 }
 
 global define void DeactivateDisk (string channel, boolean diag) {
-    if (! Arch::s390_32)
+    if (! Arch::s390_32 ())
 	diag = false;
     string command = sformat (
 	"/sbin/dasd_configure %1 %2 %3",

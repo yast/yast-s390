@@ -78,7 +78,7 @@ _("<p>To specify if the disk will be formatted,
 use <b>Format the Disk</b>.</p>")
 
 +
-(Arch::s390_32
+(Arch::s390_32 ()
     /* Disk add help 3/3, optional */
     ? _("<p>To specify if DIAG mode will be used,
 use <b>Use DIAG</b>.</p>")

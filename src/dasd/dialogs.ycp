@@ -163,7 +163,7 @@ define list<term> GetDASDDiskItems(integer min_chan, integer max_chan) ``{
 
 	term t = `item (`id (k), selected, str_channel, device,
 	    type ,access);
-	if (Arch::s390_32)
+	if (Arch::s390_32 ())
 	    t = add (t, diag);
 	t = add (t, formatted);
 	t = add (t, partition_info);
@@ -198,7 +198,7 @@ define void DisplayDASDDialog() {
 	_("Type"),
 	// table header
 	_("Access Type"));
-    if (Arch::s390_32)
+    if (Arch::s390_32 ())
 	// table header
 	header = add (header, _("Use DIAG"));
     // table header
@@ -224,7 +224,7 @@ define void DisplayDASDDialog() {
 	// menuy button id
 	`item (`id(`deactivate), _("&Deactivate")),
     ];
-    if (Arch::s390_32)
+    if (Arch::s390_32 ())
     {
 	// menuy button id
 	actions = add (actions, `item (`id(`diag_on), _("Set DIAG O&n")));
