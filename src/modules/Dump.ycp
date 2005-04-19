@@ -1,0 +1,233 @@
+/**
+ * File:	modules/Dump.ycp
+ * Package:	Configuration of S/390 specific stuff
+ * Summary:	Creating dump devices for S/390
+ * Authors:	Jiri Srain <jsrain@suse.cz>
+ *
+ * $Id: DASDController.ycp 20356 2004-11-18 13:35:46Z jsrain $
+ *
+ */
+
+{
+
+module "Dump";
+textdomain "s390";
+
+import "Mode";
+import "Progress";
+import "Report";
+import "Stage";
+import "Summary";
+import "Arch";
+//import "Bootloader";
+
+
+global map<string,map<string,any> > devices = $[];
+
+global map<string,any> current_device = $[];
+
+/**
+ * Prototypes
+ */
+global boolean Modified();
+
+/**
+ * Data was modified?
+ */
+global boolean modified = false;
+
+/**
+ */
+global boolean proposal_valid = false;
+
+/**
+ * Write only, used during autoinstallation.
+ * Don't run services and SuSEconfig, it's all done at one place.
+ */
+global boolean write_only = false;
+
+/**
+ * Abort function
+ * return boolean return true if abort
+ */
+global boolean() AbortFunction = Modified;
+
+/**
+ * Abort function
+ * @return blah blah lahjk
+ */
+global define boolean Abort() ``{
+    if(AbortFunction != nil)
+	return AbortFunction ();
+    return false;
+}
+
+/**
+ * Data was modified?
+ * @return true if modified
+ */
+global boolean Modified() {
+    y2debug("modified=%1",modified);
+    return modified;
+}
+
+/**
+ * Is this kind of disk controller available?
+ * @return boolean true if it is
+ */
+global boolean Available () {
+    return true;
+}
+
+/**
+ * Read all controller settings
+ * @return true on success
+ */
+global boolean Read() {
+    list<map<string,any> > sections = [];//Bootloader::GetSections ();
+    foreach (map<string,any> s, sections, {
+	if (s["type"]:"" == "dump")
+	{
+	    string name = s["name"]:"";
+	    string device = s["dump_device"]:"";
+	    devices[device] = $[
+		"boot_section" : name,
+		"boot_section_orig" : s["original_name"]:"",
+		"format" : false,
+	    ];
+	}
+    });
+    return true;
+
+}
+
+/**
+ * Write all controller settings
+ * @return true on success
+ */
+global boolean Write() {
+    map<string,map<string,any> > backup_devices = devices;
+    foreach (string dev, map<string,any> info, devices, {
+	if (info["format"]:false)
+	{
+	    string cmd = info["force"]:false
+		? "/sbin/mkdump -f"
+		: "/sbin/mkdump";
+	    cmd = cmd + " " + dev;
+	    y2milestone ("Running command %1", cmd);
+	    integer ret = (integer)SCR::Execute (.target.bash, cmd);
+	    y2milestone ("Return value: %1", ret);
+	    if (ret != 0)
+	    {
+		string err = "";
+		if (ret == 1)
+		    // error description
+		    err = _("Disk unuseable");
+		else if (ret == 2)
+		    // error description
+		    err = _("Support program not installed");
+		else
+		    // error description
+		    err = _("Error code from support program");
+		// error report, %1 is device name, %2 error description
+		Report::Error (sformat (_("Cannot create dump device %1:\n%2"),
+		    dev, err));
+	    }
+	}
+    });
+    boolean bl_needs_update = false;
+    list<map<string,any > > sections = [];//Bootloader::GetSections ();
+    sections = filter (map<string,any> s, sections, {
+	string device = s["dump_device"]:"";
+	if (s["type"]:"" == "dump")
+	{
+	    if (haskey (devices, device))
+	    {
+		devices = remove (devices, device);
+		return true;
+	    }
+	    else
+	    {
+		bl_needs_update = true;
+		return false;
+	    }
+	}
+	else
+	{
+	    return true;
+	}
+    });
+    if (size (devices) > 0) // new device added
+    {
+	bl_needs_update = true;
+	foreach (string dev, map<string,any> info, devices, {
+	    sections = add (sections, $[
+		"name" : info["boot_section"]:dev,
+		"type" : "dump",
+		"original_name" :
+		    info["boot_section_orig"]:info["boot_section"]:dev,
+		"dump_device" : dev,
+	    ]);
+	});
+    }
+    if (bl_needs_update)
+    {
+	//Bootloader::SetSections (sections);
+//	Bootloader::Write ();
+    }
+
+    devices = backup_devices;
+    return true;
+}
+
+/**
+ * Get all controller settings from the first parameter
+ * (For use by autoinstallation.)
+ * @param settings The YCP structure to be imported.
+ * @return boolean True on success
+ */
+global boolean Import (map settings) {
+    return true; // FIXME
+}
+
+/**
+ * Dump the controller settings to a single map
+ * (For use by autoinstallation.)
+ * @return map Dumped settings (later acceptable by Import ())
+ */
+global map Export () {
+    return $[];
+}
+
+/**
+ * Create a textual summary and a list of unconfigured cards
+ * @return summary of the current configuration
+ */
+global list Summary() {
+    return [];
+}
+
+/**
+ * Return packages needed to be installed and removed during
+ * Autoinstallation to insure module has all needed software
+ * installed.
+ * @return map with 2 lists.
+ */
+global map AutoPackages() {
+    return $[ "install":[], "remove":[] ];
+}
+
+global list<string> AvailableDisks () {
+    list<map> disks = (list<map>)SCR::Read (.probe.disk);
+    list<string> dev_names = maplist (map d, disks, {
+	return d["dev_name"]:"";
+    });
+    dev_names = filter (string d, dev_names, {
+	return ! haskey (devices, d);
+    });
+    return dev_names;
+}
+
+
+/* EOF */
+}

@@ -1,0 +1,64 @@
+/**
+ * File:	clients/controller.ycp
+ * Package:	Configuration of controller
+ * Summary:	Main file
+ * Authors:	Jiri Srain <jsrain@suse.cz>
+ *
+ * $Id: dasd.ycp 15514 2004-03-05 15:32:16Z jsrain $
+ *
+ * Main file for controller configuration. Uses all other files.
+ */
+
+{
+
+/***
+ * <h3>Configuration of controller</h3>
+ */
+
+textdomain "s390";
+
+/* The main () */
+y2milestone ("----------------------------------------");
+y2milestone ("Dump module started");
+
+import "Progress";
+import "Report";
+import "Summary";
+
+//import "CommandLine";
+include "s390/dump/wizards.ycp";
+/*
+map cmdline_description = $[
+    "id" 	: "controller",
+    // Command line help text for the Xcontroller module
+    "help"	: _("Configuration of controller"),
+    "guihandler"        : ControllerSequence,
+    "initialize"        : Controller::Read,
+    "finish"            : Controller::Write,
+    "actions"           : $[
+	// FIXME TODO: fill the functionality description here
+    ],
+    "options"		: $[
+	// FIXME TODO: fill the option descriptions here
+    ],
+    "mapping"		: $[
+	// FIXME TODO: fill the mappings of actions and options here
+    ]
+];
+*/
+
+/* main ui function */
+any ret = nil;
+
+//ret = CommandLine::Run(cmdline_description);
+ret = DumpSequence ();
+y2debug("ret=%1", ret);
+
+/* Finish */
+y2milestone("Dump module finished");
+y2milestone("----------------------------------------");
+
+return ret;
+
+/* EOF */
+}

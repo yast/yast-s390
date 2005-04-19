@@ -1,1 +1,1 @@
-SUBDIRS = zfcp dasd modules clients
+SUBDIRS = zfcp dasd dump modules clients

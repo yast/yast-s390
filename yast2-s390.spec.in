@@ -1,8 +1,8 @@
 @HEADER-COMMENT@
-# neededforbuild yast2-devel-packages
+# neededforbuild yast2-devel-packages yast2-bootloader
 
 @HEADER@
-Requires:	yast2 s390-tools
+Requires:	yast2 s390-tools yast2-bootloader
 
 ExclusiveArch:	s390 s390x
 

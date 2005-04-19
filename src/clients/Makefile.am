@@ -7,11 +7,14 @@ client_DATA =			\
 	zfcp_auto.ycp		\
 	dasd.ycp		\
 	dasd_auto.ycp		\
-	s390-disk-controller.ycp
+	s390-disk-controller.ycp\
+	dump.ycp		\
+	dump_auto.ycp
 
 desktop_DATA =			\
 	zfcp.desktop		\
-	dasd.desktop
+	dasd.desktop		\
+	dump.desktop
 
 
 EXTRA_DIST = $(client_DATA) $(desktop_DATA)

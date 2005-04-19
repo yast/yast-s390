@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Apr 19 14:19:56 CEST 2005 - jsrain@suse.cz
+
+- added preliminary support for dump devices configuration
+
+-------------------------------------------------------------------
 Thu Nov 18 13:43:01 CET 2004 - jsrain@suse.cz
 
 - using dasdview to detect if a DASD disk is formatted (#42986)

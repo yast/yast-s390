@@ -1,0 +1,109 @@
+/**
+ * File:	include/controller/wizards.ycp
+ * Package:	Configuration of controller
+ * Summary:	Wizards definitions
+ * Authors:	Jiri Srain <jsrain@suse.cz>
+ *
+ * $Id: wizards.ycp 17837 2004-06-14 14:41:34Z jsrain $
+ */
+
+{
+
+textdomain "s390";
+
+import "Sequencer";
+import "Wizard";
+
+include "s390/dump/dialogs.ycp";
+
+
+symbol MainDumpSequence () {
+    map aliases = $[
+	"main"		: ``(DumpDialog ()),
+	"edit"		: ``(EditDumpDialog (`edit)),
+	"add"		: ``(EditDumpDialog (`add)),
+    ];
+
+    map sequence = $[
+	"ws_start"	: "main",
+	"main" : $[
+	    `abort	: `abort,
+	    `next	: `next,
+	    `edit	: "edit",
+	    `add	: "add",
+	],
+	"add" : $[
+	    `abort	: `abort,
+	    `next	: "main",
+	],
+	"edit" : $[
+	    `abort	: `abort,
+	    `next	: "main",
+	],
+    ];
+
+    return Sequencer::Run (aliases, sequence);
+}
+
+/**
+ * Whole configuration of controller
+ * @return sequence result
+ */
+any DumpSequence() {
+
+    map aliases = $[
+	"read"	: [ ``( ReadDialog() ), true ],
+	"main"	:   ``( MainDumpSequence() ),
+	"write"	: [ ``( WriteDialog() ), true ]
+    ];
+
+    map sequence = $[
+	"ws_start" : "read",
+	"read" : $[
+	    `abort	: `abort,
+	    `next	: "main"
+	],
+	"main" : $[
+	    `abort	: `abort,
+	    `next	: "write"
+	],
+	"write" : $[
+	    `abort	: `abort,
+	    `next	: `next
+	]
+    ];
+
+    Wizard::CreateDialog();
+    Wizard::SetDesktopIcon("dump");
+    
+    any ret = Sequencer::Run(aliases, sequence);
+
+    UI::CloseDialog();
+    return ret;
+}
+
+/**
+ * Whole configuration of controller but without reading and writing.
+ * For use with autoinstallation.
+ * @return sequence result
+ */
+any DumpAutoSequence() {
+
+    /* Initialization dialog caption */
+    string caption = _("Dump Configuration");
+    /* Initialization dialog contents */
+    term contents = `Label(_("Initializing..."));
+
+    Wizard::CreateDialog();
+    Wizard::SetDesktopIcon("dump");
+    Wizard::SetContentsButtons(caption, contents, "",
+	    Label::BackButton(), Label::NextButton());
+
+    any ret = MainDumpSequence();
+
+    UI::CloseDialog();
+    return ret;
+}
+
+/* EOF */
+}
