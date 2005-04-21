@@ -16,7 +16,7 @@ X-SuSE-YaST-Geometry=
 X-SuSE-YaST-SortKey=
 X-SuSE-YaST-AutoInstResource=dasd
 
-Icon=dasd
+Icon=yast-dasd
 Exec=/sbin/yast2 dasd 
 
 Name=DASD

@@ -16,7 +16,7 @@ X-SuSE-YaST-Geometry=
 X-SuSE-YaST-SortKey=
 X-SuSE-YaST-AutoInstResource=zfcp
 
-Icon=zfcp
+Icon=yast-zfcp
 Exec=/sbin/yast2 zfcp 
 
 Name=Zfcp

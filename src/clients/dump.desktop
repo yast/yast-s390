@@ -16,7 +16,7 @@ X-SuSE-YaST-Geometry=
 X-SuSE-YaST-SortKey=
 X-SuSE-YaST-AutoInstResource=dump
 
-Icon=dump
+Icon=yast-dump
 Exec=/sbin/yast2 dump
 
 Name=Dump Devices
