@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Oct  3 10:36:11 CEST 2005 - jsrain@suse.cz
+
+- display zFCP LUN as 16-digit hexa number (#118430)
+
+-------------------------------------------------------------------
 Tue Apr 19 14:19:56 CEST 2005 - jsrain@suse.cz
 
 - added preliminary support for dump devices configuration
