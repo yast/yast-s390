@@ -37,7 +37,7 @@ global map<string, boolean> diag = $[];
 global define void ActivateDisk (string channel, boolean diag);
 global define void ProbeDisks ();
 global define void FormatDisks (list<string> disks_list, integer par,
-    boolean interactive);
+    boolean write_vl, boolean interactive);
 global define string GetPartitionInfo (string disk);
 
 
@@ -160,7 +160,7 @@ global boolean Import (map settings) {
 
 	// now format the disks
 	if (size (format_list) > 0)
-	    FormatDisks (format_list, 8, true);
+	    FormatDisks (format_list, 8, true, true);
     }
     return true;
 }
@@ -404,7 +404,7 @@ global define void DeactivateDisk (string channel, boolean diag) {
 }
 
 global define void FormatDisks (list<string> disks_list, integer par,
-    boolean interactive)
+    boolean write_vl, boolean interactive)
 {
     if (par > size (disks_list))
 	par = size (disks_list);
@@ -418,8 +418,12 @@ global define void FormatDisks (list<string> disks_list, integer par,
 	disks_cmd = add (disks_cmd, sformat ("-f %1", device));
     });
     string disks_param = mergestring (disks_cmd, " ");
+    string additional_param = "";
+    if (! write_vl)
+	additional_param = "--no-label";
     string command = sformat (
-	"/sbin/dasdfmt -Y -P %2 -b 4096 -y -m 1 %1", disks_param, par);
+	"/sbin/dasdfmt -Y -P %2 -b 4096 -y -m 1 %3 %1", disks_param, par,
+	    additional_param);
 
     y2milestone ("Running command %1", command);
     index = 0;

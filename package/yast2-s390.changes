@@ -1,7 +1,8 @@
 -------------------------------------------------------------------
-Mon Oct  3 10:36:11 CEST 2005 - jsrain@suse.cz
+Mon Oct  3 11:11:13 CEST 2005 - jsrain@suse.cz
 
 - display zFCP LUN as 16-digit hexa number (#118430)
+- allow to keep the the DASD label when formatting (#57598)
 
 -------------------------------------------------------------------
 Tue Apr 19 14:19:56 CEST 2005 - jsrain@suse.cz
