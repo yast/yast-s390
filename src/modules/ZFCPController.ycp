@@ -27,6 +27,10 @@ global map<integer,map<string,any> > devices = $[];
 
 global map<integer, boolean> selected = $[];
 
+global string filter_min = "0x0000";
+
+global string filter_max = "0xffff";
+
 global map<string, any> previous_settings = $[];
 
 list<map<string,any> > controllers = nil;

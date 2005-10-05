@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Oct  5 13:21:36 CEST 2005 - jsrain@suse.cz
+
+- added filtering to the zFCP disks dialog (#81867)
+
+-------------------------------------------------------------------
 Mon Oct  3 11:11:13 CEST 2005 - jsrain@suse.cz
 
 - display zFCP LUN as 16-digit hexa number (#118430)

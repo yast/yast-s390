@@ -92,13 +92,28 @@ string HexNumSize (string hex, integer digits) {
 
     // ------------------------------------------------------------------------------------
 
-
-define list<term> GetZFCPDiskItems() ``{
+/**
+ * Get the list of items for the table of ZFCP devices
+ * @param min_chan integer minimal channel number
+ * @param max_chan integer maximal channel number
+ * @return a list of terms for the table
+ */
+define list<term> GetZFCPDiskItems(integer min_chan, integer max_chan) ``{
     integer id = 0;
 
     list<term> items = [];
 
     map<integer,map<string,any> > devices = ZFCPController::devices;
+
+    if (min_chan >= 0)
+    {
+        devices = (map<integer,map<string,any> >)filter (
+            integer k, map<string,any> d, devices,
+        ``{
+            integer channel = d["resource", "io", 0, "start"]:0;
+            return (channel >= min_chan && channel <= max_chan);
+        });
+    }
 
     items = (list<term>) maplist (integer k, map<string,any> d, devices, ``{
 	string dev_name = (string)(d["dev_name"]:"");
@@ -118,9 +133,16 @@ define list<term> GetZFCPDiskItems() ``{
 }
 
 define void ReloadZFCPDialog () ``{
+    ZFCPController::filter_min = (string)
+        UI::QueryWidget(`min_chan, `Value);
+    ZFCPController::filter_max = (string)
+        UI::QueryWidget(`max_chan, `Value);
+
     ZFCPController::ProbeDisks ();
 
-    list<term> items = GetZFCPDiskItems ();
+    list<term> items = GetZFCPDiskItems (
+	tointeger(ZFCPController::filter_min),
+	tointeger(ZFCPController::filter_max));
 
     UI::ChangeWidget(`id(`table), `Items, items);
     UI::ChangeWidget (`id (`delete), `Enabled, size (items) > 0);
@@ -135,10 +157,19 @@ define void DisplayZFCPDialog () {
     /* Dialog caption */
     string caption = _("Configured ZFCP Disks");
 
-        list<term> items = GetZFCPDiskItems();
-
     /* Dialog content */
     term content = `VBox(
+	`HBox(
+	    // text entry
+	    `TextEntry(`id(`min_chan), _("Mi&nimum Channel"), "0x0000"),
+	    // text entry
+	    `TextEntry(`id(`max_chan), _("Ma&ximum Channel"), "0xffff"),
+	    `VBox (
+		`Label (""),
+		// push button
+		`PushButton (`id (`filter), _("&Filter"))
+	    )
+	),
 	`HBox(
 	    `Table(
 		`id(`table), `opt(`keepSorting, `notify),
@@ -181,7 +212,12 @@ define symbol ZFCPDialog () ``{
 
 	selected = (integer) UI::QueryWidget (`id (`table), `CurrentItem);
 
-	if (ret == `abort || ret == `cancel)
+	if (ret == `filter) {
+	    ReloadZFCPDialog ();
+	    ret = nil;
+	    continue;
+	}
+	else if (ret == `abort || ret == `cancel)
 	{
 	    // yes-no popup
 	    if (! Popup::YesNo (_("Really leave the ZFCP disk configuration without saving?
