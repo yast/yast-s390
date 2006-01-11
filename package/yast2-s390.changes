@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Jan 11 14:21:21 CET 2006 - jsrain@suse.cz
+
+- added clients to be called during installation (keep the left
+  progress steps)
+
+-------------------------------------------------------------------
 Wed Oct  5 13:21:36 CEST 2005 - jsrain@suse.cz
 
 - added filtering to the zFCP disks dialog (#81867)
