@@ -308,9 +308,9 @@ global define void ProbeDisks () {
 	return $[ index : d ];
     });
 
+/*
 DASDController::devices = (map<integer,map<string,any> >)
 	SCR::Read (.target.ycp, "/root/dasddevices.ycp");
-/*
 $[
 0:$[
 "bus":"None",
