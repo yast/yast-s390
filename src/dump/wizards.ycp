@@ -16,7 +16,10 @@ import "Wizard";
 
 include "s390/dump/dialogs.ycp";
 
-
+/**
+ * Whole configuration of controller
+ * @return symbol result
+ */
 symbol MainDumpSequence () {
     map aliases = $[
 	"main"		: ``(DumpDialog ()),

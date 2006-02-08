@@ -142,6 +142,11 @@ symbol DumpDialog() {
     return (symbol)ret;
 }
 
+/**
+ * Run the dialog for Dump
+ * @param what symbol a
+ * @return symbol EditDumpDialog that was edited
+ */
 symbol EditDumpDialog (symbol what) {
     string help = DUMP_HELPS["edit_dump"]:"";
 

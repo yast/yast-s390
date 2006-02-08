@@ -227,6 +227,7 @@ global map AutoPackages() {
 
 /**
  * Check if DASD subsystem is available
+ * @return boolean True if more than one disk
  */
 global define boolean IsAvailable () {
     list<map<string,any> > disks = (list<map<string,any> >)
@@ -263,6 +264,9 @@ global define string FourDigitHex(integer i) ``{
     return substring(s, 0, 2) + zeros + substring(s, 2);
 }
 
+/**
+ * Probe for DASD disks
+ */
 global define void ProbeDisks () {
     if (Mode::config ())
 	return;
@@ -375,6 +379,11 @@ define void ReportActivationError (any id, integer ret) {
     }
 }
 
+/**
+ * Activate selected Disks
+ * @param channel string Name of the disk to activate
+ * @param diag boolean Activate DIAG or not
+ */
 global define void ActivateDisk (string channel, boolean diag) {
     if (! Arch::s390_32 ())
 	diag = false;
@@ -389,6 +398,11 @@ global define void ActivateDisk (string channel, boolean diag) {
     ReportActivationError (channel, ret);
 }
 
+/**
+ * Activate selected Disks
+ * @param channel string Name of the disk to deactivate
+ * @param diag boolean Activate DIAG or not
+ */
 global define void DeactivateDisk (string channel, boolean diag) {
     if (! Arch::s390_32 ())
 	diag = false;
@@ -403,6 +417,13 @@ global define void DeactivateDisk (string channel, boolean diag) {
     ReportActivationError (channel, ret);
 }
 
+/**
+ * Activate selected Disks
+ * @param disks_list list<string> List of disks to be formated
+ * @param par integer Number of disks that can be formated in parallel
+ * @param write_vl boolean Write a Volume label
+ * @param interactive boolean Interactive yes/no
+ */
 global define void FormatDisks (list<string> disks_list, integer par,
     boolean write_vl, boolean interactive)
 {
@@ -540,6 +561,11 @@ global define void FormatDisks (list<string> disks_list, integer par,
     }
 }
 
+/**
+ * Get partitioninfo
+ * @param disk string Disk to read info from
+ * @return GetPartitionInfo string The info
+ */
 global define string GetPartitionInfo (string disk) {
     map outmap = (map)SCR::Execute (.target.bash_output, sformat (
 	"/sbin/fdasd -p %1", disk));

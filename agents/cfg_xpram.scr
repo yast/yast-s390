@@ -1,0 +1,17 @@
+/**
+ * File:
+ *   cfg_xpram.scr
+ * Summary:
+ *   SCR Agent for reading/writing /etc/sysconfig/xpram
+ *   using the sysconfig-agent
+ *
+ * $Id: cfg_xpram.scr 18211 2004-07-26 15:59:57Z jsuchome $
+ *
+ * Read/Sets the values defined in <tt>/etc/sysconfig/xpram</tt>
+ * in an easy manner.
+ */
+.sysconfig.xpram
+
+`ag_ini(
+  `SysConfigFile("/etc/sysconfig/xpram")
+)

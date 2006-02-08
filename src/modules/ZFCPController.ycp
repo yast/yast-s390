@@ -196,6 +196,7 @@ global map AutoPackages() {
 
 /**
  * Check if ZFCP subsystem is available
+ * @return boolean whether the ZFCP-System is availble at all
  */
 global define boolean IsAvailable () {
     if (controllers == nil)
@@ -211,6 +212,7 @@ global define boolean IsAvailable () {
 
 /**
  * Get available zfcp controllers
+ * @return list<map<string,any> > of availabel Controllers
  */
 global define list<map<string,any> > GetControllers () {
     if (controllers == nil)
@@ -224,7 +226,9 @@ global define list<map<string,any> > GetControllers () {
     return controllers;
 }
 
-
+/**
+ * Get available disks
+ */
 global define void ProbeDisks () {
     if (Mode::config ())
 	return;

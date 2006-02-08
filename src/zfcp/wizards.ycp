@@ -16,7 +16,10 @@ import "Wizard";
 
 include "s390/zfcp/dialogs.ycp";
 
-
+/**
+ * Main dialog
+ * @return symbol dialog
+ */
 symbol MainZFCPSequence () {
     map aliases = $[
 	"main"		: ``(ZFCPDialog ()),

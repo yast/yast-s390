@@ -3,6 +3,7 @@
 module_DATA =			\
 	DASDController.ycp	\
 	ZFCPController.ycp	\
+	Xpram.ycp		\
 	Dump.ycp
 
 EXTRA_DIST = $(module_DATA)

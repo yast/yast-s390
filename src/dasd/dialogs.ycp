@@ -25,7 +25,7 @@ include "s390/dasd/helps.ycp";
 
 /**
  * List DASD devices that are currently being selected
- * @return list of IDs of sellected DASD devices
+ * @return list<integer> list of IDs of selected DASD devices
  */
 define list<integer> ListSelectedDASD () ``{
     map<integer, boolean> sel_list = (map<integer, boolean>)filter (
@@ -515,6 +515,10 @@ All data on the disks will be lost!<br>
     return (symbol)ret;
 }
 
+/**
+ * Run the dialog for adding DASDs
+ * @return symbol from AddDASDDiskDialog
+ */
 define symbol AddDASDDiskDialog () ``{
     if (! Mode::config ())
     {

@@ -8,6 +8,7 @@ client_DATA =			\
 	dasd.ycp		\
 	dasd_auto.ycp		\
 	s390-disk-controller.ycp\
+	xpram.ycp		\
 	dump.ycp		\
 	dump_auto.ycp		\
 	inst_dasd.ycp		\
@@ -16,6 +17,7 @@ client_DATA =			\
 desktop_DATA =			\
 	zfcp.desktop		\
 	dasd.desktop		\
+	xpram.desktop		\
 	dump.desktop
 
 

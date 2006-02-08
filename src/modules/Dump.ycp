@@ -217,6 +217,10 @@ global map AutoPackages() {
     return $[ "install":[], "remove":[] ];
 }
 
+/**
+ * Create a List of available Disks
+ * @return list<string> of disks
+ */
 global list<string> AvailableDisks () {
     list<map> disks = (list<map>)SCR::Read (.probe.disk);
     list<string> dev_names = maplist (map d, disks, {

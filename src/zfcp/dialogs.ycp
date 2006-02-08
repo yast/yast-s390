@@ -132,6 +132,9 @@ define list<term> GetZFCPDiskItems(integer min_chan, integer max_chan) ``{
     return items;
 }
 
+/**
+ * Restart the ZFCP-Dialog
+ */
 define void ReloadZFCPDialog () ``{
     ZFCPController::filter_min = (string)
         UI::QueryWidget(`min_chan, `Value);
@@ -149,6 +152,9 @@ define void ReloadZFCPDialog () ``{
     UI::SetFocus (`table);
 }
 
+/**
+ * Show the ZFCP-Dialog
+ */
 define void DisplayZFCPDialog () {
 
     /* Minimal text for the help */
@@ -198,6 +204,10 @@ define void DisplayZFCPDialog () {
     Wizard::SetAbortButton(`abort, Label::CancelButton() );
 }
 
+/**
+ * Show the ZFCP-Dialog
+ * @return symbol From the dialog
+ */
 define symbol ZFCPDialog () ``{
     DisplayZFCPDialog ();
     ReloadZFCPDialog ();
@@ -265,6 +275,10 @@ All changes will be lost.")))
     return (symbol) ret;
 }
 
+/**
+ * Add ZFCP-Dialog
+ * @return symbol the dialog
+ */
 define symbol AddZFCPDiskDialog () ``{
     /* Minimal text for the help */
     string help = ZFCP_HELPS["disk_add"]:"";
