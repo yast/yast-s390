@@ -4,7 +4,7 @@
  * Summary:	Client for autoinstallation
  * Authors:	Jiri Srain <jsrain@suse.cz>
  *
- * $Id: dasd_auto.ycp 19066 2004-09-03 12:40:40Z jsrain $
+ * $Id$
  *
  * This is a client for autoinstallation. It takes its arguments,
  * goes through the configuration and return the setting.

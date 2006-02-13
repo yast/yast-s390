@@ -4,7 +4,7 @@
  * Summary:	Creating dump devices for S/390
  * Authors:	Jiri Srain <jsrain@suse.cz>
  *
- * $Id: DASDController.ycp 20356 2004-11-18 13:35:46Z jsrain $
+ * $Id$
  *
  */
 
