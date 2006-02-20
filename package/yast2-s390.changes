@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sa Feb 18 09:45:35 CET 2006 - ihno@suse.de
+
+- Add Warning message for adding SAN-devices (Feature 300437)
+
+-------------------------------------------------------------------
 Do Feb  9 02:03:40 CET 2006 - ihno@suse.de
 
 - initial version of XPRAM

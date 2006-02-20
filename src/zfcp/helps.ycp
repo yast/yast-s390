@@ -42,13 +42,23 @@ _("<p>To configure a new ZFCP disk, click <b>Add</b>.</p>") +
 
     /* Disk selection dialog help 3/3 */
 _("<p>To remove a configured ZFCP disk, select it and click
-<b>Delete</b>.</p>"),
+<b>Delete</b>.</p>") +
+
+	/* Disk selection dialog Warning */
+_("<h1>Warning</h1>") + _("<p>When accessing a ZFCP-device
+<b>READ</b>/<b>WRITE</b>please make sure that this access is exclusive.
+Otherwise the potential risk of data corruption is there.</p>"),
 
     /* Disk add help 1/1 */
     "disk_add" : _("<p><b><big>Add New ZFCP Disk</big></b><br>
 Enter the identifier of the disk to add. Enter the
 <b>Channel Number</b> of the ZFCP controller, the worldwide port number
-(<b>WWPN</b>), and the <b>FCP-LUN</b> number.</p>"),
+(<b>WWPN</b>), and the <b>FCP-LUN</b> number.</p>") +
+
+	/* Disk selection dialog Warning */
+_("<h1>Warning</h1>") + _("<p>When accessing a ZFCP-device
+<b>READ</b>/<b>WRITE</b>please make sure that this access is exclusive.
+Otherwise the potential risk of data corruption is there.</p>"),
 
 ];
 
