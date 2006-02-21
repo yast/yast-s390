@@ -22,9 +22,7 @@ include "s390/dump/dialogs.ycp";
  */
 symbol MainDumpSequence () {
     map aliases = $[
-	"main"		: ``(DumpDialog ()),
-	"edit"		: ``(EditDumpDialog (`edit)),
-	"add"		: ``(EditDumpDialog (`add)),
+	"main"		: ``(EditDumpDialog (`add)),
     ];
 
     map sequence = $[
@@ -32,16 +30,7 @@ symbol MainDumpSequence () {
 	"main" : $[
 	    `abort	: `abort,
 	    `next	: `next,
-	    `edit	: "edit",
-	    `add	: "add",
-	],
-	"add" : $[
-	    `abort	: `abort,
-	    `next	: "main",
-	],
-	"edit" : $[
-	    `abort	: `abort,
-	    `next	: "main",
+	    `again	: "main",
 	],
     ];
 
@@ -52,8 +41,16 @@ symbol MainDumpSequence () {
  * Whole configuration of controller
  * @return sequence result
  */
-any DumpSequence() {
+symbol DumpSequence() {
+    Wizard::CreateDialog();
+    Wizard::SetDesktopIcon("dump");
+    symbol ret = MainDumpSequence ();
+    UI::CloseDialog();
+    return ret;
 
+
+
+/*
     map aliases = $[
 	"read"	: [ ``( ReadDialog() ), true ],
 	"main"	:   ``( MainDumpSequence() ),
@@ -78,11 +75,11 @@ any DumpSequence() {
 
     Wizard::CreateDialog();
     Wizard::SetDesktopIcon("dump");
-    
-    any ret = Sequencer::Run(aliases, sequence);
+
+    symbol ret = Sequencer::Run(aliases, sequence);
 
     UI::CloseDialog();
-    return ret;
+    return ret;*/
 }
 
 /**
@@ -90,11 +87,11 @@ any DumpSequence() {
  * For use with autoinstallation.
  * @return sequence result
  */
-any DumpAutoSequence() {
+/*any DumpAutoSequence() {
 
-    /* Initialization dialog caption */
+    // Initialization dialog caption
     string caption = _("Dump Configuration");
-    /* Initialization dialog contents */
+    // Initialization dialog contents
     term contents = `Label(_("Initializing..."));
 
     Wizard::CreateDialog();
@@ -106,7 +103,7 @@ any DumpAutoSequence() {
 
     UI::CloseDialog();
     return ret;
-}
+}*/
 
 /* EOF */
 }

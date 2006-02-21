@@ -10,7 +10,6 @@ client_DATA =			\
 	s390-disk-controller.ycp\
 	xpram.ycp		\
 	dump.ycp		\
-	dump_auto.ycp		\
 	inst_dasd.ycp		\
 	inst_zfcp.ycp
 

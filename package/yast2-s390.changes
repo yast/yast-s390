@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Feb 21 22:40:49 CET 2006 - jsrain@suse.de
+
+- fixed creating dump device (#148661)
+
+-------------------------------------------------------------------
 Sa Feb 18 09:45:35 CET 2006 - ihno@suse.de
 
 - Add Warning message for adding SAN-devices (Feature 300437)

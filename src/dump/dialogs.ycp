@@ -167,16 +167,8 @@ symbol EditDumpDialog (symbol what) {
 	    available_disks
 	),
 	`VSpacing (2),
-	`TextEntry (`id(`section), `opt (`hstretch),
-	    // text entry
-	    _("&ZIPL section name")
-	),
-	`VSpacing (2),
-	// check box
-	`Left (`CheckBox (`id (`format), _("&Format the Device"))),
-	`VSpacing (2),
-	// check box
-	`Left (`CheckBox (`id (`force), _("F&ormat the Device in Any Case"))),
+	// check box, try to keep short
+	`Left (`CheckBox (`id (`force), _("Install Dump Record even if Disk Already &Formatted"))),
 	`VStretch ()
     ), `HStretch ());
 
@@ -204,25 +196,37 @@ symbol EditDumpDialog (symbol what) {
 	if (ret == `abort || ret == `cancel)
 	{
 	    // yes-no popup
-	    if (! Popup::YesNo (_("Really leave the dump devices configuration without saving?
-All changes will be lost.")))
+	    if (! Popup::YesNo (_("Really leave the dump devices configuration?")))
+//	    if (! Popup::YesNo (_("Really leave the dump devices configuration without saving?
+//All changes will be lost.")))
 	    {
 		ret = nil;
 	    }
 	}
-    }
+	if (ret == `next)
+	{
+	    boolean force = (boolean)UI::QueryWidget (`id (`force), `Value);
+	    device = (string)UI::QueryWidget (`id (`device), `Value);
+	    if (Popup::YesNo (sformat (_("The disk %1 will formatted as a dump device now.
+Continue?"), device)))
+	    {
+	        boolean success = Dump::FormatDisk (device, force);
+	        if (! success)
+	        {
+		    ret = nil;
+		    continue;
+	        }
+	    }
+	    else
+	    {
+		ret = nil;
+		continue;
+	    }
+	    // yes-no popup
+	    if (what != `add && Popup::YesNo (_("Add another dump device?")))
+	        return `again;
+	}
 
-    if (ret == `next)
-    {
-	boolean force = (boolean)UI::QueryWidget (`id (`force), `Value);
-	boolean format = (boolean)UI::QueryWidget (`id (`format), `Value);
-	string section = (string)UI::QueryWidget (`id (`section), `Value);
-	device = (string)UI::QueryWidget (`id (`device), `Value);
-	Dump::devices[device] = $[
-	    "boot_section" : section,
-	    "format" : format,
-	    "force" : force,
-	];
     }
 
     return (symbol) ret;

@@ -102,6 +102,40 @@ global boolean Read() {
 }
 
 /**
+ * Format a disk as DUMP device
+ * @param dev string the disk device node
+ * @param force boolean true to append the -f parameter
+ * @return boolean true on success
+ */
+global boolean FormatDisk (string dev, boolean force) {
+    string cmd = force
+	? "/sbin/mkdump -f"
+	: "/sbin/mkdump";
+    cmd = cmd + " " + dev;
+    y2milestone ("Running command %1", cmd);
+    integer ret = (integer)SCR::Execute (.target.bash, cmd);
+    y2milestone ("Return value: %1", ret);
+    if (ret != 0)
+    {
+	string err = "";
+	if (ret == 1)
+	    // error description
+	    err = _("Disk unuseable");
+	else if (ret == 2)
+	    // error description
+	    err = _("Support program not installed");
+	else
+	    // error description, %1 is error code (integer)
+	    err = sformat (_("Error code from support program: %1"), ret);
+	// error report, %1 is device name, %2 error description
+	Report::Error (sformat (_("Cannot create dump device %1:\n%2"),
+	    dev, err));
+	return false;
+    }
+    return true;
+}
+
+/**
  * Write all controller settings
  * @return true on success
  */

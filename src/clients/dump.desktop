@@ -11,10 +11,10 @@ X-SuSE-YaST-Call=dump
 X-SuSE-YaST-Group=Hardware
 X-SuSE-YaST-Argument=
 X-SuSE-YaST-RootOnly=true
-X-SuSE-YaST-AutoInst=all
+X-SuSE-YaST-AutoInst=
 X-SuSE-YaST-Geometry=
 X-SuSE-YaST-SortKey=
-X-SuSE-YaST-AutoInstResource=dump
+X-SuSE-YaST-AutoInstResource=
 
 Icon=yast-dump
 Exec=/sbin/yast2 dump
