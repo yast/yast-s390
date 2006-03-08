@@ -287,6 +287,8 @@ define symbol AddZFCPDiskDialog () ``{
     string caption = _("Add New ZFCP Disk");
 
     string fcp_lun = ZFCPController::previous_settings["fcp_lun"]:"";
+    if (fcp_lun == nil || fcp_lun == "")
+	fcp_lun = "0";
     integer i_lun = tointeger (fcp_lun);
     integer new_lun = i_lun;
 

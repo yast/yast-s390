@@ -227,6 +227,18 @@ global define list<map<string,any> > GetControllers () {
 }
 
 /**
+ * Get channel of the disk
+ * @param disk a map describing the disk (from hwinfo)
+ * @return string the channel ID
+ */
+global string GetDiskChannel (map<string,any> disk) {
+    integer host = disk["host"]:0;
+    map<string,any> controller = GetControllers ()[host]:$[];
+    string channel = controller["sysfs_bus_id"]:"unknown";
+    return channel;
+}
+
+/**
  * Get available disks
  */
 global define void ProbeDisks () {
@@ -246,6 +258,11 @@ global define void ProbeDisks () {
     ZFCPController::devices = listmap (map<string,any> d, disks, ``{
 	index = index + 1;
 	return $[ index : d ];
+    });
+    devices = mapmap (integer key, map<string,any> d, devices, {
+	string channel = ZFCPController::GetDiskChannel (d);
+	d["detail", "controller_id"] = channel;
+	return $[ key : d ];
     });
 
     UI::CloseDialog ();
