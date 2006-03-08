@@ -1,0 +1,407 @@
+/**
+ * File:	include/controller/dialogs.ycp
+ * Package:	Configuration of controller
+ * Summary:	Dialogs definitions
+ * Authors:	Jiri Srain <jsrain@suse.cz>
+ *
+ * $Id$
+ */
+
+{
+
+textdomain "s390";
+
+import "Arch";
+import "Label";
+import "Mode";
+import "Popup";
+import "Progress";
+import "Report";
+import "Sequencer";
+import "Wizard";
+import "ZFCPController";
+
+include "s390/zfcp/helps.ycp";
+
+/**
+ * Translate integer number to its hexadecimal representation with leading
+ * 0x and exactliy 4 hexadecimal numbers
+ * @param i integer integer number
+ * @return string hexadecimal number
+ */
+define string FourDigitHex(integer i) ``{
+    string s = tohexstring(i);
+    string zeros = "";
+
+    integer l = 6 - size(s);
+
+    while (l > 0) {
+	zeros = zeros + "0";
+	l = l - 1;
+    }
+
+    return substring(s, 0, 2) + zeros + substring(s, 2);
+}
+
+/**
+ * Read settings dialog
+ * @return `abort if aborted and `next otherwise
+ */
+symbol ReadDialog() {
+    Wizard::RestoreHelp(ZFCP_HELPS["read"]:"");
+    // Controller::AbortFunction = PollAbort;
+    boolean ret = ZFCPController::Read();
+    return ret ? `next : `abort;
+}
+
+/**
+ * Write settings dialog
+ * @return `abort if aborted and `next otherwise
+ */
+symbol WriteDialog() {
+    Wizard::RestoreHelp(ZFCP_HELPS["write"]:"");
+    // Controller::AbortFunction = PollAbort;
+    boolean ret = ZFCPController::Write();
+    return ret ? `next : `abort;
+}
+
+/**
+ * Update the size of hexa number via adding leading zeros
+ * @param hex string a hexa number (withou or without leading 0x)
+ * @param digits the count of digits (excluding leading 0x)
+ * @return hex string with specified length
+ */
+string HexNumSize (string hex, integer digits) {
+    boolean leading0x = false;
+    if (substring (hex, 0, 2) == "0x")
+    {
+	leading0x = true;
+	hex = substring (hex, 2);
+    }
+    while (size (hex) < digits)
+    {
+	hex = "0" + hex;
+    }
+    if (leading0x)
+    {
+	hex = "0x" + hex;
+    }
+    return hex;
+}
+
+
+    // ------------------------------------------------------------------------------------
+
+/**
+ * Get the list of items for the table of ZFCP devices
+ * @param min_chan integer minimal channel number
+ * @param max_chan integer maximal channel number
+ * @return a list of terms for the table
+ */
+define list<term> GetZFCPDiskItems(integer min_chan, integer max_chan) ``{
+    integer id = 0;
+
+    list<term> items = [];
+
+    map<integer,map<string,any> > devices = ZFCPController::devices;
+
+    if (min_chan >= 0)
+    {
+        devices = (map<integer,map<string,any> >)filter (
+            integer k, map<string,any> d, devices,
+        ``{
+            integer channel = d["resource", "io", 0, "start"]:0;
+            return (channel >= min_chan && channel <= max_chan);
+        });
+    }
+
+    items = (list<term>) maplist (integer k, map<string,any> d, devices, ``{
+	string dev_name = (string)(d["dev_name"]:"");
+	string channel = d["detail", "controller_id"]:"unknown";
+	string wwpn = d["detail", "wwpn"]:"unknown";
+	string fcp_lun = d["detail", "fcp_lun"]:"unknown";
+	if (fcp_lun != "unknown")
+	    fcp_lun = HexNumSize (fcp_lun, 16);
+	string selected = ZFCPController::selected[k]:false
+	    ? UI::Glyph (`CheckMark)
+	    : "-";
+
+	term t = `item (`id (k), channel, wwpn, fcp_lun);
+	return t;
+    });
+    return items;
+}
+
+/**
+ * Restart the ZFCP-Dialog
+ */
+define void ReloadZFCPDialog () ``{
+    ZFCPController::filter_min = (string)
+        UI::QueryWidget(`min_chan, `Value);
+    ZFCPController::filter_max = (string)
+        UI::QueryWidget(`max_chan, `Value);
+
+    ZFCPController::ProbeDisks ();
+
+    list<term> items = GetZFCPDiskItems (
+	tointeger(ZFCPController::filter_min),
+	tointeger(ZFCPController::filter_max));
+
+    UI::ChangeWidget(`id(`table), `Items, items);
+    UI::ChangeWidget (`id (`delete), `Enabled, size (items) > 0);
+    UI::SetFocus (`table);
+}
+
+/**
+ * Show the ZFCP-Dialog
+ */
+define void DisplayZFCPDialog () {
+
+    /* Minimal text for the help */
+    string help = ZFCP_HELPS["disk_selection"]:"";
+
+    /* Dialog caption */
+    string caption = _("Configured ZFCP Disks");
+
+    /* Dialog content */
+    term content = `VBox(
+	`HBox(
+	    // text entry
+	    `TextEntry(`id(`min_chan), _("Mi&nimum Channel"), "0x0000"),
+	    // text entry
+	    `TextEntry(`id(`max_chan), _("Ma&ximum Channel"), "0xffff"),
+	    `VBox (
+		`Label (""),
+		// push button
+		`PushButton (`id (`filter), _("&Filter"))
+	    )
+	),
+	`HBox(
+	    `Table(
+		`id(`table), `opt(`keepSorting, `notify),
+		`header(
+		    // table header
+		    `Right(_("Channel Number")),
+		    // table header
+		    `Right(_("WWPN")),
+		    // table header
+		    `Right(_("zfcp-LUN"))
+		),
+		[]
+	    )
+	),
+	`HBox(
+	    `PushButton(`id(`add), Label::AddButton ()),
+	    `PushButton(`id(`delete), Label::DeleteButton ()),
+	    `HStretch ()
+	)
+    );
+
+    y2debug("Content: %1\n", content);
+        /* Apply the settings */
+    Wizard::SetContentsButtons(caption, content, help, Label::BackButton(), Label::NextButton());
+    Wizard::HideBackButton();
+    Wizard::SetAbortButton(`abort, Label::CancelButton() );
+}
+
+/**
+ * Show the ZFCP-Dialog
+ * @return symbol From the dialog
+ */
+define symbol ZFCPDialog () ``{
+    DisplayZFCPDialog ();
+    ReloadZFCPDialog ();
+
+    any ret = nil;
+
+    integer selected = 0;
+
+    while (ret == nil)
+    {
+	ret = UI::UserInput();
+
+	selected = (integer) UI::QueryWidget (`id (`table), `CurrentItem);
+
+	if (ret == `filter) {
+	    ReloadZFCPDialog ();
+	    ret = nil;
+	    continue;
+	}
+	else if (ret == `abort || ret == `cancel)
+	{
+	    // yes-no popup
+	    if (! Popup::YesNo (_("Really leave the ZFCP disk configuration without saving?
+All changes will be lost.")))
+	    {
+		ret = nil;
+	    }
+	}
+	else if (ret == `delete)
+	{
+	    map<string,any> descr = ZFCPController::devices[selected]:$[];
+	    string dev_name = (string)(descr["dev_name"]:"");
+	    string channel = descr["detail", "controller_id"]:"unknown";
+	    string wwpn = descr["detail", "wwpn"]:"unknown";
+	    string fcp_lun = descr["detail", "fcp_lun"]:"unknown";
+
+	    // popup qestion, %1 is device name (eg. /dev/sda)
+	    if (! Popup::YesNo (sformat (_("Remove disk %1?"), dev_name)))
+	    {
+		ret = nil;
+		continue;
+	    }
+	    if (Mode::config ())
+	    {
+		ZFCPController::devices
+		    = remove (ZFCPController::devices, selected);
+	    }
+	    else
+	    {
+		ZFCPController::DeactivateDisk (channel, wwpn, fcp_lun);
+	    }
+	    ReloadZFCPDialog ();
+	    ret = nil;
+	}
+    }
+    if (ret == `add)
+    {
+	map<string,any> descr = ZFCPController::devices[selected]:$[];
+	string dev_name = (string)(descr["dev_name"]:"");
+	string channel = descr["controller_id"]:"unknown";
+	string wwpn = descr["detail", "wwpn"]:"unknown";
+	if (wwpn != "unknown")
+	    ZFCPController::previous_settings["wwpn"] = wwpn;
+    }
+    return (symbol) ret;
+}
+
+/**
+ * Add ZFCP-Dialog
+ * @return symbol the dialog
+ */
+define symbol AddZFCPDiskDialog () ``{
+    /* Minimal text for the help */
+    string help = ZFCP_HELPS["disk_add"]:"";
+
+    /* Dialog caption */
+    string caption = _("Add New ZFCP Disk");
+
+    string fcp_lun = ZFCPController::previous_settings["fcp_lun"]:"";
+    if (fcp_lun == nil || fcp_lun == "")
+	fcp_lun = "0";
+    integer i_lun = tointeger (fcp_lun);
+    integer new_lun = i_lun;
+
+    foreach (integer k, map<string,any> v, ZFCPController::devices, ``{
+	if (i_lun == tointeger (v["detail", "fcp_lun"]:""))
+	{
+	    if (v["vendor"]:"" == "IBM" && v["device"]:"" == "25f03")
+		new_lun = i_lun + tointeger ("0x100000000");
+	    else
+		new_lun = i_lun + 1;
+	}
+    });
+    fcp_lun = tohexstring (new_lun);
+    if (fcp_lun != "")
+	fcp_lun = HexNumSize (fcp_lun, 16);
+
+    list<string>items = [];
+    if (Mode::config ())
+    {
+	items = maplist (integer index, map<string,any> d,
+	    ZFCPController::devices,
+	{
+	    return d["detail", "controller_id"]:"";
+	});
+	items = toset (items);
+	items = filter (string i, items, ``(i != "" && i != nil));
+    }
+    else
+    {
+	items = maplist (map<string,any> c,
+	    ZFCPController::GetControllers (),
+	``{
+	    string channel = FourDigitHex (c["resource", "io", 0, "start"]:0);
+	    string lcss = FourDigitHex (c["detail", "lcss"]:0);
+	    channel = sformat ("%1.%2.%3",
+		substring (lcss, 4, 1),
+		substring (lcss, 5, 1),
+		substring (channel, 2, 4));
+	    return channel;
+	});
+    }
+
+    /* Dialog content */
+    term content = `HBox (`HStretch (), `VBox(
+	`VStretch (),
+	`ComboBox (`id(`channel), `opt (`editable, `hstretch),
+	    // combo box
+	    _("&Channel Number"),
+	    items),
+	`VSpacing (2),
+	// text entry
+	`TextEntry(`id(`wwpn), _("&WWPN"),
+	    ZFCPController::previous_settings["wwpn"]:""),
+	`VSpacing (2),
+	// text entry
+	`TextEntry(`id(`fcp_lun), _("&FCP-LUN"), fcp_lun),
+	`VStretch ()
+    ), `HStretch ());
+
+    /* Apply the settings */
+    Wizard::SetContents(caption, content, help, true, true);
+    Wizard::RestoreBackButton ();
+    Wizard::RestoreAbortButton ();
+
+    any ret = nil;
+
+    while (ret == nil)
+    {
+	ret = UI::UserInput();
+
+	if (ret == `abort || ret == `cancel)
+	{
+	    // yes-no popup
+	    if (! Popup::YesNo (_("Really leave the ZFCP disk configuration without saving?
+All changes will be lost.")))
+	    {
+		ret = nil;
+	    }
+	}
+    }
+
+    if (ret == `next)
+    {
+	string channel = (string)UI::QueryWidget (`id (`channel), `Value);
+	string wwpn = (string)UI::QueryWidget (`id (`wwpn), `Value);
+	string lun = (string)UI::QueryWidget (`id (`fcp_lun), `Value);
+	ZFCPController::previous_settings["wwpm"] = wwpn;
+	ZFCPController::previous_settings["fcp_lun"] = lun;
+	ZFCPController::previous_settings["channel"] = channel;
+	if (Mode::config ())
+	{
+	    map<string,any> m = $[
+		"controller_id" : channel,
+		"wwpn" : wwpn,
+		"fcp_lun" : lun,
+	    ];
+	    m = $["detail" : m ];
+	    integer index = -1;
+	    while (haskey (ZFCPController::devices, index))
+		index = index + 1;
+	    ZFCPController::devices[index] = m;
+	}
+	else
+	{
+	    ZFCPController::ActivateDisk (channel, wwpn, lun);
+	}
+    }
+
+    return (symbol) ret;
+
+}
+
+
+// EOF
+}
+

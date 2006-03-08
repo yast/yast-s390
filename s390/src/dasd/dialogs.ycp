@@ -1,0 +1,596 @@
+/**
+ * File:	include/controller/dialogs.ycp
+ * Package:	Configuration of controller
+ * Summary:	Dialogs definitions
+ * Authors:	Jiri Srain <jsrain@suse.cz>
+ *
+ * $Id$
+ */
+
+{
+
+textdomain "s390";
+
+import "Arch";
+import "DASDController";
+import "Label";
+import "Mode";
+import "Popup";
+import "Progress";
+import "Report";
+import "Sequencer";
+import "Wizard";
+
+include "s390/dasd/helps.ycp";
+
+/**
+ * List DASD devices that are currently being selected
+ * @return list<integer> list of IDs of selected DASD devices
+ */
+define list<integer> ListSelectedDASD () ``{
+    map<integer, boolean> sel_list = (map<integer, boolean>)filter (
+	integer k, boolean v, DASDController::selected,
+    ``(
+	v == true
+    ));
+    list<integer> to_activate = maplist (integer k, boolean v, sel_list, ``(k));
+    y2milestone ("Selected list: %1", to_activate);
+    return to_activate;
+}
+
+
+// --------------------------------------------------------------------------
+
+
+
+
+// now real dialogs
+
+/**
+ * Read settings dialog
+ * @return `abort if aborted and `next otherwise
+ */
+symbol ReadDialog() {
+    Wizard::RestoreHelp(DASD_HELPS["read"]:"");
+    // Controller::AbortFunction = PollAbort;
+    boolean ret = DASDController::Read();
+    return ret ? `next : `abort;
+}
+
+/**
+ * Write settings dialog
+ * @return `abort if aborted and `next otherwise
+ */
+symbol WriteDialog() {
+    Wizard::RestoreHelp(DASD_HELPS["write"]:"");
+    // Controller::AbortFunction = PollAbort;
+    boolean ret = DASDController::Write();
+    return ret ? `next : `abort;
+}
+
+/**
+ * Get the list of items for the table of DASD devices
+ * @param min_chan integer minimal channel number
+ * @param max_chan integer maximal channel number
+ * @return a list of terms for the table
+ */
+define list<term> GetDASDDiskItems(integer min_chan, integer max_chan) ``{
+    integer id = 0;
+
+    list<term> items = [];
+
+    map<integer,map<string,any> > devices = DASDController::devices;
+
+    if (min_chan >= 0)
+    {
+	devices = (map<integer,map<string,any> >)filter (
+	    integer k, map<string,any> d, devices,
+        ``{
+	    integer channel = d["resource", "io", 0, "start"]:0;
+	    return (channel >= min_chan && channel <= max_chan);
+	});
+    }
+
+    if (Mode::config ())
+    {
+	y2milestone ("Current disks: %1", devices);
+	items = (list<term>) maplist (integer k, map<string,any> d, devices, {
+	    string channel = d["channel_id"]:"";
+	    string diag = d["diag"]:false
+		// table cell
+		? _("Yes")
+		// table cell
+		: _("No");
+	    string format = d["format"]:false
+		// table cell
+		? _("Yes")
+		// table cell
+		: _("No");
+	    return `item (`id (k), channel, format, diag);
+	});
+	return items;
+    }
+
+    items = (list<term>) maplist (integer k, map<string,any> d, devices, ``{
+	boolean active = (boolean)(d["resource", "io", 0, "active"]:false);
+	integer channel = (integer)(d["resource", "io", 0, "start"]:0);
+	string str_channel = (string)(d["channel"]:"");
+	string access = toupper ((string)(d["resource", "io", 0, "mode"]:"RO"));
+	string diag = DASDController::diag[str_channel]:false
+	    // table cell
+	    ? _("Yes")
+	    // table cell
+	    : _("No");
+	string device = d["dev_name"]:"";
+	string type = toupper (sformat ("%1/%2, %3/%4",
+	    substring (
+		DASDController::FourDigitHex (
+		    d["device_id"]:0 & tointeger ("0xffff")
+		),
+		2),
+	    substring (
+		DASDController::FourDigitHex (d["detail", "cu_model"]:0),
+		4),
+	    substring (
+		DASDController::FourDigitHex (
+		    d["sub_device_id"]:0 & tointeger ("0xffff")
+		),
+		2),
+	    substring (
+		DASDController::FourDigitHex (d["detail", "dev_model"]:0),
+		4)
+	));
+
+	string formatted = (boolean)d["formatted"]:false
+		// table cell
+		? _("Yes")
+		// table cell
+		: _("No");
+	string partition_info = d["partition_info"]:"--";
+	boolean activate = d["activate"]:false;
+
+	string selected = DASDController::selected[k]:false
+	    ? UI::Glyph (`CheckMark)
+	    : "-";
+
+	if (!active) {
+	    type = "--";
+	    access = "--";
+	    formatted = "--";
+	    partition_info = "--";
+	    device = "--";
+	}
+
+	term t = `item (`id (k), selected, str_channel, device,
+	    type ,access);
+	if (Arch::s390_32 ())
+	    t = add (t, diag);
+	t = add (t, formatted);
+	t = add (t, partition_info);
+	return t;
+    });
+    return items;
+}
+
+/**
+ * Draw the DASD dialog
+ */
+define void DisplayDASDDialog() {
+
+    string help_key = Mode::config ()
+	? "disk_selection_config"
+	: "disk_selection";
+
+    /* Minimal text for the help */
+    string help = DASD_HELPS[help_key]:"";
+
+    /* Dialog caption */
+    string caption = _("DASD Disk Management");
+
+    term header = `header(
+	// table header
+	_("Sel."),
+	// table header
+	`Right(_("Channel")),
+	// table header
+	_("Device"),
+	// table header
+	_("Type"),
+	// table header
+	_("Access Type"));
+    if (Arch::s390_32 ())
+	// table header
+	header = add (header, _("Use DIAG"));
+    // table header
+    header = add (header, _("Formatted"));
+    // table header
+    header = add (header, _("Partition Information"));
+
+    if (Mode::config ())
+    {
+	header = `header(
+	    // table header
+	    `Right(_("Channel")),
+	    // table header
+	    _("Format"),
+	    // table header
+	    _("Use DIAG")
+	);
+    }
+
+    list actions = [
+	// menuy button id
+	`item (`id (`activate), _("&Activate")),
+	// menuy button id
+	`item (`id(`deactivate), _("&Deactivate")),
+    ];
+    if (Arch::s390_32 ())
+    {
+	// menuy button id
+	actions = add (actions, `item (`id(`diag_on), _("Set DIAG O&n")));
+	// menuy button id
+	actions = add (actions, `item (`id(`diag_off), _("Set DIAG O&ff")));
+    }
+    // menuy button id
+    actions = add (actions, `item (`id(`format), _("&Format")));
+
+    /* Dialog content */
+    term content = `VBox(
+	`HBox(
+	    // text entry
+	    `TextEntry(`id(`min_chan), _("Mi&nimum Channel"), "0x0000"),
+	    // text entry
+	    `TextEntry(`id(`max_chan), _("Ma&ximum Channel"), "0xffff"),
+	    `VBox (
+		`Label (""),
+		// push button
+		`PushButton (`id (`filter), _("&Filter"))
+	    )
+	),
+	`Table(`id(`table), `opt (`notify), header, []),
+	Mode::config ()
+	    ? `HBox (
+		// push button
+		`PushButton (`id (`add), _("A&dd New Disk")),
+		// push button
+		`PushButton (`id (`delete), _("De&lete Disk")),
+		`HStretch ()
+	    )
+	    : `HBox (
+		// pudh button
+		`PushButton (`id (`select), _("&Select or Deselect")),
+		`HStretch (),
+		// menu button
+		`MenuButton (`id (`operation), _("Perform &Action"), actions)
+	    )
+    );
+
+    /* Apply the settings */
+    Wizard::SetContents(caption, content, help, true, true);
+    Wizard::HideBackButton();
+    Wizard::SetAbortButton(`abort, Label::CancelButton() );
+}
+
+
+/**
+ * Redraw the contents of the widgets in the DASD Dialog
+ */
+define void ReloadDASDDialog () ``{
+    DASDController::filter_min = (string)
+	UI::QueryWidget(`min_chan, `Value);
+    DASDController::filter_max = (string)
+	UI::QueryWidget(`max_chan, `Value);
+
+
+    DASDController::ProbeDisks ();
+
+    list<term> items = GetDASDDiskItems (
+	tointeger(DASDController::filter_min),
+	tointeger(DASDController::filter_max));
+
+    UI::ChangeWidget(`id(`table), `Items, items);
+    UI::SetFocus (`table);
+}
+
+/**
+ * Run the dialog for DASD disks configuration
+ * @return symbol for wizard sequencer
+ */
+define symbol DASDDialog() {
+    DisplayDASDDialog ();
+    ReloadDASDDialog ();
+    any ret = nil;
+
+    while (ret == nil)
+    {
+	ret = UI::UserInput();
+
+	integer selected = (integer)
+	    UI::QueryWidget (`id (`table), `CurrentItem);
+
+	if (ret == `filter) {
+	    ReloadDASDDialog ();
+	    ret = nil;
+	    continue;
+	}
+	else if (ret == `table || ret == `select)
+	{
+	    DASDController::selected[selected]
+		= ! DASDController::selected[selected]:false;
+	    UI::ChangeWidget (`id (`table), `Item (selected, 0),
+		DASDController::selected[selected]:false
+		    ? UI::Glyph (`CheckMark)
+		    : "-");
+	    ret = nil;
+	    UI::SetFocus (`table);
+	    continue;
+	}
+	else if (ret == `activate)
+	{
+	    list<integer>to_activate = ListSelectedDASD ();
+	    if (0 == size (to_activate))
+	    {
+		Popup::Message (_("No disk selected."));
+		ret = nil;
+		continue;
+	    }
+	    foreach (integer id, to_activate, ``{
+		string channel = DASDController::devices[id,"channel"]:"";
+		boolean diag = DASDController::diag[channel]:false;
+		DASDController::ActivateDisk (
+		    channel,
+		    diag
+		);
+	    });
+
+	    ReloadDASDDialog ();
+
+//	    UI::ChangeWidget(`id(`table), `CurrentItem, ids_to_activate[0]:nil);
+	    ret = nil;
+
+	}
+	else if (ret == `deactivate)
+	{
+	    list<integer>to_activate = ListSelectedDASD ();
+	    if (0 == size (to_activate))
+	    {
+		// error popup message
+		Popup::Message (_("No disk selected."));
+		ret = nil;
+		continue;
+	    }
+	    foreach (integer id, to_activate, ``{
+		string channel = DASDController::devices[id,"channel"]:"";
+		boolean diag = DASDController::diag[channel]:false;
+		DASDController::DeactivateDisk (
+		    channel,
+		    diag
+		);
+	    });
+
+	    ReloadDASDDialog ();
+
+//	    UI::ChangeWidget(`id(`table), `CurrentItem, ids_to_activate[0]:nil);
+	    ret = nil;
+	}
+	else if (ret == `diag_on)
+	{
+	    list<integer>to_activate = ListSelectedDASD ();
+	    if (0 == size (to_activate))
+	    {
+		// error popup message
+		Popup::Message (_("No disk selected."));
+		ret = nil;
+		continue;
+	    }
+	    foreach (integer id, to_activate, ``{
+		string channel = DASDController::devices[id,"channel"]:"";
+		DASDController::diag[channel] = true;
+	    });
+
+	    ReloadDASDDialog ();
+
+//	    UI::ChangeWidget(`id(`table), `CurrentItem, ids_to_activate[0]:nil);
+	    ret = nil;
+	}
+	else if (ret == `diag_off)
+	{
+	    list<integer>to_activate = ListSelectedDASD ();
+	    if (0 == size (to_activate))
+	    {
+		// error popup message
+		Popup::Message (_("No disk selected."));
+		ret = nil;
+		continue;
+	    }
+	    foreach (integer id, to_activate, ``{
+		string channel = DASDController::devices[id,"channel"]:"";
+		DASDController::diag[channel] = false;
+	    });
+
+	    ReloadDASDDialog ();
+
+//	    UI::ChangeWidget(`id(`table), `CurrentItem, ids_to_activate[0]:nil);
+	    ret = nil;
+	}
+	else if (ret == `format)
+	{
+	    list<integer>to_activate = ListSelectedDASD ();
+	    if (0 == size (to_activate))
+	    {
+		Popup::Message (_("No disk selected."));
+		ret = nil;
+		continue;
+	    }
+	    // check if disks are R/W and active
+	    string problem = "";
+	    foreach (integer id, to_activate, {
+		boolean active = (boolean)
+		    (DASDController::devices[id, "resource", "io", 0, "active"]:false);
+		string access = toupper (
+		    (string)(DASDController::devices[id, "resource", "io", 0, "mode"]:"RO"));
+		if (! active)
+		{
+		    // error report, %1 is device identification
+		    problem = sformat (_("Disk %1 is not active."),
+			DASDController::devices[id, "channel"]:"");
+		}
+		else if (tolower (access) != "rw")
+		{
+		    problem = sformat (
+			// error report, %1 is device identification
+			_("Disk %1 is not accessible for writing."),
+			DASDController::devices[id, "channel"]:"");
+		}
+	    });
+	    if (problem != "")
+	    {
+		Popup::Message (problem);
+		ret = nil;
+		continue;
+	    }
+	    integer par = 8;
+	    if (par > size (to_activate))
+		par = size (to_activate);
+	    boolean cancel = false;
+	    UI::OpenDialog (`VBox (
+		`IntField (`id (`par),
+		    // integer field (count of disks formatted at parallely)
+		    _("&Parallel Formatted Disks"), 1, par, par),
+		`Left (`CheckBox (`id (`write_label),
+		    // check box
+		    _("&Write the volume label"), true)),
+		`HBox (
+		    `HStretch (),
+		    `PushButton (`id (`ok), Label::OKButton ()),
+		    `PushButton (`id (`cancel), Label::CancelButton ()),
+		    `HStretch ()
+		)
+	    ));
+	    ret = UI::UserInput ();
+	    par = (integer)UI::QueryWidget (`id (`par), `Value);
+	    boolean write_vl = (boolean)
+		UI::QueryWidget (`id (`write_label), `Value);
+	    UI::CloseDialog ();
+	    if (ret == `cancel)
+	    {
+		UI::SetFocus (`table);
+		ret = nil;
+		continue;
+	    }
+
+	    // final confirmation before formatting the discs
+	    list<string> channels = maplist (integer id, to_activate, {
+		return DASDController::devices[id, "channel"]:"";
+	    });
+	    string channels_str = mergestring (channels, ", ");
+	    if (! Popup::AnyQuestionRichText (
+		Popup::NoHeadline (),
+		sformat (_("Really format following discs?<br>
+All data on the disks will be lost!<br>
+%1"),
+		    channels_str),
+		60,
+		20,
+		Label::YesButton (),
+		Label::NoButton (),
+		`focus_no
+	    ))
+	    {
+		UI::SetFocus (`table);
+		ret = nil;
+		continue;
+	    }
+	    // final confirmation -- end
+
+	    list<string> devices = maplist (integer id, to_activate, ``{
+		return DASDController::devices[id, "dev_name"]:"";
+	    });
+	    DASDController::FormatDisks (devices, par, write_vl, true);
+	    ReloadDASDDialog ();
+	    UI::SetFocus (`table);
+	    ret = nil;
+	}
+    }
+    return (symbol)ret;
+}
+
+/**
+ * Run the dialog for adding DASDs
+ * @return symbol from AddDASDDiskDialog
+ */
+define symbol AddDASDDiskDialog () ``{
+    if (! Mode::config ())
+    {
+	y2error ("DASD Add Disk dialog shouldn't be run in Mode::config ()");
+	return `back;
+    }
+
+    /* Minimal text for the help */
+    string help = DASD_HELPS["disk_add_config"]:"";
+
+    /* Dialog caption */
+    string caption = _("Add New DASD Disk");
+
+    /* Dialog content */
+    term content = `HBox (`HStretch (), `VBox(
+	`VStretch (),
+	`TextEntry (`id(`channel), `opt (`hstretch),
+	    // text entry
+	    _("&Channel Number")
+	),
+	`VSpacing (2),
+	// check box
+	`Left (`CheckBox (`id (`format), _("Format the Disk"))),
+	`VSpacing (2),
+	// check box
+	`Left (`CheckBox (`id (`diag), _("Use &DIAG"))),
+	`VStretch ()
+    ), `HStretch ());
+
+    /* Apply the settings */
+    Wizard::SetContents(caption, content, help, true, true);
+    Wizard::RestoreBackButton ();
+    Wizard::RestoreAbortButton ();
+
+    any ret = nil;
+
+    while (ret == nil)
+    {
+	ret = UI::UserInput();
+
+	if (ret == `abort || ret == `cancel)
+	{
+	    // yes-no popup
+	    if (! Popup::YesNo (_("Really leave the ZFCP disk configuration without saving?
+All changes will be lost.")))
+	    {
+		ret = nil;
+	    }
+	}
+    }
+
+    if (ret == `next)
+    {
+	string channel = (string)UI::QueryWidget (`id (`channel), `Value);
+	boolean format = (boolean)UI::QueryWidget (`id (`format), `Value);
+	boolean diag = (boolean)UI::QueryWidget (`id (`diag), `Value);
+	map<string,any> m = $[
+	    "channel_id" : channel,
+	    "format" : format,
+	    "diag" : diag,
+	];
+	integer index = 0;
+	while (haskey (DASDController::devices, index))
+	    index = index + 1;
+	DASDController::devices[index] = m;
+    }
+
+    return (symbol) ret;
+
+}
+
+
+// EOF
+}
+
