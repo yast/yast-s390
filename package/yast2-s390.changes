@@ -3,6 +3,7 @@ Wed Mar  8 23:34:11 CET 2006 - jsrain@suse.de
 
 - fixed adding zFCP disks (#151832)
 - adapted BuildRequires
+- 2.13.4
 
 -------------------------------------------------------------------
 Tue Feb 21 22:40:49 CET 2006 - jsrain@suse.de
