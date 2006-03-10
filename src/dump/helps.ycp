@@ -28,7 +28,7 @@ Safely abort the configuration utility by pressing <b>Abort</b> now.</p>"),
 
 
     /* Write dialog help 1/2 */
-    "write" : _("<p><b><big>Saving Dump Devices Configuration</big></b><br>
+    "write" : _("<p><b><big>Saving Dump Device Configuration</big></b><br>
 Please wait...<br></p>") +
 
     /* Write dialog help 2/2 */
@@ -40,7 +40,7 @@ An additional dialog informs whether it is safe to do so.</p>"),
 
     // Dump dialog symmart help 1/2
     "summary" : _("<p><b><big>Configured Dump Devices</big></b><br>
-This dialog shows configured dump devices fo your system.</p>")
+This dialog shows configured dump devices for your system.</p>")
 +
     // Dump dialog symmart help 2/2
 _("<p>To add configure a new dump device, click <b>Add</b>. To edit an
@@ -50,11 +50,11 @@ To remove a configured dump device, select it and click <b>Delete</b>."),
 
     /* Disk add help 1/3 */
     "edit_dump" : _("<p><b><big>Add New Dump Device</big></b><br>
-Prepare a device for use as S/390 dump device. Supported devices are
+Prepare a device for use as an S/390 dump device. Supported devices are
 ECKD DASD and zfcp disks. Set <b>Dump Device</b> to select the device
-to format. If the device is found to be already formatted
-and/or configured, it is needed to set
-<b>Install Dump Record even if Disk Already &Formatted</b>.</p>"),
+to format. If the device is already formatted
+or configured, setting
+<b>Install Dump Record Even If Disk Already &Formatted</b> is required.</p>"),
 
 ];
 

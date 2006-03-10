@@ -459,7 +459,7 @@ define symbol DASDDialog() {
 		    _("&Parallel Formatted Disks"), 1, par, par),
 		`Left (`CheckBox (`id (`write_label),
 		    // check box
-		    _("&Write the volume label"), true)),
+		    _("&Write the Volume Label"), true)),
 		`HBox (
 		    `HStretch (),
 		    `PushButton (`id (`ok), Label::OKButton ()),
@@ -486,8 +486,9 @@ define symbol DASDDialog() {
 	    string channels_str = mergestring (channels, ", ");
 	    if (! Popup::AnyQuestionRichText (
 		Popup::NoHeadline (),
-		sformat (_("Really format following discs?<br>
-All data on the disks will be lost!<br>
+		// popup question
+		sformat (_("Formatting these disks destroys all data on them.<br>
+Really format the following disks?<br>
 %1"),
 		    channels_str),
 		60,

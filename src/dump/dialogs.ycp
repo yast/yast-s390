@@ -168,7 +168,7 @@ symbol EditDumpDialog (symbol what) {
 	),
 	`VSpacing (2),
 	// check box, try to keep short
-	`Left (`CheckBox (`id (`force), _("Install Dump Record even if Disk Already &Formatted"))),
+	`Left (`CheckBox (`id (`force), _("Install Dump Record Even If Disk Already &Formatted"))),
 	`VStretch ()
     ), `HStretch ());
 
@@ -196,7 +196,7 @@ symbol EditDumpDialog (symbol what) {
 	if (ret == `abort || ret == `cancel)
 	{
 	    // yes-no popup
-	    if (! Popup::YesNo (_("Really leave the dump devices configuration?")))
+	    if (! Popup::YesNo (_("Really leave the dump device configuration?")))
 //	    if (! Popup::YesNo (_("Really leave the dump devices configuration without saving?
 //All changes will be lost.")))
 	    {
