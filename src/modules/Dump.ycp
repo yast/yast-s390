@@ -261,7 +261,7 @@ global list<string> AvailableDisks () {
 	return d["dev_name"]:"";
     });
     dev_names = filter (string d, dev_names, {
-	return ! haskey (devices, d);
+	return d != "" && ! haskey (devices, d);
     });
     return dev_names;
 }
