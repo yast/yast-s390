@@ -3,6 +3,7 @@ Fri Mar 17 17:07:03 CET 2006 - jsrain@suse.de
 
 - allow DASD and zFCP disks configuration clonning (#153378)
 - fixed displaying dump devices (#149978)
+- 2.13.6
 
 -------------------------------------------------------------------
 Fri Mar 10 15:29:40 CET 2006 - locilka@suse.cz

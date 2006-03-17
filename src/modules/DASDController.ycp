@@ -183,7 +183,7 @@ global map Export () {
     ProbeDisks();
     list l = maplist (integer i, map<string,any> d, devices, {
 	return $[
-	    "channel_id" : d["resource", "io", 0, "start"]:0;
+	    "channel_id" : d["resource", "io", 0, "start"]:0,
 	    "format" : false,
 	    "diag" : false,
 	];
