@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Mar 17 16:51:15 CET 2006 - jsrain@suse.de
+
+- allow DASD and zFCP disks configuration clonning (#153378)
+
+-------------------------------------------------------------------
 Fri Mar 10 15:29:40 CET 2006 - locilka@suse.cz
 
 - merged texts from proofreading

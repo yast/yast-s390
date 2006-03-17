@@ -147,22 +147,18 @@ global boolean Import (map settings) {
  * @return map Dumped settings (later acceptable by Import ())
  */
 global map Export () {
-    if (Mode::config ())
+    list<map<string,any> > l = maplist (integer k, map<string,any> v,
+	devices,
     {
-	list<map<string,any> > l = maplist (integer k, map<string,any> v,
-	    devices,
-	{
-	    return $[
-		"controller_id" : v["detail","controller_id"]:"",
-		"wwpn" : v["detail","wwpn"]:"",
-		"fcp_lun" : v["detail","fcp_lun"]:"",
-	    ];
-	});
 	return $[
-	    "devices" : l,
+	    "controller_id" : v["detail","controller_id"]:"",
+	    "wwpn" : v["detail","wwpn"]:"",
+	    "fcp_lun" : v["detail","fcp_lun"]:"",
 	];
-    }
-    return $[];
+    });
+    return $[
+	"devices" : l,
+    ];
 }
 
 /**
