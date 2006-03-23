@@ -150,7 +150,8 @@ define list<term> GetDASDDiskItems(integer min_chan, integer max_chan) ``{
 	boolean activate = d["activate"]:false;
 
 	string selected = DASDController::selected[k]:false
-	    ? UI::Glyph (`CheckMark)
+	    // table cell
+	    ? _("Yes")
 	    : "-";
 
 	if (!active) {
@@ -319,7 +320,8 @@ define symbol DASDDialog() {
 		= ! DASDController::selected[selected]:false;
 	    UI::ChangeWidget (`id (`table), `Item (selected, 0),
 		DASDController::selected[selected]:false
-		    ? UI::Glyph (`CheckMark)
+		    // table cell
+		    ? _("Yes")
 		    : "-");
 	    ret = nil;
 	    UI::SetFocus (`table);

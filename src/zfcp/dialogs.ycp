@@ -123,7 +123,8 @@ define list<term> GetZFCPDiskItems(integer min_chan, integer max_chan) ``{
 	if (fcp_lun != "unknown")
 	    fcp_lun = HexNumSize (fcp_lun, 16);
 	string selected = ZFCPController::selected[k]:false
-	    ? UI::Glyph (`CheckMark)
+	    // table cell
+	    ? _("Yes")
 	    : "-";
 
 	term t = `item (`id (k), channel, wwpn, fcp_lun);
