@@ -39,6 +39,7 @@ map<string,boolean> activated_controllers = $[];
 
 
 global define void ActivateDisk (string channel, string wwpn, string lun);
+global define void ProbeDisks();
 
 /**
  * Prototypes
@@ -147,6 +148,7 @@ global boolean Import (map settings) {
  * @return map Dumped settings (later acceptable by Import ())
  */
 global map Export () {
+ProbeDisks();
     list<map<string,any> > l = maplist (integer k, map<string,any> v,
 	devices,
     {
@@ -238,8 +240,8 @@ global string GetDiskChannel (map<string,any> disk) {
  * Get available disks
  */
 global define void ProbeDisks () {
-    if (Mode::config ())
-	return;
+/*    if (Mode::config ())
+	return;*/
 
     // popup label
     UI::OpenDialog (`Label (_("Reading Configured ZFCP Disks")));

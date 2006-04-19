@@ -171,15 +171,6 @@ global boolean Import (map settings) {
  * @return map Dumped settings (later acceptable by Import ())
  */
 global map Export () {
-    if (Mode::config ())
-    {
-	list l = maplist (integer i, map<string,any> d, devices, {
-	    return d;
-	});
-	return $[
-	    "devices" : l,
-	];
-    }
     ProbeDisks();
     list l = maplist (integer i, map<string,any> d, devices, {
 	return $[
@@ -188,6 +179,25 @@ global map Export () {
 	    "diag" : false,
 	];
     });
+    if (Mode::config ())
+    {
+	list l = maplist (integer i, map<string,any> d, devices, {
+	    return d;
+	});
+
+	list ll = [];
+
+	foreach( map m, (list<map>)l, ``{
+		list dummy = m["resource","io"]:[];
+		map dummy2 = dummy[0]:$[];
+		if( dummy2["active"]:false == true )
+			ll = add( ll, m );
+	});
+
+	return $[
+	    "devices" : ll
+	];
+    }
     return $[
 	"devices" : l,
     ];
@@ -278,8 +288,8 @@ global define string FourDigitHex(integer i) ``{
  * Probe for DASD disks
  */
 global define void ProbeDisks () {
-    if (Mode::config ())
-	return;
+/*    if (Mode::config ())
+	return; */
 
     // popup label
     UI::OpenDialog (`Label (_("Reading Configured DASD Disks")));
