@@ -24,26 +24,6 @@ import "ZFCPController";
 include "s390/zfcp/helps.ycp";
 
 /**
- * Translate integer number to its hexadecimal representation with leading
- * 0x and exactliy 4 hexadecimal numbers
- * @param i integer integer number
- * @return string hexadecimal number
- */
-define string FourDigitHex(integer i) ``{
-    string s = tohexstring(i);
-    string zeros = "";
-
-    integer l = 6 - size(s);
-
-    while (l > 0) {
-	zeros = zeros + "0";
-	l = l - 1;
-    }
-
-    return substring(s, 0, 2) + zeros + substring(s, 2);
-}
-
-/**
  * Read settings dialog
  * @return `abort if aborted and `next otherwise
  */
@@ -322,12 +302,7 @@ define symbol AddZFCPDiskDialog () ``{
 	items = maplist (map<string,any> c,
 	    ZFCPController::GetControllers (),
 	``{
-	    string channel = FourDigitHex (c["resource", "io", 0, "start"]:0);
-	    string lcss = FourDigitHex (c["detail", "lcss"]:0);
-	    channel = sformat ("%1.%2.%3",
-		substring (lcss, 4, 1),
-		substring (lcss, 5, 1),
-		substring (channel, 2, 4));
+	    string channel = c["sysfs_bus_id"]:"0.0.0000";
 	    return channel;
 	});
     }

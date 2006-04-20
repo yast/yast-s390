@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Thu Apr 20 10:56:13 CEST 2006 - ug@suse.de
+
+- Fix ZFCP disk display (#159555 - LTC22544)
+- Display and filter DASD on lcss 1 correctly 
+  (#152915 - LTC21934)
+- 2.13.9
+
+-------------------------------------------------------------------
 Wed Apr 19 15:48:15 CEST 2006 - ug@suse.de
 
 - fixed some cloning stuff for DASD and ZFCP for

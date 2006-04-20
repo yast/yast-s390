@@ -27,9 +27,9 @@ global map<integer,map<string,any> > devices = $[];
 
 global map<integer, boolean> selected = $[];
 
-global string filter_min = "0x0000";
+global string filter_min = "0.0.0000";
 
-global string filter_max = "0xffff";
+global string filter_max = "f.f.ffff";
 
 global map<string, boolean> diag = $[];
 
@@ -134,7 +134,7 @@ global boolean Import (map settings) {
 	foreach (map d, settings["devices"]:[], {
 	    boolean format = d["format"]:false;
 	    boolean do_diag = d["diag"]:false;
-	    string channel = d["channel_id"]:"";
+	    string channel = d["channel"]:"";
 	    if (channel != "")
 	    {
 		to_format[channel] = format;
@@ -174,7 +174,7 @@ global map Export () {
     ProbeDisks();
     list l = maplist (integer i, map<string,any> d, devices, {
 	return $[
-	    "channel_id" : d["resource", "io", 0, "start"]:0,
+	    "channel" : d["channel"]:"",
 	    "format" : false,
 	    "diag" : false,
 	];
@@ -210,25 +210,13 @@ global map Export () {
 global list Summary() {
     list<string> ret = maplist (integer index, map<string,any> d, devices, {
 	string s = "";
-	if (Arch::architecture () == "s390_64")
-	{
-	    // summary text, %1 is channel ID (number),
-	    // %2 is Yes or No
-	    s = sformat (_("Channel ID: %1, Format: %2"),
-		d["channel_id"]:"",
-		d["format"]:false ? _("Yes") : _("No")
-	    );
-	}
-	else
-	{
-	    // summary text, %1 is channel ID (number),
-	    // %2 and %3 are Yes or No
-	    s = sformat (_("Channel ID: %1, Format: %2, Use DIAG: %3"),
-		d["channel_id"]:"",
-		d["format"]:false ? _("Yes") : _("No"),
-		d["diag"]:false ? _("Yes") : _("No")
-	    );
-	}
+	// summary text, %1 is channel ID (number),
+	// %2 and %3 are Yes or No
+	s = sformat (_("Channel ID: %1, Format: %2, Use DIAG: %3"),
+	    d["channel"]:"",
+	    d["format"]:false ? _("Yes") : _("No"),
+	    d["diag"]:false ? _("Yes") : _("No")
+	);
 	return s;
     });
     y2milestone ("Summary: %1", ret);
@@ -302,12 +290,7 @@ global define void ProbeDisks () {
     ));
 
     disks = maplist (map<string,any> d, disks, ``{
-	string channel = FourDigitHex (d["resource", "io", 0, "start"]:0);
-	string lcss = FourDigitHex (d["detail","lcss"]:0);
-	channel = sformat ("%1.%2.%3",
-	    substring (lcss, 4, 1),
-	    substring (lcss, 5, 1),
-	    substring (channel, 2, 4));
+	string channel = d["sysfs_bus_id"]:"0.0.0000";
 	d["channel"] = channel;
 	boolean active = (boolean)(d["resource", "io", 0, "active"]:false);
 	if (active)
