@@ -25,6 +25,11 @@ import "Service";
 global boolean modified = false;
 
 /**
+ * Should xpram be really started?
+ */
+global boolean force	= false;
+
+/**
  * Should xpram be started?
  */
 global boolean start	= false;
@@ -52,9 +57,13 @@ global define boolean ReadSysconfig () {
 	if (mountpoint == nil)
 	    mountpoint = "";
 
+	fstype = (string) SCR::Read (.sysconfig.xpram.XPRAM_FORCE);
+	force  = (fstype == "yes");
+
 	fstype = (string) SCR::Read (.sysconfig.xpram.XPRAM_FSTYPE);
 	if (fstype == nil)
 	    fstype = "swap";
+
 	return true;
     }
     return false;
@@ -117,10 +126,21 @@ global define boolean Write () {
     {
 	Service::Start ("xpram");
 	Service::Enable ("xpram");
+	SCR::Write (.sysconfig.xpram.XPRAM_START, "yes");
     }
     else
     {
 	Service::Disable ("xpram");
+	SCR::Write (.sysconfig.xpram.XPRAM_START, "no");
+    }
+
+    if (force)
+    {
+	SCR::Write (.sysconfig.xpram.XPRAM_FORCE, "yes");
+    }
+    else
+    {
+	SCR::Write (.sysconfig.xpram.XPRAM_FORCE, "no");
     }
 
     Progress::NextStage();

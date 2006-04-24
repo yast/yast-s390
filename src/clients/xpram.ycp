@@ -18,8 +18,7 @@
 textdomain "xpram";
 
 /* The main () */
-y2milestone ("----------------------------------------");
-y2milestone ("Xpram module started");
+y2milestone ("---------- Xpram module started ----------");
 
 import "CommandLine";
 import "Xpram";
@@ -125,8 +124,7 @@ any ret = CommandLine::Run (cmdline_description);
 y2debug("ret=%1", ret);
 
 /* Finish */
-y2milestone("Xpram module finished");
-y2milestone("----------------------------------------");
+y2milestone ("---------- Xpram module finished ----------");
 
 return ret;
 

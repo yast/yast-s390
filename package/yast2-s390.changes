@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Apr 24 03:48:41 PDT 2006 - ihno@suse.de
+
+- fixed update of sysconfig-file (#161352)
+- added force option to handle XPRAM which contains
+  valid data. (#161363)
+
+-------------------------------------------------------------------
 Thu Apr 20 10:56:13 CEST 2006 - ug@suse.de
 
 - Fix ZFCP disk display (#159555 - LTC22544)

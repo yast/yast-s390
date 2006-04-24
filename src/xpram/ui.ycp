@@ -41,6 +41,7 @@ define symbol XpRAMDialog () {
     _("<p>Next choose to filesystem that should be on the device.</p>");
 
     boolean start	= Xpram::start;
+    boolean force	= Xpram::force;
     string mountpoint	= Xpram::mountpoint;
     string fstype	= Xpram::fstype;
 
@@ -58,6 +59,8 @@ define symbol XpRAMDialog () {
 		    // radio button label for to start xpram
 		    _("&Start XPRAM"), start)))))
 	),
+        `VSpacing (),
+	`Left (`CheckBox (`id (`force), _("Install filesystem/swap even if &XPRAM contains valid data"), force)),
         `VSpacing (),
 	// frame label
 	`Frame (_("Mountpoint"), `HBox (`HSpacing (),
