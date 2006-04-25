@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Apr 25 16:31:32 CEST 2006 - jsrain@suse.de
+
+- fixed activating of zFCP disks (#159555) (hare)
+
+-------------------------------------------------------------------
 Mon Apr 24 03:48:41 PDT 2006 - ihno@suse.de
 
 - fixed update of sysconfig-file (#161352)
