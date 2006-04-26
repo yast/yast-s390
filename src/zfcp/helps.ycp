@@ -49,12 +49,18 @@ _("<h1>Warning</h1>") + _("<p>When accessing a ZFCP-device
 <b>READ</b>/<b>WRITE</b>please make sure that this access is exclusive.
 Otherwise the potential risk of data corruption is there.</p>"),
 
-    /* Disk add help 1/1 */
+    /* Disk add help 1/2 */
     "disk_add" : _("<p><b><big>Add New ZFCP Disk</big></b><br>
 Enter the identifier of the disk to add. Enter the
 <b>Channel Number</b> of the ZFCP controller, the worldwide port number
 (<b>WWPN</b>), and the <b>FCP-LUN</b> number.</p>") +
-
+    /* Disk add help 2/2 */
+_("<p>The Channel Number has to be entered with lowercase letters in a sysfs-conform
+format 0.0.<devno>, e.g. <i>0.0.5c51</i>.</p>
+<p>The WWPN has to be entered with lowercase letters as a 16-digit hex-value, e.g.
+<i>0x5005076300c40e5a</i>.</p>
+<p>The LUN has to be entered with lowercase letters as a 16-digit hex-value with
+all trailing zeros, e.g. <i>0x52ca000000000000</i>.</p>") +
 	/* Disk selection dialog Warning */
 _("<h1>Warning</h1>") +
 _("<p>When accessing a ZFCP device

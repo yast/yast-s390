@@ -344,6 +344,25 @@ All changes will be lost.")))
 		ret = nil;
 	    }
 	}
+	else if (ret == `next)
+	{
+	    string wwpn = (string)UI::QueryWidget (`id (`wwpn), `Value);
+	    boolean ok = true;
+	    if (substring (wwpn, 0, 2) != "0x")
+		ok = false;
+	    wwpn = substring (wwpn, 2);
+	    if (size (wwpn) != 16)
+		ok = false;
+	    if (size (filterchars (wwpn, "1234567890abcdef")) != 16)
+		ok = false;
+	    if (! ok)
+	    {
+		// error report
+		Report::Error (_("Entered WWPN is not a valid WWPN."));
+		UI::SetFocus (`wwpn);
+		ret = nil;
+	    }
+	}
     }
 
     if (ret == `next)

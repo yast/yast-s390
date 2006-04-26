@@ -271,7 +271,66 @@ define void ReportActivationError (any id, integer ret) {
 	else if (ret == 4)
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: Could not change state of the device"), id));
+		_("%1: Module zfcp could not be loaded"), id));
+	else if (ret == 5)
+	    Report::Error (sformat (
+		// error report, %1 is device identification
+		_("%1: Adapter status could not be changed"), id));
+	else if (ret == 6)
+	    Report::Error (sformat (
+		// error report, %1 is device identification
+		_("%1: WWPN ports still active"), id));
+	else if (ret == 7)
+	    Report::Error (sformat (
+		// error report, %1 is device identification
+		_("%1: SCSI disk could not be deactivated"), id));
+	else if (ret == 8)
+	    Report::Error (sformat (
+		// error report, %1 is device identification
+		_("%1: FCP LUN could not be deregistered"), id));
+	else if (ret == 9)
+	    Report::Error (sformat (
+		// error report, %1 is device identification
+		_("%1: FCP WWPN could not be deregistered"), id));
+	else
+	    Report::Error (sformat (
+		// error report, %1 is device identification, %2 is integer code
+		_("%1: Unknown error %2"), id, ret));
+    }
+}
+
+/**
+ * Report error occured during device activation
+ * @param id integer chanel id of the device
+ * @param ret integer exit code of the operation
+ */
+define void ReportControllerActivationError (any id, integer ret) {
+    if (ret != 0)
+    {
+	if (ret == 1)
+	    Report::Error (sformat (
+		// error report, %1 is device identification
+		_("%1: sysfs not mounted."), id));
+	else if (ret == 2)
+	    Report::Error (sformat (
+		// error report, %1 is device identification
+		_("%1: Invalid status for <online>"), id));
+	else if (ret == 3)
+	    Report::Error (sformat (
+		// error report, %1 is device identification
+		_("%1: Device <ccwid> does not exist"), id));
+	else if (ret == 4)
+	    Report::Error (sformat (
+		// error report, %1 is device identification
+		_("%1: Module zfcp could not be loaded"), id));
+	else if (ret == 5)
+	    Report::Error (sformat (
+		// error report, %1 is device identification
+		_("%1: Adapter status could not be changed"), id));
+	else if (ret == 6)
+	    Report::Error (sformat (
+		// error report, %1 is device identification
+		_("%1: WWPN ports still active"), id));
 	else
 	    Report::Error (sformat (
 		// error report, %1 is device identification, %2 is integer code
@@ -298,8 +357,7 @@ global define void ActivateDisk (string channel, string wwpn, string lun) {
 	integer ret = (integer)SCR::Execute (.target.bash, command);
 	if (ret != 0)
 	{
-	    Report::Error (
-		sformat ("Command %1 returned exit code %2", command, ret));
+	    ReportControllerActivationError (channel, ret);
 	}
 	else
 	{
