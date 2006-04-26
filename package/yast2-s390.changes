@@ -3,6 +3,7 @@ Wed Apr 26 21:15:30 CEST 2006 - jsrain@suse.de
 
 - fixed reporting errors when activating a zFCP disk, enhanced
   help texts (#159552)
+- 2.13.12
 
 -------------------------------------------------------------------
 Tue Apr 25 16:31:32 CEST 2006 - jsrain@suse.de
