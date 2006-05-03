@@ -29,7 +29,7 @@ define symbol XpRAMDialog () {
     string caption = _("XPRAM Configuration");
 
     // help text for XPRAM 1/4
-    string help = _("<p>Here, configure the (<b>XPRAM</b>) for your computer.</p>") +
+    string help = _("<p>Here, configure the <b>XPRAM</b> for your computer.</p>") +
 
     // help text for XPRAM 2/4
     _("<p>This YaST-module currently only support to assign to whole XPRAM to one partition. To have multiple partitions please look at \"Device Drivers, Features and Commands November 30, 2004\" for the Linux kernel 2.6 - April 2004 stream.</p><p>In this case please disable XPRAM in this module.</p>") +
