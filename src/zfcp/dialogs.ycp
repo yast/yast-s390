@@ -358,7 +358,7 @@ All changes will be lost.")))
 	    if (! ok)
 	    {
 		// error report
-		Report::Error (_("Entered WWPN is not a valid WWPN."));
+		Report::Error (_("The entered WWPN is invalid."));
 		UI::SetFocus (`wwpn);
 		ret = nil;
 	    }

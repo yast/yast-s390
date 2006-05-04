@@ -263,39 +263,39 @@ define void ReportActivationError (any id, integer ret) {
 	else if (ret == 2)
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: Invalid status for <online>"), id));
+		_("%1: Invalid status for <online>."), id));
 	else if (ret == 3)
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: No device found for <ccwid>"), id));
+		_("%1: No device found for <ccwid>."), id));
 	else if (ret == 4)
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: Module zfcp could not be loaded"), id));
+		_("%1: Module zfcp could not be loaded."), id));
 	else if (ret == 5)
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: Adapter status could not be changed"), id));
+		_("%1: Adapter status could not be changed."), id));
 	else if (ret == 6)
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: WWPN ports still active"), id));
+		_("%1: WWPN ports still active."), id));
 	else if (ret == 7)
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: SCSI disk could not be deactivated"), id));
+		_("%1: SCSI disk could not be deactivated."), id));
 	else if (ret == 8)
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: FCP LUN could not be deregistered"), id));
+		_("%1: FCP LUN could not be unregistered."), id));
 	else if (ret == 9)
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: FCP WWPN could not be deregistered"), id));
+		_("%1: FCP WWPN could not be unregistered."), id));
 	else
 	    Report::Error (sformat (
 		// error report, %1 is device identification, %2 is integer code
-		_("%1: Unknown error %2"), id, ret));
+		_("%1: Unknown error %2."), id, ret));
     }
 }
 
@@ -314,27 +314,27 @@ define void ReportControllerActivationError (any id, integer ret) {
 	else if (ret == 2)
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: Invalid status for <online>"), id));
+		_("%1: Invalid status for <online>."), id));
 	else if (ret == 3)
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: Device <ccwid> does not exist"), id));
+		_("%1: Device <ccwid> does not exist."), id));
 	else if (ret == 4)
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: Module zfcp could not be loaded"), id));
+		_("%1: Module zfcp could not be loaded."), id));
 	else if (ret == 5)
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: Adapter status could not be changed"), id));
+		_("%1: Adapter status could not be changed."), id));
 	else if (ret == 6)
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: WWPN ports still active"), id));
+		_("%1: WWPN ports still active."), id));
 	else
 	    Report::Error (sformat (
 		// error report, %1 is device identification, %2 is integer code
-		_("%1: Unknown error %2"), id, ret));
+		_("%1: Unknown error %2."), id, ret));
     }
 }
 

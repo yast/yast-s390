@@ -45,22 +45,22 @@ _("<p>To remove a configured ZFCP disk, select it and click
 <b>Delete</b>.</p>") +
 
 	/* Disk selection dialog Warning */
-_("<h1>Warning</h1>") + _("<p>When accessing a ZFCP-device
-<b>READ</b>/<b>WRITE</b>please make sure that this access is exclusive.
-Otherwise the potential risk of data corruption is there.</p>"),
+_("<h1>Warning</h1>") + _("<p>When accessing a ZFCP device
+<b>READ</b>/<b>WRITE</b>, make sure that this access is exclusive.
+Otherwise there is a potential risk of data corruption.</p>"),
 
     /* Disk add help 1/2 */
     "disk_add" : _("<p><b><big>Add New ZFCP Disk</big></b><br>
 Enter the identifier of the disk to add. Enter the
 <b>Channel Number</b> of the ZFCP controller, the worldwide port number
 (<b>WWPN</b>), and the <b>FCP-LUN</b> number.</p>") +
-    /* Disk add help 2/2 */
-_("<p>The Channel Number has to be entered with lowercase letters in a sysfs-conform
-format 0.0.<devno>, e.g. <i>0.0.5c51</i>.</p>
-<p>The WWPN has to be entered with lowercase letters as a 16-digit hex-value, e.g.
-<i>0x5005076300c40e5a</i>.</p>
-<p>The LUN has to be entered with lowercase letters as a 16-digit hex-value with
-all trailing zeros, e.g. <i>0x52ca000000000000</i>.</p>") +
+    /* Disk add help 2/2, This is HTML, so finally "&lt;devno&gt;" is displayed as "<devno>" */
+_("<p>The <b>Channel Number</b> must be entered with lowercase letters in a sysfs conforming
+format 0.0.&lt;devno&gt;, such as <tt>0.0.5c51</tt>.</p>
+<p>The WWPN must be entered with lowercase letters as a 16-digit hex value, such as
+<tt>0x5005076300c40e5a</tt>.</p>
+<p>The LUN must be entered with lowercase letters as a 16-digit hex value with
+all trailing zeros, such as <tt>0x52ca000000000000</tt>.</p>") +
 	/* Disk selection dialog Warning */
 _("<h1>Warning</h1>") +
 _("<p>When accessing a ZFCP device
