@@ -32,13 +32,13 @@ define symbol XpRAMDialog () {
     string help = _("<p>Here, configure the <b>XPRAM</b> for your computer.</p>") +
 
     // help text for XPRAM 2/4
-    _("<p>This YaST-module currently only support to assign to whole XPRAM to one partition. To have multiple partitions please look at \"Device Drivers, Features and Commands November 30, 2004\" for the Linux kernel 2.6 - April 2004 stream.</p><p>In this case please disable XPRAM in this module.</p>") +
+    _("<p>This tool currently only supports assigning the entire XPRAM to one partition. To have multiple partitions, look at \"Device Drivers, Features and Commands November 30, 2004\" for the Linux kernel 2.6--April 2004 stream. <p>In this case, disable XPRAM in this module.</p>") +
 
     // help text for XPRAM 3/4
-    _("<p>Choose the correct mountpoint for <b>Mountpoint</b>.</p>") +
+    _("<p>Choose the correct mount point for <b>Mount Point</b>.</p>") +
 
     // help text for XPRAM 4/4
-    _("<p>Next choose to filesystem that should be on the device.</p>");
+    _("<p>Next, choose the file system to use on the device.</p>");
 
     boolean start	= Xpram::start;
     boolean force	= Xpram::force;
@@ -60,7 +60,8 @@ define symbol XpRAMDialog () {
 		    _("&Start XPRAM"), start)))))
 	),
         `VSpacing (),
-	`Left (`CheckBox (`id (`force), _("Install filesystem/swap even if &XPRAM contains valid data"), force)),
+	// check box
+	`Left (`CheckBox (`id (`force), _("Install File System or Swap Although &XPRAM Contains Valid Data"), force)),
         `VSpacing (),
 	// frame label
 	`Frame (_("Mountpoint"), `HBox (`HSpacing (),
@@ -68,7 +69,7 @@ define symbol XpRAMDialog () {
 		`VSpacing (),
 		`ComboBox (`id(`m_points), `opt(`notify, `hstretch, `editable),
 		    // combobox label
-		    _("&Mountpoint"), m_points),
+		    _("&Mount Point"), m_points),
 //		`VSpacing (0.5),
 //		`Right(
 //		    // button label
@@ -78,12 +79,12 @@ define symbol XpRAMDialog () {
 	)),
 	`VSpacing (0.5),
 	// frame label
-	`Frame (_("Filesystemtype"), `HBox (`HSpacing (),
+	`Frame (_("File System Type"), `HBox (`HSpacing (),
 	    `VBox (
 		`VSpacing (0.5),
 		`ComboBox (`id(`brate), `opt(`notify, `hstretch),
 		    // combobox label
-		    _("&Filesystem to use:"), f_types),
+		    _("&File System to Use"), f_types),
 		`VSpacing (0.5)
 	    ), `HSpacing ()
 	)),

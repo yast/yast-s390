@@ -106,7 +106,7 @@ map cmdline_description = $[
     "options"		: $[
 	"mountpoint"	:$[
 	    // command line help text for the 'mountpoint' option
-	    "help"	: _("mountpoint"),
+	    "help"	: _("Mount point"),
 	    "type"	: "string"
 	],
     ],
