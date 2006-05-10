@@ -17,6 +17,7 @@ textdomain "xpram";
 
 import "FileUtils";
 import "Progress";
+import "Report";
 import "Service";
 
 /**
@@ -40,7 +41,7 @@ global boolean start	= false;
 global string mountpoint= "";
 
 /**
- * Maximum baud rate for the XpRAM serial port
+ * Filesystem used for the XpRAM
  */
 global string fstype	= "";
 
@@ -94,6 +95,7 @@ global define boolean Write () {
     /* Xpram read dialog caption */
     string caption	= _("Saving XPRAM Configuration");
     integer steps	= 2;
+    boolean bret = true;
 
     Progress::New (caption, " ", steps, [
 	    /* Progress stage 1/2 */
@@ -116,35 +118,51 @@ global define boolean Write () {
     if (mountpoint != "")
     {
 	SCR::Write (.sysconfig.xpram.XPRAM_MNTPATH, mountpoint);
-	SCR::Write (.sysconfig.xpram.XPRAM_FSTYPE, fstype);
     }
+    SCR::Write (.sysconfig.xpram.XPRAM_FSTYPE, fstype);
 
     Progress::NextStage ();
 
-    Service::Stop ("xpram");
-    if (start)
+    bret = Service::Stop ("xpram");
+    y2milestone("Service::Stop (xpram) returns %1", bret);
+    if (! bret)
     {
-	Service::Start ("xpram");
-	Service::Enable ("xpram");
-	SCR::Write (.sysconfig.xpram.XPRAM_START, "yes");
+    Report::Error (_("Error stopping xpram. Please try manual \"rcxpram stop\""));
     }
     else
     {
-	Service::Disable ("xpram");
-	SCR::Write (.sysconfig.xpram.XPRAM_START, "no");
-    }
+       if (force)
+       {
+	   SCR::Write (.sysconfig.xpram.XPRAM_FORCE, "yes");
+       }
+       else
+       {
+	   SCR::Write (.sysconfig.xpram.XPRAM_FORCE, "no");
+       }
 
-    if (force)
-    {
-	SCR::Write (.sysconfig.xpram.XPRAM_FORCE, "yes");
-    }
-    else
-    {
-	SCR::Write (.sysconfig.xpram.XPRAM_FORCE, "no");
-    }
+       if (start)
+       {
+	   SCR::Write (.sysconfig.xpram.XPRAM_START, "yes");
+	   bret = Service::Enable ("xpram");
+	   y2milestone("Service::Enable (xpram) returns %1", bret);
+//	map out = (map) SCR::Execute(.target.bash_output,"bash -x /etc/init.d/xpram start", $["TERM":"raw"]);
+//	y2milestone("got %1", out);
+	   SCR::Write (.sysconfig.xpram, nil);
+	   bret = Service::Start ("xpram");
+	   if (! bret)
+	   {
+	   Report::Error (_("Error starting xpram. Please try manual \"rcxpram start\""));
+	   }
+	   y2milestone("Service::Start (xpram) returns %1", bret);
+       }
+       else
+       {
+	   SCR::Write (.sysconfig.xpram.XPRAM_START, "no");
+	   Service::Disable ("xpram");
+       }
 
-    Progress::NextStage();
-
+       Progress::NextStage();
+    }
     return true;
 }
 

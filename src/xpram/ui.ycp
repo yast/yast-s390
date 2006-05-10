@@ -32,7 +32,7 @@ define symbol XpRAMDialog () {
     string help = _("<p>Here, configure the <b>XPRAM</b> for your computer.</p>") +
 
     // help text for XPRAM 2/4
-    _("<p>This tool currently only supports assigning the entire XPRAM to one partition. To have multiple partitions, look at \"Device Drivers, Features and Commands November 30, 2004\" for the Linux kernel 2.6--April 2004 stream. <p>In this case, disable XPRAM in this module.</p>") +
+    _("<p>This tool currently only supports assigning the entire XPRAM to one partition. To have multiple partitions, look at \"Device Drivers, Features and Commands November 30, 2004\" for the Linux kernel 2.6 - April 2004 stream.</p><p>In this case disable XPRAM in this module.</p>") +
 
     // help text for XPRAM 3/4
     _("<p>Choose the correct mount point for <b>Mount Point</b>.</p>") +
@@ -46,7 +46,7 @@ define symbol XpRAMDialog () {
     string fstype	= Xpram::fstype;
 
     list m_points = [ "swap", "/home2" ];
-    list f_types  = [ "ext2", "ext3", "reiserfs", "swap" ];
+    list f_types  = [ "ext2", "ext3", "swap" ];
 
     term con = `HBox (`HSpacing (3), `VBox (
         `VSpacing (2),
@@ -60,11 +60,10 @@ define symbol XpRAMDialog () {
 		    _("&Start XPRAM"), start)))))
 	),
         `VSpacing (),
-	// check box
 	`Left (`CheckBox (`id (`force), _("Install File System or Swap Although &XPRAM Contains Valid Data"), force)),
         `VSpacing (),
 	// frame label
-	`Frame (_("Mountpoint"), `HBox (`HSpacing (),
+	`Frame (_("Mount Point"), `HBox (`HSpacing (),
 	    `VBox (
 		`VSpacing (),
 		`ComboBox (`id(`m_points), `opt(`notify, `hstretch, `editable),
@@ -84,7 +83,7 @@ define symbol XpRAMDialog () {
 		`VSpacing (0.5),
 		`ComboBox (`id(`brate), `opt(`notify, `hstretch),
 		    // combobox label
-		    _("&File System to Use"), f_types),
+		    _("F&ile System to Use:"), f_types),
 		`VSpacing (0.5)
 	    ), `HSpacing ()
 	)),
@@ -117,11 +116,9 @@ define symbol XpRAMDialog () {
         if (ret == `yes || ret == `no)
 	{
             start = (ret == `yes);
-	    // if (start && !Package::InstalledAll (["s390-tools"]))
-	    if (start && !Package::InstalledAll (["aaa_base"]))
+	    if (start && !Package::InstalledAll (["s390-tools"]))
 	    {
-		// if (Package::InstallAll (["s390-tools"]))
-		if (Package::InstallAll (["aaa_base"]))
+		if (Package::InstallAll (["s390-tools"]))
 		{
 		    Xpram::ReadSysconfig ();
 		    mountpoint = Xpram::mountpoint;
@@ -148,12 +145,13 @@ define symbol XpRAMDialog () {
 
     if (ret == `next &&
 	(start != Xpram::start || mountpoint != Xpram::mountpoint ||
-	fstype != Xpram::fstype))
+	force  != Xpram::force || fstype != Xpram::fstype))
     {
 	Xpram::modified		= true;
 	Xpram::start		= start;
 	Xpram::mountpoint	= mountpoint;
 	Xpram::fstype		= fstype;
+	Xpram::force		= force;
     }
     return ret;
 }

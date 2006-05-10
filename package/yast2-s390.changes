@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Mai 10 08:56:08 CEST 2006 - ihno@use.de
+
+- Write config values in correct order and activate XPRAM (#161352)
+- Correct the use of the force-option. (#161363)
+
+-------------------------------------------------------------------
 Thu May  4 14:15:25 CEST 2006 - locilka@suse.cz
 
 - merged texts from proofreading 
