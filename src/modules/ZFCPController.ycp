@@ -271,15 +271,15 @@ define void ReportActivationError (any id, integer ret) {
 	else if (ret == 4)
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: Module zfcp could not be loaded."), id));
+		_("%1: WWPN invalid."), id));
 	else if (ret == 5)
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: Adapter status could not be changed."), id));
+		_("%1: Could not activate WWPN for adapter %1."), id));
 	else if (ret == 6)
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: WWPN ports still active."), id));
+		_("%1: Could not activate ZFCP disk."), id));
 	else if (ret == 7)
 	    Report::Error (sformat (
 		// error report, %1 is device identification
@@ -287,11 +287,11 @@ define void ReportActivationError (any id, integer ret) {
 	else if (ret == 8)
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: FCP LUN could not be unregistered."), id));
+		_("%1: ZFCP LUN could not be unregistered."), id));
 	else if (ret == 9)
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: FCP WWPN could not be unregistered."), id));
+		_("%1: ZFCP WWPN could not be unregistered."), id));
 	else
 	    Report::Error (sformat (
 		// error report, %1 is device identification, %2 is integer code
