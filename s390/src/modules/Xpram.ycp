@@ -1,0 +1,170 @@
+/**
+ * File:	modules/Xpram.ycp
+ * Package:	Configuration of xpram
+ * Summary:	Xpram settings, input and output functions
+ * Authors:	Ihno Krumreich <Ihno@suse.de>
+ *
+ * $Id$
+ *
+ * Representation of the XpRAM configuration.
+ * Input and output routines.
+ */
+
+{
+
+module "Xpram";
+textdomain "xpram";
+
+import "FileUtils";
+import "Progress";
+import "Report";
+import "Service";
+
+/**
+ * Data was modified?
+ */
+global boolean modified = false;
+
+/**
+ * Should xpram be really started?
+ */
+global boolean force	= false;
+
+/**
+ * Should xpram be started?
+ */
+global boolean start	= false;
+
+/**
+ * mountpoint used for xpram
+ */
+global string mountpoint= "";
+
+/**
+ * Filesystem used for the XpRAM
+ */
+global string fstype	= "";
+
+/**
+ * Read xpram settings from /etc/sysconfig/xpram
+ * @return true when file exists
+ */
+global define boolean ReadSysconfig () {
+
+
+    if (FileUtils::Exists ("/etc/sysconfig/xpram"))
+    {
+	mountpoint = (string) SCR::Read (.sysconfig.xpram.XPRAM_MNTPATH);
+	if (mountpoint == nil)
+	    mountpoint = "";
+
+	fstype = (string) SCR::Read (.sysconfig.xpram.XPRAM_FORCE);
+	force  = (fstype == "yes");
+
+	fstype = (string) SCR::Read (.sysconfig.xpram.XPRAM_FSTYPE);
+	if (fstype == nil)
+	    fstype = "swap";
+
+	return true;
+    }
+    return false;
+}
+
+/**
+ * Read all xpram settings
+ * @return true on success
+ */
+global define boolean Read () {
+
+    ReadSysconfig ();
+
+    start = (Service::Status ("xpram") == 0);
+
+    return true;
+}
+
+/**
+ * Write all xpram settings
+ * @return true on success
+ */
+global define boolean Write () {
+
+    if (!modified)
+	return true;
+
+    /* Xpram read dialog caption */
+    string caption	= _("Saving XPRAM Configuration");
+    integer steps	= 2;
+    boolean bret = true;
+
+    Progress::New (caption, " ", steps, [
+	    /* Progress stage 1/2 */
+	    _("Write the settings"),
+	    /* Progress stage 2/2 */
+	    _("Restart the service")
+	], [
+	    /* Progress step 1/2 */
+	    _("Writing the settings..."),
+	    /* Progress step 2/2 */
+	    _("Restarting service..."),
+	    /* Progress finished */
+	    _("Finished")
+	],
+	""
+    );
+
+    Progress::NextStage();
+
+    if (mountpoint != "")
+    {
+	SCR::Write (.sysconfig.xpram.XPRAM_MNTPATH, mountpoint);
+    }
+    SCR::Write (.sysconfig.xpram.XPRAM_FSTYPE, fstype);
+
+    Progress::NextStage ();
+
+    bret = Service::Stop ("xpram");
+    y2milestone("Service::Stop (xpram) returns %1", bret);
+    if (! bret)
+    {
+    Report::Error (_("Error stopping xpram. Please try manual \"rcxpram stop\""));
+    }
+    else
+    {
+       if (force)
+       {
+	   SCR::Write (.sysconfig.xpram.XPRAM_FORCE, "yes");
+       }
+       else
+       {
+	   SCR::Write (.sysconfig.xpram.XPRAM_FORCE, "no");
+       }
+
+       if (start)
+       {
+	   SCR::Write (.sysconfig.xpram.XPRAM_START, "yes");
+	   bret = Service::Enable ("xpram");
+	   y2milestone("Service::Enable (xpram) returns %1", bret);
+//	map out = (map) SCR::Execute(.target.bash_output,"bash -x /etc/init.d/xpram start", $["TERM":"raw"]);
+//	y2milestone("got %1", out);
+	   SCR::Write (.sysconfig.xpram, nil);
+	   bret = Service::Start ("xpram");
+	   if (! bret)
+	   {
+	   Report::Error (_("Error starting xpram. Please try manual \"rcxpram start\""));
+	   }
+	   y2milestone("Service::Start (xpram) returns %1", bret);
+       }
+       else
+       {
+	   SCR::Write (.sysconfig.xpram.XPRAM_START, "no");
+	   Service::Disable ("xpram");
+       }
+
+       Progress::NextStage();
+    }
+    return true;
+}
+
+/* EOF */
+}

@@ -1,0 +1,239 @@
+/**
+ * File:	include/controller/dialogs.ycp
+ * Package:	Configuration of controller
+ * Summary:	Dialogs definitions
+ * Authors:	Jiri Srain <jsrain@suse.cz>
+ *
+ * $Id$
+ */
+
+{
+
+textdomain "s390";
+
+import "Arch";
+import "Dump";
+import "Label";
+import "Mode";
+import "Popup";
+import "Progress";
+import "Report";
+import "Sequencer";
+import "Wizard";
+
+include "s390/dump/helps.ycp";
+
+
+// now real dialogs
+
+/**
+ * Read settings dialog
+ * @return `abort if aborted and `next otherwise
+ */
+symbol ReadDialog() {
+    Wizard::RestoreHelp(DUMP_HELPS["read"]:"");
+    // Controller::AbortFunction = PollAbort;
+    boolean ret = Dump::Read();
+    return ret ? `next : `abort;
+}
+
+/**
+ * Write settings dialog
+ * @return `abort if aborted and `next otherwise
+ */
+symbol WriteDialog() {
+    Wizard::RestoreHelp(DUMP_HELPS["write"]:"");
+    // Controller::AbortFunction = PollAbort;
+    boolean ret = Dump::Write();
+    return ret ? `next : `abort;
+}
+
+/**
+ * Draw the DASD dialog
+ */
+void DisplayDumpDialog() {
+    /* Minimal text for the help */
+    string help = DUMP_HELPS["summary"]:"";
+
+    /* Dialog caption */
+    string caption = _("Dump Device Management");
+
+    term header = `header(
+	_("Device"),
+	_("Loader Section Label"),
+	_("Format"));
+
+    /* Dialog content */
+    term content = `VBox(
+	`Table(`id(`table), `opt (`notify), header, []),
+	`HBox (
+	    `PushButton (`id (`add), Label::AddButton ()),
+	    `PushButton (`id (`edit), Label::EditButton ()),
+	    `PushButton (`id (`delete), Label::DeleteButton ())
+	)
+    );
+
+    /* Apply the settings */
+    Wizard::SetContents(caption, content, help, true, true);
+    Wizard::HideBackButton();
+    Wizard::SetAbortButton(`abort, Label::CancelButton() );
+}
+
+
+/**
+ * Redraw the contents of the widgets in the DASD Dialog
+ */
+void ReloadDumpDialog () {
+    list<term> items = maplist (string dev, map<string,any> info,
+	Dump::devices,
+    {
+	return `item (`id (dev),
+	    dev,
+	    info["boot_section"]:"",
+	    info["format"]:false
+		// table cell
+		? _("Yes")
+		// table cell
+		: _("No"));
+    });
+    UI::ChangeWidget(`id(`table), `Items, items);
+    UI::SetFocus (`table);
+}
+
+/**
+ * Run the dialog for DASD disks configuration
+ * @return symbol for wizard sequencer
+ */
+symbol DumpDialog() {
+    DisplayDumpDialog ();
+    ReloadDumpDialog ();
+    any ret = nil;
+
+    while (ret == nil)
+    {
+	ret = UI::UserInput();
+
+	string selected = (string)
+	    UI::QueryWidget (`id (`table), `CurrentItem);
+
+	if (ret == `delete)
+	{
+	    Dump::devices = remove (Dump::devices, selected);
+	    ReloadDumpDialog ();
+	    UI::SetFocus (`table);
+	    ret = nil;
+	}
+
+	if (ret == `table || ret == `add || ret == `edit)
+	{
+	    if (ret == `add)
+	    {
+		Dump::current_device = $[];
+		return `add;
+	    }
+	    else
+	    {
+		Dump::current_device = Dump::devices[selected]:$[];
+		Dump::current_device["device"] = selected;
+		return `edit;
+	    }
+	}
+    }
+    return (symbol)ret;
+}
+
+/**
+ * Run the dialog for Dump
+ * @param what symbol a
+ * @return symbol EditDumpDialog that was edited
+ */
+symbol EditDumpDialog (symbol what) {
+    string help = DUMP_HELPS["edit_dump"]:"";
+
+    string caption = what == `add
+	// Dialog caption
+	? _("Add New Dump Device")
+	// Dialog caption
+	: _("Edit Dump Device");
+
+    list<string> available_disks = Dump::AvailableDisks ();
+
+    /* Dialog content */
+    term content = `HBox (`HStretch (), `VBox(
+	`VStretch (),
+	`ComboBox (`id(`device), `opt (`hstretch, `editable),
+	    // text entry
+	    _("&Dump Device"),
+	    available_disks
+	),
+	`VSpacing (2),
+	// check box, try to keep short
+	`Left (`CheckBox (`id (`force), _("Install Dump Record Even If Disk Already &Formatted"))),
+	`VStretch ()
+    ), `HStretch ());
+
+    /* Apply the settings */
+    Wizard::SetContents(caption, content, help, true, true);
+    Wizard::RestoreBackButton ();
+    Wizard::RestoreAbortButton ();
+
+    string device = Dump::current_device["device"]:"";
+    if (device != "")
+	UI::ChangeWidget (`id (`device), `Value, device);
+    UI::ChangeWidget (`id (`section), `Value,
+	Dump::current_device["boot_section"]:"");
+    UI::ChangeWidget (`id (`format), `Value,
+	Dump::current_device["format"]:false);
+    UI::ChangeWidget (`id (`force), `Value,
+	Dump::current_device["force"]:false);
+
+    any ret = nil;
+
+    while (ret == nil)
+    {
+	ret = UI::UserInput();
+
+	if (ret == `abort || ret == `cancel)
+	{
+	    // yes-no popup
+	    if (! Popup::YesNo (_("Really leave the dump device configuration?")))
+//	    if (! Popup::YesNo (_("Really leave the dump devices configuration without saving?
+//All changes will be lost.")))
+	    {
+		ret = nil;
+	    }
+	}
+	if (ret == `next)
+	{
+	    boolean force = (boolean)UI::QueryWidget (`id (`force), `Value);
+	    device = (string)UI::QueryWidget (`id (`device), `Value);
+	    if (Popup::YesNo (sformat (_("The disk %1 will formatted as a dump device now.
+Continue?"), device)))
+	    {
+	        boolean success = Dump::FormatDisk (device, force);
+	        if (! success)
+	        {
+		    ret = nil;
+		    continue;
+	        }
+	    }
+	    else
+	    {
+		ret = nil;
+		continue;
+	    }
+	    // yes-no popup
+	    if (what != `add && Popup::YesNo (_("Add another dump device?")))
+	        return `again;
+	}
+
+    }
+
+    return (symbol) ret;
+
+}
+
+
+// EOF
+}
+
