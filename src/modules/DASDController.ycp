@@ -572,8 +572,11 @@ global define void FormatDisks (list<string> disks_list, integer par,
 global define string GetPartitionInfo (string disk) {
     map outmap = (map)SCR::Execute (.target.bash_output, sformat (
 	"/sbin/fdasd -p %1", disk));
+
+    // if not an eckd-disk it's an fba-disk. fba-disks have only one partition
     if (outmap["exit"]:0 != 0)
-	return "--";
+	return sformat ("%11", disk);
+
     string out = outmap["stdout"]:"";
 
     string regexp = "^[ \t]*([^ \t]+)[ \t]+([0-9]+)[ \t]+([0-9]+)[ \t]+([0-9]+)[ \t]+([^ \t]+)[ \t]+([^ \t]+([ \t]+[^ \t]+))*[ \t]*$";
