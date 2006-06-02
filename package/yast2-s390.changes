@@ -3,6 +3,7 @@ Fri Jun  2 07:37:00 CEST 2006 - jsrain@suse.cz
 
 - call mkinitd and zipl after disk activation in running system in
   order to have the disks activated also after reboot (#181085)
+- 2.13.15
 
 -------------------------------------------------------------------
 Tue May 23 17:13:37 CEST 2006 - jsrain@suse.cz
