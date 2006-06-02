@@ -41,6 +41,8 @@ map<string,boolean> activated_controllers = $[];
 global define void ActivateDisk (string channel, string wwpn, string lun);
 global define void ProbeDisks();
 
+boolean disk_configured = false;
+
 /**
  * Prototypes
  */
@@ -99,6 +101,7 @@ global boolean Available () {
  * @return true on success
  */
 global boolean Read() {
+    disk_configured = false;
     return true;
 }
 
@@ -107,6 +110,17 @@ global boolean Read() {
  * @return true on success
  */
 global boolean Write() {
+    if (disk_configured && Mode::normal ())
+    {
+	string command = "/sbin/mkinitrd && /sbin/zipl";
+	y2milestone ("Running command %1", command);
+	any ret = SCR::Execute (.target.bash, command);
+	y2milestone ("Exit code: %1", ret);
+    }
+    else
+    {
+	y2milestone ("No new disk configured");
+    }
     return true;
 
 }
@@ -375,6 +389,7 @@ global define void ActivateDisk (string channel, string wwpn, string lun) {
     y2milestone ("Running command %1", command);
     integer ret = (integer)SCR::Execute (.target.bash, command);
     ReportActivationError (channel, ret);
+    disk_configured = true;
 }
 
 /**
@@ -394,6 +409,7 @@ global define void DeactivateDisk (string channel, string wwpn, string lun) {
     y2milestone ("Running command %1", command);
     integer ret = (integer)SCR::Execute (.target.bash, command);
     ReportActivationError (channel, ret);
+    disk_configured = true;
 }
 
 /* EOF */
