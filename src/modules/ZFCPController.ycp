@@ -379,8 +379,8 @@ define void ReportControllerActivationError (any id, integer ret) {
 /**
  * Activate a disk
  * @param channel string channel id
- * @param wwpn string wwpn
- * @param lun string lun
+ * @param wwpn string wwpn (hexa number)
+ * @param lun string lun   (hexa number)
  */
 global define void ActivateDisk (string channel, string wwpn, string lun) {
 
@@ -406,6 +406,7 @@ global define void ActivateDisk (string channel, string wwpn, string lun) {
     string command = sformat (
 	"/sbin/zfcp_disk_configure '%1' '%2' '%3' '%4'",
 	channel,
+	// bugzilla #205503
 	HexNumSize (wwpn, 16),
 	HexNumSize (lun,  16),
 	1
@@ -419,13 +420,14 @@ global define void ActivateDisk (string channel, string wwpn, string lun) {
 /**
  * Activate a disk
  * @param channel string channel id
- * @param wwpn string wwpn
- * @param lun string lun
+ * @param wwpn string wwpn (hexa number)
+ * @param lun string lun   (hexa number)
  */
 global define void DeactivateDisk (string channel, string wwpn, string lun) {
     string command = sformat (
 	"/sbin/zfcp_disk_configure '%1' '%2' '%3' '%4'",
 	channel,
+	// bugzilla #205503
 	HexNumSize (wwpn, 16),
 	HexNumSize (lun,  16),
 	0
