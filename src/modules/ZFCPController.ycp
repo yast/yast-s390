@@ -44,6 +44,30 @@ global define void ProbeDisks();
 boolean disk_configured = false;
 
 /**
+ * Update the size of hexa number via adding leading zeros
+ * @param hex string a hexa number (withou or without leading 0x)
+ * @param digits the count of digits (excluding leading 0x)
+ * @return hex string with specified length
+ */
+global string HexNumSize (string hex, integer digits) {
+    boolean leading0x = false;
+    if (substring (hex, 0, 2) == "0x")
+    {
+        leading0x = true;
+        hex = substring (hex, 2);
+    }
+    while (size (hex) < digits)
+    {
+        hex = "0" + hex;
+    }
+    if (leading0x)
+    {
+        hex = "0x" + hex;
+    }
+    return hex;
+}
+
+/**
  * Prototypes
  */
 global boolean Modified();
@@ -355,8 +379,8 @@ define void ReportControllerActivationError (any id, integer ret) {
 /**
  * Activate a disk
  * @param channel string channel id
- * @param wwpn string wwpn
- * @param lun string lun
+ * @param wwpn string wwpn (hexa number)
+ * @param lun string lun   (hexa number)
  */
 global define void ActivateDisk (string channel, string wwpn, string lun) {
 
@@ -380,10 +404,11 @@ global define void ActivateDisk (string channel, string wwpn, string lun) {
     }
 
     string command = sformat (
-	"/sbin/zfcp_disk_configure %1 %2 %3 %4",
+	"/sbin/zfcp_disk_configure '%1' '%2' '%3' '%4'",
 	channel,
-	wwpn,
-	lun,
+	// bugzilla #205503
+	HexNumSize (wwpn, 16),
+	HexNumSize (lun,  16),
 	1
     );
     y2milestone ("Running command %1", command);
@@ -395,15 +420,16 @@ global define void ActivateDisk (string channel, string wwpn, string lun) {
 /**
  * Activate a disk
  * @param channel string channel id
- * @param wwpn string wwpn
- * @param lun string lun
+ * @param wwpn string wwpn (hexa number)
+ * @param lun string lun   (hexa number)
  */
 global define void DeactivateDisk (string channel, string wwpn, string lun) {
     string command = sformat (
-	"/sbin/zfcp_disk_configure %1 %2 %3 %4",
+	"/sbin/zfcp_disk_configure '%1' '%2' '%3' '%4'",
 	channel,
-	wwpn,
-	lun,
+	// bugzilla #205503
+	HexNumSize (wwpn, 16),
+	HexNumSize (lun,  16),
 	0
     );
     y2milestone ("Running command %1", command);
