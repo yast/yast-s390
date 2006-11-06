@@ -45,31 +45,6 @@ symbol WriteDialog() {
     return ret ? `next : `abort;
 }
 
-/**
- * Update the size of hexa number via adding leading zeros
- * @param hex string a hexa number (withou or without leading 0x)
- * @param digits the count of digits (excluding leading 0x)
- * @return hex string with specified length
- */
-string HexNumSize (string hex, integer digits) {
-    boolean leading0x = false;
-    if (substring (hex, 0, 2) == "0x")
-    {
-	leading0x = true;
-	hex = substring (hex, 2);
-    }
-    while (size (hex) < digits)
-    {
-	hex = "0" + hex;
-    }
-    if (leading0x)
-    {
-	hex = "0x" + hex;
-    }
-    return hex;
-}
-
-
     // ------------------------------------------------------------------------------------
 
 /**
@@ -101,7 +76,7 @@ define list<term> GetZFCPDiskItems(integer min_chan, integer max_chan) ``{
 	string wwpn = d["detail", "wwpn"]:"unknown";
 	string fcp_lun = d["detail", "fcp_lun"]:"unknown";
 	if (fcp_lun != "unknown")
-	    fcp_lun = HexNumSize (fcp_lun, 16);
+	    fcp_lun = ZFCPController::HexNumSize (fcp_lun, 16);
 	string selected = ZFCPController::selected[k]:false
 	    // table cell
 	    ? _("Yes")
@@ -284,7 +259,7 @@ define symbol AddZFCPDiskDialog () ``{
     });
     fcp_lun = tohexstring (new_lun);
     if (fcp_lun != "")
-	fcp_lun = HexNumSize (fcp_lun, 16);
+	fcp_lun = ZFCPController::HexNumSize (fcp_lun, 16);
 
     list<string>items = [];
     if (Mode::config ())

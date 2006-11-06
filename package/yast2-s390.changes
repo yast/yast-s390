@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Nov  6 13:13:09 CET 2006 - locilka@suse.cz
+
+- Call /sbin/zfcp_disk_configure always with 16-digit hex numbers
+  (#205503).
+- 2.13.16
+
+-------------------------------------------------------------------
 Fri Jun  2 07:37:00 CEST 2006 - jsrain@suse.cz
 
 - call mkinitd and zipl after disk activation in running system in
