@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Jan 18 16:06:48 CET 2007 - jsrain@suse.cz
+
+- added _proposal clients for DASD and zFCP (#160399)
+
+-------------------------------------------------------------------
 Mon Nov  6 13:13:09 CET 2006 - locilka@suse.cz
 
 - Call /sbin/zfcp_disk_configure always with 16-digit hex numbers

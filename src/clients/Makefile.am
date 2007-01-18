@@ -11,7 +11,9 @@ client_DATA =			\
 	xpram.ycp		\
 	dump.ycp		\
 	inst_dasd.ycp		\
-	inst_zfcp.ycp
+	inst_zfcp.ycp		\
+	dasd_proposal.ycp	\
+	zfcp_proposal.ycp
 
 desktop_DATA =			\
 	zfcp.desktop		\
