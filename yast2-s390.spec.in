@@ -27,4 +27,5 @@ Summary:	Configuration of s390
 @moduledir@/*
 @scrconfdir@/*.scr
 @desktopdir@/*.desktop
+@schemadir@/autoyast/rnc/*.rnc
 %doc @docdir@

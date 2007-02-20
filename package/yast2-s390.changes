@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Feb 20 13:16:20 CET 2007 - jsrain@suse.cz
+
+- packed missing schema files for AutoYaST (#242148)
+
+-------------------------------------------------------------------
 Thu Jan 18 16:06:48 CET 2007 - jsrain@suse.cz
 
 - added _proposal clients for DASD and zFCP (#160399)
