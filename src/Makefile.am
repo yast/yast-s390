@@ -1,1 +1,1 @@
-SUBDIRS = zfcp dasd xpram dump modules clients
+SUBDIRS = zfcp dasd xpram dump modules clients config

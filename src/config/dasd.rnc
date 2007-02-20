@@ -1,0 +1,89 @@
+default namespace = "http://www.suse.com/1.0/yast2ns"
+namespace a = "http://relaxng.org/ns/compatibility/annotations/1.0"
+namespace config = "http://www.suse.com/1.0/configns"
+
+
+dasd = element dasd {
+    element devices {
+        LIST,
+        element listentry {
+            element bus { text }? &
+            element bus_hwcfg { text }? &
+            element channel { text }? &
+            element class_id { INTEGER }? &
+            element detail {
+                element cu_model  { INTEGER }? &
+                element dev_model { INTEGER }? &
+                element lcss      { INTEGER }?
+            }? &
+            element dev_name { text }? &
+            element dev_names {
+                LIST,
+                element listentry { text }*
+            }? &
+            element dev_num {
+                element major { INTEGER }? &
+                element minor { INTEGER }? &
+                element range { INTEGER }? &
+                element type { text }?
+            }? &
+            element device { text }? &
+            element device_id { INTEGER }? &
+            element driver { text }? &
+            element drivers {
+                LIST,
+                element listentry {
+                    element active { BOOLEAN }? &
+                    element modprobe { BOOLEAN }? &
+                    element modules {
+                        LIST,
+                        element module_entry {
+                            LIST,
+                            element listentry { text }*
+                        }*
+                    }*
+                }*
+            }? &
+            element formatted { BOOLEAN }? &
+            element model { text }? &
+            element old_unique_key { text }? &
+            element partition_info { text }? &
+            element prog_if { INTEGER }? &
+            element resource {
+                element disk_log_geo {
+                    LIST,
+                    element listentry {
+                        element cylinders { INTEGER }? &
+                        element heads     { INTEGER }? &
+                        element sectors   { INTEGER }?
+                    }*
+                }? &
+                element io {
+                    LIST,
+                    element listentry {
+                        element active { BOOLEAN }? &
+                        element length { INTEGER }? &
+                        element mode   { text }? &
+                        element start  { INTEGER }?
+                    }*
+                }? &
+                element size {
+                    LIST,
+                    element listentry {
+                        element unit { text }? &
+                        element x    { INTEGER }? &
+                        element y    { INTEGER }?
+                    }*
+                }?
+            }? &
+            element sub_class_id { INTEGER }? &
+            element sub_device_id { INTEGER }? &
+            element sysfs_bus_id  { text }? &
+            element udi { text }? &
+            element unique_key { text }? &
+            element vendor { text }? &
+            element vendor_id { INTEGER }?
+        }*
+    }?
+}
+
