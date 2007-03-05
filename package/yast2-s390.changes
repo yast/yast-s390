@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Mar  5 09:38:17 CET 2007 - jsrain@suse.cz
+
+- removed ExclusiveArch (#242148)
+
+-------------------------------------------------------------------
 Tue Feb 20 13:16:20 CET 2007 - jsrain@suse.cz
 
 - packed missing schema files for AutoYaST (#242148)
