@@ -4,8 +4,6 @@
 BuildRequires:	docbook-xsl-stylesheets doxygen libxslt perl-XML-Writer sgml-skel update-desktop-files yast2 yast2-devtools yast2-testsuite
 Requires:	yast2 s390-tools
 
-ExclusiveArch:	s390 s390x
-
 Summary:	Configuration of s390
 
 %description
