@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Mar 14 10:29:15 CET 2007 - mvidner@suse.cz
+
+- Tell yast2-schema about our schema pieces (#242148).
+- 2.13.20
+
+-------------------------------------------------------------------
 Mon Mar  5 09:38:17 CET 2007 - jsrain@suse.cz
 
 - removed ExclusiveArch (#242148)
