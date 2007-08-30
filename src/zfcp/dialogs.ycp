@@ -290,12 +290,18 @@ define symbol AddZFCPDiskDialog () ``{
 	    _("&Channel Number"),
 	    items),
 	`VSpacing (2),
-	// text entry
-	`TextEntry(`id(`wwpn), _("&WWPN"),
-	    ZFCPController::previous_settings["wwpn"]:""),
+       `HBox(
+         // text entry
+         `ComboBox(`id(`wwpn), `opt(`hstretch), _("&WWPN"),
+           [ ZFCPController::previous_settings["wwpn"]:"" ]),
+         `PushButton(`id(`get_wwpn), _("Get WWPN's"))
+            ),
 	`VSpacing (2),
+       `HBox(
 	// text entry
-	`TextEntry(`id(`fcp_lun), _("&FCP-LUN"), fcp_lun),
+        `ComboBox(`id(`fcp_lun), _("&FCP-LUN"), [ fcp_lun ]),
+        `PushButton(`id(`get_lun), _("Get LUN's"))
+            ),
 	`VStretch ()
     ), `HStretch ());
 
@@ -310,7 +316,17 @@ define symbol AddZFCPDiskDialog () ``{
     {
 	ret = UI::UserInput();
 
-	if (ret == `abort || ret == `cancel)
+       if (ret == `get_wwpn){
+        list<string> items = ZFCPController::GetWWPNs((string)UI::QueryWidget(`channel, `Value));
+        UI::ChangeWidget(`wwpn, `Items, items);
+        ret=nil;
+       }
+       else if (ret == `get_lun){
+        list<string> items = ZFCPController::GetLUNs((string)UI::QueryWidget(`channel, `Value), (string)UI::QueryWidget(`wwpn, `Value));
+        UI::ChangeWidget(`fcp_lun, `Items, items);
+        ret=nil;
+       }
+       else if (ret == `abort || ret == `cancel)
 	{
 	    // yes-no popup
 	    if (! Popup::YesNo (_("Really leave the ZFCP disk configuration without saving?

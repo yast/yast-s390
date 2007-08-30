@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Aug 30 10:09:37 CEST 2007 - mzugec@suse.cz
+
+- zfcp discovery in add dialog (fate#300869)
+- 2.13.21 
+
+-------------------------------------------------------------------
 Wed Mar 14 10:29:15 CET 2007 - mvidner@suse.cz
 
 - Tell yast2-schema about our schema pieces (#242148).
