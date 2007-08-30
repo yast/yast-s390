@@ -21,7 +21,7 @@ import "Progress";
 import "Report";
 import "Stage";
 import "Summary";
-
+import "Popup";
 
 global map<integer,map<string,any> > devices = $[];
 
@@ -437,6 +437,29 @@ global define void DeactivateDisk (string channel, string wwpn, string lun) {
     ReportActivationError (channel, ret);
     disk_configured = true;
 }
+
+ list<string> runCommand(string cmd){
+  list<string> ret = [];
+  map<string, any> cmd_output = (map<string, any>)SCR::Execute(.target.bash_output, cmd);
+  if (cmd_output["exit"]:-1==0){
+   ret = splitstring(cmd_output["stdout"]:"", "\n");
+   ret = filter(string row, ret, {return (size(row)>0);});
+  } else {
+    Popup::Error(cmd_output["stderr"]:"");
+   }
+  y2milestone("command %1, output %2", cmd, cmd_output);
+  return ret;
+ }
+
+ global list<string> GetWWPNs(string busid){
+  return runCommand(sformat("zfcp_san_disc -b '%1' -W", busid));
+ }
+
+ global list<string> GetLUNs(string busid, string wwpn){
+  return runCommand(sformat("zfcp_san_disc -b '%1' -p '%2' -L", busid, wwpn));
+ }
+
+
 
 /* EOF */
 }
