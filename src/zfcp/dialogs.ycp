@@ -292,15 +292,15 @@ define symbol AddZFCPDiskDialog () ``{
 	`VSpacing (2),
        `HBox(
          // text entry
-         `ComboBox(`id(`wwpn), `opt(`hstretch), _("&WWPN"),
+         `ComboBox(`id(`wwpn), `opt(`hstretch, `editable), _("&WWPN"),
            [ ZFCPController::previous_settings["wwpn"]:"" ]),
-         `PushButton(`id(`get_wwpn), _("Get WWPN's"))
+         `PushButton(`id(`get_wwpn), _("Get WWPNs"))
             ),
 	`VSpacing (2),
        `HBox(
 	// text entry
-        `ComboBox(`id(`fcp_lun), _("&FCP-LUN"), [ fcp_lun ]),
-        `PushButton(`id(`get_lun), _("Get LUN's"))
+        `ComboBox(`id(`fcp_lun), `opt(`editable), _("&FCP-LUN"), [ fcp_lun ]),
+        `PushButton(`id(`get_lun), _("Get LUNs"))
             ),
 	`VStretch ()
     ), `HStretch ());
