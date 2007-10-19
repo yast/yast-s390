@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Oct 19 13:13:17 CEST 2007 - mzugec@suse.de
+
+- allow to select zfcp WWPN and LUN manually (#332690)
+- 2.16.0 
+
+-------------------------------------------------------------------
 Thu Aug 30 09:40:46 CEST 2007 - mzugec@suse.cz
 
 - zfcp discovery in add dialog (fate#300869)
