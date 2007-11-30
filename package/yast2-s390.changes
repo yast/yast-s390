@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Nov 30 10:55:21 CET 2007 - jsrain@suse.cz
+
+- merged texts from proofread
+
+-------------------------------------------------------------------
 Fri Oct 19 13:13:17 CEST 2007 - mzugec@suse.de
 
 - allow to select zfcp WWPN and LUN manually (#332690)
