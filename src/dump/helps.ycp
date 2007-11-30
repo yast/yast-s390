@@ -17,9 +17,10 @@ textdomain "s390";
 map DUMP_HELPS = $[
 
     /* Read dialog help 1/2 */
-    "read" : _("<p><b><big>Initializing Dump Devices Configuration</big></b>
+    "read" : _("<p><b><big>Initializing Dump Device Configuration</big></b>
 <br>
-Please wait...<br></p>") +
+Please wait...<br></p>
+") +
 
     /* Read dialog help 2/2 */
     _("<p><b><big>Aborting Initialization:</big></b><br>
