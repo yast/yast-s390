@@ -21,3 +21,4 @@ Exec=/sbin/yast2 dump
 
 Name=Dump Devices
 GenericName=Configure Dump Devices
+StartupNotify=true
