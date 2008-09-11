@@ -44,7 +44,7 @@ An additional dialog informs whether it is safe to do so.</p>"),
 This dialog shows configured dump devices for your system.</p>")
 +
     // Dump dialog symmart help 2/2
-_("<p>To add configure a new dump device, click <b>Add</b>. To edit an
+_("<p>To add and configure a new dump device, click <b>Add</b>. To edit an
 already configured dump device, select it and click <b>Edit</b>.
 To remove a configured dump device, select it and click <b>Delete</b>.</p>"),
 
