@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Oct 16 02:37:46 CEST 2008 - ro@suse.de
+
+- temporary workaround for yast2-schema:
+  require s390-tools only on s390 and s390x
+- 2.17.0
+
+-------------------------------------------------------------------
 Thu Sep 11 08:32:14 CEST 2008 - jsrain@suse.cz
 
 - merged texts from proofread
