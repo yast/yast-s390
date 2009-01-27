@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Jan 27 12:25:41 CET 2009 - mzugec@suse.cz
+
+- descriptions for return values  (bnc#446998)
+- 2.17.1 
+
+-------------------------------------------------------------------
 Thu Oct 16 02:37:46 CEST 2008 - ro@suse.de
 
 - temporary workaround for yast2-schema:

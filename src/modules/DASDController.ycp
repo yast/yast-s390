@@ -388,6 +388,16 @@ define void ReportActivationError (any id, integer ret) {
 	    Report::Error (sformat (
 		// error report, %1 is device identification
 		_("%1: Could not change state of the device"), id));
+	else if (ret == 5)
+	    // https://bugzilla.novell.com/show_bug.cgi?id=446998#c15
+	    Report::Error (sformat (
+		// error report, %1 is device identification
+		_("%1: device is not a DASD"), id));
+	else if (ret == 6)
+	    // https://bugzilla.novell.com/show_bug.cgi?id=446998#c15
+	    Report::Error (sformat (
+		// error report, %1 is device identification
+		_("%1: Could not load module"), id));
 	else
 	    Report::Error (sformat (
 		// error report, %1 is device identification, %2 is integer code
