@@ -46,7 +46,7 @@ define symbol XpRAMDialog () {
     string fstype	= Xpram::fstype;
 
     list m_points = [ "swap", "/home2" ];
-    list f_types  = [ "ext2", "ext3", "swap" ];
+    list f_types  = [ "ext2", "ext3", "ext4", "swap" ];
 
     term con = `HBox (`HSpacing (3), `VBox (
         `VSpacing (2),
