@@ -10,7 +10,8 @@ Requires:       s390-tools
 Summary:	YaST2 - S/390 Specific Features Configuration
 
 %description
--
+This package contains the YaST component for configuration of
+S/390-specific features.
 
 @PREP@
 
