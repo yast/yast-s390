@@ -7,7 +7,7 @@ Requires:       yast2
 Requires:       s390-tools
 %endif
 
-Summary:	Configuration of s390
+Summary:	YaST2 - S/390 Specific Features Configuration
 
 %description
 -
