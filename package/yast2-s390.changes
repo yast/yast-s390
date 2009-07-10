@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Jul 10 11:35:50 CEST 2009 - coolo@novell.com
+
+- use the right template to work with automake 1.11
+- 2.18.1
+
+-------------------------------------------------------------------
 Tue Jan 27 12:20:16 CET 2009 - mzugec@suse.cz
 
 - descriptions for return values  (bnc#446998)
