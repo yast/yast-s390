@@ -299,7 +299,7 @@ define symbol AddZFCPDiskDialog () ``{
 	`VSpacing (2),
        `HBox(
 	// text entry
-        `ComboBox(`id(`fcp_lun), `opt(`editable), _("&FCP-LUN"), [ fcp_lun ]),
+        `ComboBox(`id(`fcp_lun), `opt(`hstretch, `editable), _("&FCP-LUN"), [ fcp_lun ]),
         `PushButton(`id(`get_lun), _("Get LUNs"))
             ),
 	`VStretch ()
