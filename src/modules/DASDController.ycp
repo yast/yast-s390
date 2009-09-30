@@ -411,8 +411,7 @@ define void ReportActivationError (any id, integer ret) {
  * @param diag boolean Activate DIAG or not
  */
 global define void ActivateDisk (string channel, boolean diag) {
-    if (! Arch::s390_32 ())
-	diag = false;
+//    if (! Arch::s390_32 ()) diag = false;
     string command = sformat (
 	"/sbin/dasd_configure %1 %2 %3",
 	channel,
@@ -431,8 +430,7 @@ global define void ActivateDisk (string channel, boolean diag) {
  * @param diag boolean Activate DIAG or not
  */
 global define void DeactivateDisk (string channel, boolean diag) {
-    if (! Arch::s390_32 ())
-	diag = false;
+ //   if (! Arch::s390_32 ()) diag = false;
     string command = sformat (
 	"/sbin/dasd_configure %1 %2 %3",
 	channel,

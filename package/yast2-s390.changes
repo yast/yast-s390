@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Sep 30 09:46:42 CEST 2009 - mzugec@suse.cz
+
+- L3: configure diag for dasd disks (bnc#530411)
+- 2.17.3 
+
+-------------------------------------------------------------------
 Fri Aug  7 11:03:21 CEST 2009 - mzugec@suse.cz
 
 - stretch zfcp dialog (bnc#524128)
