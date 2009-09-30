@@ -1,0 +1,7 @@
+Makefile
+Makefile.in
+*.ybc
+.dep
+common
+cups
+lprng

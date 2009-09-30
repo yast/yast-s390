@@ -1,0 +1,318 @@
+-------------------------------------------------------------------
+Wed Sep 30 09:46:42 CEST 2009 - mzugec@suse.cz
+
+- L3: configure diag for dasd disks (bnc#530411)
+- 2.17.3 
+
+-------------------------------------------------------------------
+Fri Aug  7 11:03:21 CEST 2009 - mzugec@suse.cz
+
+- stretch zfcp dialog (bnc#524128)
+- 2.17.2 
+
+-------------------------------------------------------------------
+Tue Jan 27 12:25:41 CET 2009 - mzugec@suse.cz
+
+- descriptions for return values  (bnc#446998)
+- 2.17.1 
+
+-------------------------------------------------------------------
+Thu Oct 16 02:37:46 CEST 2008 - ro@suse.de
+
+- temporary workaround for yast2-schema:
+  require s390-tools only on s390 and s390x
+- 2.17.0
+
+-------------------------------------------------------------------
+Thu Sep 11 08:32:14 CEST 2008 - jsrain@suse.cz
+
+- merged texts from proofread
+
+-------------------------------------------------------------------
+Fri May 16 16:40:22 CEST 2008 - jsrain@suse.cz
+
+- added categories Settings and System into desktop file
+  (bnc #382778)
+
+-------------------------------------------------------------------
+Mon Mar 17 12:43:32 CET 2008 - jsrain@suse.cz
+
+- added 'StartupNotify=true' to the desktop file (bnc #304964)
+
+-------------------------------------------------------------------
+Tue Jan 15 11:04:14 CET 2008 - jsrain@suse.cz
+
+- added missing HTML tag (#351063)
+
+-------------------------------------------------------------------
+Fri Nov 30 10:55:21 CET 2007 - jsrain@suse.cz
+
+- merged texts from proofread
+
+-------------------------------------------------------------------
+Fri Oct 19 13:13:17 CEST 2007 - mzugec@suse.de
+
+- allow to select zfcp WWPN and LUN manually (#332690)
+- 2.16.0 
+
+-------------------------------------------------------------------
+Thu Aug 30 09:40:46 CEST 2007 - mzugec@suse.cz
+
+- zfcp discovery in add dialog (fate#300869)
+- 2.15.1 
+
+-------------------------------------------------------------------
+Wed Mar 14 10:29:15 CET 2007 - mvidner@suse.cz
+
+- Tell yast2-schema about our schema pieces (#242148).
+
+-------------------------------------------------------------------
+Mon Mar  5 09:38:17 CET 2007 - jsrain@suse.cz
+
+- removed ExclusiveArch (#242148)
+
+-------------------------------------------------------------------
+Tue Feb 20 13:16:20 CET 2007 - jsrain@suse.cz
+
+- packed missing schema files for AutoYaST (#242148)
+- 2.15.0
+
+-------------------------------------------------------------------
+Thu Jan 18 16:06:48 CET 2007 - jsrain@suse.cz
+
+- added _proposal clients for DASD and zFCP (#160399)
+
+-------------------------------------------------------------------
+Mon Nov  6 13:13:09 CET 2006 - locilka@suse.cz
+
+- Call /sbin/zfcp_disk_configure always with 16-digit hex numbers
+  (#205503).
+- 2.13.16
+
+-------------------------------------------------------------------
+Fri Jun  2 07:37:00 CEST 2006 - jsrain@suse.cz
+
+- call mkinitd and zipl after disk activation in running system in
+  order to have the disks activated also after reboot (#181085)
+- 2.13.15
+
+-------------------------------------------------------------------
+Tue May 23 17:13:37 CEST 2006 - jsrain@suse.cz
+
+- updated error messages for ZFCP disk activation (#159552)
+- 2.13.14
+
+-------------------------------------------------------------------
+Wed May 18 08:40:08 CEST 2006 - mskibbe@suse.de
+
+- Bug #155407 - Yast: Installation doesn't recognize partition on FBA VDISK
+
+-------------------------------------------------------------------
+Wed May 10 08:56:08 CEST 2006 - ihno@use.de
+
+- Write config values in correct order and activate XPRAM (#161352)
+- Correct the use of the force-option. (#161363)
+- 2.13.13
+
+-------------------------------------------------------------------
+Thu May  4 14:15:25 CEST 2006 - locilka@suse.cz
+
+- merged texts from proofreading 
+
+-------------------------------------------------------------------
+Wed Apr 26 21:15:30 CEST 2006 - jsrain@suse.de
+
+- fixed reporting errors when activating a zFCP disk, enhanced
+  help texts (#159552)
+- 2.13.12
+
+-------------------------------------------------------------------
+Tue Apr 25 16:31:32 CEST 2006 - jsrain@suse.de
+
+- fixed activating of zFCP disks (#159555) (hare)
+- 2.13.11
+
+-------------------------------------------------------------------
+Mon Apr 24 03:48:41 PDT 2006 - ihno@suse.de
+
+- fixed update of sysconfig-file (#161352)
+- added force option to handle XPRAM which contains
+  valid data. (#161363)
+
+-------------------------------------------------------------------
+Thu Apr 20 10:56:13 CEST 2006 - ug@suse.de
+
+- Fix ZFCP disk display (#159555 - LTC22544)
+- Display and filter DASD on lcss 1 correctly 
+  (#152915 - LTC21934)
+- 2.13.9
+
+-------------------------------------------------------------------
+Wed Apr 19 15:48:15 CEST 2006 - ug@suse.de
+
+- fixed some cloning stuff for DASD and ZFCP for
+  autoyast
+- 2.13.8
+
+-------------------------------------------------------------------
+Thu Mar 23 09:53:03 CET 2006 - locilka@suse.cz
+
+- Replacing UI::Glyph(`CheckMark) with _("Yes") in UI (#145602)
+- 2.13.7
+
+-------------------------------------------------------------------
+Fri Mar 17 17:07:03 CET 2006 - jsrain@suse.de
+
+- allow DASD and zFCP disks configuration clonning (#153378)
+- fixed displaying dump devices (#149978)
+- 2.13.6
+
+-------------------------------------------------------------------
+Fri Mar 10 15:29:40 CET 2006 - locilka@suse.cz
+
+- merged texts from proofreading
+- 2.13.5
+
+-------------------------------------------------------------------
+Wed Mar  8 23:34:11 CET 2006 - jsrain@suse.de
+
+- fixed adding zFCP disks (#151832)
+- adapted BuildRequires
+- 2.13.4
+
+-------------------------------------------------------------------
+Tue Feb 21 22:40:49 CET 2006 - jsrain@suse.de
+
+- fixed creating dump device (#148661)
+- 2.13.3
+
+-------------------------------------------------------------------
+Sat Feb 18 09:45:35 CET 2006 - ihno@suse.de
+
+- Add Warning message for adding SAN-devices (Feature 300437)
+
+-------------------------------------------------------------------
+Thu Feb  9 02:03:40 CET 2006 - ihno@suse.de
+
+- initial version of XPRAM
+
+-------------------------------------------------------------------
+Mon Jan 23 10:27:55 CET 2006 - jsrain@suse.cz
+
+- fixed reading DASD disks (#144298)
+- 2.13.1
+
+-------------------------------------------------------------------
+Wed Jan 11 14:21:21 CET 2006 - jsrain@suse.cz
+
+- added clients to be called during installation (keep the left
+  progress steps)
+- 2.13.0
+
+-------------------------------------------------------------------
+Wed Oct  5 13:21:36 CEST 2005 - jsrain@suse.cz
+
+- added filtering to the zFCP disks dialog (#81867)
+
+-------------------------------------------------------------------
+Mon Oct  3 11:11:13 CEST 2005 - jsrain@suse.cz
+
+- display zFCP LUN as 16-digit hexa number (#118430)
+- allow to keep the the DASD label when formatting (#57598)
+
+-------------------------------------------------------------------
+Tue Apr 19 14:19:56 CEST 2005 - jsrain@suse.cz
+
+- added preliminary support for dump devices configuration
+
+-------------------------------------------------------------------
+Thu Nov 18 13:43:01 CET 2004 - jsrain@suse.cz
+
+- using dasdview to detect if a DASD disk is formatted (#42986)
+
+-------------------------------------------------------------------
+Fri Nov  5 13:14:47 CET 2004 - jsrain@suse.cz
+
+- fixed problems when formatting >26 DASDs (#47699)
+
+-------------------------------------------------------------------
+Wed Oct 27 15:17:43 CEST 2004 - jsrain@suse.cz
+
+- adapted to new Mode:: interface
+- 2.11.1
+
+-------------------------------------------------------------------
+Mon Oct 11 16:50:10 CEST 2004 - jsrain@suse.cz
+
+- adapted to new Arch:: interface
+
+-------------------------------------------------------------------
+Mon Sep  6 13:31:47 CEST 2004 - jsrain@suse.cz
+
+- ask for confirmation before formatting the DASD disks (#44376)
+
+-------------------------------------------------------------------
+Fri Sep  3 14:40:11 CEST 2004 - jsrain@suse.cz
+
+- added GetModified and SetModified functions to _auto clients
+
+-------------------------------------------------------------------
+Tue May  4 15:39:03 CEST 2004 - jsrain@suse.cz
+
+- merged texts from proofreading
+- 2.9.5
+
+-------------------------------------------------------------------
+Mon May  3 15:46:08 CEST 2004 - jsrain@suse.cz
+
+- added autoinstallation support for DASD disks (#39806)
+- displaying all required information for DASD disks (#39806)
+- allow to set the DIAG mode on 31-bit S390 (#39806)
+- 2.9.4
+
+-------------------------------------------------------------------
+Thu Apr 29 16:26:24 CEST 2004 - jsrain@suse.cz
+
+- activate zfcp adapter before activating any disk of it (#39339)
+- offer DASD disks setup on mixed (DASD+ZFCP) system (#39338)
+- added AI support for ZFCP disks
+- added help texts
+- 2.9.3
+
+-------------------------------------------------------------------
+Fri Apr  2 16:14:42 CEST 2004 - jsrain@suse.de
+
+- changed license to GPL
+- 2.9.2
+
+-------------------------------------------------------------------
+Wed Mar 17 09:46:48 CET 2004 - jsrain@suse.cz
+
+- added comments for translators
+
+-------------------------------------------------------------------
+Fri Mar 12 17:46:25 CET 2004 - jsrain@suse.de
+
+- added support for DASD disks formatting
+- 2.9.1
+
+-------------------------------------------------------------------
+Thu Mar 11 11:39:35 CET 2004 - jsrain@suse.de
+
+- fixed detection of unconfigured DASD disks
+
+-------------------------------------------------------------------
+Wed Mar 10 11:11:20 CET 2004 - jsrain@suse.de
+
+- added checking of DASD-only/zFCP-only/mixed system
+- removed filter support fro zFCP disks
+- fixed .spec file (use ExclusiveArch)
+- fixed parameters of dasd_configure script
+- better defaults for new ZFCP disk, combo box for channels
+- adapted to changed structure of hwinfo's output
+
+-------------------------------------------------------------------
+Mon Mar  8 17:54:03 CET 2004 - jsrain@suse.de
+
+- initial version
+- 2.9.0

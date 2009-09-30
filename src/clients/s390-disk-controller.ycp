@@ -1,0 +1,108 @@
+/**
+ * File:	clients/controller.ycp
+ * Package:	Configuration of controller
+ * Summary:	Main file
+ * Authors:	Jiri Srain <jsrain@suse.cz>
+ *
+ * $Id$
+ *
+ * Main file for controller configuration. Uses all other files.
+ */
+
+{
+
+/***
+ * <h3>Configuration of controller</h3>
+ */
+
+textdomain "s390";
+
+/* The main () */
+y2milestone ("----------------------------------------");
+y2milestone ("S/390 Controller module started");
+
+import "Progress";
+import "Report";
+import "Summary";
+import "Wizard";
+import "Label";
+
+import "DASDController";
+import "ZFCPController";
+
+// popup label
+UI::OpenDialog (`Label (_("Detecting Available Controllers")));
+
+boolean have_dasd = DASDController::IsAvailable ();
+boolean have_zfcp = ZFCPController::IsAvailable ();
+
+y2milestone ("Have DASD: %1, have zFCP: %2", have_dasd, have_zfcp);
+
+UI::CloseDialog ();
+
+if (have_dasd && ! have_zfcp)
+{
+    y2milestone ("Having DASD-only system");
+    return WFM::call ("dasd");
+}
+else if (have_zfcp && ! have_dasd)
+{
+    y2milestone ("Having zFCP-only system");
+    return WFM::call ("zfcp");
+}
+
+
+/* Initialization dialog caption */
+string caption = _("S/390 Disk Controller Configuration");
+/* Initialization dialog contents */
+term contents = `HBox (`HWeight (999, `HStretch ()), `VBox (
+    `VStretch (),
+    `HWeight (1, `PushButton (`id (`dasd), `opt (`hstretch),
+	// push button
+	_("Configure &DASD Disks"))),
+    `VSpacing (2),
+    `HWeight (1, `PushButton (`id (`zfcp), `opt (`hstretch),
+	// push button
+	_("Configure &ZFCP Disks"))),
+    `VStretch ()
+), `HWeight (999, `HStretch ()));
+
+
+`Label(_("Initializing..."));
+
+Wizard::CreateDialog();
+Wizard::SetDesktopIcon("disk");
+Wizard::SetContentsButtons(caption, contents, "",
+    Label::BackButton(), Label::FinishButton());
+
+Wizard::HideBackButton();
+
+any ret = nil;
+while (ret == nil)
+{
+    ret = UI::UserInput ();
+    if (ret == `dasd)
+    {
+	WFM::call ("dasd");
+	ret = nil;
+    }
+    else if (ret == `zfcp)
+    {
+	WFM::call ("zfcp");
+	ret = nil;
+    }
+}
+
+UI::CloseDialog();
+return ret;
+
+y2debug("ret=%1", ret);
+
+/* Finish */
+y2milestone("S/390 controller module finished");
+y2milestone("----------------------------------------");
+
+return ret;
+
+/* EOF */
+}

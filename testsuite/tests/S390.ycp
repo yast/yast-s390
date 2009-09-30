@@ -1,0 +1,13 @@
+{
+
+// testedfiles: S390.ycp
+
+include "testsuite.ycp";
+TESTSUITE_INIT([], nil);
+
+import "DASDController";
+
+DUMP("DASDController::Modified");
+TEST(``(DASDController::Modified()), [], nil);
+
+}

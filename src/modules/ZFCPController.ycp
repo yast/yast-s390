@@ -1,0 +1,465 @@
+/**
+ * File:	modules/ZFCPController.ycp
+ * Package:	Configuration of controller
+ * Summary:	Controller settings, input and output functions
+ * Authors:	Jiri Srain <jsrain@suse.cz>
+ *
+ * $Id$
+ *
+ * Representation of the configuration of controller.
+ * Input and output routines.
+ */
+
+{
+
+module "ZFCPController";
+textdomain "s390";
+
+import "Arch";
+import "Mode";
+import "Progress";
+import "Report";
+import "Stage";
+import "Summary";
+import "Popup";
+
+global map<integer,map<string,any> > devices = $[];
+
+global map<integer, boolean> selected = $[];
+
+global string filter_min = "0x0000";
+
+global string filter_max = "0xffff";
+
+global map<string, any> previous_settings = $[];
+
+list<map<string,any> > controllers = nil;
+
+map<string,boolean> activated_controllers = $[];
+
+
+global define void ActivateDisk (string channel, string wwpn, string lun);
+global define void ProbeDisks();
+
+boolean disk_configured = false;
+
+/**
+ * Update the size of hexa number via adding leading zeros
+ * @param hex string a hexa number (withou or without leading 0x)
+ * @param digits the count of digits (excluding leading 0x)
+ * @return hex string with specified length
+ */
+global string HexNumSize (string hex, integer digits) {
+    boolean leading0x = false;
+    if (substring (hex, 0, 2) == "0x")
+    {
+        leading0x = true;
+        hex = substring (hex, 2);
+    }
+    while (size (hex) < digits)
+    {
+        hex = "0" + hex;
+    }
+    if (leading0x)
+    {
+        hex = "0x" + hex;
+    }
+    return hex;
+}
+
+/**
+ * Prototypes
+ */
+global boolean Modified();
+
+/**
+ * Data was modified?
+ */
+global boolean modified = false;
+
+/**
+ */
+global boolean proposal_valid = false;
+
+/**
+ * Write only, used during autoinstallation.
+ * Don't run services and SuSEconfig, it's all done at one place.
+ */
+global boolean write_only = false;
+
+/**
+ * Abort function
+ * return boolean return true if abort
+ */
+global boolean() AbortFunction = Modified;
+
+/**
+ * Abort function
+ * @return blah blah lahjk
+ */
+global define boolean Abort() ``{
+    if(AbortFunction != nil)
+	return AbortFunction ();
+    return false;
+}
+
+/**
+ * Data was modified?
+ * @return true if modified
+ */
+global boolean Modified() {
+    y2debug("modified=%1",modified);
+    return modified;
+}
+
+/**
+ * Is this kind of disk controller available?
+ * @return boolean true if it is
+ */
+global boolean Available () {
+    return true;
+}
+
+/**
+ * Read all controller settings
+ * @return true on success
+ */
+global boolean Read() {
+    disk_configured = false;
+    return true;
+}
+
+/**
+ * Write all controller settings
+ * @return true on success
+ */
+global boolean Write() {
+    if (disk_configured && Mode::normal ())
+    {
+	string command = "/sbin/mkinitrd && /sbin/zipl";
+	y2milestone ("Running command %1", command);
+	any ret = SCR::Execute (.target.bash, command);
+	y2milestone ("Exit code: %1", ret);
+    }
+    else
+    {
+	y2milestone ("No new disk configured");
+    }
+    return true;
+
+}
+
+/**
+ * Get all controller settings from the first parameter
+ * (For use by autoinstallation.)
+ * @param settings The YCP structure to be imported.
+ * @return boolean True on success
+ */
+global boolean Import (map settings) {
+    if (Mode::config ())
+    {
+	integer index = -1;
+	devices = listmap (map d, settings["devices"]:[], {
+	    index = index + 1;
+	    map<string,any> m = $[
+		"detail" : $[
+		    "controller_id" : d["controller_id"]:"",
+		    "wwpn" : d["wwpn"]:"",
+		    "fcp_lun" : d["fcp_lun"]:"",
+		],
+	    ];
+	    return $[ index : m ];
+	});
+    }
+    else if (Stage::initial ())
+    {
+	foreach (map d, settings["devices"]:[], {
+	    ActivateDisk (d["controller_id"]:"", d["wwpn"]:"", d["fcp_lun"]:"");
+	});
+    }
+    return true;
+}
+
+/**
+ * Dump the controller settings to a single map
+ * (For use by autoinstallation.)
+ * @return map Dumped settings (later acceptable by Import ())
+ */
+global map Export () {
+ProbeDisks();
+    list<map<string,any> > l = maplist (integer k, map<string,any> v,
+	devices,
+    {
+	return $[
+	    "controller_id" : v["detail","controller_id"]:"",
+	    "wwpn" : v["detail","wwpn"]:"",
+	    "fcp_lun" : v["detail","fcp_lun"]:"",
+	];
+    });
+    return $[
+	"devices" : l,
+    ];
+}
+
+/**
+ * Create a textual summary and a list of unconfigured cards
+ * @return summary of the current configuration
+ */
+global list<string> Summary() {
+    list<string> ret = maplist (integer index, map<string,any> d, devices, {
+	// summary text, %1 is channel ID, %1 is WWPN, %3 is LUN
+	// (all of them are numbers)
+	string s = sformat (_("Channel ID: %1, WWPN: %2, ZFCP LUN: %3"),
+	    d["detail","controller_id"]:"",
+	    d["detail","wwpn"]:"",
+	    d["detail","fcp_lun"]:""
+	);
+	return s;
+    });
+    y2milestone ("Summary: %1", ret);
+    return ret;
+}
+
+/**
+ * Return packages needed to be installed and removed during
+ * Autoinstallation to insure module has all needed software
+ * installed.
+ * @return map with 2 lists.
+ */
+global map AutoPackages() {
+    return $[ "install":[], "remove":[] ];
+}
+
+/**
+ * Check if ZFCP subsystem is available
+ * @return boolean whether the ZFCP-System is availble at all
+ */
+global define boolean IsAvailable () {
+    if (controllers == nil)
+    {
+	controllers = (list<map<string,any> >)SCR::Read (.probe.storage);
+	controllers = filter (map<string,any> c, controllers, {
+	    return c["device"]:"" == "zFCP controller";
+	});
+	y2milestone ("Found %1 zfcp controllers", size (controllers));
+    }
+    return size (controllers) > 0;
+}
+
+/**
+ * Get available zfcp controllers
+ * @return list<map<string,any> > of availabel Controllers
+ */
+global define list<map<string,any> > GetControllers () {
+    if (controllers == nil)
+    {
+	controllers = (list<map<string,any> >)SCR::Read (.probe.storage);
+	controllers = filter (map<string,any> c, controllers, {
+	    return c["device"]:"" == "zFCP controller";
+	});
+	y2milestone ("Found %1 zfcp controllers", size (controllers));
+    }
+    return controllers;
+}
+
+/**
+ * Get available disks
+ */
+global define void ProbeDisks () {
+/*    if (Mode::config ())
+	return;*/
+
+    // popup label
+    UI::OpenDialog (`Label (_("Reading Configured ZFCP Disks")));
+
+    list<map<string,any> > disks = (list<map<string,any> >)
+	SCR::Read (.probe.disk);
+
+    disks = filter (map<string,any> d, disks, ``(
+	d["bus"]:"" == "SCSI"
+    ));
+    integer index = -1;
+    ZFCPController::devices = listmap (map<string,any> d, disks, ``{
+	index = index + 1;
+	return $[ index : d ];
+    });
+    UI::CloseDialog ();
+}
+
+/**
+ * Report error occured during device activation
+ * @param id integer chanel id of the device
+ * @param ret integer exit code of the operation
+ */
+define void ReportActivationError (any id, integer ret) {
+    if (ret != 0)
+    {
+	if (ret == 1)
+	    Report::Error (sformat (
+		// error report, %1 is device identification
+		_("%1: sysfs not mounted."), id));
+	else if (ret == 2)
+	    Report::Error (sformat (
+		// error report, %1 is device identification
+		_("%1: Invalid status for <online>."), id));
+	else if (ret == 3)
+	    Report::Error (sformat (
+		// error report, %1 is device identification
+		_("%1: No device found for <ccwid>."), id));
+	else if (ret == 4)
+	    Report::Error (sformat (
+		// error report, %1 is device identification
+		_("%1: WWPN invalid."), id));
+	else if (ret == 5)
+	    Report::Error (sformat (
+		// error report, %1 is device identification
+		_("%1: Could not activate WWPN for adapter %1."), id));
+	else if (ret == 6)
+	    Report::Error (sformat (
+		// error report, %1 is device identification
+		_("%1: Could not activate ZFCP disk."), id));
+	else if (ret == 7)
+	    Report::Error (sformat (
+		// error report, %1 is device identification
+		_("%1: SCSI disk could not be deactivated."), id));
+	else if (ret == 8)
+	    Report::Error (sformat (
+		// error report, %1 is device identification
+		_("%1: ZFCP LUN could not be unregistered."), id));
+	else if (ret == 9)
+	    Report::Error (sformat (
+		// error report, %1 is device identification
+		_("%1: ZFCP WWPN could not be unregistered."), id));
+	else
+	    Report::Error (sformat (
+		// error report, %1 is device identification, %2 is integer code
+		_("%1: Unknown error %2."), id, ret));
+    }
+}
+
+/**
+ * Report error occured during device activation
+ * @param id integer chanel id of the device
+ * @param ret integer exit code of the operation
+ */
+define void ReportControllerActivationError (any id, integer ret) {
+    if (ret != 0)
+    {
+	if (ret == 1)
+	    Report::Error (sformat (
+		// error report, %1 is device identification
+		_("%1: sysfs not mounted."), id));
+	else if (ret == 2)
+	    Report::Error (sformat (
+		// error report, %1 is device identification
+		_("%1: Invalid status for <online>."), id));
+	else if (ret == 3)
+	    Report::Error (sformat (
+		// error report, %1 is device identification
+		_("%1: Device <ccwid> does not exist."), id));
+	else if (ret == 4)
+	    Report::Error (sformat (
+		// error report, %1 is device identification
+		_("%1: Module zfcp could not be loaded."), id));
+	else if (ret == 5)
+	    Report::Error (sformat (
+		// error report, %1 is device identification
+		_("%1: Adapter status could not be changed."), id));
+	else if (ret == 6)
+	    Report::Error (sformat (
+		// error report, %1 is device identification
+		_("%1: WWPN ports still active."), id));
+	else
+	    Report::Error (sformat (
+		// error report, %1 is device identification, %2 is integer code
+		_("%1: Unknown error %2."), id, ret));
+    }
+}
+
+/**
+ * Activate a disk
+ * @param channel string channel id
+ * @param wwpn string wwpn (hexa number)
+ * @param lun string lun   (hexa number)
+ */
+global define void ActivateDisk (string channel, string wwpn, string lun) {
+
+    if (! activated_controllers[channel]:false)
+    {
+	string command = sformat (
+	    "/sbin/zfcp_host_configure %1 %2",
+	    channel,
+	    1
+	);
+	y2milestone ("Running command %1", command);
+	integer ret = (integer)SCR::Execute (.target.bash, command);
+	if (ret != 0)
+	{
+	    ReportControllerActivationError (channel, ret);
+	}
+	else
+	{
+	    activated_controllers[channel] = true;
+	}
+    }
+
+    string command = sformat (
+	"/sbin/zfcp_disk_configure '%1' '%2' '%3' '%4'",
+	channel,
+	// bugzilla #205503
+	HexNumSize (wwpn, 16),
+	HexNumSize (lun,  16),
+	1
+    );
+    y2milestone ("Running command %1", command);
+    integer ret = (integer)SCR::Execute (.target.bash, command);
+    ReportActivationError (channel, ret);
+    disk_configured = true;
+}
+
+/**
+ * Activate a disk
+ * @param channel string channel id
+ * @param wwpn string wwpn (hexa number)
+ * @param lun string lun   (hexa number)
+ */
+global define void DeactivateDisk (string channel, string wwpn, string lun) {
+    string command = sformat (
+	"/sbin/zfcp_disk_configure '%1' '%2' '%3' '%4'",
+	channel,
+	// bugzilla #205503
+	HexNumSize (wwpn, 16),
+	HexNumSize (lun,  16),
+	0
+    );
+    y2milestone ("Running command %1", command);
+    integer ret = (integer)SCR::Execute (.target.bash, command);
+    ReportActivationError (channel, ret);
+    disk_configured = true;
+}
+
+ list<string> runCommand(string cmd){
+  list<string> ret = [];
+  map<string, any> cmd_output = (map<string, any>)SCR::Execute(.target.bash_output, cmd);
+  if (cmd_output["exit"]:-1==0){
+   ret = splitstring(cmd_output["stdout"]:"", "\n");
+   ret = filter(string row, ret, {return (size(row)>0);});
+  } else {
+    Popup::Error(cmd_output["stderr"]:"");
+   }
+  y2milestone("command %1, output %2", cmd, cmd_output);
+  return ret;
+ }
+
+ global list<string> GetWWPNs(string busid){
+  return runCommand(sformat("zfcp_san_disc -b '%1' -W", busid));
+ }
+
+ global list<string> GetLUNs(string busid, string wwpn){
+  return runCommand(sformat("zfcp_san_disc -b '%1' -p '%2' -L", busid, wwpn));
+ }
+
+
+
+/* EOF */
+}
