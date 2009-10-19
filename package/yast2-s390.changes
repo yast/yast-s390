@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Oct 19 15:38:42 CEST 2009 - mzugec@suse.cz
+
+- error messages more verbose for dump module (bnc#525440)
+- 2.18.4 
+
+-------------------------------------------------------------------
 Wed Sep 30 10:09:49 CEST 2009 - mzugec@suse.cz
 
 - L3: configure diag for dasd disks (bnc#530411)
