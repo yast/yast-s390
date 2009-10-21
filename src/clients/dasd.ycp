@@ -25,16 +25,16 @@ import "Progress";
 import "Report";
 import "Summary";
 
-//import "CommandLine";
+import "CommandLine";
 include "s390/dasd/wizards.ycp";
-/*
+
 map cmdline_description = $[
     "id" 	: "controller",
     // Command line help text for the Xcontroller module
-    "help"	: _("Configuration of controller"),
-    "guihandler"        : ControllerSequence,
-    "initialize"        : Controller::Read,
-    "finish"            : Controller::Write,
+    "help"	: _("Configuration of DASD"),
+    "guihandler"        : DASDSequence,
+    "initialize"        : DASDController::Read,
+    "finish"            : DASDController::Write,
     "actions"           : $[
 	// FIXME TODO: fill the functionality description here
     ],
@@ -45,13 +45,13 @@ map cmdline_description = $[
 	// FIXME TODO: fill the mappings of actions and options here
     ]
 ];
-*/
+
 
 /* main ui function */
 any ret = nil;
 
-//ret = CommandLine::Run(cmdline_description);
-ret = DASDSequence ();
+ret = CommandLine::Run(cmdline_description);
+//ret = DASDSequence ();
 y2debug("ret=%1", ret);
 
 /* Finish */
