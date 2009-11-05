@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Nov  5 17:21:37 CET 2009 - mzugec@suse.cz
+
+- dasd: display DIAG mode (bnc#551268)
+- 2.17.4 
+
+-------------------------------------------------------------------
 Wed Sep 30 09:46:42 CEST 2009 - mzugec@suse.cz
 
 - L3: configure diag for dasd disks (bnc#530411)
