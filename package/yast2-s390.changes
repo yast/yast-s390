@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Nov  6 22:37:04 CET 2009 - mzugec@suse.cz
+
+- fixed help text (bnc#529149)
+- 2.17.6 
+
+-------------------------------------------------------------------
 Fri Nov  6 22:05:26 CET 2009 - mzugec@suse.cz
 
 - error messages more verbose for dump module (bnc#525440)

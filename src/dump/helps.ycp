@@ -52,7 +52,7 @@ To remove a configured dump device, select it and click <b>Delete</b>.</p>"),
     /* Disk add help 1/3 */
     "edit_dump" : _("<p><b><big>Add New Dump Device</big></b><br>
 Prepare a device for use as an S/390 dump device. Supported devices are
-ECKD DASD and zfcp disks. Set <b>Dump Device</b> to select the device
+ECKD DASD. Set <b>Dump Device</b> to select the device
 to format. If the device is already formatted
 or configured, setting
 <b>Install Dump Record Even If Disk Already &Formatted</b> is required.</p>"),
