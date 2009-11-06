@@ -21,7 +21,7 @@ import "Report";
 import "Stage";
 import "Summary";
 import "Arch";
-
+import "FileUtils";
 
 global map<integer,map<string,any> > devices = $[];
 
@@ -319,6 +319,13 @@ global define void ProbeDisks () {
 	    }
 	    d["formatted"] = formatted;
 	    d["partition_info"] = GetPartitionInfo (device);
+	}
+	string diag_file = sformat("/sys/%1/use_diag", d["sysfs_id"]:"");
+	if (FileUtils::Exists(diag_file)){
+	  string use_diag = (string)SCR::Read(.target.string, diag_file);
+//	  y2milestone("use_diag %1", use_diag);
+		if (substring(use_diag,0,1) == "1") diag[channel]=true;
+			else diag[channel]=false;
 	}
 	return d;
     });
