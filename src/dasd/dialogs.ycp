@@ -254,9 +254,9 @@ define void DisplayDASDDialog() {
     term content = `VBox(
 	`HBox(
 	    // text entry
-	    `TextEntry(`id(`min_chan), _("Mi&nimum Channel"), "0.0.0000"),
+	    `InputField(`id(`min_chan), `opt(`hstretch), _("Mi&nimum Channel"), "0.0.0000"),
 	    // text entry
-	    `TextEntry(`id(`max_chan), _("Ma&ximum Channel"), "0.f.ffff"),
+	    `InputField(`id(`max_chan), `opt(`hstretch), _("Ma&ximum Channel"), "0.f.ffff"),
 	    `VBox (
 		`Label (""),
 		// push button

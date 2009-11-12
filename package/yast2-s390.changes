@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Nov 12 17:48:55 CET 2009 - mzugec@suse.cz
+
+- zfcp: fixed devices list filter (bnc#538313)
+- 2.18.8 
+
+-------------------------------------------------------------------
 Thu Nov  5 17:30:14 CET 2009 - mzugec@suse.cz
 
 - dasd: display DIAG mode (bnc#551268)

@@ -27,9 +27,9 @@ global map<integer,map<string,any> > devices = $[];
 
 global map<integer, boolean> selected = $[];
 
-global string filter_min = "0x0000";
+global string filter_min = "0.0.0000";
 
-global string filter_max = "0xffff";
+global string filter_max = "0.f.ffff";
 
 global map<string, any> previous_settings = $[];
 
