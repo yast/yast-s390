@@ -53,20 +53,36 @@ symbol WriteDialog() {
  * @param max_chan integer maximal channel number
  * @return a list of terms for the table
  */
-define list<term> GetZFCPDiskItems(integer min_chan, integer max_chan) ``{
+define list<term> GetZFCPDiskItems(string min_channel, string max_channel) ``{
     integer id = 0;
-
     list<term> items = [];
 
     map<integer,map<string,any> > devices = ZFCPController::devices;
 
-    if (min_chan >= 0)
+    integer min_css = tointeger(substring (min_channel, 0, 1));
+    integer min_lcss = tointeger(sformat("0x%1",substring (min_channel, 2, 1)));
+    integer min_chan = tointeger(sformat("0x%1",substring (min_channel, 4, 4)));
+
+    integer max_css = tointeger(substring (max_channel, 0, 1));
+    integer max_lcss = tointeger(sformat("0x%1",substring (max_channel, 2, 1)));
+    integer max_chan = tointeger(sformat("0x%1",substring (max_channel, 4, 4)));
+
+
+    if (min_chan > 0 || min_lcss > 0 || min_css > 0 ||
+        max_chan < 0xffff || max_lcss < 0xf || max_css < 0xf)
     {
         devices = (map<integer,map<string,any> >)filter (
             integer k, map<string,any> d, devices,
         ``{
-            integer channel = d["resource", "io", 0, "start"]:0;
-            return (channel >= min_chan && channel <= max_chan);
+            string channel = d["detail", "controller_id"]:"0.0.0000";
+            integer tmp_css = tointeger(substring (channel, 0, 1));
+            integer tmp_lcss = tointeger(sformat("0x%1",substring (channel, 2, 1)));
+            integer tmp_chan = tointeger(sformat("0x%1",substring (channel, 4, 4)));
+
+
+            boolean ret = (tmp_css >= min_css && tmp_lcss >= min_lcss && tmp_chan >= min_chan
+                   && tmp_css <= max_css && tmp_lcss <= max_lcss && tmp_chan <= max_chan);
+	  return ret;
         });
     }
 
@@ -92,16 +108,12 @@ define list<term> GetZFCPDiskItems(integer min_chan, integer max_chan) ``{
  * Restart the ZFCP-Dialog
  */
 define void ReloadZFCPDialog () ``{
-    ZFCPController::filter_min = (string)
-        UI::QueryWidget(`min_chan, `Value);
-    ZFCPController::filter_max = (string)
-        UI::QueryWidget(`max_chan, `Value);
+    ZFCPController::filter_min = (string) UI::QueryWidget(`min_chan, `Value);
+    ZFCPController::filter_max = (string) UI::QueryWidget(`max_chan, `Value);
 
     ZFCPController::ProbeDisks ();
 
-    list<term> items = GetZFCPDiskItems (
-	tointeger(ZFCPController::filter_min),
-	tointeger(ZFCPController::filter_max));
+    list<term> items = GetZFCPDiskItems (ZFCPController::filter_min, ZFCPController::filter_max);
 
     UI::ChangeWidget(`id(`table), `Items, items);
     UI::ChangeWidget (`id (`delete), `Enabled, size (items) > 0);
@@ -123,9 +135,9 @@ define void DisplayZFCPDialog () {
     term content = `VBox(
 	`HBox(
 	    // text entry
-	    `TextEntry(`id(`min_chan), _("Mi&nimum Channel"), "0x0000"),
+	    `InputField(`id(`min_chan), `opt(`hstretch), _("Mi&nimum Channel"), ZFCPController::filter_min),
 	    // text entry
-	    `TextEntry(`id(`max_chan), _("Ma&ximum Channel"), "0xffff"),
+	    `InputField(`id(`max_chan), `opt(`hstretch), _("Ma&ximum Channel"), ZFCPController::filter_max),
 	    `VBox (
 		`Label (""),
 		// push button
