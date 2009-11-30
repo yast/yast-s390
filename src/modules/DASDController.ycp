@@ -22,6 +22,7 @@ import "Stage";
 import "Summary";
 import "Arch";
 import "FileUtils";
+import "Popup";
 
 global map<integer,map<string,any> > devices = $[];
 
@@ -427,7 +428,21 @@ global define void ActivateDisk (string channel, boolean diag) {
     );
     y2milestone ("Running command %1", command);
     integer ret = (integer)SCR::Execute (.target.bash, command);
-    ReportActivationError (channel, ret);
+    if (ret == 5){
+      if (Popup::ContinueCancel(_("Device is not DASD. Format device?"))){
+	string cmd = sformat("ls /sys/bus/ccw/devices/%1/block/|tr -d '\n'", channel);
+	map<string, any> disk = (map<string, any>)SCR::Execute(.target.bash_output, cmd);
+	if (disk["exit"]:-1 == 0 && size(disk["stdout"]:"")>0){
+	    FormatDisks ([ disk["stdout"]:"" ], 1, true, true);
+//	    ReloadDASDDialog ();
+	    ActivateDisk(channel, diag);
+	} else {
+		Popup::Error(sformat("Couldn't find device for %1 channel", channel));
+	}
+      }
+    } else {
+        ReportActivationError (channel, ret);
+    }
     disk_configured = true;
 }
 

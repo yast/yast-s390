@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Nov 30 09:25:00 CET 2009 - mzugec@suse.cz
+
+- dasd: activation non-formated devices (bnc#446998)
+- 2.19.0 
+
+-------------------------------------------------------------------
 Thu Nov 12 17:48:55 CET 2009 - mzugec@suse.cz
 
 - zfcp: fixed devices list filter (bnc#538313)
