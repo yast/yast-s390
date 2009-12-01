@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Dec  1 14:10:04 CET 2009 - mzugec@suse.cz
+
+- fixed desktop files (bnc#559343)
+- 2.19.1 
+
+-------------------------------------------------------------------
 Mon Nov 30 09:25:00 CET 2009 - mzugec@suse.cz
 
 - dasd: activation non-formated devices (bnc#446998)
