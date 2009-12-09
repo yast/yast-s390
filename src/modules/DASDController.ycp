@@ -426,8 +426,8 @@ global define void ActivateDisk (string channel, boolean diag) {
 	1,
 	diag ? 1 : 0
     );
-    y2milestone ("Running command %1", command);
     integer ret = (integer)SCR::Execute (.target.bash, command);
+    y2milestone ("Running command %1 with exit code %2", command, ret);
     if (ret == 5){
       if (Popup::ContinueCancel(_("Device is not DASD. Format device?"))){
 	string cmd = sformat("ls /sys/bus/ccw/devices/%1/block/|tr -d '\n'", channel);

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Dec  9 17:10:49 CET 2009 - mzugec@suse.cz
+
+- loging more verbose (log exit code when activate DASD) 
+
+-------------------------------------------------------------------
 Tue Dec  1 14:03:22 CET 2009 - mzugec@suse.cz
 
 - fixed desktop files (bnc#559343)
