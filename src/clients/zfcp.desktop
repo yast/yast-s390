@@ -19,9 +19,8 @@ X-SuSE-YaST-AutoInstSchema=zfcp.rnc
 X-SuSE-YaST-AutoInstClonable=true
 
 Icon=yast-zfcp
-Exec=/sbin/yast2 zfcp 
+Exec=xdg-su -c "/sbin/yast2 zfcp"
 
 Name=Zfcp
 GenericName=Configure zfcp
-X-KDE-SubstituteUID=true
 StartupNotify=true

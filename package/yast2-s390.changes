@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Jan 13 18:56:03 CET 2010 - kmachalkova@suse.cz
+
+- Adjusted .desktop file(s) to wrap /sbin/yast2/ calls in xdg-su
+  where root privileges are needed, removed X-KDE-SubstituteUID key 
+  (bnc#540627)
+
+-------------------------------------------------------------------
 Mon Dec 21 17:20:19 CET 2009 - mzugec@suse.cz
 
 - dasd: activation non-formated devices (bnc#446998)

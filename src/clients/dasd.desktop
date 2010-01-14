@@ -19,9 +19,8 @@ X-SuSE-YaST-AutoInstSchema=dasd.rnc
 X-SuSE-YaST-AutoInstClonable=true
 
 Icon=yast-dasd
-Exec=/sbin/yast2 dasd 
+Exec=xdg-su -c "/sbin/yast2 dasd"
 
 Name=DASD
 GenericName=Configure dasd
-X-KDE-SubstituteUID=true
 StartupNotify=true

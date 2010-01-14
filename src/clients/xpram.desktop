@@ -17,9 +17,8 @@ X-SuSE-YaST-SortKey=
 X-SuSE-YaST-AutoInstResource=xpram
 
 Icon=yast-xpram
-Exec=/sbin/yast2 xpram 
+Exec=xdg-su -c "/sbin/yast2 xpram"
 
 Name=XPRAM device
 GenericName=Configure an XpRAM device (XpRAM)
-X-KDE-SubstituteUID=true
 StartupNotify=true
