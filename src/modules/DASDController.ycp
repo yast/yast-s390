@@ -36,6 +36,7 @@ global map<string, boolean> diag = $[];
 
 
 global define void ActivateDisk (string channel, boolean diag);
+global define void DeactivateDisk (string channel, boolean diag);
 global define void ProbeDisks ();
 global define void FormatDisks (list<string> disks_list, integer par,
     boolean write_vl, boolean interactive);
