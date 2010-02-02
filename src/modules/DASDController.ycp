@@ -406,6 +406,16 @@ define void ReportActivationError (any id, integer ret) {
 	    Report::Error (sformat (
 		// error report, %1 is device identification
 		_("%1: Could not load module"), id));
+	else if (ret == 7)
+	   //bugzilla.novell.com/show_bug.cgi?id=561876#c8
+	    Report::Error (sformat (
+		// error report, %1 is device identification
+		_("%1: Failed to activate DASD"), id));
+	else if (ret == 8)
+	   //bugzilla.novell.com/show_bug.cgi?id=561876#c8
+	    Report::Error (sformat (
+		// error report, %1 is device identification
+		_("%1: DASD is not formatted"), id));
 	else
 	    Report::Error (sformat (
 		// error report, %1 is device identification, %2 is integer code
@@ -440,7 +450,12 @@ global define void ActivateDisk (string channel, boolean diag) {
 		Popup::Error(sformat("Couldn't find device for %1 channel", channel));
 	}
       }
-    } else {
+    } else if (ret == 7){
+		 // when return code is 7, set DASD offline
+		 // https://bugzilla.novell.com/show_bug.cgi?id=561876#c9
+		 DeactivateDisk(channel, diag);
+		}
+	else {
         ReportActivationError (channel, ret);
     }
     disk_configured = true;
