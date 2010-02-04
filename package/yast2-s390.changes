@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Feb  4 15:12:20 CET 2010 - mzugec@suse.cz
+
+- fixed package build 
+
+-------------------------------------------------------------------
 Tue Feb  2 16:08:01 CET 2010 - mzugec@suse.cz
 
 - DASD: support for additional dasd_configure ret codes (bnc#561876)
