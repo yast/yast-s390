@@ -320,7 +320,14 @@ global define void ProbeDisks () {
 		formatted = ! regexpmatch (toupper (out), "NOT[ \t]*FORMATTED");
 	    }
 	    d["formatted"] = formatted;
-	    d["partition_info"] = GetPartitionInfo (device);
+	    if ( d["formatted"]:false )
+	    { 
+		d["partition_info"] = GetPartitionInfo (device);
+	    }
+	    else
+	    {
+		d["partition_info"] = "--";
+	    }
 	}
 	string diag_file = sformat("/sys/%1/use_diag", d["sysfs_id"]:"");
 	if (FileUtils::Exists(diag_file)){
@@ -375,7 +382,7 @@ $[
 
 /**
  * Report error occured during device activation
- * @param id integer chanel id of the device
+ * @param id integer channel id of the device
  * @param ret integer exit code of the operation
  */
 define void ReportActivationError (any id, integer ret) {
@@ -439,8 +446,8 @@ global define void ActivateDisk (string channel, boolean diag) {
     );
     integer ret = (integer)SCR::Execute (.target.bash, command);
     y2milestone ("Running command %1 with exit code %2", command, ret);
-    if (ret == 5){
-      if (Popup::ContinueCancel(_("Device is unformatted. Format device?"))){
+    if (ret == 8){
+      if (Popup::ContinueCancel (sformat (_("Device %1 is unformatted. Format device now?\nIf you want to format multiple devices in parallel,\npress Cancel and select 'Perform Action', 'Format' later on!"), channel))){
 	string cmd = sformat("ls /sys/bus/ccw/devices/%1/block/|tr -d '\n'", channel);
 	map<string, any> disk = (map<string, any>)SCR::Execute(.target.bash_output, cmd);
 	if (disk["exit"]:-1 == 0 && size(disk["stdout"]:"")>0){
@@ -463,7 +470,7 @@ global define void ActivateDisk (string channel, boolean diag) {
 }
 
 /**
- * Activate selected Disks
+ * Deactivate selected Disks
  * @param channel string Name of the disk to deactivate
  * @param diag boolean Activate DIAG or not
  */
@@ -482,9 +489,9 @@ global define void DeactivateDisk (string channel, boolean diag) {
 }
 
 /**
- * Activate selected Disks
- * @param disks_list list<string> List of disks to be formated
- * @param par integer Number of disks that can be formated in parallel
+ * Format selected Disks
+ * @param disks_list list<string> List of disks to be formatted
+ * @param par integer Number of disks that can be formatted in parallel
  * @param write_vl boolean Write a Volume label
  * @param interactive boolean Interactive yes/no
  */
@@ -507,7 +514,7 @@ global define void FormatDisks (list<string> disks_list, integer par,
     if (! write_vl)
 	additional_param = "--no-label";
     string command = sformat (
-	"/sbin/dasdfmt -P %2 -b 4096 -y -m 1 %3 %1", disks_param, par,
+	"/sbin/dasdfmt -Y -P %2 -b 4096 -y -m 1 %3 %1", disks_param, par,
 	    additional_param);
 
     y2milestone ("Running command %1", command);
@@ -610,7 +617,7 @@ global define void FormatDisks (list<string> disks_list, integer par,
 		    while (index < par)
 		    {
 			UI::ChangeWidget (`id (index), `Label, "");
-			UI::ChangeWidget (`id (index), `Value, 0);
+			UI::ChangeWidget (`id (index), `Value, 100);
 			UI::ChangeWidget (`id (index), `Enabled, false);
 			index = index + 1;
 		    }
@@ -634,7 +641,9 @@ global define string GetPartitionInfo (string disk) {
     map outmap = (map)SCR::Execute (.target.bash_output, sformat (
 	"/sbin/fdasd -p %1", disk));
 
-    // if not an eckd-disk it's an fba-disk. fba-disks have only one partition
+    // if rc != 0 the fdasd failed due to either an unformatted
+    // disk or a disk that contains only one predefined partion 
+    // (fba disk or disk formatted with ldl - Linux disk layout)
     if (outmap["exit"]:0 != 0)
 	return sformat ("%11", disk);
 

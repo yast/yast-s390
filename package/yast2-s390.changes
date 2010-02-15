@@ -1,4 +1,19 @@
 -------------------------------------------------------------------
+Mon Feb 15 09:47:00 CET 2010 - juhliarik@suse.cz
+
+- added patch for (bnc#561876) - updated dash_configure
+- added patch for (bnc#446998) - activate non-formatted dasd, 
+  installation hangs cannot proceed further 
+- added patch for (bnc#579578) - dasdfmt progress bar is broken
+- added patch for (bnc#579579) - progress bar for just formatted 
+  DASDs shows 0% instead of 100%
+- added patch for (bnc#579581) - "Device is unformatted" should 
+  display the device number
+- added patch for (bnc#579584) - s390-tools dasd_configure online 
+  of an unformatted, already online DASD sets this device offline
+- 2.17.15
+
+-------------------------------------------------------------------
 Thu Feb  4 15:12:20 CET 2010 - mzugec@suse.cz
 
 - fixed package build 
