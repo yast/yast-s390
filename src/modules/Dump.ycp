@@ -124,7 +124,16 @@ global boolean FormatDisk (string dev, boolean force) {
 	else if (ret == 2)
 	    // error description
 	    err = _("Support program not installed.");
-	else
+	else if (ret == 11)
+            // error description
+            err = _("Invalid or unuseable disk (fatal).");
+        else if (ret == 12)
+            // error description
+            err = _("Minor error, can be corrected with -f.");
+        else if (ret == 13)
+            // error description
+            err = _("Missing support programs.");
+        else
 	    // error description, %1 is error code (integer)
 	    err = sformat (_("Error code from support program: %1."), ret);
 	// error report, %1 is device name, %2 error description
