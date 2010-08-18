@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Aug 18 15:14:52 CEST 2010 - mzugec@suse.cz
+
+- fixed typo (bnc#631743)
+- 2.19.4 
+
+-------------------------------------------------------------------
 Tue Feb  2 16:28:53 CET 2010 - mzugec@suse.cz
 
 - DASD: support for additional dasd_configure ret codes (bnc#561876)
