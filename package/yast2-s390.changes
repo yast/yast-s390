@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Oct  8 09:25:09 CEST 2010 - mzugec@suse.de
+
+- error messages more verbose for dump module (bnc#525440)
+- 2.13.27 
+
+-------------------------------------------------------------------
 Fri Nov  6 10:02:23 CET 2009 - mzugec@suse.cz
 
 - dasd: display DIAG mode (bnc#551268)
