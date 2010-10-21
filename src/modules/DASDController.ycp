@@ -197,6 +197,8 @@ global map Export () {
     if (Mode::config ())
     {
 	list l = maplist (integer i, map<string,any> d, devices, {
+       // if possible, use device by-path (bnc#591603)
+       if (haskey(d, "dev_name") && size(d["dev_names"]:[])>1) d["dev_name"]=d["dev_names", 1]:"";
 	    return d;
 	});
 

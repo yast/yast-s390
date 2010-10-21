@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Oct 21 17:46:53 CEST 2010 - mzugec@suse.cz
+
+- DASD: if possible, use device by-path in AY Export (bnc#591603)
+- 2.19.5 
+
+-------------------------------------------------------------------
 Wed Aug 18 15:14:52 CEST 2010 - mzugec@suse.cz
 
 - fixed typo (bnc#631743)
