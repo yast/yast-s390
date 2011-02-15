@@ -442,7 +442,10 @@ global define void ActivateDisk (string channel, boolean diag) {
     integer ret = (integer)SCR::Execute (.target.bash, command);
     y2milestone ("Running command %1 with exit code %2", command, ret);
     if (ret == 5){
-      if (Popup::ContinueCancel(_("Device is unformatted. Format device?"))){
+      string popup = sformat (_("Device %1 is unformatted. Format device now?\nIf you want to format multiple devices in parallel,\npress Cancel and select 'Perform Action', 'Format' later on!"), channel);
+      if ((Mode::autoinst() && Popup::TimedOKCancel(popup, 10))
+        || Popup::ContinueCancel (popup))
+      {
 	string cmd = sformat("ls /sys/bus/ccw/devices/%1/block/|tr -d '\n'", channel);
 	map<string, any> disk = (map<string, any>)SCR::Execute(.target.bash_output, cmd);
 	if (disk["exit"]:-1 == 0 && size(disk["stdout"]:"")>0){
