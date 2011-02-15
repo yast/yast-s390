@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Feb 15 10:47:15 CET 2011 - jsrain@suse.cz
+
+- added time-out when asking about formatting a disk during
+  AutoInstallation (bnc#668317)
+
+-------------------------------------------------------------------
 Thu Mar  4 09:30:58 CET 2010 - mzugec@suse.cz
 
 - error message more detailed (bnc#525447)
