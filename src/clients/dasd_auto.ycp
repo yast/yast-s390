@@ -24,7 +24,7 @@
 textdomain "s390";
 
 y2milestone("----------------------------------------");
-y2milestone("DADS auto started");
+y2milestone("DASD auto started");
 
 import "DASDController";
 include "s390/dasd/wizards.ycp";

@@ -24,7 +24,7 @@
 textdomain "s390";
 
 y2milestone("----------------------------------------");
-y2milestone("DADS auto started");
+y2milestone("ZFCP auto started");
 
 import "ZFCPController";
 include "s390/zfcp/wizards.ycp";
