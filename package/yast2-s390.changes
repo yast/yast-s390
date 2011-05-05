@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu May 05 11:10:41 CEST 2011 - aschnell@suse.de
+
+- set exclusive architecture to s390 and s390x (bnc #690511)
+- 2.21.0
+
+-------------------------------------------------------------------
 Tue Feb 15 10:48:06 CET 2011 - jsrain@suse.cz
 
 - added time-out when asking about formatting a disk during
