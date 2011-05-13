@@ -24,7 +24,7 @@
 	list summary = ZFCPController::Summary();
 	if (size (summary) == 0)
 	    // text for installation summary
-	    summary = [ _("No zFCP disk configured") ];
+	    summary = [ _("No zFCP device configured") ];
 	// Fill return map
 	ret =
 	    $[ "raw_proposal"	: summary,

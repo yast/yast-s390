@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri May 13 03:36:54 EDT 2011 - aschnell@suse.de
+
+- allow to configure zFCP tapes (fate #311718)
+- 2.21.1
+
+-------------------------------------------------------------------
 Thu May 05 11:10:41 CEST 2011 - aschnell@suse.de
 
 - set exclusive architecture to s390 and s390x (bnc #690511)
