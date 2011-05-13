@@ -83,7 +83,7 @@ else if (func == "Read") {
     ret = ZFCPController::Read();
     Progress::on();
 }
-/* Write givven settings */
+/* Write given settings */
 else if (func == "Write") {
     import "Progress";
     Progress::off();

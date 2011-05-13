@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri May 13 03:36:54 EDT 2011 - aschnell@suse.de
+
+- allow to configure zFCP tapes (fate #311718)
+- 2.17.17
+
+-------------------------------------------------------------------
 Tue Feb 15 10:47:15 CET 2011 - jsrain@suse.cz
 
 - added time-out when asking about formatting a disk during

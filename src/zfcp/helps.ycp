@@ -17,7 +17,7 @@ textdomain "s390";
 map ZFCP_HELPS = $[
 
     /* Read dialog help 1/2 */
-    "read" : _("<p><b><big>Initializing ZFCP Disk Configuration</big></b><br>
+    "read" : _("<p><b><big>Initializing ZFCP Device Configuration</big></b><br>
 Please wait...<br></p>") +
 
     /* Read dialog help 2/2 */
@@ -25,7 +25,7 @@ Please wait...<br></p>") +
 Safely abort the configuration utility by pressing <b>Abort</b> now.</p>"),
 
     /* Write dialog help 1/2 */
-    "write" : _("<p><b><big>Saving ZFCP Disk Configuration</big></b><br>
+    "write" : _("<p><b><big>Saving ZFCP Device Configuration</big></b><br>
 Please wait...<br></p>") +
 
     /* Write dialog help 2/2 */
@@ -34,14 +34,14 @@ Abort the save procedure by pressing <b>Abort</b>.
 An additional dialog informs whether it is safe to do so.</p>"),
 
     /* Disk selection dialog help 1/3 */
-    "disk_selection" : _("<p><b><big>Configured ZFCP Disks</big></b><br>
-In this dialog, manage ZFCP disks on your system.</p>") +
+    "disk_selection" : _("<p><b><big>Configured ZFCP Devices</big></b><br>
+In this dialog, manage ZFCP devices on your system.</p>") +
 
     /* Disk selection dialog help 2/3 */
-_("<p>To configure a new ZFCP disk, click <b>Add</b>.</p>") +
+_("<p>To configure a new ZFCP device, click <b>Add</b>.</p>") +
 
     /* Disk selection dialog help 3/3 */
-_("<p>To remove a configured ZFCP disk, select it and click
+_("<p>To remove a configured ZFCP device, select it and click
 <b>Delete</b>.</p>") +
 
 	/* Disk selection dialog Warning */
@@ -50,8 +50,8 @@ _("<h1>Warning</h1>") + _("<p>When accessing a ZFCP device
 Otherwise there is a potential risk of data corruption.</p>"),
 
     /* Disk add help 1/2 */
-    "disk_add" : _("<p><b><big>Add New ZFCP Disk</big></b><br>
-Enter the identifier of the disk to add. Enter the
+    "disk_add" : _("<p><b><big>Add New ZFCP Device</big></b><br>
+Enter the identifier of the device to add. Enter the
 <b>Channel Number</b> of the ZFCP controller, the worldwide port number
 (<b>WWPN</b>), and the <b>FCP-LUN</b> number.</p>") +
     /* Disk add help 2/2, This is HTML, so finally "&lt;devno&gt;" is displayed as "<devno>" */

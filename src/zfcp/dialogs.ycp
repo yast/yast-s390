@@ -129,7 +129,7 @@ define void DisplayZFCPDialog () {
     string help = ZFCP_HELPS["disk_selection"]:"";
 
     /* Dialog caption */
-    string caption = _("Configured ZFCP Disks");
+    string caption = _("Configured ZFCP Devices");
 
     /* Dialog content */
     term content = `VBox(
@@ -198,7 +198,7 @@ define symbol ZFCPDialog () ``{
 	else if (ret == `abort || ret == `cancel)
 	{
 	    // yes-no popup
-	    if (! Popup::YesNo (_("Really leave the ZFCP disk configuration without saving?
+	    if (! Popup::YesNo (_("Really leave the ZFCP device configuration without saving?
 All changes will be lost.")))
 	    {
 		ret = nil;
@@ -213,7 +213,7 @@ All changes will be lost.")))
 	    string fcp_lun = descr["detail", "fcp_lun"]:"unknown";
 
 	    // popup qestion, %1 is device name (eg. /dev/sda)
-	    if (! Popup::YesNo (sformat (_("Remove disk %1?"), dev_name)))
+	    if (! Popup::YesNo (sformat (_("Remove device %1?"), dev_name)))
 	    {
 		ret = nil;
 		continue;
@@ -252,7 +252,7 @@ define symbol AddZFCPDiskDialog () ``{
     string help = ZFCP_HELPS["disk_add"]:"";
 
     /* Dialog caption */
-    string caption = _("Add New ZFCP Disk");
+    string caption = _("Add New ZFCP Device");
 
     string fcp_lun = ZFCPController::previous_settings["fcp_lun"]:"";
     if (fcp_lun == nil || fcp_lun == "")
@@ -341,7 +341,7 @@ define symbol AddZFCPDiskDialog () ``{
        else if (ret == `abort || ret == `cancel)
 	{
 	    // yes-no popup
-	    if (! Popup::YesNo (_("Really leave the ZFCP disk configuration without saving?
+	    if (! Popup::YesNo (_("Really leave the ZFCP device configuration without saving?
 All changes will be lost.")))
 	    {
 		ret = nil;
