@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jun 21 12:29:58 EDT 2011 - aschnell@suse.de
+
+- use ButtonBox for correct button order (bnc #701269)
+
+-------------------------------------------------------------------
 Fri May 13 03:36:54 EDT 2011 - aschnell@suse.de
 
 - allow to configure zFCP tapes (fate #311718)

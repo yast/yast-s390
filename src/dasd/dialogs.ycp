@@ -476,11 +476,9 @@ define symbol DASDDialog() {
 		`Left (`CheckBox (`id (`write_label),
 		    // check box
 		    _("&Write the Volume Label"), true)),
-		`HBox (
-		    `HStretch (),
+		`ButtonBox (
 		    `PushButton (`id (`ok), Label::OKButton ()),
-		    `PushButton (`id (`cancel), Label::CancelButton ()),
-		    `HStretch ()
+		    `PushButton (`id (`cancel), Label::CancelButton ())
 		)
 	    ));
 	    ret = UI::UserInput ();
