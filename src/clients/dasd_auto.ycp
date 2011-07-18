@@ -27,6 +27,7 @@ y2milestone("----------------------------------------");
 y2milestone("DASD auto started");
 
 import "DASDController";
+    import "HTML";
 include "s390/dasd/wizards.ycp";
 
 any ret = nil;
@@ -44,7 +45,7 @@ y2debug("param=%1", param);
 
 /* Create a summary*/
 if(func == "Summary") {
-    ret = select(DASDController::Summary(), 0, "");
+    ret = HTML::List(DASDController::Summary());
 }
 /* Reset configuration */
 else if (func == "Reset") {

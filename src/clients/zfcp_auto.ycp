@@ -27,6 +27,7 @@ y2milestone("----------------------------------------");
 y2milestone("ZFCP auto started");
 
 import "ZFCPController";
+    import "HTML";
 include "s390/zfcp/wizards.ycp";
 
 any ret = nil;
@@ -44,7 +45,7 @@ y2debug("param=%1", param);
 
 /* Create a summary*/
 if(func == "Summary") {
-    ret = select(ZFCPController::Summary(), 0, "");
+    ret = HTML::List(ZFCPController::Summary());
 }
 /* Reset configuration */
 else if (func == "Reset") {
