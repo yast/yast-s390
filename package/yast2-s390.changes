@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Jul 18 10:30:40 CEST 2011 - aschnell@suse.de
+
+- include fix for bnc #591603
+- 2.17.18
+
+-------------------------------------------------------------------
 Fri May 13 03:36:54 EDT 2011 - aschnell@suse.de
 
 - allow to configure zFCP tapes (fate #311718)
