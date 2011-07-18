@@ -205,7 +205,8 @@ ProbeDisks();
  * Create a textual summary and a list of unconfigured cards
  * @return summary of the current configuration
  */
-global list<string> Summary() {
+global list<string> Summary()
+{
     list<string> ret = maplist (integer index, map<string,any> d, devices, {
 	// summary text, %1 is channel ID, %1 is WWPN, %3 is LUN
 	// (all of them are numbers)

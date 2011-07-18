@@ -225,7 +225,8 @@ global map Export () {
  * Create a textual summary and a list of unconfigured cards
  * @return summary of the current configuration
  */
-global list Summary() {
+global list<string> Summary()
+{
     list<string> ret = maplist (integer index, map<string,any> d, devices, {
 	string s = "";
 	// summary text, %1 is channel ID (number),
