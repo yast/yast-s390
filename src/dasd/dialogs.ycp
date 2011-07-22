@@ -311,7 +311,8 @@ define void ReloadDASDDialog () ``{
  * Run the dialog for DASD disks configuration
  * @return symbol for wizard sequencer
  */
-define symbol DASDDialog() {
+symbol DASDDialog()
+{
     DisplayDASDDialog ();
     ReloadDASDDialog ();
     any ret = nil;
@@ -320,8 +321,7 @@ define symbol DASDDialog() {
     {
 	ret = UI::UserInput();
 
-	integer selected = (integer)
-	    UI::QueryWidget (`id (`table), `CurrentItem);
+	integer selected = (integer) UI::QueryWidget(`id(`table), `CurrentItem);
 
 	if (ret == `filter) {
 	    ReloadDASDDialog ();
@@ -391,17 +391,21 @@ define symbol DASDDialog() {
 	}
 	else if (ret == `diag_on)
 	{
-	    list<integer>to_activate = ListSelectedDASD ();
-	    if (0 == size (to_activate))
+	    list<integer> selected = ListSelectedDASD();
+	    if (isempty(selected))
 	    {
 		// error popup message
 		Popup::Message (_("No disk selected."));
 		ret = nil;
 		continue;
 	    }
-	    foreach (integer id, to_activate, ``{
-		string channel = DASDController::devices[id,"channel"]:"";
+
+	    foreach (integer id, selected, {
+		string channel = DASDController::devices[id, "channel"]:"";
+		boolean active = DASDController::devices[id, "resource", "io", 0, "active"]:false;
 		DASDController::diag[channel] = true;
+		if (active)
+		    DASDController::ActivateDisk(channel, true);
 	    });
 
 	    ReloadDASDDialog ();
@@ -411,17 +415,21 @@ define symbol DASDDialog() {
 	}
 	else if (ret == `diag_off)
 	{
-	    list<integer>to_activate = ListSelectedDASD ();
-	    if (0 == size (to_activate))
+	    list<integer> selected = ListSelectedDASD();
+	    if (isempty(selected))
 	    {
 		// error popup message
 		Popup::Message (_("No disk selected."));
 		ret = nil;
 		continue;
 	    }
-	    foreach (integer id, to_activate, ``{
-		string channel = DASDController::devices[id,"channel"]:"";
+
+	    foreach (integer id, selected, {
+		string channel = DASDController::devices[id, "channel"]:"";
+		boolean active = DASDController::devices[id, "resource", "io", 0, "active"]:false;
 		DASDController::diag[channel] = false;
+		if (active)
+		    DASDController::ActivateDisk(channel, false);
 	    });
 
 	    ReloadDASDDialog ();

@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Jul 22 14:41:14 CEST 2011 - aschnell@suse.de
+
+- fixed diag mode setting (bnc #591037)
+- 2.17.19
+
+-------------------------------------------------------------------
 Tue Jun 21 12:29:58 EDT 2011 - aschnell@suse.de
 
 - use ButtonBox for correct button order (bnc #701269)
