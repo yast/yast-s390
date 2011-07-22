@@ -2,7 +2,7 @@
 
 @HEADER@
 BuildRequires:	docbook-xsl-stylesheets doxygen libxslt perl-XML-Writer sgml-skel update-desktop-files yast2 yast2-devtools yast2-testsuite
-Requires:       yast2
+Requires:       yast2 yast2-core >= 2.17.37
 %ifarch s390 s390x
 Requires:       s390-tools
 %endif
