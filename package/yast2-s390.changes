@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Aug  5 12:34:53 CEST 2011 - tgoettlicher@suse.de
+
+- fixed .desktop file (bnc #681249)
+
+-------------------------------------------------------------------
 Fri Jul 22 14:41:14 CEST 2011 - aschnell@suse.de
 
 - fixed diag mode setting (bnc #591037)
