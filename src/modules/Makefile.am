@@ -4,7 +4,8 @@ module_DATA =			\
 	DASDController.ycp	\
 	ZFCPController.ycp	\
 	Xpram.ycp		\
-	Dump.ycp
+	Dump.ycp		\
+	OnPanic.ycp
 
 EXTRA_DIST = $(module_DATA)
 

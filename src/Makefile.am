@@ -1,1 +1,1 @@
-SUBDIRS = zfcp dasd xpram dump modules clients config
+SUBDIRS = zfcp dasd xpram dump onpanic modules clients config

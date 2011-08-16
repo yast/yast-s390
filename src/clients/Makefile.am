@@ -10,6 +10,7 @@ client_DATA =			\
 	s390-disk-controller.ycp\
 	xpram.ycp		\
 	dump.ycp		\
+	onpanic.ycp		\
 	inst_dasd.ycp		\
 	inst_zfcp.ycp		\
 	dasd_proposal.ycp	\
@@ -19,7 +20,8 @@ desktop_DATA =			\
 	zfcp.desktop		\
 	dasd.desktop		\
 	xpram.desktop		\
-	dump.desktop
+	dump.desktop		\
+	onpanic.desktop
 
 
 EXTRA_DIST = $(client_DATA) $(desktop_DATA)

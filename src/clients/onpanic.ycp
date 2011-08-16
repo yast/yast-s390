@@ -1,0 +1,58 @@
+/**
+ * File:	clients/onpanic.ycp
+ * Package:	Configuration of onpanic
+ * Summary:	Main file
+ * Authors:	Tim Hardeck <thardeck@suse.de>
+ *
+ * $Id: irda.ycp 22889 2005-04-01 09:12:51Z jsuchome $
+ *
+ * Main file for onpanic configuration. Uses all other files.
+ */
+
+{
+
+/***
+ * <h3>Configuration of onpanic</h3>
+ */
+
+textdomain "s390";
+
+/* The main () */
+y2milestone ("----------------------------------------");
+y2milestone ("OnPanic module started");
+
+import "CommandLine";
+import "OnPanic";
+
+include "s390/onpanic/ui.ycp";
+
+map cmdline_description = $[
+	"id"		: "onpanic",
+	/* Command line help text for the Xirda module */
+	"help"		: _("Configuration of OnPanic"),
+	"guihandler"		: OnPanicSequence,
+	"initialize"		: OnPanic::Read,
+	"finish"			: OnPanic::Write,
+	"actions"		   : $[
+	// FIXME TODO: fill the functionality description here
+	],
+	"options"	   : $[
+	// FIXME TODO: fill the option descriptions here
+	],
+];
+
+
+/* main ui function */
+any ret = CommandLine::Run (cmdline_description);
+
+//ret = OnPanicSequence ();
+y2debug("ret=%1", ret);
+
+/* Finish */
+y2milestone("OnPanic module finished");
+y2milestone("----------------------------------------");
+
+return ret;
+
+/* EOF */
+}
