@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Aug  9 14:06:43 UTC 2011 - thardeck@novell.com
+
+- extended dump module to support dasd multi-volume dump devices (fate#304024)
+- added onpanic module - a fronted for dumpconf
+
+-------------------------------------------------------------------
 Fri Jul 22 14:41:14 CEST 2011 - aschnell@suse.de
 
 - fixed diag mode setting (bnc #591037)

@@ -1,18 +1,16 @@
 /**
- * File:	clients/controller.ycp
- * Package:	Configuration of controller
+ * File:	clients/dump.ycp
+ * Package:	Creation of s390 dump devices
  * Summary:	Main file
- * Authors:	Jiri Srain <jsrain@suse.cz>
+ * Authors:	Tim Hardeck <thardeck@suse.de>
  *
- * $Id$
- *
- * Main file for controller configuration. Uses all other files.
+ * Main file for s390 dump devices creation. Uses all other files.
  */
 
 {
 
 /***
- * <h3>Configuration of controller</h3>
+ * <h3>Creation of s390 dump devices</h3>
  */
 
 textdomain "s390";
@@ -21,36 +19,29 @@ textdomain "s390";
 y2milestone ("----------------------------------------");
 y2milestone ("Dump module started");
 
-import "Progress";
-import "Report";
-import "Summary";
-
 import "CommandLine";
-include "s390/dump/wizards.ycp";
+include "s390/dump/ui.ycp";
 
 map cmdline_description = $[
-    "id" 	: "controller",
-    // Command line help text for the Xcontroller module
-    "help"	: _("Configuration of controller"),
-    "guihandler"        : DumpSequence,
-    "initialize"        : Dump::Read,
-    "finish"            : Dump::Write,
-    "actions"           : $[
+	"id" 	: "dumpdevices",
+	// Command line help text for the Xcontroller module
+	"help"	: _("Creation of s390 dump devices"),
+	"guihandler"		: DumpSequence,
+	"actions"		   : $[
 	// FIXME TODO: fill the functionality description here
-    ],
-    "options"		: $[
+	],
+	"options"		: $[
 	// FIXME TODO: fill the option descriptions here
-    ],
-    "mapping"		: $[
+	],
+	"mapping"		: $[
 	// FIXME TODO: fill the mappings of actions and options here
-    ]
+	]
 ];
 
 
 /* main ui function */
-any ret = nil;
+any ret = CommandLine::Run(cmdline_description);
 
-ret = CommandLine::Run(cmdline_description);
 //ret = DumpSequence ();
 y2debug("ret=%1", ret);
 

@@ -1,0 +1,24 @@
+[Desktop Entry]
+Type=Application
+Categories=Settings;System;Qt;X-SuSE-YaST;X-SuSE-YaST-Hardware;
+
+X-KDE-ModuleType=Library
+X-KDE-RootOnly=true
+X-KDE-HasReadOnlyMode=true
+X-KDE-Library=yast2
+X-SuSE-YaST-Call=onpanic
+
+X-SuSE-YaST-Group=Hardware
+X-SuSE-YaST-Argument=
+X-SuSE-YaST-RootOnly=true
+X-SuSE-YaST-AutoInst=
+X-SuSE-YaST-Geometry=
+X-SuSE-YaST-SortKey=
+X-SuSE-YaST-AutoInstResource=
+
+Icon=yast-onpanic
+Exec=/sbin/yast2 onpanic
+
+Name=On Panic
+GenericName=Configures the actions which should be performed after a kernel panic
+StartupNotify=true

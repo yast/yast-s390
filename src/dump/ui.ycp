@@ -1,0 +1,172 @@
+/**
+ * File:	include/s390/dump/ui.ycp
+ * Package:	Creation of s390 dump devices
+ * Summary:	Dialogs definitions
+ * Authors:	Tim Hardeck <thardeck@suse.de>
+ *
+ */
+
+{
+
+textdomain "s390";
+
+import "Dump";
+import "Label";
+import "Popup";
+import "Wizard";
+
+/**
+ * Run the dialog for Dump
+ * @param what symbol a
+ * @return symbol EditDumpDialog that was edited
+ */
+symbol DumpDialog () {
+	string caption = _("Create Dump Device");
+	string help = _("
+<p><b>Prepare one or more volumes for use as S/390 dump device.</b></p>
+<p>Supported devices are ECKD DASD and ZFCP disks, while multi-volumes are limited to DASD.<br>
+Only whole disks can be used, no partitions! If the device is incompatible formatted/partioned, activate the checkbox
+<b>Force overwrite of disk</b></p>
+<p>Devices which are in use or have mounted partitions will not be shown.<br>
+The mentioning of <b>dumpdevice</b> after a disk indicates that it is an already usable dump device. Additionally multi-volume dump devices are indicated by the list of including DASD ids. </p>
+<p>ZFCP columns: Device, Size, ID, WWPN, LUN, Dump<br>
+DASD columns: Device, Size, ID, Dump</p>");
+
+	list<string> dasd_disks = Dump::dasd_disks;
+	list<string> zfcp_disks = Dump::zfcp_disks;
+
+	// define default active selection (`dasd, `zfcp)
+	symbol type = `zfcp;
+
+
+	/* Dialog content */
+	term content = `HBox( `VBox(
+	`RadioButtonGroup(`id(`disk),
+		`VBox(
+		`Frame("", `VBox(
+			 `Left(`RadioButton(`id(`zfcp),  `opt(`notify), _("&ZFCP"), type == `zfcp)),
+				`ComboBox (`id(`zfcp_disks), `opt (`hstretch), "",
+				zfcp_disks
+			))),
+		`VSpacing (0.3),
+		`Frame("", `VBox(
+			`Left(`RadioButton(`id(`dasd), `opt(`notify), _("&DASD"), type == `dasd)),
+			`MultiSelectionBox( `id( `dasd_disks ), "",
+					dasd_disks
+			)))
+		)
+	),
+	`VSpacing (0.3),
+	`Left (`CheckBox (`id (`force), `opt(`notify), _("&Force overwrite of disk")))
+	));
+
+	/* Apply the settings */
+	Wizard::SetContentsButtons (caption, content, help, Label::BackButton (),  Label::CreateButton());
+	Wizard::HideBackButton();
+	Wizard::SetAbortButton(`cancel, Label::CancelButton());
+
+	UI::ChangeWidget(`id(`dasd_disks), `Enabled, type == `dasd);
+	UI::ChangeWidget(`id(`zfcp_disks), `Enabled, type == `zfcp);
+
+	boolean force	= false;
+	symbol ret		= nil;
+
+	do
+	{
+		ret = (symbol) UI::UserInput();
+
+		if (ret == `force)
+		{
+			force = (boolean)UI::QueryWidget (`id (`force), `Value);
+		}
+
+		// disable inactive area
+		if (ret == `dasd || ret == `zfcp)
+		{
+			UI::ChangeWidget(`id(`dasd_disks), `Enabled, ret == `dasd);
+			UI::ChangeWidget(`id(`zfcp_disks), `Enabled, ret == `zfcp);
+		}
+
+		if (contains ([`create, `ok, `next, `finish], ret))
+		{
+			string device	= "";
+			type = (symbol) UI::QueryWidget(`id(`disk), `CurrentButton);
+
+			// gather selected device[s]
+			list<string> entries = [ ];
+			if (type == `zfcp) { //zfcp
+				string dev_line = (string)UI::QueryWidget (`id (`zfcp_disks), `Value);
+				entries = splitstring (dev_line, "\t");
+				device = entries[0]:"";
+			}
+			else	// dasd
+			{
+				list<string> selected_items = (list<string>)UI::QueryWidget( `id(`dasd_disks), `SelectedItems );
+				foreach (string dev_line, selected_items,
+				{
+					entries = splitstring (dev_line, "\t");
+					// prevent leading space
+					if (device != "")
+					{
+						device = device + " " + entries[0]:"";
+					}
+					else
+					{
+						device = entries[0]:"";
+					}
+				});
+			}
+
+			if (size(device) == 0)
+			{
+				Popup::Notify (_("You haven't selected any device."));
+			}
+			else
+			{
+				// warn only in case of force
+				if (!force || Popup::YesNo (sformat (_("The disk[s] %1 will be formatted as a dump device. All data on this device[s] will be lost! Continue?"), device)))
+				{
+					boolean success = Dump::FormatDisk (device, force);
+					// don't quit in case of failures, error messages are reported by FormatDisk()
+					if (success && !Popup::YesNo (_("Operation successful. Initialize another dump device?")))
+					{
+						ret = `cancel;
+					}
+					else
+					{
+						// reinitialize devices
+						ret = `again;
+					}
+				}
+			}
+		}
+	} while (!contains ([`abort, `cancel, `again], ret));
+	return (symbol) ret;
+}
+
+
+/**
+ * The whole squence
+ * @return sequence result
+ */
+symbol DumpSequence() {
+	symbol ret = nil;
+	// reset dialog if required
+	do
+	{
+		// recreate dialog everytime to show the read progress bar after the creation progress bar
+		Wizard::CreateDialog();
+		Wizard::SetDesktopIcon("dump");
+		Dump::Read ();
+
+		ret = DumpDialog ();
+		UI::CloseDialog();
+	} while (ret == `again);
+
+	return ret;
+}
+
+/* EOF */
+}
+
+

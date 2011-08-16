@@ -1,6 +1,6 @@
 # Makefile.am for dasd/src
 
-yncludedir = @yncludedir@/s390/dump
+yncludedir = @yncludedir@/s390/onpanic
 
 ynclude_DATA =			\
 	ui.ycp

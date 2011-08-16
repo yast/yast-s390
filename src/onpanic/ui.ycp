@@ -1,0 +1,228 @@
+/**
+ * File:	include/s390/onpanic/ui.ycp
+ * Package:	Configuration of OnPanic
+ * Summary:	Dialogs definitions
+ * Authors:	Tim Hardeck <thardeck@suse.de>
+ *
+ */
+
+{
+
+textdomain "s390";
+
+import "OnPanic";
+import "Label";
+import "Message";
+import "Package";
+import "Popup";
+import "Wizard";
+
+
+/**
+ * Should dumpconf be started?
+ */
+define boolean start	= false;
+
+/**Update the screen according to user input
+ * @param return symbol
+ * @return void
+ */
+define void UpdateScreen (symbol ret) {
+	if (ret == `yes || ret == `no)
+	{
+		start = (ret == `yes);
+	}
+
+	if (ret == `vmcmd)
+	{
+		string vmcmds			= (string) UI::QueryWidget (`id (`vmcmd), `Value);
+		list<string> vmcmd_list = splitstring (vmcmds, "\n");
+		// only five lines are allowed, remove every additional line
+		if (size(vmcmd_list) > 5)
+		{
+			vmcmd_list = sublist(vmcmd_list, 0, 5);
+			vmcmds = mergestring(vmcmd_list, "\n");
+			UI::ChangeWidget (`id(`vmcmd), `Value, vmcmds);
+			Popup::Notify (_("Only five lines are allowed for VMCMD!"));
+		}
+	}
+
+	if (start)
+	{
+		UI::ChangeWidget (`id (`rd), `CurrentButton, `yes);
+		UI::ChangeWidget (`id (`onpanic), `Enabled, true);
+		UI::ChangeWidget (`id (`delayminutes), `Enabled, true);
+
+		// dis/enable widgets according to `onpanic selection
+		string on_panic = (string) UI::QueryWidget (`id (`onpanic), `Value);
+		UI::ChangeWidget (`id (`dumpdevice), `Enabled,
+			(on_panic == "dump" || on_panic == "dump_reipl")
+		);
+		UI::ChangeWidget (`id (`vmcmd), `Enabled,
+			(on_panic == "vmcmd")
+		);
+	}
+	else
+	{
+		// disable all widgets except of "enable dumpconf"
+		UI::ChangeWidget (`id(`rd), `CurrentButton, `no);
+		foreach (symbol widget, [`onpanic, `dumpdevice, `vmcmd, `delayminutes],{
+				UI::ChangeWidget (`id (widget), `Enabled, false);
+		});
+	}
+}
+
+/**
+ * Dialog for seting up OnPanic
+ */
+define symbol OnPanicDialog () {
+	// On Panic Actions
+	list<string> actions = [ "stop", "dump", "reipl", "dump_reipl", "vmcmd" ];
+	// Mkdump list of dump devices
+	list<string> dump_devices = OnPanic::dump_devices;
+
+	// For translators: Caption of the dialog
+	string caption = _("On Panic Configuration");
+	string help = _("
+<p><b>Configure the action[s] to be taken if a kernel panic occurs</b></p>
+<p>The <b>Dumpconf</b> daemon needs to be enabled to influence the behavior during kernel panics.</p>
+
+<p>The following <b>Panic Actions</b> are possible:<br>
+<b>stop</b> Stop Linux (default).<br>
+<b>dump</b> Dump Linux and stop system.<br>
+<b>reipl</b> Reboot Linux.<br>
+<b>dump_reipl</b> Dump Linux and reboot system. It is only available on LPAR with z9® machines and later, and on z/VMversion 5.3 and later.<br>
+<b>vmcmd</b> Execute specified CP commands and stop system.</p>
+
+<p>The time defined in <b>Delay Minutes</b> defers activating the specified panic action for a newly started system to prevent loops. If the system crashes before the time has elapsed the default action (stop) is performed.<br>
+Every time an option is changed in this dialog the delay is triggered too.<br>
+<u>So every panic action besides stop isn't available until Delay Minutes have passed</u>.</p>
+
+<p>The device for dumping the memory can be set with <b>Dump Device</b>. If no device is shown you have to create one with the <b>YaST Dump Devices</b> dialog.</p>
+
+<p>With <b>VMCMD</b> CP commands can be specified which are executed before the system is stopped. Only five lines are allowed.</p>
+");
+
+	term content = `HBox (`HSpacing (3), `VBox (
+	`VSpacing (2),
+		`VSquash(`HBox(
+		`RadioButtonGroup(`id(`rd),
+		`HSquash(`VBox(
+				`Left (`RadioButton(`id(`no), `opt (`notify),
+			// radio button label
+			_("Do No&t Start Dumpconf"), !start)),
+				`Left(`RadioButton(`id(`yes), `opt (`notify),
+			// radio button label
+			_("&Start Dumpconf"), start))))),
+		`HSpacing (5),
+		`VCenter(`HBox(
+			`ComboBox (`id(`onpanic), `opt(`notify, `hstretch),
+				// combobox label
+				_("&Panic Action"), actions),
+		`IntField(`id(`delayminutes), _("Delay &Minutes"), 0, 300, 5 )
+		)))),
+	`VSpacing (),
+		`ComboBox (`id(`dumpdevice), `opt(`hstretch),
+			// combobox label
+			_("&Dump Device"), dump_devices),
+	`VSpacing (),
+	`MultiLineEdit( `id( `vmcmd ), `opt(`notify), _("&VMCMD"), "" ),
+	`VStretch ()
+	), `HSpacing(3));
+
+
+	Wizard::SetContentsButtons (caption, content, help, Label::BackButton (),  Label::OKButton());
+	Wizard::HideBackButton();
+	Wizard::SetAbortButton(`cancel, Label::CancelButton());
+
+	// set configuration settings if available
+	start		= OnPanic::start;
+	// initialize fields
+	UI::ChangeWidget (`id(`onpanic), `Value, OnPanic::on_panic);
+	UI::ChangeWidget (`id(`delayminutes), `Value, OnPanic::delay_min);
+	UI::ChangeWidget (`id(`vmcmd), `Value, OnPanic::vmcmds);
+	UI::ChangeWidget (`id(`dumpdevice), `Value, OnPanic::dump_line);
+	// limit VMCMD length (plus 4 additional newline chars)
+	UI::ChangeWidget( `vmcmd, `InputMaxLength, OnPanic::VMCMD_MAX_CHARS + 4);
+
+	symbol ret = nil;
+	UpdateScreen(ret);
+
+	do
+	{
+		ret	= (symbol) UI::UserInput ();
+		UpdateScreen(ret);
+
+		// check for changes on final user actions
+		if (contains ([`back, `abort, `cancel, `next, `ok, `finish], ret))
+		{
+			OnPanic::modified = (OnPanic::start != start
+								|| OnPanic::on_panic	!= (string) UI::QueryWidget (`id (`onpanic), `Value)
+								|| OnPanic::delay_min	!= (integer) UI::QueryWidget (`id (`delayminutes), `Value)
+								|| OnPanic::vmcmds		!= (string) UI::QueryWidget (`id (`vmcmd), `Value)
+								|| OnPanic::dump_line	!= (string) UI::QueryWidget (`id (`dumpdevice), `Value));
+
+			// if settings were changed don't exit without asking
+			if (contains ([`back, `abort, `cancel], ret) && OnPanic::modified
+				&& !Popup::YesNo (_("Really leave without saving?")))
+			{
+				ret = `again;
+			}
+
+			// check misconfigurations
+			if (contains ([`next, `ok, `finish], ret) && start)
+			{
+				// don't allow dumps if no device is available
+				if (regexpmatch((string) UI::QueryWidget (`id (`onpanic), `Value), "^dump")
+					&& (string) UI::QueryWidget (`id (`dumpdevice), `Value) == "")
+				{
+					Popup::Notify (_("It is not possible to enable the dump process without a dump device."));
+					ret = `again;
+				}
+
+				// don't allow vmcmd without at least one command
+				if ((string) UI::QueryWidget (`id (`onpanic), `Value) == "vmcmd"
+					&& !regexpmatch((string) UI::QueryWidget (`id (`vmcmd), `Value), "[A-Za-z]{2,}"))
+				{
+					Popup::Notify (_("It is not possible to use vmcmd  without defining at least one command."));
+					ret = `again;
+				}
+
+			}
+		}
+	} while (!contains ([`back, `abort, `cancel, `next, `ok], ret));
+
+	// commit changes
+	if (OnPanic::modified && (ret == `next || ret == `ok || ret == `finish))
+	{
+		OnPanic::start		= start;
+		OnPanic::on_panic	= (string) UI::QueryWidget (`id (`onpanic), `Value);
+		OnPanic::delay_min	= (integer) UI::QueryWidget (`id (`delayminutes), `Value);
+		OnPanic::vmcmds		= (string) UI::QueryWidget (`id (`vmcmd), `Value);
+		OnPanic::dump_line	= (string) UI::QueryWidget (`id (`dumpdevice), `Value);
+	}
+
+	return ret;
+}
+
+/**
+ * The whole sequence
+ */
+define symbol OnPanicSequence () {
+	Wizard::CreateDialog ();
+	Wizard::SetDesktopIcon("onpanic");
+
+	OnPanic::Read ();
+
+	symbol ret = OnPanicDialog ();
+	if (ret == `next || ret == `finish || ret == `ok)
+	{
+		OnPanic::Write ();
+	}
+
+	UI::CloseDialog ();
+	return ret;
+}
+
+/* EOF */
+}
