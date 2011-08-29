@@ -16,28 +16,28 @@ import "Popup";
 import "Wizard";
 
 /**
+ * Defines the default active device selection (`dasd, `zfcp)
+ */
+define symbol type = `zfcp;
+
+/**
  * Run the dialog for Dump
  * @param what symbol a
  * @return symbol EditDumpDialog that was edited
  */
 symbol DumpDialog () {
 	string caption = _("Create Dump Device");
-	string help = _("
-<p><b>Prepare one or more volumes for use as S/390 dump device.</b></p>
-<p>Supported devices are ECKD DASD and ZFCP disks, while multi-volumes are limited to DASD.<br>
-Only whole disks can be used, no partitions! If the device is incompatible formatted/partioned, activate the checkbox
-<b>Force overwrite of disk</b></p>
-<p>Devices which are in use or have mounted partitions will not be shown.<br>
-The mentioning of <b>dumpdevice</b> after a disk indicates that it is an already usable dump device. Additionally multi-volume dump devices are indicated by the list of including DASD ids. </p>
-<p>ZFCP columns: Device, Size, ID, WWPN, LUN, Dump<br>
-DASD columns: Device, Size, ID, Dump</p>");
+	string help = _("<p><b>Prepare one or more volumes for use as S/390 dump device.</b></p>")
++ _("<p>Supported devices are ECKD DASD and ZFCP disks, while multi-volumes are limited to DASD.<br>")
++ _("Only whole disks can be used, no partitions! If the device is incompatible formatted/partioned, activate the checkbox <b>Force overwrite of disk</b></p>")
++ _("<p>DASD and ZFCP devices have to be active to be utilized. This activation can be done in the YaST DASD respective ZFCP dialog.<br>")
++ _("Devices which are in use or have mounted partitions will not be shown.</p>")
++ _("The mentioning of <b>dumpdevice</b> after a disk indicates that it is an already usable dump device. Additionally multi-volume dump devices are indicated by the list of including DASD ids. </p>")
++ _("<p>ZFCP columns: Device, Size, ID, WWPN, LUN, Dump<br>")
++ _("DASD columns: Device, Size, ID, Dump</p>");
 
 	list<string> dasd_disks = Dump::dasd_disks;
 	list<string> zfcp_disks = Dump::zfcp_disks;
-
-	// define default active selection (`dasd, `zfcp)
-	symbol type = `zfcp;
-
 
 	/* Dialog content */
 	term content = `HBox( `VBox(
@@ -137,6 +137,9 @@ DASD columns: Device, Size, ID, Dump</p>");
 						// reinitialize devices
 						ret = `again;
 					}
+
+					// reset screen after dump progress bar
+					Wizard::SetContentsButtons (caption, `VBox(), help, Label::BackButton (),  Label::CreateButton());
 				}
 			}
 		}
@@ -152,16 +155,14 @@ DASD columns: Device, Size, ID, Dump</p>");
 symbol DumpSequence() {
 	symbol ret = nil;
 	// reset dialog if required
+	Wizard::CreateDialog();
+	Wizard::SetDesktopIcon("dump");
 	do
 	{
-		// recreate dialog everytime to show the read progress bar after the creation progress bar
-		Wizard::CreateDialog();
-		Wizard::SetDesktopIcon("dump");
 		Dump::Read ();
-
 		ret = DumpDialog ();
-		UI::CloseDialog();
 	} while (ret == `again);
+	UI::CloseDialog();
 
 	return ret;
 }

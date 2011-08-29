@@ -16,7 +16,7 @@ X-SuSE-YaST-SortKey=
 X-SuSE-YaST-AutoInstResource=
 
 Icon=yast-dump
-Exec=xdg-su -c "/sbin/yast2 dump"
+Exec=/sbin/yast2 dump
 
 Name=Dump Devices
 GenericName=Configure Dump Devices

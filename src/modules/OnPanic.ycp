@@ -1,7 +1,7 @@
 /**
  * File:	modules/OnPanic.ycp
  * Package:	Configuration of OnPanic
- * Summary:	Configuration of kernel panic reaction
+ * Summary:	Configuring OnPanic, input and output functions
  * Authors:	Tim Hardeck <thardeck@suse.de>
  *
  * Representation of the dumpconf configuration.
@@ -20,9 +20,14 @@ import "String";
 import "Integer";
 
 /**
+ * Maximal allowed rows for VMCMD?
+ */
+global const integer VMCMD_MAX_ROWS		= 8;
+
+/**
  * Maximal allowed characters for VMCMD?
  */
-global const integer VMCMD_MAX_CHARS	= 400;
+global const integer VMCMD_MAX_CHARS	= 128;
 
 /**
  * Data was modified?
@@ -167,7 +172,7 @@ global define boolean ReadSysconfig () {
 		dump_line = ConvertConfToMkdump(dump_device);
 
 		string config_entry = "";
-		foreach(integer i, Integer::RangeFrom(1, 6), {
+		foreach(integer i, Integer::RangeFrom(1, VMCMD_MAX_ROWS + 1), {
 			config_entry = (string) SCR::Read (.sysconfig.dumpconf + ("VMCMD_" + tostring(i)));
 			if (config_entry != "")
 			{
@@ -267,23 +272,22 @@ global define boolean Write () {
 	});
 
 	list<string> vmcmd_list = splitstring(vmcmds, "\n");
-	foreach(integer i, Integer::RangeFrom(1, 6), {
+	foreach(integer i, Integer::RangeFrom(1, VMCMD_MAX_ROWS + 1), {
 			SCR::Write (.sysconfig.dumpconf + ("VMCMD_" + tostring(i)), vmcmd_list[i-1]:"");
 	});
 
 	SCR::Write (.sysconfig.dumpconf, nil);
 
 	Progress::NextStage ();
-	// stopping since dumpconf restart doesn't work correctly
-	Service::Stop ("dumpconf");
 	if (start)
 	{
 		Service::Enable ("dumpconf");
-		Service::Start ("dumpconf");
+		Service::Restart ("dumpconf");
 	}
 	else
 	{
 		Service::Disable ("dumpconf");
+		Service::Stop ("dumpconf");
 	}
 
 	Progress::NextStage();

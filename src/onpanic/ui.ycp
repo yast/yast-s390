@@ -37,14 +37,19 @@ define void UpdateScreen (symbol ret) {
 	{
 		string vmcmds			= (string) UI::QueryWidget (`id (`vmcmd), `Value);
 		list<string> vmcmd_list = splitstring (vmcmds, "\n");
+
 		// only five lines are allowed, remove every additional line
-		if (size(vmcmd_list) > 5)
+		if (size(vmcmd_list) > OnPanic::VMCMD_MAX_ROWS)
 		{
-			vmcmd_list = sublist(vmcmd_list, 0, 5);
+			vmcmd_list = sublist(vmcmd_list, 0, OnPanic::VMCMD_MAX_ROWS);
 			vmcmds = mergestring(vmcmd_list, "\n");
 			UI::ChangeWidget (`id(`vmcmd), `Value, vmcmds);
-			Popup::Notify (_("Only five lines are allowed for VMCMD!"));
+			Popup::Notify (sformat(_("Only %1 lines are allowed for VMCMD!"), OnPanic::VMCMD_MAX_ROWS));
 		}
+
+		// allow max chars + newlines
+		integer vmcmd_max_chars = OnPanic::VMCMD_MAX_CHARS + size(vmcmd_list) - 1;
+		UI::ChangeWidget( `vmcmd, `InputMaxLength, vmcmd_max_chars);
 	}
 
 	if (start)
@@ -83,25 +88,17 @@ define symbol OnPanicDialog () {
 
 	// For translators: Caption of the dialog
 	string caption = _("On Panic Configuration");
-	string help = _("
-<p><b>Configure the action[s] to be taken if a kernel panic occurs</b></p>
-<p>The <b>Dumpconf</b> daemon needs to be enabled to influence the behavior during kernel panics.</p>
-
-<p>The following <b>Panic Actions</b> are possible:<br>
-<b>stop</b> Stop Linux (default).<br>
-<b>dump</b> Dump Linux and stop system.<br>
-<b>reipl</b> Reboot Linux.<br>
-<b>dump_reipl</b> Dump Linux and reboot system. It is only available on LPAR with z9® machines and later, and on z/VMversion 5.3 and later.<br>
-<b>vmcmd</b> Execute specified CP commands and stop system.</p>
-
-<p>The time defined in <b>Delay Minutes</b> defers activating the specified panic action for a newly started system to prevent loops. If the system crashes before the time has elapsed the default action (stop) is performed.<br>
-Every time an option is changed in this dialog the delay is triggered too.<br>
-<u>So every panic action besides stop isn't available until Delay Minutes have passed</u>.</p>
-
-<p>The device for dumping the memory can be set with <b>Dump Device</b>. If no device is shown you have to create one with the <b>YaST Dump Devices</b> dialog.</p>
-
-<p>With <b>VMCMD</b> CP commands can be specified which are executed before the system is stopped. Only five lines are allowed.</p>
-");
+	string help = _("<p><b>Configure the action[s] to be taken if a kernel panic occurs</b></p>")
++ _("<p>The <b>Dumpconf</b> daemon needs to be enabled to influence the behavior during kernel panics.</p>")
++ _("<p>The following <b>Panic Actions</b> are possible:<br>")
++ _("<b>stop</b> Stop Linux (default).<br>")
++ _("<b>dump</b> Dump Linux and stop system.<br>")
++ _("<b>reipl</b> Reboot Linux.<br>")
++ _("<b>dump_reipl</b> Dump Linux and reboot system. It is only available on LPAR with z9(r) machines and later, and on z/VMversion 5.3 and later.<br>")
++ _("<b>vmcmd</b> Execute specified CP commands and stop system.</p>")
++ _("<p>The time defined in <b>Delay Minutes</b> defers activating the specified panic action for a newly started system to prevent loops. If the system crashes before the time has elapsed the default action (stop) is performed.</p>")
++ _("<p>The device for dumping the memory can be set with <b>Dump Device</b>. If no device is shown you have to create one with the <b>YaST Dump Devices</b> dialog.</p>")
++ sformat(_("<p>With <b>VMCMD</b> CP commands can be specified which are executed before the Linux system is stopped. Only %1 lines and a total of %2 chars are allowed.</p>"), OnPanic::VMCMD_MAX_ROWS, OnPanic::VMCMD_MAX_CHARS);
 
 	term content = `HBox (`HSpacing (3), `VBox (
 	`VSpacing (2),
@@ -142,8 +139,8 @@ Every time an option is changed in this dialog the delay is triggered too.<br>
 	UI::ChangeWidget (`id(`delayminutes), `Value, OnPanic::delay_min);
 	UI::ChangeWidget (`id(`vmcmd), `Value, OnPanic::vmcmds);
 	UI::ChangeWidget (`id(`dumpdevice), `Value, OnPanic::dump_line);
-	// limit VMCMD length (plus 4 additional newline chars)
-	UI::ChangeWidget( `vmcmd, `InputMaxLength, OnPanic::VMCMD_MAX_CHARS + 4);
+	// limit the vmcmd size
+	UI::ChangeWidget( `vmcmd, `InputMaxLength, OnPanic::VMCMD_MAX_CHARS);
 
 	symbol ret = nil;
 	UpdateScreen(ret);
@@ -164,7 +161,7 @@ Every time an option is changed in this dialog the delay is triggered too.<br>
 
 			// if settings were changed don't exit without asking
 			if (contains ([`back, `abort, `cancel], ret) && OnPanic::modified
-				&& !Popup::YesNo (_("Really leave without saving?")))
+				&& !Popup::ReallyAbort (true))
 			{
 				ret = `again;
 			}
