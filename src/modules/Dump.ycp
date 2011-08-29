@@ -1,7 +1,7 @@
 /**
  * File:	modules/Dump.ycp
  * Package:	Creation of s390 dump devices
- * Summary:	Creating dump devices for S/390
+ * Summary:	Creating s390 dump devices, input and output functions
  * Authors:	Tim Hardeck <thardeck@suse.de>
  *
  */
@@ -17,11 +17,11 @@ import "Progress";
 
 /**
  * DASD devices list of mkdump
-  */
+ */
 global define list<string> dasd_disks = [ ];
 /**
  * ZFCP devices list of mkdump
-  */
+ */
 global define list<string> zfcp_disks = [ ];
 
 /**

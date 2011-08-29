@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Aug 29 11:57:31 UTC 2011 - thardeck@suse.com
+
+- updated onpanic dialog to allow 8 vmcmd commands and a total of 128 chars
+- updated the help texts of the onpanic and dump modules
+- removed X-KDE-RootOnly=true entry for both modules (bnc#681249)
+
+-------------------------------------------------------------------
 Tue Aug  9 14:06:43 UTC 2011 - thardeck@novell.com
 
 - extended dump module to support dasd multi-volume dump devices (fate#304024)
