@@ -1,0 +1,383 @@
+/**
+ * File:	modules/IUCVTerminal.ycp
+ * Package:	Configuration IUCV Terminal Settings
+ * Summary:	IUCV Terminal settings, input and output functions
+ * Authors:	Tim Hardeck <thardeck@suse.de>
+ *
+ */
+
+{
+
+module "IUCVTerminal";
+textdomain "s390";
+
+import "FileUtils";
+import "Report";
+import "String";
+import "Progress";
+import "Integer";
+import "Bootloader";
+
+/**
+ * Maximal allowed IUCV ttys, 999 is the absolute maximum
+ */
+global const integer MAX_IUCV_TTYS = 99;
+
+/**
+ * Default Emulation for HVC
+ */
+global const string	DEFAULT_HVC_EMULATION = "linux";
+
+/**
+ * Text field for changing settings of all HVC instances
+ */
+global define const string TEXT_INSTANCES_ALL = _("<all>");
+
+/**
+ * Text field for not changing the HVC emulation
+ */
+global define const string TEXT_EMU_NO_CHANGE = _("<don't change>");
+
+/**
+ * List of all possible HVC terminals
+  */
+global define const list<string> POSSIBLE_HVC_INSTANCES = [ TEXT_INSTANCES_ALL, "hvc0", "hvc1", "hvc2", "hvc3", "hvc4", "hvc5", "hvc6", "hvc7" ];
+
+/**
+ * List of all HVC emulations
+ */
+global define const list<string> HVC_EMULATIONS = [ TEXT_EMU_NO_CHANGE, "linux", "dumb", "xterm", "vt220" ];
+
+/**
+ * Data was modified?
+ */
+global boolean modified = false;
+
+/**
+ * Number of IUCV instances
+ */
+global integer iucv_instances = 0;
+
+/**
+ * First part of the Terminal name (without the counter)
+ */
+global string iucv_name				= "lxterm";
+
+/**
+ * Number of HVC instances
+ */
+global integer hvc_instances		= 0;
+
+/**
+ * List of emulations per HVC device (first entry for hvc0, second for
+ * hvc1 and so on)
+ */
+global list<string> hvc_emulations	= [ ];
+
+/**
+ * Show kernel output on hvc0?
+ */
+global boolean show_kernel_out_on_hvc		= false;
+
+/**
+ * Allow only connections from the mentioned Terminal server
+ */
+global string restrict_hvc_to_srvs		= "";
+
+/**
+ * Has the bootloader configuration changed?
+ */
+global boolean has_bootloader_changed	= false;
+
+/**
+ * Read all settings
+ * @return true on success
+ */
+global define boolean Read () {
+	string caption  = _("Loading IUCV Terminal Configuration");
+	integer steps   = 2;
+
+	Progress::New (caption, " ", steps, [
+	/* Progress stage 1/3 */
+	_("Check IUCVtty entries"),
+	/* Progress stage 2/3 */
+	_("Check HVC entries"),
+	/* Progress stage 3/3 */
+	_("Read Kernel parameters")
+	], [
+	/* Progress step 1/3 */
+	_("Checking IUCVtty entries..."),
+	/* Progress step 2/3 */
+	_("Checking HVC entries..."),
+	/* Progress step 3/3 */
+	_("Reading Kernel parameters..."),
+	/* Progress finished */
+	_("Finished")
+	],
+	""
+	);
+
+
+	// Load IUCVtty settings
+	Progress::NextStage();
+	if (FileUtils::Exists ("/etc/inittab"))
+	{
+		iucv_instances = 0;
+		if (SCR::Read(.etc.inittab.i001) != nil)
+		{
+			string id = "";
+			// count the iucvtty instances
+			foreach (integer i, Integer::RangeFrom(1, MAX_IUCV_TTYS + 1),{
+				id = "i";
+				if (i < 10)
+				{
+					id = id + "00";
+				}
+				else if (i < 100)
+				{
+					id = id + "0";
+				}
+				if (SCR::Read(.etc.inittab  + (id + tostring(i))) != nil)
+				{
+					iucv_instances = iucv_instances + 1;
+				}
+				else
+				{
+					break;
+				}
+			});
+			// extract IUCVtty Terminal name
+			if (iucv_instances > 0)
+			{
+				string value = (string)SCR::Read(.etc.inittab  + "i001");
+				// remove the following number
+				list<string> temp = regexptokenize(value, " ([a-z0-9]{1,7})1$");
+				iucv_name = temp[0]:"lxterm";
+			}
+		}
+	}
+
+	// Load HVC settings
+	Progress::NextStage();
+	if (FileUtils::Exists ("/etc/inittab"))
+	{
+		hvc_instances = 0;
+		if (SCR::Read(.etc.inittab.h0) != nil)
+		{
+			string id = "";
+			string console = nil;
+			// count the hvc instances
+			foreach (integer i, Integer::RangeFrom(0, 8),{
+				id = "h";
+				console = (string) SCR::Read(.etc.inittab  + (id + tostring(i)));
+				if (console != nil)
+				{
+					hvc_instances = hvc_instances + 1;
+					// read emulation
+					hvc_emulations = (list<string>)merge(hvc_emulations, regexptokenize(console, " (.{4,5})$"));
+				}
+				else
+				{
+					break;
+				}
+			});
+
+		}
+	}
+
+	// Extract settings from the kernel parameters
+	Progress::NextStage();
+	boolean old_progress = Progress::set (false);
+	Bootloader::Read();
+	Progress::set (old_progress);
+
+	// load actual boot selection
+	string actual_boot_section =  Bootloader::getDefaultSection ();
+
+	string restrict_hvc_to_srvs_output = Bootloader::getKernelParam (actual_boot_section, "hvc_iucv_allow");
+	if (restrict_hvc_to_srvs_output != "false")
+	{
+		restrict_hvc_to_srvs = restrict_hvc_to_srvs_output;
+	}
+
+	string hvc_instances_output = Bootloader::getKernelParam (actual_boot_section, "hvc_iucv");
+	if (hvc_instances_output != "false")
+	{
+		hvc_instances = tointeger(hvc_instances_output);
+	}
+
+	string console = Bootloader::getKernelParam (actual_boot_section, "console");
+	// if console is defined
+	if (console != "false")
+	{
+		if (console == "hvc0")
+		{
+			show_kernel_out_on_hvc = true;
+		}
+		else
+		{
+			// since it is possible to use more than one console parameter and getKernelParam
+			// is only able to read one, cmdline is used as fallback
+			list<string> parameters = (list<string>) SCR::Read(.proc.cmdline);
+			foreach (string parameter, parameters,{
+				if (regexpmatch(parameter, "console=hvc0"))
+				{
+					show_kernel_out_on_hvc = true;
+				}
+			});
+		}
+	}
+
+	Progress::NextStage();
+	return true;
+}
+
+
+/**
+ * Write all settings
+ * @return true on success
+ */
+global define boolean Write () {
+	if (!modified)
+	{
+		return true;
+	}
+
+	/* Inittab write dialog caption */
+	string caption  = _("Saving IUCV Terminal Configuration");
+	integer steps   = 2;
+
+	Progress::New (caption, " ", steps, [
+	/* Progress stage 1/4 */
+	_("Write IUCVtty settings"),
+	/* Progress stage 2/4 */
+	_("Write HVC settings"),
+	/* Progress stage 3/4 */
+	_("Write Kernel parameters"),
+	/* Progress stage 4/4 */
+	_("Initialize Init")
+	], [
+	/* Progress step 1/4 */
+	_("Writing IUCVtty settings..."),
+	/* Progress step 2/4 */
+	_("Writing HVC settings..."),
+	/* Progress step 3/4 */
+	_("Writing Kernel parameters..."),
+    /* Progress step 4/4 */
+	_("Initializing Init..."),
+	/* Progress finished */
+	_("Finished")
+	],
+	""
+	);
+
+	// save IUCVtty settings
+	Progress::NextStage();
+	string id = "";
+	foreach (integer i, Integer::RangeFrom(1, MAX_IUCV_TTYS + 1),{
+		id = "i";
+		if (i < 10)
+		{
+			id = id + "00";
+		}
+		else if (i < 100)
+		{
+			id = id + "0";
+		}
+
+		if (i <= iucv_instances)
+		{
+			// the maximum for terminal ids are 8 characters
+			SCR::Write (.etc.inittab  + (id + tostring(i)), "2345:respawn:/usr/bin/iucvtty " + iucv_name + tostring(i));
+		}
+		else
+		{
+			// delete all other iucv inittab entries
+			SCR::Write (.etc.inittab  + (id + tostring(i)), nil);
+		}
+	});
+
+	// save HVC settings
+	Progress::NextStage();
+	string console = "";
+	foreach (integer i, Integer::RangeFrom(0, 8),{
+		id = "h";
+		// hvc starts with zero instead of 1
+		if (i < hvc_instances)
+		{
+			/* this console was build according to the documentation from 2009 but SP2 seems to have already inittab entries
+			 * for HVC so using the same syntax
+			 * console = "2345:respawn:/sbin/agetty -L 9600 hvc" + tostring(i) + " " + hvc_emulations[i]:DEFAULT_HVC_EMULATION;
+			 */
+
+			console = "2345:respawn:/sbin/ttyrun hvc" + tostring(i) + " /sbin/agetty -L 9600 %t " + hvc_emulations[i]:DEFAULT_HVC_EMULATION;
+			SCR::Write (.etc.inittab  + (id + tostring(i)), console);
+		}
+		else
+		{
+			// delete all other hvc inittab entries
+			SCR::Write (.etc.inittab  + (id + tostring(i)), nil);
+		}
+	});
+
+	// flush cache
+	SCR::Write (.etc.inittab, nil);
+
+	// writing Kernel parameters
+	Progress::NextStage();
+	// only change/save the bootloader configuration if it was adjusted
+	if (has_bootloader_changed)
+	{
+		string actual_boot_section =  Bootloader::getDefaultSection ();
+		// one hvc device is activated by default so no kernel parameter needed in this case
+		if (hvc_instances > 1)
+		{
+			Bootloader::setKernelParam (actual_boot_section, "hvc_iucv", tostring(hvc_instances));
+		}
+		else
+		{
+			// remove entry
+			Bootloader::setKernelParam (actual_boot_section, "hvc_iucv", "false");
+		}
+
+		// removing empty option
+		if (restrict_hvc_to_srvs == "")
+		{
+			restrict_hvc_to_srvs = "false";
+		}
+		Bootloader::setKernelParam (actual_boot_section, "hvc_iucv_allow", restrict_hvc_to_srvs);
+
+		// this might overwrite other console options but this is mentioned in the help text
+		if (show_kernel_out_on_hvc)
+		{
+			Bootloader::setKernelParam (actual_boot_section, "console", "hvc0");
+		}
+		else
+		{
+			// remove console entry if there is only one or the last is hvc0
+			// otherwise it might not be possible to access it with SetKernelParm
+			// make sure not to remove other console tags
+			if (Bootloader::getKernelParam (actual_boot_section, "console") == "hvc0")
+			{
+				Bootloader::setKernelParam (actual_boot_section, "console", "false");
+			}
+		}
+
+		boolean old_progress = Progress::set (false);
+		Bootloader::Write();
+		Progress::set (old_progress);
+	}
+
+	// initialize init system
+	Progress::NextStage();
+    string cmd = "init q";
+    y2milestone ("Running command %1", cmd);
+    map output = (map) SCR::Execute (.target.bash_output, cmd);
+    string message = output["stdout"]:"" + output["stderr"]:"";
+	y2milestone ("%1 output: %2", cmd, message);
+
+	Progress::NextStage();
+	return true;
+}
+/* EOF */
+}

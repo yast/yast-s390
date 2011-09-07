@@ -1,0 +1,461 @@
+/**
+ * File:	include/s390/iucvterminal/ui.ycp
+ * Package:	Configuration IUCV Terminal Settings
+ * Summary:	Dialogs definitions
+ * Authors:	Tim Hardeck <thardeck@suse.de>
+ *
+ */
+
+{
+
+textdomain "s390";
+
+import "IUCVTerminal";
+import "Label";
+import "Popup";
+import "Wizard";
+import "Integer";
+
+/**
+ * Hspacing value between most dialog fields
+ */
+define const float hspacing = 2;
+
+/**
+ * Vspacing value between most dialog fields
+ */
+define const float vspacing = 0.5;
+
+/**
+ * Text field for changing settings of all HVC instances
+ */
+define const string TEXT_INSTANCES_ALL = IUCVTerminal::TEXT_INSTANCES_ALL;
+
+/**
+ * Text field for not changing the HVC emulation
+ */
+define const string TEXT_EMU_NO_CHANGE = IUCVTerminal::TEXT_EMU_NO_CHANGE;
+
+/**
+ * Default HVC emulation
+ */
+define const string DEFAULT_HVC_EMULATION = IUCVTerminal::DEFAULT_HVC_EMULATION;
+
+/**
+ * Map of HVC terminals and their according emulations
+ */
+define map hvc_emulations = $[ ];
+
+/**
+ * Update the HVC emulation for the "<all> instance" according to the selected
+ * emulations.
+ * So if all emulations are the same <all> shows this particular emulation
+ * otherwise the <don't change> selection is shown to prevent overwriting.
+ * @return void
+ */
+define void UpdateHVCEmulation() {
+	string previous_emulation = hvc_emulations["hvc0"]:DEFAULT_HVC_EMULATION;
+	boolean same_emulation = true;
+	string terminal = "";
+	// for the number of instances
+	foreach (integer i, Integer::RangeFrom(0, (integer)UI::QueryWidget (`id (`hvc_instances), `Value)),{
+		terminal = "hvc" + tostring(i);
+		if (hvc_emulations[terminal]:DEFAULT_HVC_EMULATION != previous_emulation)
+		{
+			same_emulation = false;
+		}
+		previous_emulation = hvc_emulations[terminal]:DEFAULT_HVC_EMULATION;
+	});
+
+	if (same_emulation)
+	{
+		hvc_emulations[TEXT_INSTANCES_ALL] = previous_emulation;
+	}
+	else
+	{
+		hvc_emulations[TEXT_INSTANCES_ALL] = TEXT_EMU_NO_CHANGE;
+	}
+
+	// update emulation field if all is selected
+	if ((string)UI::QueryWidget (`id (`hvc_instance), `Value) == TEXT_INSTANCES_ALL)
+	{
+		UI::ChangeWidget (`id(`hvc_emulation), `Value, hvc_emulations[TEXT_INSTANCES_ALL]:TEXT_EMU_NO_CHANGE);
+	}
+}
+
+/**
+ * Check the "Allowed Terminal Server list" field for validity.
+ * @return true for valid inputs
+ */
+define boolean IsValidTerminalSrvList() {
+	boolean ret = false;
+
+	string restrict_hvc_to_srvs = (string)UI::QueryWidget (`id (`restrict_hvc_to_srvs), `Value);
+	if (regexpmatch(restrict_hvc_to_srvs, "[^a-z0-9,]"))
+	{
+		Popup::Notify(_("Wrong input, only lower case letters, numbers and for separation commas are allowed."));
+	}
+	else if (regexpmatch(restrict_hvc_to_srvs, "^,|,,"))
+	{
+		Popup::Notify(_("Comma is only a separator."));
+	}
+	else if (regexpmatch(restrict_hvc_to_srvs, "[a-z0-9]{9,}"))
+	{
+		Popup::Notify(_("z/VM IDs doesn't allow more than eight characters."));
+	}
+	else
+	{
+		ret = true;
+	}
+	return ret;
+}
+
+/**
+ * Check the "IUCV Name" field for validity.
+ * @return true for valid inputs
+ */
+define boolean IsValidIucvId() {
+	/* in case of more than 99 iucv instances only 5 characters would be allowed
+	 *  because the name is limited to eight chars*/
+	integer max_length = (IUCVTerminal::MAX_IUCV_TTYS < 100) ? 6 : 5;
+
+	boolean ret = false;
+	string iucv_name = (string)UI::QueryWidget (`id (`iucv_name), `Value);
+
+	if (regexpmatch(iucv_name, "[^a-z0-9]"))
+	{
+		Popup::Notify(_("Wrong IUCV ID, only lower case letters are allowed."));
+	}
+	else if (regexpmatch(iucv_name, ".{" + tostring(max_length + 1) + ",}"))
+	{
+		Popup::Notify(sformat(_("IUVC IDs can't be bigger than %1 chars long."), max_length));
+	}
+	else
+	{
+		ret = true;
+	}
+	return ret;
+}
+
+/**
+ * Check if the HVC emulations differ from  the ones loaded at start.
+ * @return true if it has changed
+ */
+define boolean HasEmulationChanged() {
+	boolean has_changed = false;
+	string key = "";
+	// for hvc instances
+	foreach (integer i, Integer::RangeFrom(0, (integer)UI::QueryWidget (`id (`hvc_instances), `Value)),{
+		key = "hvc" + tostring(i);
+		if (hvc_emulations[key]:"" != IUCVTerminal::hvc_emulations[i]:"")
+		{
+			has_changed = true;
+			break;
+		}
+	});
+	return has_changed;
+}
+
+/**
+ * Update the screen according to user input.
+ * @return void
+ */
+define void UpdateScreen(symbol ret) {
+		if (ret == `hvc)
+		{
+			// enable if restrict access is enabled too
+			UI::ChangeWidget(`id(`restrict_hvc_to_srvs), `Enabled, (boolean)UI::QueryWidget (`id (`is_hvc_restricted), `Value));
+		}
+
+		if (ret == `is_hvc_restricted)
+		{
+			UI::ChangeWidget(`id(`restrict_hvc_to_srvs), `Enabled, (boolean)UI::QueryWidget (`id (`is_hvc_restricted), `Value));
+		}
+
+		if (ret == `hvc_instances)
+		{
+			// only show the selected number of instances plus the entry <all>
+			integer number = (integer)UI::QueryWidget (`id (`hvc_instances), `Value) + 1;
+			list<string> hvc_instances = sublist(IUCVTerminal::POSSIBLE_HVC_INSTANCES, 0, number);
+			UI::ChangeWidget (`id(`hvc_instance), `Items, hvc_instances);
+
+			// make sure not to overwrite the emulation after adding new ones
+			UpdateHVCEmulation();
+		}
+
+		if (ret == `hvc_instance)
+		{
+			string instance = (string)UI::QueryWidget (`id (`hvc_instance), `Value);
+			UI::ChangeWidget (`id(`hvc_emulation), `Value, hvc_emulations[instance]:TEXT_EMU_NO_CHANGE);
+		}
+
+		if (ret == `hvc_emulation)
+		{
+			string instance = (string)UI::QueryWidget (`id (`hvc_instance), `Value);
+			string emulation = (string)UI::QueryWidget (`id (`hvc_emulation), `Value);
+
+			if (emulation != TEXT_EMU_NO_CHANGE)
+			{
+				if (instance == TEXT_INSTANCES_ALL)
+				{
+					foreach (string key, IUCVTerminal::POSSIBLE_HVC_INSTANCES,{
+						hvc_emulations[key] = emulation;
+					});
+				}
+				else
+				{
+					hvc_emulations[TEXT_INSTANCES_ALL] = TEXT_EMU_NO_CHANGE;
+					hvc_emulations[instance] =  (string)UI::QueryWidget (`id (`hvc_emulation), `Value);
+				}
+			}
+			UpdateHVCEmulation();
+		}
+}
+
+/**
+ * Run the dialog
+ * @return symbol EditDumpDialog that was edited
+ */
+symbol TerminalDialog () {
+	string caption = "Configure IUCV Terminal Settings";
+	string help = _("<p><h2>Configure Local Terminal System Settings</h2></p>")
++ _("<p><b>IUVCtty</b></p>")
++ _("<p>Several <b>IUCVtty instances</b> can run to provide multiple terminal devices. The instances are distinguished by a Terminal ID that consist of the <b>Terminal ID Prefix</b> and the number of the instance.<br>")
++ _("So if for example 10 instances are defined with the prefix &quot;<i>lxterm</i>&quot; Terminal IDs from <i>lxterm1</i> to <i>lxterm10</i> would be available.</p>")
++ "<p>&nbsp;</p>"
++ _("<p><b>HVC</b></p>")
++ _("<p>The z/VM IUCV HVC device driver is a kernel module and uses device nodes to enable up to 8 HVC terminal devices to communicate with getty and login programs.</p>")
++ _("<p>With <b>restrict access</b> it is possible to allow only the connection from certain <b>Terminal Servers</b>.</p>")
++ _("<p>You can define the emulation for all instances at once or for every one of them on its own.</p>")
++ _("<p>By activating <b>receive kernel messages on hvc0</b> kernel messages are routed to the hvc0 device instead of ttyS0.<br>")
++_("If you want the kernel messages to still be shown on ttyS0 you have to manually add <b>console=ttyS0</b> to the current boot selection kernel parameter in the <b>YaST bootloader module</b>.</p>")
++ _("<h3>Warning: HVC Terminals stay logged on without a manual logout through the shortcut: ctrl _ d</h3>");
+
+	/* Dialog content */
+	term content = `HBox(`HSpacing(3), `VBox(`VSpacing(vspacing + 0.5),
+		`VBox(
+		`CheckBoxFrame(`id(`iucv), _("&IUCVtty"), false, `VBox( `HBox(`HSpacing(hspacing),
+				`InputField(`id(`iucv_name), `opt(`notify, `hstretch), _("Terminal ID &Prefix"), "" ),
+				`HSpacing(2),
+				`IntField(`id(`iucv_instances), _("I&UCVtty instances"), 1, IUCVTerminal::MAX_IUCV_TTYS, 1 )
+			,`HSpacing(hspacing)),`VSpacing(vspacing))),
+
+		`VSpacing (vspacing + 0.5),
+
+		`CheckBoxFrame(`id(`hvc), `opt(`notify), _("HVC"), false, `HBox(`HSpacing(hspacing),`VBox(`VSpacing(vspacing),
+			`HBox(
+				`IntField(`id(`hvc_instances), `opt(`notify), _("H&VC instances"), 1, 8, 1 )
+			),
+		`VSpacing (vspacing),
+			`HBox(
+				`CheckBox (`id (`is_hvc_restricted), `opt(`notify), _("Restrict &access to")),
+				`HSpacing(1),
+				`InputField(`id(`restrict_hvc_to_srvs), `opt(`notify, `hstretch), _("Allowed Terminal &Servers"), "" )
+			),
+		`VSpacing (vspacing),
+			`HBox(
+				`ComboBox (`id(`hvc_instance), `opt(`notify, `hstretch),
+				_("Select I&nstance"), IUCVTerminal::POSSIBLE_HVC_INSTANCES),
+				`HSpacing(1),
+				`ComboBox (`id(`hvc_emulation), `opt(`notify, `hstretch),
+				_("Select &Emulation"), IUCVTerminal::HVC_EMULATIONS)
+			),
+		`VSpacing (vspacing + 0.7),
+			`Left(
+				`CheckBox (`id (`show_kernel_out_on_hvc), _("route &kernel messages to HVC0"))
+			)
+		,`VSpacing(vspacing + 0.5)),`HSpacing(hspacing))
+		)
+	)
+	,`VStretch()),`HSpacing(3));
+
+	Wizard::SetContentsButtons (caption, content, help, Label::BackButton (),  Label::OKButton());
+	Wizard::HideBackButton();
+	Wizard::SetAbortButton(`cancel, Label::CancelButton());
+
+	// initialize hvc_emulations with default value
+    foreach (string key, IUCVTerminal::POSSIBLE_HVC_INSTANCES,{
+		hvc_emulations = add (hvc_emulations, key, DEFAULT_HVC_EMULATION);
+	});
+
+	if (size(IUCVTerminal::hvc_emulations) > 0)
+	{
+		integer i = 0;
+		foreach (string emulation, IUCVTerminal::hvc_emulations,{
+			hvc_emulations["hvc" + tostring(i)] = emulation;
+			i = i + 1;
+		});
+		UpdateHVCEmulation();
+	}
+
+	UI::ChangeWidget(`id(`show_kernel_out_on_hvc), `Value, IUCVTerminal::show_kernel_out_on_hvc);
+	if (IUCVTerminal::restrict_hvc_to_srvs != "")
+	{
+		UI::ChangeWidget(`id(`restrict_hvc_to_srvs), `Value, IUCVTerminal::restrict_hvc_to_srvs);
+		UI::ChangeWidget(`id(`is_hvc_restricted), `Value, true);
+	}
+
+	// initialize screen
+	if (IUCVTerminal::iucv_instances > 0) {
+		UI::ChangeWidget(`id(`iucv), `Value, true);
+		UI::ChangeWidget(`id(`iucv_instances), `Value, IUCVTerminal::iucv_instances);
+	}
+	if (IUCVTerminal::hvc_instances > 0) {
+		UI::ChangeWidget(`id(`hvc), `Value, true);
+		UI::ChangeWidget(`id(`hvc_instances), `Value, IUCVTerminal::hvc_instances);
+	}
+
+	if (IUCVTerminal::iucv_name != "")
+	{
+		UI::ChangeWidget(`id(`iucv_name), `Value, IUCVTerminal::iucv_name);
+	}
+
+	UpdateScreen(`hvc_instances);
+	UpdateScreen(`hvc_instance);
+	UpdateScreen(`iucv);
+	UpdateScreen(`hvc);
+
+	symbol ret		= nil;
+	do
+	{
+		ret = (symbol) UI::UserInput();
+		UpdateScreen (ret);
+
+		if (ret == `restrict_hvc_to_srvs)
+		{
+			IsValidTerminalSrvList();
+		}
+
+		if (ret == `iucv_name)
+		{
+			IsValidIucvId();
+		}
+
+        // check for changes on final user actions
+        if (contains ([`back, `abort, `cancel, `next, `ok, `finish], ret))
+		{
+			IUCVTerminal::modified	= ((IUCVTerminal::iucv_instances == 0
+										&& (boolean)UI::QueryWidget (`id (`iucv), `Value))
+									|| (IUCVTerminal::iucv_instances != 0
+										&& !(boolean)UI::QueryWidget (`id (`iucv), `Value))
+									|| (IUCVTerminal::iucv_instances != 0
+										&& IUCVTerminal::iucv_instances != (integer)UI::QueryWidget (`id (`iucv_instances), `Value))
+									|| IUCVTerminal::iucv_name != (string)UI::QueryWidget (`id (`iucv_name), `Value)
+									|| (IUCVTerminal::hvc_instances != 0
+										&& IUCVTerminal::hvc_instances != (integer)UI::QueryWidget (`id (`hvc_instances), `Value))
+									|| (IUCVTerminal::hvc_instances == 0 && (boolean)UI::QueryWidget (`id (`hvc), `Value))
+									|| (IUCVTerminal::hvc_instances != 0 && !(boolean)UI::QueryWidget (`id (`hvc), `Value))
+									|| IUCVTerminal::show_kernel_out_on_hvc != (boolean)UI::QueryWidget (`id (`show_kernel_out_on_hvc), `Value)
+									|| IUCVTerminal::restrict_hvc_to_srvs != (string)UI::QueryWidget (`id (`restrict_hvc_to_srvs), `Value)
+									|| (IUCVTerminal::restrict_hvc_to_srvs != ""
+										&& !(boolean)UI::QueryWidget (`id (`is_hvc_restricted), `Value))
+									|| (IUCVTerminal::hvc_instances != 0 && HasEmulationChanged())
+									);
+
+			// if settings were changed don't exit without asking
+			if (contains ([`back, `abort, `cancel], ret) && IUCVTerminal::modified
+				&& !Popup::YesNo (_("Really leave without saving?")))
+			{
+				ret = `again;
+			}
+
+			if (contains ([`next, `ok, `finish], ret))
+			{
+				// check iucv id
+				string iucv_name = (string)UI::QueryWidget (`id (`iucv_name), `Value);
+				if (!IsValidIucvId() || iucv_name == "")
+				{
+					UI::SetFocus(`iucv_name);
+					Popup::Notify(_("The IUCV ID is not valid."));
+					ret = `again;
+				}
+
+				// check restrict_hvc_to_srvs and make sure they doesn't end with a comma
+				if ((boolean) UI::QueryWidget (`id (`is_hvc_restricted), `Value))
+				{
+					string restrict_hvc_to_srvs = (string)UI::QueryWidget (`id (`restrict_hvc_to_srvs), `Value);
+					if (!IsValidTerminalSrvList() || restrict_hvc_to_srvs == "" || regexpmatch(restrict_hvc_to_srvs, ",$"))
+					{
+						UI::SetFocus(`restrict_hvc_to_srvs);
+						Popup::Notify(_("The Terminal Servers are not valid."));
+						ret = `again;
+					}
+				}
+			}
+		}
+	} while (!contains ([`back, `abort, `cancel, `next, `ok, `finish], ret));
+
+
+	// commit changes
+	if (IUCVTerminal::modified && (ret == `next || ret == `ok || ret == `finish))
+	{
+		// set instances to zero if it is disabled
+		integer current_hvc_instances = (boolean) UI::QueryWidget (`id (`hvc), `Value)
+			? (integer) UI::QueryWidget (`id (`hvc_instances), `Value)
+			: 0;
+		// no need to provide allowed terminal servers if disabled
+		string current_restrict_hvc_to_srvs	= (boolean) UI::QueryWidget (`id (`is_hvc_restricted), `Value)
+			? (string) UI::QueryWidget (`id (`restrict_hvc_to_srvs), `Value)
+			: "";
+		// check if the bootloader settings need to be adjusted
+		IUCVTerminal::has_bootloader_changed =
+			// one HVC device is allowed by default so no extra Kernel parameter is needed
+			((IUCVTerminal::hvc_instances != current_hvc_instances && ((current_hvc_instances + IUCVTerminal::hvc_instances) > 2))
+			|| IUCVTerminal::restrict_hvc_to_srvs != current_restrict_hvc_to_srvs
+			|| IUCVTerminal::show_kernel_out_on_hvc != (boolean) UI::QueryWidget (`id (`show_kernel_out_on_hvc), `Value));
+
+		if (IUCVTerminal::has_bootloader_changed)
+		{
+			Popup::Notify(_("The system has to be rebooted for some changes to take effect."));
+		}
+
+		IUCVTerminal::hvc_instances		= current_hvc_instances;
+		// set instances to zero if it is disabled
+		IUCVTerminal::iucv_instances	= (boolean) UI::QueryWidget (`id (`iucv), `Value)
+			? (integer) UI::QueryWidget (`id (`iucv_instances), `Value)
+			: 0;
+
+		IUCVTerminal::iucv_name			= (string)UI::QueryWidget (`id (`iucv_name), `Value);
+		IUCVTerminal::restrict_hvc_to_srvs	= current_restrict_hvc_to_srvs;
+		IUCVTerminal::show_kernel_out_on_hvc	= (boolean) UI::QueryWidget (`id (`show_kernel_out_on_hvc), `Value);
+		// commit hvc emulations
+		if (IUCVTerminal::hvc_instances > 0)
+		{
+			list<string> hvc_emulation_list = [ ];
+			string key = "";
+			foreach (integer i, Integer::RangeFrom(0, IUCVTerminal::hvc_instances),{
+				key = "hvc" + tostring(i);
+				hvc_emulation_list = add (hvc_emulation_list, hvc_emulations[key]:DEFAULT_HVC_EMULATION);
+			});
+			IUCVTerminal::hvc_emulations = hvc_emulation_list;
+		}
+	}
+	return (symbol) ret;
+}
+
+
+/**
+ * The whole squence
+ * @return sequence result
+ */
+symbol IUCVTerminalSequence() {
+	symbol ret = nil;
+	Wizard::CreateDialog();
+	Wizard::SetDesktopIcon("dump");
+	IUCVTerminal::Read ();
+	ret = TerminalDialog ();
+	// only write during 
+	if (ret == `next || ret == `finish || ret == `ok)
+	{
+		IUCVTerminal::Write ();
+	}
+	UI::CloseDialog();
+
+
+	return ret;
+}
+
+/* EOF */
+}
+
+

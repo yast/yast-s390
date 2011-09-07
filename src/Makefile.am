@@ -1,1 +1,1 @@
-SUBDIRS = zfcp dasd xpram dump onpanic modules clients config
+SUBDIRS = zfcp dasd xpram dump onpanic iucvterminal iucvterminal-server modules clients config

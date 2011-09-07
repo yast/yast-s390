@@ -1,0 +1,23 @@
+/**
+ * File:
+ *   ts-authorization.conf
+ * Summary:
+ *   SCR Agent for reading/writing /etc/iucvterm/ts-authorization.conf using the ini-agent
+ *
+ */
+.etc.iucvterm-ts-authorization
+
+`ag_ini(
+  `IniAgent(
+   "/etc/iucvterm/ts-authorization.conf",
+    $[
+      "options" : [ "global_values" ],
+      "comments": [ "^[ \t]*#.*", "#.*", "^[ \t]*$" ],
+      "params" : [
+        $[
+        "match" : [ "^[ \t]*([^=]*[^ \t=])[ \t]*=[ \t]*(.*)[ \t]*$" , "%s = %s"],
+      ],
+    ],
+    ]
+  )
+)
