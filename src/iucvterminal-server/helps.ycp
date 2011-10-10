@@ -32,7 +32,7 @@ map HELP = $[
 
 + _("<p>To add or remove groups from the TS-Shell authorization table or to change the membership of them <b>Manage Groups</b> has to be called.</p>")
 
-+ _("<p>With <b>Audited IDs</b> the z/VM IDs could be specified from which transrcripts should be gathered."),
++ _("<p>With <b>Audited IDs</b> the z/VM IDs could be specified from which transcripts should be gathered."),
 
 
     /* TS-Shell User creation dialog */

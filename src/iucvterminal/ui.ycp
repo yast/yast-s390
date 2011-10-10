@@ -220,8 +220,8 @@ symbol TerminalDialog () {
 	string caption = "Configure IUCV Terminal Settings";
 	string help = _("<p><h2>Configure Local Terminal System Settings</h2></p>")
 + _("<p><b>IUVCtty</b></p>")
-+ _("<p>Several <b>IUCVtty instances</b> can run to provide multiple terminal devices. The instances are distinguished by a Terminal ID that consist of the <b>Terminal ID Prefix</b> and the number of the instance.<br>")
-+ _("So if for example 10 instances are defined with the prefix &quot;<i>lxterm</i>&quot; Terminal IDs from <i>lxterm1</i> to <i>lxterm10</i> would be available.</p>")
++ _("<p>Several <b>IUCVtty instances</b> can run to provide multiple terminal devices. The instances are distinguished by a Terminal ID which is a combination of the the <b>Terminal ID Prefix</b> and the number of the instance.<br>")
++ _("So if for example 10 instances are defined with the prefix &quot;<i>lxterm</i>&quot; the Terminal IDs from <i>lxterm1</i> to <i>lxterm10</i> would be available.</p>")
 + "<p>&nbsp;</p>"
 + _("<p><b>HVC</b></p>")
 + _("<p>The z/VM IUCV HVC device driver is a kernel module and uses device nodes to enable up to 8 HVC terminal devices to communicate with getty and login programs.</p>")
@@ -349,7 +349,7 @@ symbol TerminalDialog () {
 									|| IUCVTerminal::restrict_hvc_to_srvs != (string)UI::QueryWidget (`id (`restrict_hvc_to_srvs), `Value)
 									|| (IUCVTerminal::restrict_hvc_to_srvs != ""
 										&& !(boolean)UI::QueryWidget (`id (`is_hvc_restricted), `Value))
-									|| (IUCVTerminal::hvc_instances != 0 && HasEmulationChanged())
+									|| (HasEmulationChanged() && (boolean)UI::QueryWidget (`id (`hvc), `Value))
 									);
 
 			// if settings were changed don't exit without asking
@@ -399,9 +399,7 @@ symbol TerminalDialog () {
 			: "";
 		// check if the bootloader settings need to be adjusted
 		IUCVTerminal::has_bootloader_changed =
-			// one HVC device is allowed by default so no extra Kernel parameter is needed
-			((IUCVTerminal::hvc_instances != current_hvc_instances && ((current_hvc_instances + IUCVTerminal::hvc_instances) > 2))
-			|| IUCVTerminal::restrict_hvc_to_srvs != current_restrict_hvc_to_srvs
+			(  IUCVTerminal::restrict_hvc_to_srvs != current_restrict_hvc_to_srvs
 			|| IUCVTerminal::show_kernel_out_on_hvc != (boolean) UI::QueryWidget (`id (`show_kernel_out_on_hvc), `Value));
 
 		if (IUCVTerminal::has_bootloader_changed)
@@ -441,7 +439,7 @@ symbol TerminalDialog () {
 symbol IUCVTerminalSequence() {
 	symbol ret = nil;
 	Wizard::CreateDialog();
-	Wizard::SetDesktopIcon("dump");
+	Wizard::SetDesktopIcon("iucvterminal");
 	IUCVTerminal::Read ();
 	ret = TerminalDialog ();
 	// only write during 

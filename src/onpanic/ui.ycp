@@ -88,7 +88,7 @@ define symbol OnPanicDialog () {
 
 	// For translators: Caption of the dialog
 	string caption = _("On Panic Configuration");
-	string help = _("<p><b>Configure the action[s] to be taken if a kernel panic occurs</b></p>")
+	string help = _("<p><b>Configure the actions to be taken if a kernel panic occurs</b></p>")
 + _("<p>The <b>Dumpconf</b> daemon needs to be enabled to influence the behavior during kernel panics.</p>")
 + _("<p>The following <b>Panic Actions</b> are possible:<br>")
 + _("<b>stop</b> Stop Linux (default).<br>")

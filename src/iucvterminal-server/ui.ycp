@@ -648,7 +648,7 @@ void DrawMainDialog() {
 
 void DrawTsUserDialog() {
 	Wizard::SetContentsButtons(_("New TS-Shell User"), TsUserDialogContent(),
-		HELP["ts-user"]:"",	Label::BackButton (), Label::OKButton ());
+		HELP["ts-user"]:"",	Label::BackButton (), Label::CreateButton ());
 	Wizard::SetAbortButton(`abort, Label::CancelButton());
 }
 

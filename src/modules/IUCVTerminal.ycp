@@ -200,12 +200,6 @@ global define boolean Read () {
 		restrict_hvc_to_srvs = restrict_hvc_to_srvs_output;
 	}
 
-	string hvc_instances_output = Bootloader::getKernelParam (actual_boot_section, "hvc_iucv");
-	if (hvc_instances_output != "false")
-	{
-		hvc_instances = tointeger(hvc_instances_output);
-	}
-
 	string console = Bootloader::getKernelParam (actual_boot_section, "console");
 	// if console is defined
 	if (console != "false")
@@ -325,21 +319,10 @@ global define boolean Write () {
 
 	// writing Kernel parameters
 	Progress::NextStage();
+	string actual_boot_section =  Bootloader::getDefaultSection ();
 	// only change/save the bootloader configuration if it was adjusted
 	if (has_bootloader_changed)
 	{
-		string actual_boot_section =  Bootloader::getDefaultSection ();
-		// one hvc device is activated by default so no kernel parameter needed in this case
-		if (hvc_instances > 1)
-		{
-			Bootloader::setKernelParam (actual_boot_section, "hvc_iucv", tostring(hvc_instances));
-		}
-		else
-		{
-			// remove entry
-			Bootloader::setKernelParam (actual_boot_section, "hvc_iucv", "false");
-		}
-
 		// removing empty option
 		if (restrict_hvc_to_srvs == "")
 		{
