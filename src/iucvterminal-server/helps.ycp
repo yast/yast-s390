@@ -1,0 +1,70 @@
+/**
+ * File:	include/s390/iucvterminal-server/helps.ycp
+ * Package:	Configuration IUCV Terminal Server
+ * Summary:	Help texts of all the dialogs
+ * Authors:	Tim Hardeck <thardeck@suse.de>
+ *
+ */
+
+{
+
+textdomain "s390";
+
+/**
+ * All helps are here
+ */
+ // zmvids ts_group ts_user ts ic
+map HELP = $[
+
+    /* z/VM IDs */
+    "zvmids" : _("<p><b><big>z/VM IDs</big></b></p>")
++ _("<p>To configure the IUCV Terminal Server the z/VM IDs which are to be used have to be specified.
+<br>They are separated by breaks from each other.</p>"),
+
+
+    /* TS-Shell */
+    "ts" : _("<p><b><big>TS-Shell</big></b></p>")
++ _("<p>TS-Shell allows the <b>Authorization</b> to be specified for every TS-Shell user and group. The rights of a group are inherited by their members.</p>")
+
++ _("<p>Each allowed z/VM IDs are either selected manually under <b>Selection</b>, defined by a <b>Regex</b> or loaded from a <b>File</b> which consist all allowed z/VM IDs separated by breaks.</p>")
+
++ _("<p>By clicking on the button <b>New User</b> addtional TS-Shell users could be created and also deleted by using <b>Delete User</b>.</p>")
+
++ _("<p>To add or remove groups from the TS-Shell authorization table or to change the membership of them <b>Manage Groups</b> has to be called.</p>")
+
++ _("<p>With <b>Audited IDs</b> the z/VM IDs could be specified from which transcripts should be gathered."),
+
+
+    /* TS-Shell User creation dialog */
+    "ts-user" : _("<p><b><big>New TS-Shell User</big></b></p>")
++ _("<p>To create new TS-Shell user the <b>Username</b>, <b>Home Directory</b> and <b>Password</b> has to be provided.
+	<br>It is also possible to specify <b>Additional Groups</b> by selecting them on the right.</p>")
+
++ _("<p>To ensure that the user changes his password after the first Login <b>Force Password Change</b> has to be activated.</p>")
+
++ _("<p>The home directory could be the same for every TS-SHell user since it is not used for saving purposes.</p>"),
+
+
+    /* TS-Shell Managing Groups Dialog */
+    "ts-group" : _("<p><b><big>Mange Groups for TS-Authorization</big></b></p>")
++ _("<p>It is possible to define TS-Shell authorizations per group so every TS-Shell member of this groups inherits these rights.</p>")
+
++ _("<p>Already existing groups could be added to or removed from the TS-Shell authorization by selecting them in the table and clicking on <b>Select or Deselect</b>. The current status is shown in the column <b>TS-Auth</b>.</p>")
+
++ _("<p>TS-Shell members of the selected group could be changed in the <b>TS-Members</b> selection on the side.</p>")
+
++ _("<p>New groups could be created by entering the name in the <b>New Group</b> input field and confirming with <b>Create</b>.
+	<br>To delete previously created groups the <b>YaST users</b> dialog has to be used.</p>")
+
++ _("<p>Changes in this dialog could be undone by using the <b>Back</b> button.<p>"),
+
+
+    /* IUCVConn on Login */
+    "ic" : _("<p><b><big>IUCVConn on Login</big></b></p>")
++ _("<p>IUCVConn on Login needs one user for every z/VM ID. To create these users a <b>password</b> and <b>home directory</b> has to be provided.
+	<br>It is possible to sync the users manually by clicking on <b>Sync</b> or just confirming the changes with <b>Ok</b> while <b>IUCVConn on Login</b> is enabled. </p>"),
+
+
+];
+/* EOF */
+}

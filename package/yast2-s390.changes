@@ -1,4 +1,16 @@
 -------------------------------------------------------------------
+Thu Oct 10 10:55:11 UTC 2011 - thardeck@suse.com
+
+- fixed translation (bnc#722447)
+- removed workaround for (bnc#718089)
+
+-------------------------------------------------------------------
+Wed Sep 07 16:15:24 UTC 2011 - thardeck@suse.com
+
+- added IUCV Terminal module
+- added IUCV Terminal Server module
+
+-------------------------------------------------------------------
 Tue Aug 29 11:57:31 UTC 2011 - thardeck@suse.com
 
 - updated onpanic dialog to allow 8 vmcmd commands and a total of 128 chars

@@ -11,6 +11,8 @@ client_DATA =			\
 	xpram.ycp		\
 	dump.ycp		\
 	onpanic.ycp		\
+	iucvterminal.ycp	\
+	iucvterminal-server.ycp	\
 	inst_dasd.ycp		\
 	inst_zfcp.ycp		\
 	dasd_proposal.ycp	\
@@ -21,7 +23,9 @@ desktop_DATA =			\
 	dasd.desktop		\
 	xpram.desktop		\
 	dump.desktop		\
-	onpanic.desktop
+	onpanic.desktop		\
+	iucvterminal.desktop	\
+	iucvterminal-server.desktop
 
 
 EXTRA_DIST = $(client_DATA) $(desktop_DATA)

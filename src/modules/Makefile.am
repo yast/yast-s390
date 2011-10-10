@@ -3,6 +3,8 @@
 module_DATA =			\
 	DASDController.ycp	\
 	ZFCPController.ycp	\
+	IUCVTerminalServer.ycp	\
+	IUCVTerminal.ycp	\
 	Xpram.ycp		\
 	Dump.ycp		\
 	OnPanic.ycp

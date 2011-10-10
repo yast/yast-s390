@@ -1,0 +1,49 @@
+/**
+ * File:	clients/iucvterminal.ycp
+ * Package:	Configuration IUCV Terminal Settings
+ * Summary:	Main file
+ * Authors:	Tim Hardeck <thardeck@suse.de>
+ *
+ */
+
+{
+
+textdomain "s390";
+
+/* The main () */
+y2milestone ("----------------------------------------");
+y2milestone ("IUCV Terminal module started");
+
+import "CommandLine";
+include "s390/iucvterminal/ui.ycp";
+
+map cmdline_description = $[
+	"id" 	: "iucvterminal",
+	// Command line help text for the Xcontroller module
+	"help"	: _("Configuration of IUCV Terminal Settings"),
+	"guihandler"		: IUCVTerminalSequence,
+	"actions"		   : $[
+	// FIXME TODO: fill the functionality description here
+	],
+	"options"		: $[
+	// FIXME TODO: fill the option descriptions here
+	],
+	"mapping"		: $[
+	// FIXME TODO: fill the mappings of actions and options here
+	]
+];
+
+
+/* main ui function */
+any ret = CommandLine::Run(cmdline_description);
+
+y2debug("ret=%1", ret);
+
+/* Finish */
+y2milestone("IUCV Terminal module finished");
+y2milestone("----------------------------------------");
+
+return ret;
+
+/* EOF */
+}

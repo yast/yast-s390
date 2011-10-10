@@ -80,15 +80,15 @@ global define boolean Read () {
  * @return boolean true on success
  */
 global define boolean FormatDisk (string dev, boolean force) {
-	string caption  = _("Creating Dump Device[s]");
+	string caption  = _("Creating Dump Device");
 	integer steps   = 1;
 
 	Progress::New (caption, " ", steps, [
 	/* Progress stage 1/1 */
-	_("Creating dump device[s]")
+	_("Creating dump device")
 	], [
 	/* Progress step 1/1 */
-	_("Creating dump device[s]. This process might take some minutes."),
+	_("Creating dump device. This process might take some minutes."),
 	/* Progress finished */
 	_("Finished")
 	],

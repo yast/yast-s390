@@ -123,8 +123,10 @@ symbol DumpDialog () {
 			}
 			else
 			{
+				// count devices for proper grammatical number output
+				integer num_devices = size(splitstring(device," "));
 				// warn only in case of force
-				if (!force || Popup::YesNo (sformat (_("The disk[s] %1 will be formatted as a dump device. All data on this device[s] will be lost! Continue?"), device)))
+				if (!force || Popup::YesNo (sformat (_("The disk %1 will be formatted as a dump device. All data on this device will be lost! Continue?", "The disks %1 will be formatted as a dump device. All data on these devices will be lost! Continue?", num_devices), device)))
 				{
 					boolean success = Dump::FormatDisk (device, force);
 					// don't quit in case of failures, error messages are reported by FormatDisk()

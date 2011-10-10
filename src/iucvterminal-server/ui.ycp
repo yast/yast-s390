@@ -1,0 +1,1339 @@
+/**
+ * File:	include/s390/iucvterminal-server/ui.ycp
+ * Package:	Configuration IUCV Terminal Server
+ * Summary:	Dialogs definitions
+ * Authors:	Tim Hardeck <thardeck@suse.de>
+ *
+ */
+
+{
+
+textdomain "s390";
+
+import "IUCVTerminalServer";
+import "Label";
+import "Popup";
+import "Wizard";
+import "Integer";
+import "String";
+import "Users";
+
+include "s390/iucvterminal-server/helps.ycp";
+
+/**
+ * Hspacing value between most dialog fields
+ */
+define const float HSPACING = 0.5;
+
+/**
+ * Vspacing value between most dialog fields
+ */
+define const float VSPACING = 0.3;
+
+/**
+ * Text to select all
+ */
+define const string TEXT_ALL = IUCVTerminalServer::TEXT_ALL;
+
+/**
+ * Text approval
+ */
+define const string TEXT_YES = _("Yes");
+
+/**
+ * Text disapproval
+ */
+define const string TEXT_NO = _("No");
+
+/**
+ * Text for category user
+ */
+define const string TEXT_USER = _("user");
+
+/**
+ * Text for category group
+ */
+define const string TEXT_GROUP = _("group");
+
+/**
+ * list of all z/VM IDs
+ */
+define list<string> zvm_id_list = [];
+
+/**
+ * z/VM ID widget entries (List with TEXT_ALL element)
+ */
+define list<string> zvm_id_entries = [];
+
+/**
+ * Current active tab in the main dialog
+ */
+define symbol current_main_tab = `t_zvmids;
+
+/**
+ * Current active dialog
+ */
+define symbol current_dialog = `main_window;
+
+/**
+ * Is TS-Shell activated?
+ */
+define boolean ts_enabled = false;
+
+/**
+ * TS-Shell  password
+ */
+define string ts_password = "";
+
+/**
+ * TS-Shell home directory
+ */
+define string ts_home = "";
+
+/**
+ * Currently selected TS-Shell user/group entry
+ */
+define string ts_selected_member = "";
+
+/**
+ * File/Regex map per TS-Shell user/groups
+ * the key of the first map is the user/group name
+ * the key of the second map is the selected radio button symbol
+ */
+define map<string, map<symbol, any> > ts_member_conf = $[ ];
+
+/**
+ * List of audited z/VM IDs during TS-Shell sessions
+ * item(id, zvmid, activated)
+ */
+define list<string> ts_audited_ids = [];
+
+/**
+ * Temporary storage for TS-Shell group items to be able to undo changes
+ */
+define list<term> ts_groups_items = [];
+
+/**
+ * Is IUCVConn activated?
+ */
+define boolean ic_enabled = false;
+
+/**
+ * IUCVConn home directory
+ */
+define string ic_home = "";
+
+/**
+ * IUCVConn password
+ */
+define string ic_password = "";
+
+/* Declaration */
+void HandleEvent( symbol widget );
+
+/**
+ * Get a list of local groups without the default users group
+ * @return map of groups
+ */
+map <string, map> GetGroupsWithoutUsers() {
+	map<string, map> groups = IUCVTerminalServer::GetGroups(true);
+	groups = remove(groups, "users");
+	return groups;
+}
+
+/**
+ * Generates the IUCVConn users table list
+ * @return list<term> of items
+ */
+define list<term> GenerateIcUsersTable() {
+	list<string> ic_users = IUCVTerminalServer::GetIcUsersList();
+	list<term> ic_items = [];
+	foreach (string username, ic_users, {
+		map <string, any> user = Users::GetUserByName(username, "local");
+		ic_items = add( ic_items, `item(`id(user["uid"]:nil), user["uid"]:"", user["uidNumber"]:"", user["homeDirectory"]:"", user["loginShell"]:""));
+	});
+	return ic_items;
+}
+
+/**
+ * Generates the TS-Shell Authorization table (for users and groups)
+ * @return list<term> of items
+ */
+define list<term> GenerateTsMembersTable() {
+	list <term> ts_users_groups = [];
+	foreach (string name, map <symbol, any> conf, ts_member_conf, {
+		if (regexpmatch(name, "^@"))
+		{ //group
+			// remove the leading @
+			string groupname = substring(name, 1);
+			map <string, any> group = Users::GetGroupByName(groupname, "local");
+
+			list <string> userlist = maplist ( string k, string v, group["userlist"]:$[], { return k; });
+			// filter non ts users
+			userlist = filter (string username, userlist, { return (haskey(ts_member_conf, username)); });
+			string group_members = mergestring(userlist, ",");
+
+			ts_users_groups = add( ts_users_groups, `item(`id(name), TEXT_GROUP, groupname, group["gidNumber"]:"", group_members));
+		}
+		else
+		{ //user
+			map <string, any> user = Users::GetUserByName(name, "local");
+			list <string> grouplist = maplist ( string k, string v, user["grouplist"]:$[], { return k; });
+			string groups = mergestring(grouplist, ",");
+			ts_users_groups = add( ts_users_groups, `item(`id(user["uid"]:nil), TEXT_USER, user["uid"]:nil, user["uidNumber"]:nil, groups, user["homeDirectory"]:nil  ));
+		}
+	});
+
+	return ts_users_groups;
+}
+
+term ZvmIdsDialogContent() {
+	term content = `HBox(`HSpacing(HSPACING),`VBox(
+	`VSpacing(VSPACING),
+	`MultiLineEdit( `id( `zvmids ), `opt(`notify), _("z/&VM IDs"), mergestring(zvm_id_list, "\n") ),
+	`VSpacing(VSPACING)
+	),`HSpacing(HSPACING));
+	return content;
+}
+
+term TsShellDialogContent() {
+	term content = `HBox(
+	`HSpacing(HSPACING),
+	`VBox(
+	`VSpacing(VSPACING),
+	`Left(
+		`CheckBox (`id (`ts_enabled), `opt(`notify), _("&Enable TS-Shell"), ts_enabled)
+	),
+	`VSpacing(VSPACING),
+	`HBox(
+	`HWeight(13,
+	`Frame(`id(`f_ts_configuration), _("Authorization"),
+		`VBox(
+		`VSpacing(VSPACING),
+		`HBox(
+		`HSpacing(HSPACING),
+			`HWeight(11, `VBox(
+				`Table(`id (`ts_users_groups), `opt(`notify, `immediate),  `header(
+			// table header
+				_("Type"),
+			// table header
+				_("Name"),
+			// table header
+				_("UID/GID"),
+			// table header
+				_("Groups/Members")
+				), GenerateTsMembersTable() ),
+				`HBox(
+					`PushButton(`id(`ts_open_user_dialog), _("&New User") ),
+					`HSpacing(HSPACING),
+					`PushButton(`id(`ts_delete_user), _("&Delete User") ),
+					`HSpacing(HSPACING),
+					`PushButton(`id(`ts_open_group_dialog), _("&Manage Groups") ),
+					`HStretch()
+				)
+			)),
+
+			`HSpacing(HSPACING),
+
+			`HWeight(5, `Frame(`id(`f_ts_member_conf),_("Allowed z/VM IDs"),
+				`HBox(
+				`HSpacing(HSPACING),
+				`RadioButtonGroup(`id(`ts_auth_type),
+				`VBox(
+					`Heading(`id(`ts_label), `opt(`hstretch), ts_selected_member),
+						`Left(`RadioButton(`id(`rb_ts_list), `opt(`notify), _("&Selection"),
+							ts_member_conf[ts_selected_member, `type]:nil == `rb_ts_list)),
+						// force min size to make it easier readable in terminals
+						`MinWidth(14, `MultiSelectionBox( `id(`ts_auth_ids), `opt(`notify, `vstretch), "" , zvm_id_entries)),
+						`Left(`RadioButton(`id(`rb_ts_regex),  `opt(`notify), _("&Regex"),
+							ts_member_conf[ts_selected_member, `type]:nil == `rb_ts_regex)),
+						`InputField(`id(`ts_auth_regex), `opt(`notify, `hstretch),"",""),
+						`Left(`RadioButton(`id(`rb_ts_file),  `opt(`notify), _("&File"),
+							ts_member_conf[ts_selected_member, `type]:nil == `rb_ts_file)),
+						`HBox(
+						`InputField(`id(`ts_auth_file), `opt(`notify, `hstretch),"",""),
+						`PushButton(`id(`ts_auth_file_browse), _("Bro&wse") )),
+				`VSpacing(VSPACING)
+				)),
+				`HSpacing(HSPACING)
+				)
+			)),
+		`HSpacing(HSPACING)
+		),
+		`VSpacing(VSPACING)
+		)
+		)),
+
+		`HSpacing(HSPACING),
+
+		`HWeight(3,
+			`VBox(
+				`VSpacing(VSPACING),
+				// force min size to make it easier readable in terminals
+				`MinWidth(14, `MultiSelectionBox(`id(`ts_audited_ids), `opt(`notify),  _("&Auditied IDs"), zvm_id_entries)),
+				`VSpacing(VSPACING)
+			)
+		)
+	)),
+	`HSpacing(HSPACING)
+	);
+	return content;
+}
+
+term IucvConnDialogContent() {
+	term content =
+	`HBox(
+	`HSpacing(HSPACING),
+	`VBox(
+	`VSpacing(VSPACING),
+	`CheckBoxFrame (`id (`ic_enabled), `opt(`notify), _("&Enable IUCVConn on Login"), ic_enabled,
+		`VBox(
+		`VSpacing(VSPACING),
+		`HBox(
+		`HSpacing(HSPACING),
+			`HWeight(5, `Table(`id (`ic_users), `opt(`vstretch), `header(
+		// table header
+			_("Login"),
+		// table header
+			_("UID"),
+		// table header
+			_("Home"),
+		// table header
+			_("Shell")
+			), GenerateIcUsersTable() )),
+			`HWeight(2, `Frame(_("Settings for new Users"),`VBox(
+				`Top(`Password (`id (`ic_pw1), `opt(`notify, `hstretch), _("&Password"), ic_password)),
+				`VSpacing(VSPACING),
+				`Top(`Password (`id (`ic_pw2), `opt(`notify, `hstretch), _("Co&nfirm Password"), ic_password)),
+				`VSpacing(VSPACING * 2),
+				`Top( `VBox( `InputField(`id(`ic_home), `opt(`hstretch), _("&Home Directory"), ic_home),
+				`PushButton(`id(`ic_browse_home), _("B&rowse") ))),
+				`VStretch(),
+				`PushButton(`id(`ic_sync), _("&Sync") )
+			))),
+		`HSpacing(HSPACING)
+		),
+		`VSpacing(VSPACING)
+		)
+	),
+	`VSpacing(VSPACING)
+	),
+	`HSpacing(HSPACING)
+	);
+
+	return content;
+}
+
+term TsUserDialogContent() {
+	// initialize list with additional groups
+	list<string> groups = maplist ( string name, map v, GetGroupsWithoutUsers(), { return name; });
+
+	term content = `HBox (
+	`HWeight (1, `VBox(
+	`VSpacing(1),
+	`Top (`InputField (`id (`ts_username), `opt (`hstretch),_("&Username"), "")),
+	`VSpacing(1),
+	`Top (`HBox(
+	`InputField(`id(`ts_home), `opt (`hstretch), _("&Home Directory"), ts_home),
+	`HSpacing(HSPACING),
+	`PushButton(`id(`ts_browse_home), _("B&rowse") )
+	)),
+
+	`VSpacing(1),
+	`Top (
+	`Password(`id(`ts_pw1), `opt (`notify, `hstretch), _("&Password"), "")
+	),
+	`Top (
+	`Password(`id(`ts_pw2), `opt (`notify, `hstretch), _("Co&nfirm Password"), "")
+	),
+	`Top (
+	`CheckBox (`id (`ts_force_pw_change), _("&Force Password Change"), false)
+	)
+
+	)),
+	`HSpacing(2),
+	`HWeight (1, `VBox(
+	`VSpacing(1),
+	`MultiSelectionBox (`id(`ts_additional_groups), _("&Additonal Groups"), groups)
+	,
+	`VSpacing(1)
+	)));
+	return content;
+}
+
+term TsGroupDialogContent() {
+	term content = `VBox(`VSpacing(VSPACING),
+	`HBox(
+	`HSpacing(HSPACING),
+	`HWeight(4, `VBox(
+		`Table (`id(`ts_table_add_groups), `opt(`notify, `immediate), `header(
+		// table header
+		_("Name"),
+		// table header
+		_("TS-Auth"),
+		// table header
+		_("GID"),
+		// table header
+		_("TS-Members")), []),
+		`HBox(
+			`PushButton(`id(`ts_groups_select), _("&Select or Deselect") ),
+			`HStretch(),
+			`PushButton(`id(`ts_groups_create), _("C&reate") ),
+			`HSpacing(HSPACING),
+			`InputField(`id(`ts_groups_name), _("&New Group"), "")
+		)
+	)),
+	`HSpacing(HSPACING),
+	`HWeight(1, `MultiSelectionBox (`id(`ts_groups_members), `opt(`notify), _("TS-&Members"),
+		IUCVTerminalServer::GetTsUsersList())),
+	`HSpacing(HSPACING)	));
+	return content;
+}
+
+term MainDialogContent()
+{
+	// draw active tab
+	term widgets = nil;
+	if ( current_main_tab == `t_zvmids )
+		widgets = ZvmIdsDialogContent();
+	else if ( current_main_tab == `t_tsshell )
+		widgets = TsShellDialogContent();
+	else
+		widgets = IucvConnDialogContent();
+
+	term contents =	`VBox(
+		`DumbTab(`id(`tab),
+		[`item(`id(`t_zvmids), _("&z/VM IDs")),
+		`item(`id(`t_tsshell), _("&TS-Shell")) ,
+		`item(`id(`t_iucvconn), _("&IUCVConn")) ],
+		`ReplacePoint(`id(`tab_content), widgets)
+		)
+	);
+	return contents;
+}
+
+
+/**
+ * Initializes the main dialogs (zvmid, ts-shell and iucvconn)
+ * @param the symbol of the activated tab
+ * @return void
+ */
+void InitMainDialog(symbol tab) {
+	// remember current tab
+	current_main_tab = tab;
+	if (tab == `t_zvmids)
+	{
+		UI::ChangeWidget(`id(`zvmids), `Value, mergestring(zvm_id_list, "\n"));
+	}
+	else if (tab == `t_tsshell)
+	{
+		// disable frames if TS-Shell is disabled
+		HandleEvent(`ts_enabled);
+
+		if (ts_selected_member != "")
+		{
+			UI::ChangeWidget(`id(`ts_users_groups), `CurrentItem, ts_selected_member);
+		}
+
+		// filter not anymore existing entries after the z/VM ids have been updated
+		ts_audited_ids = filter (string name, ts_audited_ids, { return (contains(zvm_id_entries, name)); });
+		UI::ChangeWidget(`id(`ts_audited_ids), `SelectedItems, ts_audited_ids );
+		// mark all if selected and new entries were inserted
+		HandleEvent(`ts_audited_ids);
+
+		HandleEvent((symbol) ts_member_conf[ts_selected_member, `type]:nil);
+		HandleEvent(`ts_users_groups);
+
+		// ts_auth_ids has to be behind ts_users_groups otherwise the selection is gone after a tab change
+		HandleEvent(`ts_auth_ids);
+	}
+}
+
+/**
+ * Initializes the TS-Shell group dialog for managing groups
+ * @return void
+ */
+define void InitTsGroupDialog() {
+	list<term> items = [];
+
+	map<string, map> group_map = GetGroupsWithoutUsers();
+
+	foreach (string name, map group, group_map, {
+		// show if the group is already used for TS-Authentication
+		string ts_auth_status = TEXT_YES;
+		// groups ids start with @
+		if (!haskey(ts_member_conf, "@" + name))
+		{
+			ts_auth_status =  TEXT_NO;
+		}
+
+		list <string> userlist = maplist ( string k, string v, group["userlist"]:$[], { return k; });
+		// filter non ts users
+		userlist = filter (string username, userlist, { return (haskey(ts_member_conf, username)); });
+
+		// convert group members to a string separated by comma for the table
+		string group_members = mergestring(userlist, ",");
+		items = add(items, `item(`id(name), name, ts_auth_status, group["gidNumber"]:nil, group_members));
+	});
+
+	// save items for modification check
+	ts_groups_items = items;
+
+	UI::ChangeWidget(`id(`ts_table_add_groups), `Items, items );
+	HandleEvent(`ts_table_add_groups);
+}
+
+
+/**
+ * Checks the input for the new user and creates it if valid
+ * @return true if successful
+ */
+boolean CommitTsUserDialogSettings () {
+	string username	= tolower((string) UI::QueryWidget (`id (`ts_username), `Value));
+	string password	= (string) UI::QueryWidget (`id (`ts_pw1), `Value);
+	string home = (string) UI::QueryWidget (`id (`ts_home), `Value);
+	map <string, map> users = IUCVTerminalServer::GetUsers(false);
+
+	// check and commit password
+
+	boolean ret = true;
+
+	if (ts_password == "")
+	{
+		UI::SetFocus(`ts_pw1);
+		Popup::Notify(_("The passwords doesn't match or are invalid."));
+		ret = false;
+	}
+	// check if the user specifcation is valid and if the name does already exist
+	else if (!IUCVTerminalServer::CheckUserGroupName(username) || haskey(users, username))
+	{
+		UI::SetFocus(`ts_username);
+		Popup::Notify(_("The username is not valid!"));
+		ret = false;
+	}
+	else if (!regexpmatch(home, "^\/"))
+	{
+		UI::SetFocus(`ts_home);
+		Popup::Notify(_("A home directory has to be specified!"));
+		ret = false;
+	}
+	else
+	{
+		ts_home = home;
+
+		list<string> grouplist = (list<string>) UI::QueryWidget (`id (`ts_additional_groups), `SelectedItems);
+		string groups = mergestring(grouplist, ",");
+		map <string, string> groupmap = listmap (string g, grouplist, { return $[g:"1"]; });
+
+		boolean force_pw_change = (boolean) UI::QueryWidget(`id (`ts_force_pw_change), `Value);
+
+		string new_uid = IUCVTerminalServer::AddTsUser(username, password, home, groupmap, force_pw_change);
+		if (new_uid != "")
+		{
+			ts_member_conf = add(ts_member_conf, username,
+			$[  `type       : (symbol)`rb_ts_list,
+			`rb_ts_list : (list <string>) [ ],
+			`rb_ts_regex: (string) "",
+			`rb_ts_file : (string) ""
+			]);
+		}
+		else
+		{
+			Popup::Notify(_("Adding the user has failed."));
+			ret = false;
+		}
+	}
+	return ret;
+}
+
+/**
+ * Extracts the groups and settings from the TsGroupTable items and updates the
+ * users and groups settings accordingly
+ * @return void
+ */
+void CommitTsGroupDialogSettings () {
+	list<term> items = (list<term>) UI::QueryWidget(`id(`ts_table_add_groups), `Items);
+	map <string, any> groups = IUCVTerminalServer::GetGroups(true);
+
+	foreach (term line, items, {
+		boolean is_ts_auth_group = (line[2]:"" == TEXT_YES);
+		string groupname = line[1]:"";
+		list<string> userlist = splitstring(line[4]:"", ",");
+		map <string, string> usermap =  listmap (string k, userlist, { return $[k:"1"]; });
+
+		// if group doesn't exist create it otherwise edit its userlist
+		if (!haskey(groups, groupname))
+		{
+			map <string, any> group = $["cn"		: groupname,
+										"userlist"	: usermap	];
+
+			string error = Users::AddGroup(group);
+			if (error == "")
+			{
+				Users::CommitGroup();
+			}
+			else
+			{
+				y2milestone("Adding the group %1 failed because of: %2", groupname, error);
+			}
+		}
+		else
+		{
+			if (groups[groupname, "userlist"]:$[] != usermap)
+			{
+				Users::SelectGroupByName(groupname);
+				map <string, any> group = Users::GetCurrentGroup ();
+
+				// filter all TS-Entries from current user list to remove deselected ones
+				map <string, string> non_ts_users_list = filter (string username, string number, group["userlist"]:$[], { return (!haskey(ts_member_conf, username)); });
+				group["userlist"] = union(non_ts_users_list, usermap);
+
+				string error = Users::EditGroup(group);
+				if (error == "")
+				{
+					Users::CommitGroup();
+				}
+				else
+				{
+					y2milestone("Editing the group %1 failed because of: %2", groupname, error);
+				}
+			}
+		}
+
+		// groups start with an @
+		string identification = "@" + groupname;
+		// check if the group should be added and  was not already used for TS auth
+		if (!haskey(ts_member_conf, identification))
+		{
+			if (is_ts_auth_group)
+			{
+				string group_members = mergestring(userlist, ",");
+				map <string, any> group = Users::GetGroupByName(groupname, "");
+				string gid = group["gidNumber"]:"";
+
+				// add ts_member_conf
+				ts_member_conf = add(ts_member_conf, identification,
+					$[  `type       : (symbol)`rb_ts_list,
+					`rb_ts_list : (list <string>) [ ],
+					`rb_ts_regex: (string) "",
+					`rb_ts_file : (string) ""
+					]);
+			}
+		}
+		else
+		{
+			// delete group entry if disabled
+			if (!is_ts_auth_group)
+			{
+				integer i = 0;
+				ts_member_conf = remove(ts_member_conf, identification);
+			}
+		}
+	});
+}
+
+
+void DrawMainDialog() {
+	Wizard::SetContentsButtons(_("Configure IUCV Terminal Server Settings"), MainDialogContent(),
+		HELP["zvmids"]:"", Label::BackButton (), Label::OKButton ());
+	Wizard::HideBackButton();
+	Wizard::SetAbortButton(`abort, Label::CancelButton());
+
+	// change tab selection to active tab
+	UI::ChangeWidget (`id (`tab), `CurrentItem, current_main_tab);
+
+	// update screen
+	HandleEvent(current_main_tab);
+}
+
+void DrawTsUserDialog() {
+	Wizard::SetContentsButtons(_("New TS-Shell User"), TsUserDialogContent(),
+		HELP["ts-user"]:"",	Label::BackButton (), Label::CreateButton ());
+	Wizard::SetAbortButton(`abort, Label::CancelButton());
+}
+
+void DrawTsGroupDialog() {
+	Wizard::SetContentsButtons(_("Manage Groups for TS-Authorization"), TsGroupDialogContent(),
+		HELP["ts-group"]:"", Label::BackButton (), Label::OKButton ());
+	Wizard::SetAbortButton(`abort, Label::CancelButton());
+
+	// initialize dialog
+	InitTsGroupDialog();
+}
+
+
+/**
+ * Updates the TS-Shell Group table widget with new items and tries to keep the current selection
+ * @param list<term> of table items
+ * @return void
+ */
+void UpdateTsGroupTable (list<term> items) {
+	// save current table position
+	string ts_group_table_position = (string) UI::QueryWidget(`id(`ts_table_add_groups), `CurrentItem);
+
+	UI::ChangeWidget(`id(`ts_table_add_groups), `Items, items );
+
+	// change to the old position if possible
+	if (ts_group_table_position != nil)
+	{
+		UI::ChangeWidget(`id(`ts_table_add_groups), `CurrentItem, ts_group_table_position);
+	}
+
+	// update the member selection
+	HandleEvent(`ts_table_add_groups);
+}
+
+/**
+ * Extracts the TS-Members of the selected groups from the TS-Shell Group Table entries
+ * @return void list<string> of group members
+ */
+list<string> GetTsGroupTableUserList() {
+	// get table items and position
+	list<term> items = (list<term>) UI::QueryWidget(`id(`ts_table_add_groups), `Items);
+	string current_group = (string) UI::QueryWidget(`id(`ts_table_add_groups), `CurrentItem);
+
+	// extract current item
+	term item = find (term entry, items, ``(entry[0]:nil == `id(current_group)));
+
+	// create a list with users
+	string users = item[4]:"";
+	list<string> users_list = splitstring(users, ",");
+
+	return users_list;
+}
+
+/**
+ * Changes the userlist of the TS-Shell Group entry at the current position
+ * @param list<string> of members
+ * @return void
+ */
+void SetTSGroupTableUserList(list<string> new_list) {
+	// get table items and position
+	list<term> items = (list<term>) UI::QueryWidget(`id(`ts_table_add_groups), `Items);
+	string current_group = (string) UI::QueryWidget(`id(`ts_table_add_groups), `CurrentItem);
+
+	integer i = 0;
+	foreach (term entry, items, {
+		if (entry[1]:"" == current_group)
+		{
+			entry[4] = mergestring(new_list, ",");
+			items[i] = entry;
+			break;
+		}
+		i = i + 1;
+	});
+
+	UpdateTsGroupTable(items);
+}
+
+
+string CheckPassword(symbol field1, symbol field2) {
+		string pw1 = (string) UI::QueryWidget (`id (field1), `Value);
+		if (pw1 != "" && pw1 == (string) UI::QueryWidget (`id (field2), `Value))
+		{
+			return pw1;
+		}
+		else
+		{
+			return "";
+		}
+}
+
+/**
+ * Checks if the user specified z/VM ID list is valid and otherwise shows
+ * a popup what's incorrect
+ * @return boolean true if the list is valid
+ */
+define boolean IsValidZvmIdList() {
+	boolean ret = true;
+	string text = (string) UI::QueryWidget (`id (`zvmids), `Value);
+	list<string> zvmid_list = splitstring(text, "\n");
+
+	// determine last entry
+	integer lines = size(zvmid_list);
+	integer line = 0;
+	foreach (string zvmid, zvmid_list,{
+		line = line + 1;
+		if (regexpmatch(zvmid, "[^a-zA-Z0-9]"))
+		{
+			Popup::Notify(sformat(_("Wrong z/VM ID \"%1\" in line %2, only letters and numbers are allowed."), zvmid, line));
+			ret = false;
+			break;
+		}
+		else if (regexpmatch(zvmid, "^[0-9]"))
+		{
+			Popup::Notify(sformat(_("Wrong z/VM ID \"%1\" in line %2, numbers at the beginning are not allowed."), zvmid, line));
+			ret = false;
+			break;
+		}
+		else if (regexpmatch(zvmid, "[a-z0-9]{9,}"))
+		{
+			Popup::Notify(sformat(_("Wrong z/VM ID \"%1\" in line %2, more than eight characters are not allowed."), zvmid, line));
+			ret = false;
+			break;
+		}
+		// only the last entry is allowed to be empty
+		else if (zvmid == "" && line != lines)
+		{
+			Popup::Notify(sformat(_("Wrong z/VM ID \"%1\" in line %2, at least one letter is required."), zvmid, line));
+			ret = false;
+			break;
+		}
+	});
+	return ret;
+}
+
+/**
+ * Checks if IUCVConn users have to be synced and if the required information is provided
+ * @return boolean true if the list is already synced or was synced
+ */
+boolean SyncIucvConnUsers() {
+	boolean ret = false;
+
+	// check if the ic users list is different since the start
+	if (zvm_id_list != IUCVTerminalServer::GetIcUsersList())
+	{
+		// check password
+		if (ic_password == "")
+		{
+			Popup::Notify(_("A correctly entered password to sync IUCVConn users is required."));
+		}
+		// check home directory
+		else if (!regexpmatch(ic_home, "^\/"))
+		{
+			Popup::Notify(_("The specified IUCVConn home directory is invalid."));
+		}
+		else
+		{
+			IUCVTerminalServer::ic_home = ic_home;
+			IUCVTerminalServer::SyncIucvConnUsers(zvm_id_list, ic_password);
+			UI::ChangeWidget(`id(`ic_users), `Items, GenerateIcUsersTable());
+			ret = true;
+		}
+	}
+	else
+	{
+		ret = true;
+	}
+	return ret;
+}
+
+/**
+ * Updates the MultiSelectionBoxes of z/VM IDs according to user interaction to de/select all at once
+ * @param list<string> of previous defined ids and the MultiSelectionBox symbol to get the new id selection
+ * @return list<string> of items to select
+ */
+list<string> UpdateIdSelections(list<string> previous_ids, symbol widget) {
+	list<string> ids = (list<string>) UI::QueryWidget( `id(widget), `SelectedItems);
+
+	// make sure that only available ids are compared
+	previous_ids = filter (string name, previous_ids, { return (contains(zvm_id_entries, name)); });
+
+	if (previous_ids != ids)
+	{
+		// check if TEXT_ALL was previously selected
+		boolean was_all_selected = (previous_ids[0]:"" == TEXT_ALL);
+		if (was_all_selected)
+		{
+			if (ids[0]:"" == TEXT_ALL)
+			{
+				// remove TEXT_ALL entry if something else is deactivated
+				ids = remove(ids, 0);
+			}
+			else
+			{
+				// if TEXT_ALL was explicitly deactivated disable all
+				ids = [];
+			}
+		}
+
+		// activate all if selected
+		if (ids[0]:nil == TEXT_ALL)
+		{
+			ids = zvm_id_entries;
+		}
+		UI::ChangeWidget(`id(widget), `SelectedItems, ids );
+	}
+	else
+	{
+		// activate all if selected and no user change was committed
+		if (ids[0]:"" == TEXT_ALL)
+		{
+			ids = zvm_id_entries;
+			UI::ChangeWidget(`id(widget), `SelectedItems, ids );
+		}
+	}
+	return ids;
+}
+
+
+/**
+ * Handle user interaction
+ * @param symbol of activated widget
+ * @return void
+ */
+void HandleEvent( symbol widget )
+{
+	if (widget == `ic_enabled)
+	{
+		ic_enabled = (boolean)UI::QueryWidget (`id (`ic_enabled), `Value);
+	}
+
+	if (widget == `ts_enabled)
+	{
+		ts_enabled = (boolean)UI::QueryWidget (`id (`ts_enabled), `Value);
+		UI::ChangeWidget(`id(`f_ts_configuration), `Enabled, ts_enabled);
+		UI::ChangeWidget(`id(`ts_audited_ids), `Enabled, ts_enabled);
+	}
+
+	if (widget == `rb_ts_list || widget == `rb_ts_regex || widget == `rb_ts_file)
+	{
+		if (haskey(ts_member_conf, ts_selected_member))
+		{
+			ts_member_conf[ts_selected_member, `type] = widget;
+		}
+		UI::ChangeWidget(`id(`ts_auth_ids), `Enabled, widget == `rb_ts_list);
+		UI::ChangeWidget(`id(`ts_auth_regex), `Enabled, widget == `rb_ts_regex);
+		UI::ChangeWidget(`id(`ts_auth_file), `Enabled, widget == `rb_ts_file);
+		UI::ChangeWidget(`id(`ts_auth_file_browse), `Enabled, widget == `rb_ts_file);
+	}
+
+	if (widget == `ts_auth_ids)
+	{
+		ts_member_conf[ts_selected_member, `rb_ts_list] = UpdateIdSelections(ts_member_conf[ts_selected_member, `rb_ts_list]:[], `ts_auth_ids);
+	}
+
+	if (widget == `ts_audited_ids)
+	{
+		ts_audited_ids = UpdateIdSelections(ts_audited_ids, `ts_audited_ids);
+	}
+
+	if (widget == `ts_auth_regex)
+	{
+		ts_member_conf[ts_selected_member, `rb_ts_regex] = (string) UI::QueryWidget (`id (`ts_auth_regex), `Value);
+	}
+
+
+	if (widget == `ts_users_groups)
+	{
+		boolean ts_isnt_empty = (size(GenerateTsMembersTable()) > 0);
+		if (ts_isnt_empty)
+		{
+			ts_selected_member = (string) UI::QueryWidget (`id (`ts_users_groups), `CurrentItem);
+		}
+		else
+		{
+			ts_selected_member = "";
+		}
+
+		// show the current selected user
+		UI::ChangeWidget(`id(`ts_label), `Value, ts_selected_member);
+
+		// update selected z/VM IDs
+		UI::ChangeWidget( `id(`ts_auth_ids), `SelectedItems,  ts_member_conf[ts_selected_member, `rb_ts_list]:[]);
+
+		// select the correct radio box (default is `rb_ts_list)
+		UI::ChangeWidget(`id(`ts_auth_type), `CurrentButton, ts_member_conf[ts_selected_member, `type]:`rb_ts_list);
+		// deactivate the other radio box settings
+		HandleEvent((symbol) ts_member_conf[ts_selected_member, `type]:`rb_ts_list);
+
+		// update the regex and file fields
+		UI::ChangeWidget(`id(`ts_auth_regex), `Value, ts_member_conf[ts_selected_member, `rb_ts_regex]:"");
+		UI::ChangeWidget(`id(`ts_auth_file), `Value, ts_member_conf[ts_selected_member, `rb_ts_file]:"");
+
+		// disable the delete users button in case of groups and if the table is empty
+		UI::ChangeWidget(`id(`ts_delete_user), `Enabled, (ts_isnt_empty && regexpmatch(ts_selected_member, "^[^@]")));
+
+		//disable the user configuration dialog in case of an empty table
+		UI::ChangeWidget(`id(`f_ts_member_conf), `Enabled, ts_isnt_empty);
+	}
+
+	if (widget == `ts_delete_user)
+	{
+		// remove user from system
+		IUCVTerminalServer::DeleteUser(ts_selected_member);
+
+		// remove user TS-Shell settings
+		ts_member_conf = remove(ts_member_conf, ts_selected_member);
+
+		// update table
+		UI::ChangeWidget(`id(`ts_users_groups), `Items, GenerateTsMembersTable());
+		HandleEvent(`ts_users_groups);
+	}
+
+	// select file
+	if (widget == `ts_auth_file_browse)
+	{
+		// set default directory
+		string file = ts_member_conf[ts_selected_member, `rb_ts_file]:"/";
+		file =  UI::AskForExistingFile ( file, "", "Select a file with z/VM IDs");
+		if (file != nil)
+		{
+			ts_member_conf[ts_selected_member, `rb_ts_file] = file;
+			UI::ChangeWidget(`id(`ts_auth_file), `Value, file);
+		}
+	}
+
+
+	// reset repeated password on change
+	if (widget == `ic_pw1)
+	{
+		UI::ChangeWidget(`id(`ic_pw2), `Value, "");
+	}
+
+	// check password and update if valid
+	if (widget == `ic_pw2)
+	{
+		ic_password = CheckPassword(`ic_pw1, `ic_pw2);
+	}
+
+	// select home directory
+	if (widget == `ic_browse_home)
+	{
+		// set default directory
+		string dir = (ic_home != "") ? ic_home : "/";
+		dir =  UI::AskForExistingDirectory (dir, "");
+		if (dir != nil)
+		{
+			ic_home = dir;
+			UI::ChangeWidget(`id(`ic_home), `Value, dir);
+		}
+	}
+
+    if (widget == `ic_sync)
+	{
+		SyncIucvConnUsers();
+	}
+
+	// select home directory
+	if (widget == `ts_browse_home)
+	{
+		// set default directory
+		string dir = (ts_home != "") ? ts_home : "/";
+		dir =  UI::AskForExistingDirectory (dir, "");
+		if (dir != nil)
+		{
+			ts_home = dir;
+			UI::ChangeWidget(`id(`ts_home), `Value, dir);
+		}
+	}
+
+	if (widget == `ts_open_group_dialog)
+	{
+		current_dialog = widget;
+		DrawTsGroupDialog();
+	}
+
+	if (widget == `ts_open_user_dialog)
+	{
+		current_dialog = widget;
+		DrawTsUserDialog();
+	}
+
+	if ( widget == `zvmids ) {
+		if ( IsValidZvmIdList() )
+		{
+			// convert to lower case before saving
+			string zvm_ids_text = tolower((string) UI::QueryWidget (`id (`zvmids), `Value));
+			// remove possible break at the end
+			if (regexpmatch(zvm_ids_text, "\n$"))
+			{
+				zvm_ids_text = substring(zvm_ids_text, 0, size(zvm_ids_text) - 1);
+			}
+
+			list<string> id_list = splitstring(zvm_ids_text, "\n");
+			// remove possible duplicates
+			zvm_id_list = (list<string>) union(id_list, id_list);
+			// sort list
+			zvm_id_list = sort(zvm_id_list);
+
+			// update the zvm_id_entries
+			zvm_id_entries = (list<string>) merge([TEXT_ALL], zvm_id_list);
+		}
+		else
+		{
+			// reset list to prevent saving the previous settings
+			zvm_id_list = [ ];
+			zvm_id_entries = [TEXT_ALL];
+		}
+
+		// disabled tab selection without valid z/VM IDs
+		UI::ChangeWidget(`id(`tab), `Enabled, (size(zvm_id_list) > 0));
+	}
+
+	// reset repeated password on change
+	if (widget == `ts_pw1)
+	{
+		UI::ChangeWidget(`id(`ts_pw2), `Value, "");
+	}
+
+	// check password and update if valid
+	if (widget == `ts_pw2)
+	{
+		ts_password = CheckPassword(`ts_pw1, `ts_pw2);
+	}
+
+	// updated group members
+	if (widget == `ts_table_add_groups)
+	{
+		boolean groups_exist = ([] != (list<term>) UI::QueryWidget(`id(`ts_table_add_groups), `Items));
+		UI::ChangeWidget(`id(`ts_groups_members), `Enabled, groups_exist);
+		UI::ChangeWidget(`id(`ts_groups_select), `Enabled, groups_exist);
+		if (groups_exist)
+		{
+			UI::ChangeWidget(`id(`ts_groups_members), `SelectedItems,  GetTsGroupTableUserList());
+		}
+	}
+
+	if (widget == `ts_groups_create)
+	{
+		list<term> table_data = (list<term>) UI::QueryWidget(`id(`ts_table_add_groups), `Items);
+		string groupname = (string) UI::QueryWidget (`id (`ts_groups_name), `Value);
+
+		// gather all groups to check for name overlapses
+		map<string, map> groups =  IUCVTerminalServer::GetGroups(false);
+
+		// check if the group was already added this session
+		boolean is_not_in_list = (nil == find (term line, table_data, ``(line[0]:nil == `id(groupname))));
+		// make sure that that group doesn't already exist and check the specification
+		if (is_not_in_list && !haskey(groups, groupname)
+			&& IUCVTerminalServer::CheckUserGroupName(groupname))
+		{
+			list<term> items = (list<term>) UI::QueryWidget(`id(`ts_table_add_groups), `Items);
+
+			term item = `item(`id(groupname), groupname, TEXT_YES, "new", "");
+			items = add(items, item);
+
+			UpdateTsGroupTable(items);
+			// update ts member selection
+			HandleEvent(`ts_table_add_groups);
+		}
+		else
+		{
+			UI::SetFocus(`ts_groups_name);
+			Popup::Notify(_("The group name is not valid!"));
+		}
+	}
+
+	if (widget == `ts_groups_select)
+	{
+		list<term> items = (list<term>) UI::QueryWidget(`id(`ts_table_add_groups), `Items);
+		string groupname = (string) UI::QueryWidget(`id(`ts_table_add_groups), `CurrentItem);
+
+		integer i = 0;
+		foreach(term item, items, {
+			if (item[1]:"" == groupname)
+			{
+				boolean in_list = (item[2]:"" == TEXT_YES);
+				item[2] = in_list
+				? TEXT_NO
+				: TEXT_YES;
+				items[i] = item;
+				break;
+			}
+			i = i + 1;
+		});
+
+		UpdateTsGroupTable(items);
+	}
+
+	if (widget == `ts_groups_members)
+	{
+		list<string> user_list = (list<string>) UI::QueryWidget(`id(`ts_groups_members), `SelectedItems);
+		SetTSGroupTableUserList(user_list);
+	}
+
+
+	/* tab handling */
+	if ( widget == `t_zvmids )
+	{
+		//SaveSettings( $[ "ID" : widget ] );
+		UI::ReplaceWidget(`id(`tab_content), ZvmIdsDialogContent() );
+		InitMainDialog(widget);
+		Wizard::SetHelpText( HELP["zvmids"]:"" );
+
+	}
+	else if ( widget == `t_tsshell || widget == `t_iucvconn )
+	{
+		// deactivate other tabs without  valid z/VM ids
+		if ( size(zvm_id_list) > 0)
+		{
+			if ( widget == `t_tsshell )
+			{
+				UI::ReplaceWidget(`id(`tab_content), TsShellDialogContent() );
+				InitMainDialog(widget);
+				Wizard::SetHelpText( HELP["ts"]:"" );
+			}
+			else if ( widget == `t_iucvconn )
+			{
+				UI::ReplaceWidget(`id(`tab_content), IucvConnDialogContent() );
+				InitMainDialog(widget);
+				Wizard::SetHelpText( HELP["ic"]:"" );
+			}
+		}
+		else
+		{
+			// change tab selection back
+			UI::ChangeWidget (`id (`tab), `CurrentItem, `t_zvmids);
+			Popup::Notify (_("It is not possible to configure the Terminal Server without valid z/VM IDs."));
+		}
+	}
+}
+
+/**
+ * Run the dialog
+ * @return symbol last pressed button
+ */
+symbol IUCVTerminalServerDialog () {
+	zvm_id_list		= IUCVTerminalServer::zvm_id_list;
+	ts_home			= IUCVTerminalServer::ts_home;
+	ts_enabled		= IUCVTerminalServer::ts_enabled;
+	ts_member_conf= IUCVTerminalServer::ts_member_conf;
+	ts_audited_ids	= IUCVTerminalServer::ts_audited_ids;
+	ic_enabled		= IUCVTerminalServer::ic_enabled;
+	ic_home			= IUCVTerminalServer::ic_home;
+
+	// initialize z/VM IDs
+	zvm_id_entries = (list<string>) merge( [TEXT_ALL], zvm_id_list);
+
+	// initialize screen
+	DrawMainDialog();
+
+	// disable Dumbtab if no proper z/VM IDs are defined
+	UI::ChangeWidget(`id(`tab), `Enabled, (size(zvm_id_list) > 0));
+
+	symbol ret		= nil;
+	do
+	{
+		ret = (symbol) UI::UserInput();
+		// if ts user/group dialog is active
+		if (contains ([`ts_open_user_dialog, `ts_open_group_dialog], current_dialog))
+		{
+			if (contains ([`next, `ok, `finish], ret))
+			{
+				ret = `again;
+				boolean success = true;
+				// check TS-Shell user dialog settings and commit them if valid
+				if (current_dialog == `ts_open_user_dialog)
+				{
+					success = CommitTsUserDialogSettings();
+				}
+				// commit TS-Shell group dialog settings
+				else if (current_dialog == `ts_open_group_dialog)
+				{
+					CommitTsGroupDialogSettings();
+				}
+
+				// if successful return to main dialog
+				if (success) {
+					current_dialog = `main_window;
+					DrawMainDialog();
+				}
+			}
+
+			if (contains ([`abort, `cancel, `back], ret))
+			{
+				// ask for confirmation if the ts group dialog has changed
+				list<term> current_items = (list<term>) UI::QueryWidget(`id(`ts_table_add_groups), `Items);
+				if (current_dialog == `ts_open_group_dialog
+					&&  ts_groups_items != current_items && !Popup::ReallyAbort(true))
+				{
+					ret = `again;
+					continue;
+				}
+
+				current_dialog = `main_window;
+				ret = `again;
+				DrawMainDialog();
+			}
+		}
+
+		// run action for current event
+		HandleEvent(ret);
+
+		// check for changes on final user actions
+		if (contains ([`back, `abort, `cancel, `next, `ok, `finish], ret))
+		{
+			// check if something was modified
+			IUCVTerminalServer::modified	=
+									(IUCVTerminalServer::zvm_id_list != zvm_id_list
+									|| IUCVTerminalServer::ts_enabled != ts_enabled
+									|| IUCVTerminalServer::ts_home != ts_home
+									|| IUCVTerminalServer::ts_audited_ids != ts_audited_ids
+									|| IUCVTerminalServer::ts_member_conf != ts_member_conf
+									|| IUCVTerminalServer::ic_enabled != ic_enabled
+									|| IUCVTerminalServer::ic_home != ic_home
+									|| Users::Modified ()
+									);
+
+			// if settings were changed don't exit without asking
+			if (contains ([`abort, `cancel], ret) && IUCVTerminalServer::modified
+				&& !Popup::ReallyAbort (true))
+			{
+				ret = `again;
+			}
+
+			if (contains ([`next, `ok, `finish], ret))
+			{
+				// check for z/VM ID entries
+				if (size(zvm_id_list) == 0)
+				{
+					Popup::Notify (_("It is not possible to configure the Terminal Server without valid z/VM IDs."));
+					ret = `again;
+					continue;
+				}
+				// don't quit without syncronisation if iucvconn is enabled
+				else if (ic_enabled && !SyncIucvConnUsers()) {
+					ret = `again;
+					continue;
+				}
+			}
+		}
+	} while (!contains ([`back, `abort, `cancel, `next, `ok, `finish], ret));
+
+
+	// commit changes
+	if (IUCVTerminalServer::modified && (ret == `next || ret == `ok || ret == `finish))
+	{
+		// check if the TS-Shell status has changed
+		IUCVTerminalServer::ts_has_status_changed = (IUCVTerminalServer::ts_enabled != ts_enabled);
+
+		IUCVTerminalServer::zvm_id_list		= zvm_id_list;
+		IUCVTerminalServer::ts_enabled		= ts_enabled;
+		IUCVTerminalServer::ts_home			= ts_home;
+		IUCVTerminalServer::ts_audited_ids	= ts_audited_ids;
+		IUCVTerminalServer::ts_member_conf	= ts_member_conf;
+		IUCVTerminalServer::ic_enabled		= ic_enabled;
+		IUCVTerminalServer::ic_home			= ic_home;
+
+		//remove remaining IUCVConn users if disabled
+		if (!ic_enabled && IUCVTerminalServer::GetIcUsersList() != [])
+		{
+			IUCVTerminalServer::SyncIucvConnUsers([ ], "");
+		}
+	}
+	return (symbol) ret;
+}
+
+/**
+ * The whole sequence
+ * @return sequence result
+ */
+symbol IUCVTerminalServerSequence() {
+	symbol ret = nil;
+	Wizard::CreateDialog();
+	Wizard::SetDesktopIcon("iucvterminal-server");
+	IUCVTerminalServer::Read ();
+	ret = IUCVTerminalServerDialog ();
+	// only write during 
+	if (ret == `next || ret == `finish || ret == `ok)
+	{
+		IUCVTerminalServer::Write ();
+	}
+	UI::CloseDialog();
+
+	return ret;
+}
+
+/* EOF */
+}
