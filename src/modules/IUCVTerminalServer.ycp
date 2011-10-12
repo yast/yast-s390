@@ -518,7 +518,7 @@ global define boolean Write () {
 		}
 
 		// ignore empty entries(like "list:" or "regex:")
-		if (!regexpmatch(value, "^[a-z]{4,5}:$"))
+		if (!regexpmatch(value, "^[:lower:]{4,5}:$"))
 		{
 			ts_auth_values = add(ts_auth_values, name, value);
 		}
