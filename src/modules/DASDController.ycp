@@ -23,6 +23,7 @@ import "Summary";
 import "Arch";
 import "FileUtils";
 import "Popup";
+    import "String";
 
 global map<integer,map<string,any> > devices = $[];
 
@@ -180,46 +181,54 @@ global boolean Import (map settings) {
     return true;
 }
 
+
 /**
  * Dump the controller settings to a single map
  * (For use by autoinstallation.)
  * @return map Dumped settings (later acceptable by Import ())
  */
-global map Export () {
+global map<string, list> Export()
+{
     ProbeDisks();
-    list l = maplist (integer i, map<string,any> d, devices, {
-	return $[
-	    "channel" : d["channel"]:"",
-	    "format" : false,
-	    "diag" : false,
-	];
-    });
-    if (Mode::config ())
+
+    if (Mode::config())
     {
-	list l = maplist (integer i, map<string,any> d, devices, {
+	list<map<string, any> > l = maplist(integer i, map<string, any> d, devices, {
 	    // if possible, use device by-path (bnc#591603)
-	    if (haskey(d, "dev_name") && size(d["dev_names"]:[]) > 1)
-		d["dev_name"] = d["dev_names", 1]:"";
+	    string tmp = find(string s, d["dev_names"]:[], {
+		return String::StartsWith(s, "/dev/disk/by-path/");
+	    });
+	    if (tmp != nil)
+		d["dev_name"] = tmp;
 	    return d;
 	});
 
-	list ll = [];
-
-	foreach( map m, (list<map>)l, ``{
-		list dummy = m["resource","io"]:[];
-		map dummy2 = dummy[0]:$[];
-		if( dummy2["active"]:false == true )
-			ll = add( ll, m );
+	l = filter(map<string, any> m, l, {
+	    return m["resource", "io", 0, "active"]:false;
 	});
 
-	return $[
-	    "devices" : ll
-	];
+	/*
+	l = maplist(map<string, any> m, l, {
+	    return filter(string k, any v, m, {
+		return contains([ "channel", "dev_name" ], k);
+	    });
+	});
+	*/
+
+	return $[ "devices" : l ];
     }
-    return $[
-	"devices" : l,
-    ];
+    else
+    {
+	list<map<string, any> > l = maplist (integer i, map<string, any> d, devices, {
+	    return $[ "channel" : d["channel"]:"",
+		      "format" : false,
+		      "diag" : false ];
+        });
+
+	return $[ "devices" : l ];
+    }
 }
+
 
 /**
  * Create a textual summary and a list of unconfigured cards
@@ -311,7 +320,7 @@ global define void ProbeDisks () {
     disks = maplist (map<string,any> d, disks, ``{
 	string channel = d["sysfs_bus_id"]:"0.0.0000";
 	d["channel"] = channel;
-	boolean active = (boolean)(d["resource", "io", 0, "active"]:false);
+	boolean active = d["resource", "io", 0, "active"]:false;
 	if (active)
 	{
 	    string device = d["dev_name"]:"";
