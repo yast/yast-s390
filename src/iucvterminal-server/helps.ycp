@@ -59,7 +59,7 @@ map HELP = $[
 + _("<p>Already existing groups could be added to or removed from the TS-Shell authorization by selecting them in the table and clicking on <b>Select or Deselect</b>. The current status is shown in the column <b>TS-Auth</b>.</p>")
 
     /* TS-Shell Managing Groups dialog help 3/5 */
-+ _("<p>TS-Shell members of the selected group could be changed in the <b>TS-Members</b> selection on the side.</p>")
++ _("<p>TS-Shell members of the selected group could be changed in the <b>TS-Members</b> selection.</p>")
 
     /* TS-Shell Managing Groups dialog help 4/5 */
 + _("<p>New groups could be created by entering the name in the <b>New Group</b> input field and confirming with <b>Create</b>.

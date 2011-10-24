@@ -128,7 +128,7 @@ define boolean IsValidIucvId() {
 	}
 	else if (regexpmatch(iucv_name, ".{" + tostring(max_length + 1) + ",}"))
 	{
-		Popup::Notify(sformat(_("IUVC IDs can't be bigger than %1 chars long."), max_length));
+		Popup::Notify(sformat(_("IUCV IDs can't be bigger than %1 chars long."), max_length));
 	}
 	else
 	{
@@ -224,7 +224,7 @@ symbol TerminalDialog () {
 _("<p><h2>Configure Local Terminal System Settings</h2></p>")
 
 /* IUCVTerminal dialog help 2/11 */
-+ _("<p><b>IUVCtty</b></p>")
++ _("<p><b>IUCVtty</b></p>")
 
 /* IUCVTerminal dialog help 3/11 */
 + _("<p>Several <b>IUCVtty instances</b> can run to provide multiple terminal devices. The instances are distinguished by a Terminal ID which is a combination of the the <b>Terminal ID Prefix</b> and the number of the instance.<br>")
