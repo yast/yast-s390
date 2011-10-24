@@ -35,7 +35,7 @@ _("<p><b>Prepare one or more volumes for use as S/390 dump device.</b></p>")
     /* Dump dialog help 3/8 */
 + _("Only whole disks can be used, no partitions! If the device is incompatible formatted/partioned, activate the checkbox <b>Force overwrite of disk</b></p>")
     /* Dump dialog help 4/8 */
-+ _("<p>DASD and ZFCP devices have to be active to be utilized. This activation can be done in the YaST DASD respective ZFCP dialog.<br>")
++ _("<p>DASD and ZFCP devices have to be active to be utilized. This activation can be done in the respective YaST DASD or ZFCP dialog.<br>")
     /* Dump dialog help 5/8 */
 + _("Devices which are in use or have mounted partitions will not be shown.</p>")
     /* Dump dialog help 6/8 */
