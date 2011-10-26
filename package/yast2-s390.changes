@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Oct 26 16:06:33 EDT 2011 - thardeck@suse.com
+
+- fixed POSIX regex expressions
+
+-------------------------------------------------------------------
 Mon Oct 24 15:05:56 EDT 2011 - thardeck@suse.com
 
 - fixed some help texts (bnc#724622)
