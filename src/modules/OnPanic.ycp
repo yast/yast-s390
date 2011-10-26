@@ -86,8 +86,8 @@ define map ConvertMkdumpToConf (string dev_line) {
 	map dev = $[ ];
 
 	list<string> entry = splitstring(dev_line, "\t");
-	boolean is_dasd = regexpmatch(entry[0]:nil, "^\/dev\/dasd[:lower:]+$");
-	boolean is_zfcp = regexpmatch(entry[0]:nil, "^\/dev\/sd[:lower:]+$");
+	boolean is_dasd = regexpmatch(entry[0]:nil, "^\/dev\/dasd[[:lower:]]+$");
+	boolean is_zfcp = regexpmatch(entry[0]:nil, "^\/dev\/sd[[:lower:]]+$");
 
 	if (is_dasd)
 	{
@@ -123,10 +123,10 @@ define string ConvertConfToMkdump (map dev) {
 	foreach (string entry, dump_devices,{
 		list<string> line = splitstring(entry, "\t");
 		if ( // check for fitting dasd
-		  (type == "ccw" && regexpmatch(line[0]:nil, "^\/dev\/dasd[:lower:]+")
+		  (type == "ccw" && regexpmatch(line[0]:nil, "^\/dev\/dasd[[:lower:]]+")
 			&& line[2]:nil == dev["DEVICE"]:nil)
 		  || // check for fitting zfcp
-		  (type == "fcp" && regexpmatch(line[0]:nil, "^\/dev\/sd[:lower:]+")
+		  (type == "fcp" && regexpmatch(line[0]:nil, "^\/dev\/sd[[:lower:]]+")
 			&& line[2]:nil == dev["DEVICE"]:nil
 			&& line[3]:nil == dev["WWPN"]:nil
 			&& line[4]:nil == dev["LUN"]:nil)

@@ -191,7 +191,7 @@ _("<p><b>Configure the actions to be taken if a kernel panic occurs</b></p>")
 
 				// don't allow vmcmd without at least one command
 				if ((string) UI::QueryWidget (`id (`onpanic), `Value) == "vmcmd"
-					&& !regexpmatch((string) UI::QueryWidget (`id (`vmcmd), `Value), "[:alpha:]{2,}"))
+					&& !regexpmatch((string) UI::QueryWidget (`id (`vmcmd), `Value), "[[:alpha:]]{2,}"))
 				{
 					Popup::Notify (_("It is not possible to use vmcmd  without defining at least one command."));
 					ret = `again;

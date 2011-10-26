@@ -754,19 +754,19 @@ define boolean IsValidZvmIdList() {
 	integer line = 0;
 	foreach (string zvmid, zvmid_list,{
 		line = line + 1;
-		if (regexpmatch(zvmid, "[^:alnum:]"))
+		if (regexpmatch(zvmid, "[^[:alnum:]]"))
 		{
 			Popup::Notify(sformat(_("Wrong z/VM ID \"%1\" in line %2, only letters and numbers are allowed."), zvmid, line));
 			ret = false;
 			break;
 		}
-		else if (regexpmatch(zvmid, "^[:digit:]"))
+		else if (regexpmatch(zvmid, "^[[:digit:]]"))
 		{
 			Popup::Notify(sformat(_("Wrong z/VM ID \"%1\" in line %2, numbers at the beginning are not allowed."), zvmid, line));
 			ret = false;
 			break;
 		}
-		else if (regexpmatch(zvmid, "[:lower::digit:]{9,}"))
+		else if (regexpmatch(zvmid, "[[:lower:][:digit:]]{9,}"))
 		{
 			Popup::Notify(sformat(_("Wrong z/VM ID \"%1\" in line %2, more than eight characters are not allowed."), zvmid, line));
 			ret = false;

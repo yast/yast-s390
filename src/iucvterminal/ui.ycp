@@ -91,7 +91,7 @@ define boolean IsValidTerminalSrvList() {
 	boolean ret = false;
 
 	string restrict_hvc_to_srvs = (string)UI::QueryWidget (`id (`restrict_hvc_to_srvs), `Value);
-	if (regexpmatch(restrict_hvc_to_srvs, "[^:lower::digit:,]"))
+	if (regexpmatch(restrict_hvc_to_srvs, "[^[:lower:][:digit:],]"))
 	{
 		Popup::Notify(_("Wrong input, only lower case letters, numbers and for separation commas are allowed."));
 	}
@@ -99,7 +99,7 @@ define boolean IsValidTerminalSrvList() {
 	{
 		Popup::Notify(_("Comma is only a separator."));
 	}
-	else if (regexpmatch(restrict_hvc_to_srvs, "[:lower::digit:]{9,}"))
+	else if (regexpmatch(restrict_hvc_to_srvs, "[[:lower:][:digit:]]{9,}"))
 	{
 		Popup::Notify(_("z/VM IDs doesn't allow more than eight characters."));
 	}
@@ -122,7 +122,7 @@ define boolean IsValidIucvId() {
 	boolean ret = false;
 	string iucv_name = (string)UI::QueryWidget (`id (`iucv_name), `Value);
 
-	if (regexpmatch(iucv_name, "[^:lower::digit:]"))
+	if (regexpmatch(iucv_name, "[^[:lower:][:digit:]]"))
 	{
 		Popup::Notify(_("Wrong IUCV ID, only lower case letters are allowed."));
 	}
