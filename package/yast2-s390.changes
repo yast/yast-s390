@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Oct 31 10:59:47 EDT 2011 - thardeck@suse.com
+
+- fixed iucvterminal* module typos (bnc#723425)
+
+-------------------------------------------------------------------
 Mon Oct 26 16:06:33 EDT 2011 - thardeck@suse.com
 
 - fixed POSIX regex expressions

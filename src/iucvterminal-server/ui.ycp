@@ -501,7 +501,7 @@ boolean CommitTsUserDialogSettings () {
 	if (ts_password == "")
 	{
 		UI::SetFocus(`ts_pw1);
-		Popup::Notify(_("The passwords doesn't match or are invalid."));
+		Popup::Notify(_("The passwords don't match or are invalid."));
 		ret = false;
 	}
 	// check if the user specifcation is valid and if the name does already exist
