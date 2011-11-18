@@ -44,7 +44,7 @@ define void UpdateScreen (symbol ret) {
 			vmcmd_list = sublist(vmcmd_list, 0, OnPanic::VMCMD_MAX_ROWS);
 			vmcmds = mergestring(vmcmd_list, "\n");
 			UI::ChangeWidget (`id(`vmcmd), `Value, vmcmds);
-			Popup::Notify (sformat(_("Only %1 lines are allowed for VMCMD!"), OnPanic::VMCMD_MAX_ROWS));
+			Popup::Notify (sformat(_("Only %1 lines are allowed for VMCMD."), OnPanic::VMCMD_MAX_ROWS));
 		}
 
 		// allow max chars + newlines
@@ -102,7 +102,7 @@ _("<p><b>Configure the actions to be taken if a kernel panic occurs</b></p>")
     /* OnPanic dialog help 6/11 */
 + _("<b>reipl</b> Reboot Linux.<br>")
     /* OnPanic dialog help 7/11 */
-+ _("<b>dump_reipl</b> Dump Linux and reboot system. It is only available on LPAR with z9(r) machines and later, and on z/VMversion 5.3 and later.<br>")
++ _("<b>dump_reipl</b> Dump Linux and reboot system. This option is only available\non LPAR with z9(r) machines and later and on z/VMversion 5.3 and later.<br>")
     /* OnPanic dialog help 8/11 */
 + _("<b>vmcmd</b> Execute specified CP commands and stop system.</p>")
     /* OnPanic dialog help 9/11 */
@@ -110,7 +110,7 @@ _("<p><b>Configure the actions to be taken if a kernel panic occurs</b></p>")
     /* OnPanic dialog help 10/11 */
 + _("<p>The device for dumping the memory can be set with <b>Dump Device</b>. If no device is shown you have to create one with the <b>YaST Dump Devices</b> dialog.</p>")
     /* OnPanic dialog help 11/11 */
-+ sformat(_("<p>With <b>VMCMD</b> CP commands can be specified which are executed before the Linux system is stopped. Only %1 lines and a total of %2 chars are allowed.</p>"), OnPanic::VMCMD_MAX_ROWS, OnPanic::VMCMD_MAX_CHARS);
++ sformat(_("<p>With <b>VMCMD</b> specify CP commands to be executed before the Linux system is stopped. Only %1 lines and a total of %2 chars are allowed.</p>"), OnPanic::VMCMD_MAX_ROWS, OnPanic::VMCMD_MAX_CHARS);
 
 	term content = `HBox (`HSpacing (3), `VBox (
 	`VSpacing (2),

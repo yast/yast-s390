@@ -402,39 +402,39 @@ define void ReportActivationError (any id, integer ret) {
 	else if (ret == 2)
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: Invalid status for <online>"), id));
+		_("%1: Invalid status for <online>."), id));
 	else if (ret == 3)
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: No device found for <ccwid>"), id));
+		_("%1: No device found for <ccwid>."), id));
 	else if (ret == 4)
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: Could not change state of the device"), id));
+		_("%1: Could not change state of the device."), id));
 	else if (ret == 5)
 	    // https://bugzilla.novell.com/show_bug.cgi?id=446998#c15
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: device is not a DASD"), id));
+		_("%1: Device is not a DASD."), id));
 	else if (ret == 6)
 	    // https://bugzilla.novell.com/show_bug.cgi?id=446998#c15
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: Could not load module"), id));
+		_("%1: Could not load module."), id));
 	else if (ret == 7)
 	   //bugzilla.novell.com/show_bug.cgi?id=561876#c8
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: Failed to activate DASD"), id));
+		_("%1: Failed to activate DASD."), id));
 	else if (ret == 8)
 	   //bugzilla.novell.com/show_bug.cgi?id=561876#c8
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: DASD is not formatted"), id));
+		_("%1: DASD is not formatted."), id));
 	else
 	    Report::Error (sformat (
 		// error report, %1 is device identification, %2 is integer code
-		_("%1: Unknown error %2"), id, ret));
+		_("%1: Unknown error %2."), id, ret));
     }
 }
 
@@ -454,7 +454,10 @@ global define void ActivateDisk (string channel, boolean diag) {
     integer ret = (integer)SCR::Execute (.target.bash, command);
     y2milestone ("Running command %1 with exit code %2", command, ret);
     if (ret == 5){
-      string popup = sformat (_("Device %1 is unformatted. Format device now?\nIf you want to format multiple devices in parallel,\npress Cancel and select 'Perform Action', 'Format' later on!"), channel);
+      string popup = sformat (_("Device %1 is not formatted. Format device now?
+If you want to format multiple devices in parallel,
+press 'Cancel' and select 'Perform Action', 'Format' later on.
+"), channel);
       if ((Mode::autoinst() && Popup::TimedOKCancel(popup, 10))
         || Popup::ContinueCancel (popup))
       {
@@ -553,7 +556,7 @@ global define void FormatDisks (list<string> disks_list, integer par,
 	    UI::CloseDialog ();
 	    integer iret = (integer)SCR::Read (.background.status);
 	    // error report, %1 is exit code of the command (integer)
-	    Report::Error (sformat (_("Disks formatting failed. Exit code: %1"),
+	    Report::Error (sformat (_("Disks formatting failed. Exit code: %1."),
 		iret));
 	    return;
 	}
@@ -637,7 +640,7 @@ global define void FormatDisks (list<string> disks_list, integer par,
     if (iret != 0)
     {
 	// error report, %1 is exit code of the command (integer)
-	Report::Error (sformat (_("Disks formatting failed. Exit code: %1"),
+	Report::Error (sformat (_("Disks formatting failed. Exit code: %1."),
 	    iret));
     }
 }

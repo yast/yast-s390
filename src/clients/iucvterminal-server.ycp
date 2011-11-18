@@ -20,7 +20,7 @@ include "s390/iucvterminal-server/ui.ycp";
 map cmdline_description = $[
 	"id" 	: "iucvterminal-server",
 	// Command line help text for the Xcontroller module
-	"help"	: _("Configuration of IUCV Terminal Server"),
+	"help"	: _("Configuration of IUCV terminal server"),
 	"guihandler"		: IUCVTerminalServerSequence,
 	"actions"		   : $[
 	// FIXME TODO: fill the functionality description here

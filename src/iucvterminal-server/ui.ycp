@@ -270,7 +270,7 @@ term TsShellDialogContent() {
 			`VBox(
 				`VSpacing(VSPACING),
 				// force min size to make it easier readable in terminals
-				`MinWidth(14, `MultiSelectionBox(`id(`ts_audited_ids), `opt(`notify),  _("&Auditied IDs"), zvm_id_entries)),
+				`MinWidth(14, `MultiSelectionBox(`id(`ts_audited_ids), `opt(`notify),  _("&Audited IDs"), zvm_id_entries)),
 				`VSpacing(VSPACING)
 			)
 		)
@@ -501,7 +501,7 @@ boolean CommitTsUserDialogSettings () {
 	if (ts_password == "")
 	{
 		UI::SetFocus(`ts_pw1);
-		Popup::Notify(_("The passwords don't match or are invalid."));
+		Popup::Notify(_("The passwords do not match or are invalid."));
 		ret = false;
 	}
 	// check if the user specifcation is valid and if the name does already exist
@@ -1175,7 +1175,7 @@ void HandleEvent( symbol widget )
 		{
 			// change tab selection back
 			UI::ChangeWidget (`id (`tab), `CurrentItem, `t_zvmids);
-			Popup::Notify (_("It is not possible to configure the Terminal Server without valid z/VM IDs."));
+			Popup::Notify (_("Cannot configure the terminal server without valid z/VM IDs."));
 		}
 	}
 }
@@ -1278,7 +1278,7 @@ symbol IUCVTerminalServerDialog () {
 				// check for z/VM ID entries
 				if (size(zvm_id_list) == 0)
 				{
-					Popup::Notify (_("It is not possible to configure the Terminal Server without valid z/VM IDs."));
+					Popup::Notify (_("Cannot configure the terminal server without valid z/VM IDs."));
 					ret = `again;
 					continue;
 				}

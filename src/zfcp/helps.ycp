@@ -18,7 +18,8 @@ map ZFCP_HELPS = $[
 
     /* Read dialog help 1/2 */
     "read" : _("<p><b><big>Initializing ZFCP Device Configuration</big></b><br>
-Please wait...<br></p>") +
+</p>
+") +
 
     /* Read dialog help 2/2 */
     _("<p><b><big>Aborting Initialization:</big></b><br>
@@ -26,16 +27,19 @@ Safely abort the configuration utility by pressing <b>Abort</b> now.</p>"),
 
     /* Write dialog help 1/2 */
     "write" : _("<p><b><big>Saving ZFCP Device Configuration</big></b><br>
-Please wait...<br></p>") +
+</p>
+") +
 
     /* Write dialog help 2/2 */
 _("<p><b><big>Aborting Saving:</big></b><br>
 Abort the save procedure by pressing <b>Abort</b>.
-An additional dialog informs whether it is safe to do so.</p>"),
+An additional dialog will inform you whether it is safe to do so.</p>
+"),
 
     /* Disk selection dialog help 1/3 */
     "disk_selection" : _("<p><b><big>Configured ZFCP Devices</big></b><br>
-In this dialog, manage ZFCP devices on your system.</p>") +
+Manage ZFCP devices on your system.</p>
+") +
 
     /* Disk selection dialog help 2/3 */
 _("<p>To configure a new ZFCP device, click <b>Add</b>.</p>") +
@@ -51,9 +55,10 @@ Otherwise there is a potential risk of data corruption.</p>"),
 
     /* Disk add help 1/2 */
     "disk_add" : _("<p><b><big>Add New ZFCP Device</big></b><br>
-Enter the identifier of the device to add. Enter the
+Enter the identifier of the device to add, the
 <b>Channel Number</b> of the ZFCP controller, the worldwide port number
-(<b>WWPN</b>), and the <b>FCP-LUN</b> number.</p>") +
+(<b>WWPN</b>) and the <b>FCP-LUN</b> number.</p>
+") +
     /* Disk add help 2/2, This is HTML, so finally "&lt;devno&gt;" is displayed as "<devno>" */
 _("<p>The <b>Channel Number</b> must be entered with lowercase letters in a sysfs conforming
 format 0.0.&lt;devno&gt;, such as <tt>0.0.5c51</tt>.</p>

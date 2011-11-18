@@ -127,7 +127,7 @@ global define boolean FormatDisk (string dev, boolean force) {
 			err = _("Invalid or unusable disk (fatal).");
 		else if (ret == 12)
 			// error description
-			err = _("Incompatible formatting/partitioning, can be corrected with Force.");
+			err = _("Incompatible formatting or partitioning, correct with Force.");
 		else if (ret == 13)
 			// error description
 			err = _("Missing support programs.");

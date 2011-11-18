@@ -453,7 +453,7 @@ global define boolean Write () {
 	_("Update user settings")
 	], [
 	/* Progress step 1/2 */
-	_("Writing Configuration files..."),
+	_("Writing configuration files..."),
     /* Progress step 2/2 */
 	_("Updating user settings..."),
 	/* Progress finished */
