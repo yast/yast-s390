@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Nov 22 15:23:19 EDT 2011 - thardeck@suse.com
+
+- fixed wrong Yast categories for IUCV terminal modules (fate#310723)
+- fixed disabling of the IUCV input field in the ncurses dialog (fate#310723)
+- check z/VM ids against username specification to prevent umlauts
+
+-------------------------------------------------------------------
 Mon Oct 31 10:59:47 EDT 2011 - thardeck@suse.com
 
 - fixed iucvterminal* module typos (bnc#723425)

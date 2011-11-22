@@ -190,7 +190,7 @@ define list<term> GenerateTsMembersTable() {
 term ZvmIdsDialogContent() {
 	term content = `HBox(`HSpacing(HSPACING),`VBox(
 	`VSpacing(VSPACING),
-	`MultiLineEdit( `id( `zvmids ), `opt(`notify), _("z/&VM IDs"), mergestring(zvm_id_list, "\n") ),
+	`MultiLineEdit( `id( `zvmids ), `opt(`notify), _("z/&VM IDs (auto-sorted)"), mergestring(zvm_id_list, "\n") ),
 	`VSpacing(VSPACING)
 	),`HSpacing(HSPACING));
 	return content;
@@ -754,7 +754,8 @@ define boolean IsValidZvmIdList() {
 	integer line = 0;
 	foreach (string zvmid, zvmid_list,{
 		line = line + 1;
-		if (regexpmatch(zvmid, "[^[:alnum:]]"))
+		// since alnum allows umlauts too the id is checked against the user name specification
+		if (regexpmatch(zvmid, "[^[:alnum:]]") || (!IUCVTerminalServer::CheckUserGroupName(zvmid) && zvmid != ""))
 		{
 			Popup::Notify(sformat(_("Wrong z/VM ID \"%1\" in line %2, only letters and numbers are allowed."), zvmid, line));
 			ret = false;
@@ -1056,9 +1057,6 @@ void HandleEvent( symbol widget )
 			zvm_id_list = [ ];
 			zvm_id_entries = [TEXT_ALL];
 		}
-
-		// disabled tab selection without valid z/VM IDs
-		UI::ChangeWidget(`id(`tab), `Enabled, (size(zvm_id_list) > 0));
 	}
 
 	// reset repeated password on change
