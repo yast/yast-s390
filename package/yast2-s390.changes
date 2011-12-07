@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Dec  7 10:04:50 UTC 2011 - coolo@suse.com
+
+- fix license to be in spdx.org format
+
+-------------------------------------------------------------------
 Mon Nov 22 15:23:19 EDT 2011 - thardeck@suse.com
 
 - fixed wrong Yast categories for IUCV terminal modules (fate#310723)
