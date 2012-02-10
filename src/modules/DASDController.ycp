@@ -25,10 +25,8 @@ import "Popup";
 
 global map<integer,map<string,any> > devices = $[];
 
-global map<integer, boolean> selected = $[];
-
     global string filter_min = "0.0.0000";
-    global string filter_max = "f.f.ffff";
+    global string filter_max = "0.0.ffff";
 
 global map<string, boolean> diag = $[];
 
@@ -343,7 +341,7 @@ global define void ProbeDisks () {
 	{
 	    string device = d["dev_name"]:"";
 	    map scr_out = (map)SCR::Execute (.target.bash_output, sformat (
-		    "dasdview -x -f %1 | grep formatted", device));
+		    "dasdview -x -f '%1' | grep formatted", device));
 	    boolean formatted = false;
 	    if (scr_out["exit"]:0 == 0)
 	    {
@@ -464,7 +462,7 @@ define void ReportActivationError (any id, integer ret) {
 global define void ActivateDisk (string channel, boolean diag) {
 //    if (! Arch::s390_32 ()) diag = false;
     string command = sformat (
-	"/sbin/dasd_configure %1 %2 %3",
+	"/sbin/dasd_configure '%1' '%2' '%3'",
 	channel,
 	1,
 	diag ? 1 : 0
@@ -479,7 +477,7 @@ press 'Cancel' and select 'Perform Action', 'Format' later on.
       if ((Mode::autoinst() && Popup::TimedOKCancel(popup, 10))
         || Popup::ContinueCancel (popup))
       {
-	string cmd = sformat("ls /sys/bus/ccw/devices/%1/block/|tr -d '\n'", channel);
+	string cmd = sformat("ls '/sys/bus/ccw/devices/%1/block/' | tr -d '\n'", channel);
 	map<string, any> disk = (map<string, any>)SCR::Execute(.target.bash_output, cmd);
 	if (disk["exit"]:-1 == 0 && size(disk["stdout"]:"")>0){
 	    FormatDisks ([ sformat("/dev/%1", disk["stdout"]:"") ], 1, true, true);
@@ -508,7 +506,7 @@ press 'Cancel' and select 'Perform Action', 'Format' later on.
 global define void DeactivateDisk (string channel, boolean diag) {
  //   if (! Arch::s390_32 ()) diag = false;
     string command = sformat (
-	"/sbin/dasd_configure %1 %2 %3",
+	"/sbin/dasd_configure '%1' '%2' '%3'",
 	channel,
 	0,
 	diag ? 1 : 0
@@ -538,7 +536,7 @@ global define void FormatDisks (list<string> disks_list, integer par,
     foreach (string device, disks_list, ``{
 	index = index + 1;
 	disks[index] = device;
-	disks_cmd = add (disks_cmd, sformat ("-f %1", device));
+	disks_cmd = add(disks_cmd, sformat("-f '%1'", device));
     });
     string disks_param = mergestring (disks_cmd, " ");
     string additional_param = "";
@@ -668,9 +666,9 @@ global define void FormatDisks (list<string> disks_list, integer par,
  * @param disk string Disk to read info from
  * @return GetPartitionInfo string The info
  */
-global define string GetPartitionInfo (string disk) {
-    map outmap = (map)SCR::Execute (.target.bash_output, sformat (
-	"/sbin/fdasd -p %1", disk));
+global string GetPartitionInfo (string disk)
+{
+    map outmap = (map) SCR::Execute (.target.bash_output, sformat("/sbin/fdasd -p '%1'", disk));
 
     // if not an eckd-disk it's an fba-disk. fba-disks have only one partition
     if (outmap["exit"]:0 != 0)

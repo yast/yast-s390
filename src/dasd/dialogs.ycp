@@ -22,28 +22,18 @@ import "Wizard";
 
 include "s390/dasd/helps.ycp";
 
-/**
- * List DASD devices that are currently being selected
- * @return list<integer> list of IDs of selected DASD devices
- */
-define list<integer> ListSelectedDASD () ``{
-    map<integer, boolean> sel_list = (map<integer, boolean>)filter (
-	integer k, boolean v, DASDController::selected,
-    ``(
-	v == true
-    ));
-    list<integer> to_activate = maplist (integer k, boolean v, sel_list, ``(k));
-    y2milestone ("Selected list: %1", to_activate);
-    return to_activate;
-}
 
+    /**
+     * List DASD devices that are currently being selected
+     * @return list<integer> list of IDs of selected DASD devices
+     */
+    list<integer> ListSelectedDASD()
+    {
+	list<integer> selected = (list<integer>) UI::QueryWidget(`id(`table), `SelectedItems);
+	y2milestone("selected %1", selected);
+	return selected;
+    }
 
-// --------------------------------------------------------------------------
-
-
-
-
-// now real dialogs
 
 /**
  * Read settings dialog
@@ -92,10 +82,9 @@ list<term> GetDASDDiskItems()
     {
     items = maplist(integer k, map<string, any> d, devices, {
 	boolean active = d["resource", "io", 0, "active"]:false;
-	integer channel = d["resource", "io", 0, "start"]:0;
-	string str_channel = d["channel"]:"";
+	string channel = d["channel"]:"";
 	string access = toupper(d["resource", "io", 0, "mode"]:"RO");
-	string diag = String::YesNo(DASDController::diag[str_channel]:false);
+	string diag = String::YesNo(DASDController::diag[channel]:false);
 	string device = d["dev_name"]:"";
 	string type = toupper(sformat("%1/%2, %3/%4",
 	    substring(tohexstring(d["device_id"]:0 & 0xffff, 4), 2),
@@ -107,11 +96,6 @@ list<term> GetDASDDiskItems()
 	string formatted = String::YesNo(d["formatted"]:false);
 	string partition_info = d["partition_info"]:"--";
 
-	string selected = DASDController::selected[k]:false
-	    // table cell
-	    ? _("Yes")
-	    : "-";
-
 	if (!active)
 	{
 	    type = "--";
@@ -121,7 +105,7 @@ list<term> GetDASDDiskItems()
 	    device = "--";
 	}
 
-	return `item(`id(k), selected, str_channel, device, type, access, diag, formatted,
+	return `item(`id(k), channel, device, type, access, diag, formatted,
 		     partition_info);
     });
     }
@@ -145,8 +129,6 @@ void DisplayDASDDialog()
     string caption = _("DASD Disk Management");
 
     term header = `header(
-	// table header
-	_("Sel."),
 	// table header
 	`Right(_("Channel")),
 	// table header
@@ -201,7 +183,7 @@ void DisplayDASDDialog()
 		`PushButton (`id (`filter), _("&Filter"))
 	    )
 	),
-	`Table(`id(`table), `opt(`notify), header, []),
+	`Table(`id(`table), `opt(`multiSelection), header, []),
 	Mode::config ()
 	    ? `HBox (
 		// push button
@@ -211,8 +193,6 @@ void DisplayDASDDialog()
 		`HStretch ()
 	    )
 	    : `HBox (
-		// pudh button
-		`PushButton (`id (`select), _("&Select or Deselect")),
 		`HStretch (),
 		// menu button
 		`MenuButton (`id (`operation), _("Perform &Action"), actions)
@@ -237,13 +217,16 @@ void ReloadDASDDialog()
     DASDController::filter_min = (string) UI::QueryWidget(`min_chan, `Value);
     DASDController::filter_max = (string) UI::QueryWidget(`max_chan, `Value);
 
-    DASDController::ProbeDisks ();
+    DASDController::ProbeDisks();
 
     list<term> items = GetDASDDiskItems();
 
+    list<integer> selected = (list<integer>) UI::QueryWidget(`id(`table), `SelectedItems);
     UI::ChangeWidget(`id(`table), `Items, items);
-    UI::SetFocus (`table);
+    UI::ChangeWidget(`id(`table), `SelectedItems, selected);
+    UI::SetFocus(`table);
 }
+
 
 /**
  * Run the dialog for DASD disks configuration
@@ -259,72 +242,53 @@ symbol DASDDialog()
     {
 	ret = UI::UserInput();
 
-	integer selected = (integer) UI::QueryWidget(`id(`table), `CurrentItem);
-
 	if (ret == `filter) {
 	    ReloadDASDDialog ();
 	    ret = nil;
 	    continue;
 	}
-	else if (ret == `table || ret == `select)
+	else if (ret == `table)
 	{
-	    DASDController::selected[selected]
-		= ! DASDController::selected[selected]:false;
-	    UI::ChangeWidget (`id (`table), `Item (selected, 0),
-		DASDController::selected[selected]:false
-		    // table cell
-		    ? _("Yes")
-		    : "-");
 	    ret = nil;
-	    UI::SetFocus (`table);
 	    continue;
 	}
 	else if (ret == `activate)
 	{
-	    list<integer>to_activate = ListSelectedDASD ();
-	    if (0 == size (to_activate))
+	    list<integer> selected = ListSelectedDASD();
+	    if (isempty(selected))
 	    {
 		Popup::Message (_("No disk selected."));
 		ret = nil;
 		continue;
 	    }
-	    foreach (integer id, to_activate, ``{
+
+	    foreach (integer id, selected, {
 		string channel = DASDController::devices[id,"channel"]:"";
 		boolean diag = DASDController::diag[channel]:false;
-		DASDController::ActivateDisk (
-		    channel,
-		    diag
-		);
+		DASDController::ActivateDisk(channel, diag);
 	    });
 
 	    ReloadDASDDialog ();
-
-//	    UI::ChangeWidget(`id(`table), `CurrentItem, ids_to_activate[0]:nil);
 	    ret = nil;
-
 	}
 	else if (ret == `deactivate)
 	{
-	    list<integer>to_activate = ListSelectedDASD ();
-	    if (0 == size (to_activate))
+	    list<integer> selected = ListSelectedDASD();
+	    if (isempty(selected))
 	    {
 		// error popup message
 		Popup::Message (_("No disk selected."));
 		ret = nil;
 		continue;
 	    }
-	    foreach (integer id, to_activate, ``{
+
+	    foreach (integer id, selected, {
 		string channel = DASDController::devices[id,"channel"]:"";
 		boolean diag = DASDController::diag[channel]:false;
-		DASDController::DeactivateDisk (
-		    channel,
-		    diag
-		);
+		DASDController::DeactivateDisk(channel, diag);
 	    });
 
 	    ReloadDASDDialog ();
-
-//	    UI::ChangeWidget(`id(`table), `CurrentItem, ids_to_activate[0]:nil);
 	    ret = nil;
 	}
 	else if (ret == `diag_on)
@@ -347,8 +311,6 @@ symbol DASDDialog()
 	    });
 
 	    ReloadDASDDialog ();
-
-//	    UI::ChangeWidget(`id(`table), `CurrentItem, ids_to_activate[0]:nil);
 	    ret = nil;
 	}
 	else if (ret == `diag_off)
@@ -371,26 +333,23 @@ symbol DASDDialog()
 	    });
 
 	    ReloadDASDDialog ();
-
-//	    UI::ChangeWidget(`id(`table), `CurrentItem, ids_to_activate[0]:nil);
 	    ret = nil;
 	}
 	else if (ret == `format)
 	{
-	    list<integer>to_activate = ListSelectedDASD ();
-	    if (0 == size (to_activate))
+	    list<integer> selected = ListSelectedDASD ();
+	    if (isempty(selected))
 	    {
 		Popup::Message (_("No disk selected."));
 		ret = nil;
 		continue;
 	    }
+
 	    // check if disks are R/W and active
 	    string problem = "";
-	    foreach (integer id, to_activate, {
-		boolean active = (boolean)
-		    (DASDController::devices[id, "resource", "io", 0, "active"]:false);
-		string access = toupper (
-		    (string)(DASDController::devices[id, "resource", "io", 0, "mode"]:"RO"));
+	    foreach (integer id, selected, {
+		boolean active = DASDController::devices[id, "resource", "io", 0, "active"]:false;
+		string access = toupper(DASDController::devices[id, "resource", "io", 0, "mode"]:"RO");
 		if (! active)
 		{
 		    // error report, %1 is device identification
@@ -412,8 +371,8 @@ symbol DASDDialog()
 		continue;
 	    }
 	    integer par = 8;
-	    if (par > size (to_activate))
-		par = size (to_activate);
+	    if (par > size (selected))
+		par = size (selected);
 	    boolean cancel = false;
 	    UI::OpenDialog (`VBox (
 		`IntField (`id (`par),
@@ -428,9 +387,8 @@ symbol DASDDialog()
 		)
 	    ));
 	    ret = UI::UserInput ();
-	    par = (integer)UI::QueryWidget (`id (`par), `Value);
-	    boolean write_vl = (boolean)
-		UI::QueryWidget (`id (`write_label), `Value);
+	    par = (integer) UI::QueryWidget(`id(`par), `Value);
+	    boolean write_vl = (boolean) UI::QueryWidget(`id(`write_label), `Value);
 	    UI::CloseDialog ();
 	    if (ret == `cancel)
 	    {
@@ -440,7 +398,7 @@ symbol DASDDialog()
 	    }
 
 	    // final confirmation before formatting the discs
-	    list<string> channels = maplist (integer id, to_activate, {
+	    list<string> channels = maplist (integer id, selected, {
 		return DASDController::devices[id, "channel"]:"";
 	    });
 	    string channels_str = mergestring (channels, ", ");
@@ -464,7 +422,7 @@ Really format the following disks?<br>
 	    }
 	    // final confirmation -- end
 
-	    list<string> devices = maplist (integer id, to_activate, ``{
+	    list<string> devices = maplist (integer id, selected, {
 		return DASDController::devices[id, "dev_name"]:"";
 	    });
 	    DASDController::FormatDisks (devices, par, write_vl, true);
@@ -548,7 +506,6 @@ All changes will be lost.")))
     }
 
     return (symbol) ret;
-
 }
 
 }

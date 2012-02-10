@@ -13,7 +13,6 @@
 module "ZFCPController";
 textdomain "s390";
 
-import "Arch";
 import "Mode";
 import "Progress";
 import "Report";
@@ -23,10 +22,8 @@ import "Popup";
 
 global map<integer,map<string,any> > devices = $[];
 
-global map<integer, boolean> selected = $[];
-
     global string filter_min = "0.0.0000";
-    global string filter_max = "f.f.ffff";
+    global string filter_max = "0.0.ffff";
 
 global map<string, any> previous_settings = $[];
 
@@ -429,7 +426,7 @@ global define void ActivateDisk (string channel, string wwpn, string lun) {
     if (! activated_controllers[channel]:false)
     {
 	string command = sformat (
-	    "/sbin/zfcp_host_configure %1 %2",
+	    "/sbin/zfcp_host_configure '%1' '%2'",
 	    channel,
 	    1
 	);

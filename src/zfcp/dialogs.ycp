@@ -9,7 +9,6 @@
 {
 textdomain "s390";
 
-import "Arch";
 import "Label";
 import "Mode";
 import "Popup";
@@ -43,7 +42,6 @@ symbol WriteDialog() {
     return ret ? `next : `abort;
 }
 
-    // ------------------------------------------------------------------------------------
 
 /**
  * Get the list of items for the table of ZFCP devices
@@ -64,10 +62,6 @@ list<term> GetZFCPDiskItems()
 	string fcp_lun = d["detail", "fcp_lun"]:"unknown";
 	if (fcp_lun != "unknown")
 	    fcp_lun = ZFCPController::HexNumSize (fcp_lun, 16);
-	string selected = ZFCPController::selected[k]:false
-	    // table cell
-	    ? _("Yes")
-	    : "-";
 
 	return `item(`id(k), channel, wwpn, fcp_lun);
     });
@@ -84,13 +78,13 @@ void ReloadZFCPDialog()
     ZFCPController::filter_min = (string) UI::QueryWidget(`min_chan, `Value);
     ZFCPController::filter_max = (string) UI::QueryWidget(`max_chan, `Value);
 
-    ZFCPController::ProbeDisks ();
+    ZFCPController::ProbeDisks();
 
     list<term> items = GetZFCPDiskItems();
 
     UI::ChangeWidget(`id(`table), `Items, items);
-    UI::ChangeWidget (`id (`delete), `Enabled, size (items) > 0);
-    UI::SetFocus (`table);
+    UI::ChangeWidget(`id(`delete), `Enabled, !isempty(items));
+    UI::SetFocus(`table);
 }
 
 /**
@@ -371,7 +365,6 @@ All changes will be lost.")))
     }
 
     return (symbol) ret;
-
 }
 
 }
