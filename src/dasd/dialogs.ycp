@@ -440,7 +440,8 @@ Really format the following disks?<br>
  * Run the dialog for adding DASDs
  * @return symbol from AddDASDDiskDialog
  */
-define symbol AddDASDDiskDialog () ``{
+symbol AddDASDDiskDialog ()
+{
     if (! Mode::config ())
     {
 	y2error ("DASD Add Disk dialog shouldn't be run in Mode::config ()");

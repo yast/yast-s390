@@ -145,7 +145,8 @@ void DisplayZFCPDialog()
  * Show the ZFCP-Dialog
  * @return symbol From the dialog
  */
-define symbol ZFCPDialog () ``{
+symbol ZFCPDialog()
+{
     DisplayZFCPDialog ();
     ReloadZFCPDialog ();
 
@@ -216,7 +217,8 @@ All changes will be lost.")))
  * Add ZFCP-Dialog
  * @return symbol the dialog
  */
-define symbol AddZFCPDiskDialog () ``{
+symbol AddZFCPDiskDialog()
+{
     /* Minimal text for the help */
     string help = ZFCP_HELPS["disk_add"]:"";
 
@@ -229,7 +231,7 @@ define symbol AddZFCPDiskDialog () ``{
     integer i_lun = tointeger (fcp_lun);
     integer new_lun = i_lun;
 
-    foreach (integer k, map<string,any> v, ZFCPController::devices, ``{
+    foreach (integer k, map<string,any> v, ZFCPController::devices, {
 	if (i_lun == tointeger (v["detail", "fcp_lun"]:""))
 	{
 	    if (v["vendor"]:"" == "IBM" && v["device"]:"" == "25f03")
@@ -245,19 +247,15 @@ define symbol AddZFCPDiskDialog () ``{
     list<string>items = [];
     if (Mode::config ())
     {
-	items = maplist (integer index, map<string,any> d,
-	    ZFCPController::devices,
-	{
+	items = maplist (integer index, map<string, any> d, ZFCPController::devices, {
 	    return d["detail", "controller_id"]:"";
 	});
 	items = toset (items);
-	items = filter (string i, items, ``(i != "" && i != nil));
+	items = filter (string i, items, { return i != "" && i != nil; });
     }
     else
     {
-	items = maplist (map<string,any> c,
-	    ZFCPController::GetControllers (),
-	``{
+	items = maplist (map<string, any> c, ZFCPController::GetControllers(), {
 	    string channel = c["sysfs_bus_id"]:"0.0.0000";
 	    return channel;
 	});

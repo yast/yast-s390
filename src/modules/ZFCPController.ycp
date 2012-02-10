@@ -32,8 +32,8 @@ list<map<string,any> > controllers = nil;
 map<string,boolean> activated_controllers = $[];
 
 
-global define void ActivateDisk (string channel, string wwpn, string lun);
-global define void ProbeDisks();
+global void ActivateDisk(string channel, string wwpn, string lun);
+global void ProbeDisks();
 
 boolean disk_configured = false;
 
@@ -87,11 +87,13 @@ global boolean write_only = false;
  */
 global boolean() AbortFunction = Modified;
 
+
 /**
  * Abort function
  * @return blah blah lahjk
  */
-global define boolean Abort() ``{
+global boolean Abort()
+{
     if(AbortFunction != nil)
 	return AbortFunction ();
     return false;
@@ -274,7 +276,8 @@ global map AutoPackages() {
  * Get available zfcp controllers
  * @return list<map<string,any> > of availabel Controllers
  */
-global define list<map<string,any> > GetControllers () {
+global list<map<string, any> > GetControllers()
+{
     if (controllers == nil)
     {
 	controllers = (list<map<string,any> >)SCR::Read (.probe.storage);
@@ -330,7 +333,8 @@ global void ProbeDisks()
  * @param id integer chanel id of the device
  * @param ret integer exit code of the operation
  */
-define void ReportActivationError (any id, integer ret) {
+void ReportActivationError(any id, integer ret)
+{
     if (ret != 0)
     {
 	if (ret == 1)
@@ -381,7 +385,8 @@ define void ReportActivationError (any id, integer ret) {
  * @param id integer chanel id of the device
  * @param ret integer exit code of the operation
  */
-define void ReportControllerActivationError (any id, integer ret) {
+void ReportControllerActivationError(any id, integer ret)
+{
     if (ret != 0)
     {
 	if (ret == 1)
@@ -421,8 +426,8 @@ define void ReportControllerActivationError (any id, integer ret) {
  * @param wwpn string wwpn (hexa number)
  * @param lun string lun   (hexa number)
  */
-global define void ActivateDisk (string channel, string wwpn, string lun) {
-
+global void ActivateDisk(string channel, string wwpn, string lun)
+{
     if (! activated_controllers[channel]:false)
     {
 	string command = sformat (
@@ -462,7 +467,8 @@ global define void ActivateDisk (string channel, string wwpn, string lun) {
  * @param wwpn string wwpn (hexa number)
  * @param lun string lun   (hexa number)
  */
-global define void DeactivateDisk (string channel, string wwpn, string lun) {
+global void DeactivateDisk(string channel, string wwpn, string lun)
+{
     string command = sformat (
 	"/sbin/zfcp_disk_configure '%1' '%2' '%3' '%4'",
 	channel,

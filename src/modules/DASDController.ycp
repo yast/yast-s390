@@ -31,12 +31,12 @@ global map<integer,map<string,any> > devices = $[];
 global map<string, boolean> diag = $[];
 
 
-global define void ActivateDisk (string channel, boolean diag);
-global define void DeactivateDisk (string channel, boolean diag);
-global define void ProbeDisks ();
-global define void FormatDisks (list<string> disks_list, integer par,
+global void ActivateDisk (string channel, boolean diag);
+global void DeactivateDisk (string channel, boolean diag);
+global void ProbeDisks ();
+global void FormatDisks (list<string> disks_list, integer par,
     boolean write_vl, boolean interactive);
-global define string GetPartitionInfo (string disk);
+global string GetPartitionInfo (string disk);
 
 boolean disk_configured = false;
 
@@ -71,7 +71,8 @@ global boolean() AbortFunction = Modified;
  * Abort function
  * @return blah blah lahjk
  */
-global define boolean Abort() ``{
+global boolean Abort()
+{
     if(AbortFunction != nil)
 	return AbortFunction ();
     return false;
@@ -297,43 +298,38 @@ global map AutoPackages() {
     return $[ "install":[], "remove":[] ];
 }
 
+
 /**
  * Check if DASD subsystem is available
  * @return boolean True if more than one disk
  */
-global define boolean IsAvailable () {
-    list<map<string,any> > disks = (list<map<string,any> >)
-	SCR::Read (.probe.disk);
-
-    disks = filter (map<string,any> d, disks, ``(
-	tolower (d["device"]:"") == "dasd"
-    ));
+global boolean IsAvailable()
+{
+    list<map<string, any> > disks = (list<map<string,any> >) SCR::Read(.probe.disk);
+    disks = filter (map<string,any> d, disks, { return tolower(d["device"]:"") == "dasd"; });
 
     integer count = size (disks);
     y2milestone ("Detected %1 DASD disks", count);
 
-    return (count > 0);
+    return count > 0;
 }
 
 
 /**
  * Probe for DASD disks
  */
-global define void ProbeDisks () {
+global void ProbeDisks()
+{
 /*    if (Mode::config ())
 	return; */
 
     // popup label
     UI::OpenDialog (`Label (_("Reading Configured DASD Disks")));
 
-    list<map<string,any> > disks = (list<map<string,any> >)
-	SCR::Read (.probe.disk);
-
-    disks = filter (map<string,any> d, disks, ``(
-	tolower (d["device"]:"") == "dasd"
-    ));
-
-    disks = maplist (map<string,any> d, disks, ``{
+    list<map<string, any> > disks = (list<map<string, any> >) SCR::Read(.probe.disk);
+    disks = filter (map<string, any> d, disks, { return tolower(d["device"]:"") == "dasd"; });
+   
+    disks = maplist (map<string,any> d, disks, {
 	string channel = d["sysfs_bus_id"]:"0.0.0000";
 	d["channel"] = channel;
 	boolean active = d["resource", "io", 0, "active"]:false;
@@ -362,7 +358,7 @@ global define void ProbeDisks () {
 	return d;
     });
     integer index = -1;
-    DASDController::devices = listmap (map<string,any> d, disks, ``{
+    DASDController::devices = listmap (map<string,any> d, disks, {
 	index = index + 1;
 	return $[ index : d ];
     });
@@ -408,7 +404,8 @@ $[
  * @param id integer chanel id of the device
  * @param ret integer exit code of the operation
  */
-define void ReportActivationError (any id, integer ret) {
+void ReportActivationError(any id, integer ret)
+{
     if (ret != 0)
     {
 	if (ret == 1)
@@ -459,7 +456,8 @@ define void ReportActivationError (any id, integer ret) {
  * @param channel string Name of the disk to activate
  * @param diag boolean Activate DIAG or not
  */
-global define void ActivateDisk (string channel, boolean diag) {
+global void ActivateDisk(string channel, boolean diag)
+{
 //    if (! Arch::s390_32 ()) diag = false;
     string command = sformat (
 	"/sbin/dasd_configure '%1' '%2' '%3'",
@@ -503,7 +501,8 @@ press 'Cancel' and select 'Perform Action', 'Format' later on.
  * @param channel string Name of the disk to deactivate
  * @param diag boolean Activate DIAG or not
  */
-global define void DeactivateDisk (string channel, boolean diag) {
+global void DeactivateDisk(string channel, boolean diag)
+{
  //   if (! Arch::s390_32 ()) diag = false;
     string command = sformat (
 	"/sbin/dasd_configure '%1' '%2' '%3'",
@@ -524,8 +523,8 @@ global define void DeactivateDisk (string channel, boolean diag) {
  * @param write_vl boolean Write a Volume label
  * @param interactive boolean Interactive yes/no
  */
-global define void FormatDisks (list<string> disks_list, integer par,
-    boolean write_vl, boolean interactive)
+global void FormatDisks(list<string> disks_list, integer par, boolean write_vl,
+			boolean interactive)
 {
     if (par > size (disks_list))
 	par = size (disks_list);
