@@ -18,6 +18,7 @@ import "Progress";
 import "Report";
 import "Sequencer";
 import "Wizard";
+    import "String";
 
 include "s390/dasd/helps.ycp";
 
@@ -82,17 +83,9 @@ list<term> GetDASDDiskItems()
     {
 	items = maplist (integer k, map<string,any> d, devices, {
 	    string channel = d["channel_id"]:"";
-	    string diag = d["diag"]:false
-		// table cell
-		? _("Yes")
-		// table cell
-		: _("No");
-	    string format = d["format"]:false
-		// table cell
-		? _("Yes")
-		// table cell
-		: _("No");
-	    return `item (`id(k), channel, format, diag);
+	    string diag = String::YesNo(d["diag"]:false);
+	    string format = String::YesNo(d["format"]:false);
+	    return `item(`id(k), channel, format, diag);
 	});
     }
     else
@@ -102,11 +95,7 @@ list<term> GetDASDDiskItems()
 	integer channel = d["resource", "io", 0, "start"]:0;
 	string str_channel = d["channel"]:"";
 	string access = toupper(d["resource", "io", 0, "mode"]:"RO");
-	string diag = DASDController::diag[str_channel]:false
-	    // table cell
-	    ? _("Yes")
-	    // table cell
-	    : _("No");
+	string diag = String::YesNo(DASDController::diag[str_channel]:false);
 	string device = d["dev_name"]:"";
 	string type = toupper(sformat("%1/%2, %3/%4",
 	    substring(tohexstring(d["device_id"]:0 & 0xffff, 4), 2),
@@ -115,11 +104,7 @@ list<term> GetDASDDiskItems()
 	    substring(tohexstring(d["detail", "dev_model"]:0, 4), 4)
 	));
 
-	string formatted = d["formatted"]:false
-		// table cell
-		? _("Yes")
-		// table cell
-		: _("No");
+	string formatted = String::YesNo(d["formatted"]:false);
 	string partition_info = d["partition_info"]:"--";
 
 	string selected = DASDController::selected[k]:false

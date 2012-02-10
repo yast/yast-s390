@@ -9,9 +9,7 @@
  * Representation of the configuration of controller.
  * Input and output routines.
  */
-
 {
-
 module "ZFCPController";
 textdomain "s390";
 
@@ -503,7 +501,4 @@ global define void DeactivateDisk (string channel, string wwpn, string lun) {
   return runCommand(sformat("zfcp_san_disc -b '%1' -p '%2' -L", busid, wwpn));
  }
 
-
-
-/* EOF */
 }

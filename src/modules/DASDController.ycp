@@ -9,9 +9,7 @@
  * Representation of the configuration of controller.
  * Input and output routines.
  */
-
 {
-
 module "DASDController";
 textdomain "s390";
 
@@ -283,9 +281,7 @@ global list<string> Summary()
 	// summary text, %1 is channel ID (number),
 	// %2 and %3 are Yes or No
 	s = sformat (_("Channel ID: %1, Format: %2, Use DIAG: %3"),
-	    d["channel"]:"",
-	    d["format"]:false ? _("Yes") : _("No"),
-	    d["diag"]:false ? _("Yes") : _("No")
+	    d["channel"]:"", String::YesNo(d["format"]:false), String::YesNo(d["diag"]:false)
 	);
 	return s;
     });
@@ -695,5 +691,4 @@ global define string GetPartitionInfo (string disk) {
     return mergestring (l, ", ");
 }
 
-/* EOF */
 }
