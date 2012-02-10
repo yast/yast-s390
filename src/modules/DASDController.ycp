@@ -533,7 +533,7 @@ global define void FormatDisks (list<string> disks_list, integer par,
     map<integer,string> disks = $[];
     list<string> disks_cmd = [];
     integer index = -1;
-    foreach (string device, disks_list, ``{
+    foreach (string device, disks_list, {
 	index = index + 1;
 	disks[index] = device;
 	disks_cmd = add(disks_cmd, sformat("-f '%1'", device));
@@ -551,52 +551,59 @@ global define void FormatDisks (list<string> disks_list, integer par,
     index = 0;
     while (index < par)
     {
-	contents = add (contents, `ProgressBar (`id (index), " ", 100, 0));
+	// progress bar
+	contents = add(contents, `ProgressBar(`id(index), sformat(_("Formatting %1:"),
+								  disks[index]:""), 100, 0));
 	index = index + 1;
     }
     UI::OpenDialog (contents);
     map<integer,integer> cylinders = $[];
     map<integer,integer> done = $[];
     // start formatting on background
-    any ret = SCR::Execute (.background.run_output, command);
-    y2milestone ("Background start returned %1", ret);
+    integer process_id = (integer) SCR::Execute(.process.start_shell, command);
+    y2milestone ("Process start returned %1", process_id);
     // get the sizes of all disks
     index = 0;
     while (index < size (disks))
     {
 	y2milestone ("Running first formatting cycle");
 	sleep (500);
-	if (! (boolean)SCR::Read (.background.isrunning))
+
+	if (!(boolean) SCR::Read(.process.running, process_id))
 	{
 	    UI::CloseDialog ();
-	    integer iret = (integer)SCR::Read (.background.status);
+	    integer iret = (integer) SCR::Read(.process.status, process_id);
 	    // error report, %1 is exit code of the command (integer)
 	    Report::Error (sformat (_("Disks formatting failed. Exit code: %1."),
 		iret));
 	    return;
 	}
-	list new_lines = (list) SCR::Read (.background.newout);
-	foreach (any line, new_lines, {
-			integer siz = tointeger (line);
+
+	while (index < size (disks))
+	{
+	    string line = (string) SCR::Read(.process.read_line, process_id);
+	    if (line == nil)
+		break;
+	    
+	    		integer siz = tointeger (line);
 			if (siz == 0)
 			    siz = 999999999;
 			cylinders[index] = siz;
 			index = index + 1;
-		    });
+	}
     }
     y2milestone ("Sizes of disks: %1", cylinders);
     y2milestone ("Disks to format: %1", disks);
     list<integer> last_step = [];
     string last_rest = "";
-    while ((boolean)SCR::Read (.background.isrunning))
+    while ((boolean) SCR::Read(.process.running, process_id))
     {
 		    sleep (1000);
-		    string buffer = sformat ("%1",
-			SCR::Read (.background.buffer_out));
+		    string buffer = (string) SCR::Read(.process.read, process_id);
 		    buffer = last_rest + buffer;
 		    list<string> progress = splitstring (buffer, "|");
 		    map<integer,integer> this_step = $[];
-		    if ((boolean)SCR::Read (.background.isrunning))
+		    if ((boolean) SCR::Read(.process.running, process_id))
 		    {
 			integer last = size (progress) - 1;
 			last_rest = progress[last]:"";
@@ -629,7 +636,7 @@ global define void FormatDisks (list<string> disks_list, integer par,
 		    index = 0;
 		    integer siz = size (this_step);
 		    foreach (integer k, integer v, this_step, {
-			UI::ChangeWidget (`id (index), `Label, sformat (
+			UI::ChangeWidget(`id(index), `Label, sformat(
 			    // progress bar, %1 is device name, %2 and %3
 			    // integers,
 		    // eg. Formatting /dev/dasda: cylinder 123 of 12334 done
@@ -637,9 +644,8 @@ global define void FormatDisks (list<string> disks_list, integer par,
 			    disks[k]:"",
 			    done[k]:0,
 			    cylinders[k]:0));
-			UI::ChangeWidget (`id (index), `Value,
-			    100 * done[k]:0 / cylinders[k]:1);
-			UI::ChangeWidget (`id (index), `Enabled, true);
+			UI::ChangeWidget(`id(index), `Value, 100 * done[k]:0 / cylinders[k]:1);
+			UI::ChangeWidget(`id(index), `Enabled, true);
 			index = index + 1;
 		    });
 		    while (index < par)
@@ -651,7 +657,7 @@ global define void FormatDisks (list<string> disks_list, integer par,
 		    }
 		}
 		UI::CloseDialog ();
-		integer iret = (integer)SCR::Read (.background.status);
+		integer iret = (integer) SCR::Read(.process.status, process_id);
     if (iret != 0)
     {
 	// error report, %1 is exit code of the command (integer)
