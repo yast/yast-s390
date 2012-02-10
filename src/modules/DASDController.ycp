@@ -323,26 +323,6 @@ global define boolean IsAvailable () {
 
 
 /**
- * Translate integer number to its hexadecimal representation with leading
- * 0x and exactliy 4 hexadecimal numbers
- * @param i integer integer number
- * @return string hexadecimal number
- */
-global define string FourDigitHex(integer i) ``{
-    string s = tohexstring(i);
-    string zeros = "";
-
-    integer l = 6 - size(s);
-
-    while (l > 0) {
-	zeros = zeros + "0";
-	l = l - 1;
-    }
-
-    return substring(s, 0, 2) + zeros + substring(s, 2);
-}
-
-/**
  * Probe for DASD disks
  */
 global define void ProbeDisks () {

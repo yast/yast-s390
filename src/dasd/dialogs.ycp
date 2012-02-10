@@ -98,36 +98,24 @@ list<term> GetDASDDiskItems()
     else
     {
     items = maplist(integer k, map<string, any> d, devices, {
-	boolean active = (boolean)(d["resource", "io", 0, "active"]:false);
-	integer channel = (integer)(d["resource", "io", 0, "start"]:0);
-	string str_channel = (string)(d["channel"]:"");
-	string access = toupper ((string)(d["resource", "io", 0, "mode"]:"RO"));
+	boolean active = d["resource", "io", 0, "active"]:false;
+	integer channel = d["resource", "io", 0, "start"]:0;
+	string str_channel = d["channel"]:"";
+	string access = toupper(d["resource", "io", 0, "mode"]:"RO");
 	string diag = DASDController::diag[str_channel]:false
 	    // table cell
 	    ? _("Yes")
 	    // table cell
 	    : _("No");
 	string device = d["dev_name"]:"";
-	string type = toupper (sformat ("%1/%2, %3/%4",
-	    substring (
-		DASDController::FourDigitHex (
-		    d["device_id"]:0 & tointeger ("0xffff")
-		),
-		2),
-	    substring (
-		DASDController::FourDigitHex (d["detail", "cu_model"]:0),
-		4),
-	    substring (
-		DASDController::FourDigitHex (
-		    d["sub_device_id"]:0 & tointeger ("0xffff")
-		),
-		2),
-	    substring (
-		DASDController::FourDigitHex (d["detail", "dev_model"]:0),
-		4)
+	string type = toupper(sformat("%1/%2, %3/%4",
+	    substring(tohexstring(d["device_id"]:0 & 0xffff, 4), 2),
+	    substring(tohexstring(d["detail", "cu_model"]:0, 4), 4), 
+	    substring(tohexstring(d["sub_device_id"]:0 & 0xffff, 4), 2),
+	    substring(tohexstring(d["detail", "dev_model"]:0, 4), 4)
 	));
 
-	string formatted = (boolean)d["formatted"]:false
+	string formatted = d["formatted"]:false
 		// table cell
 		? _("Yes")
 		// table cell
