@@ -542,9 +542,8 @@ global define void FormatDisks (list<string> disks_list, integer par,
     string additional_param = "";
     if (! write_vl)
 	additional_param = "--no-label";
-    string command = sformat (
-	"/sbin/dasdfmt -P %2 -b 4096 -y -m 1 %3 %1", disks_param, par,
-	    additional_param);
+    string command = sformat("/sbin/dasdfmt -Y -P %2 -b 4096 -y -m 1 %3 %1",
+			     disks_param, par, additional_param);
 
     y2milestone ("Running command %1", command);
     index = 0;
