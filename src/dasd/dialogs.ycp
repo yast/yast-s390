@@ -80,7 +80,7 @@ list<term> GetDASDDiskItems()
 
     if (Mode::config ())
     {
-	items = (list<term>) maplist (integer k, map<string,any> d, devices, {
+	items = maplist (integer k, map<string,any> d, devices, {
 	    string channel = d["channel_id"]:"";
 	    string diag = d["diag"]:false
 		// table cell
@@ -92,12 +92,12 @@ list<term> GetDASDDiskItems()
 		? _("Yes")
 		// table cell
 		: _("No");
-	    return `item (`id (k), channel, format, diag);
+	    return `item (`id(k), channel, format, diag);
 	});
-	return items;
     }
-
-    items = (list<term>) maplist (integer k, map<string,any> d, devices, ``{
+    else
+    {
+    items = maplist(integer k, map<string, any> d, devices, {
 	boolean active = (boolean)(d["resource", "io", 0, "active"]:false);
 	integer channel = (integer)(d["resource", "io", 0, "start"]:0);
 	string str_channel = (string)(d["channel"]:"");
@@ -133,14 +133,14 @@ list<term> GetDASDDiskItems()
 		// table cell
 		: _("No");
 	string partition_info = d["partition_info"]:"--";
-	boolean activate = d["activate"]:false;
 
 	string selected = DASDController::selected[k]:false
 	    // table cell
 	    ? _("Yes")
 	    : "-";
 
-	if (!active) {
+	if (!active)
+	{
 	    type = "--";
 	    access = "--";
 	    formatted = "--";
@@ -148,13 +148,11 @@ list<term> GetDASDDiskItems()
 	    device = "--";
 	}
 
-	term t = `item (`id (k), selected, str_channel, device,
-	    type ,access);
-	t = add (t, diag);
-	t = add (t, formatted);
-	t = add (t, partition_info);
-	return t;
+	return `item(`id(k), selected, str_channel, device, type, access, diag, formatted,
+		     partition_info);
     });
+    }
+
     return items;
 }
 

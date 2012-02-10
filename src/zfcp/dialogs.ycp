@@ -57,7 +57,7 @@ list<term> GetZFCPDiskItems()
 
     list<term> items = [];
 
-    items = (list<term>) maplist (integer k, map<string,any> d, devices, ``{
+    items = maplist(integer k, map<string, any> d, devices, {
 	string dev_name = (string)(d["dev_name"]:"");
 	string channel = d["detail", "controller_id"]:"unknown";
 	string wwpn = d["detail", "wwpn"]:"unknown";
@@ -69,9 +69,9 @@ list<term> GetZFCPDiskItems()
 	    ? _("Yes")
 	    : "-";
 
-	term t = `item (`id (k), channel, wwpn, fcp_lun);
-	return t;
+	return `item(`id(k), channel, wwpn, fcp_lun);
     });
+
     return items;
 }
 
