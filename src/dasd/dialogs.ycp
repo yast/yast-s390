@@ -6,9 +6,7 @@
  *
  * $Id$
  */
-
 {
-
 textdomain "s390";
 
 import "Arch";
@@ -163,8 +161,8 @@ list<term> GetDASDDiskItems()
 /**
  * Draw the DASD dialog
  */
-define void DisplayDASDDialog() {
-
+void DisplayDASDDialog()
+{
     string help_key = Mode::config ()
 	? "disk_selection_config"
 	: "disk_selection";
@@ -176,7 +174,7 @@ define void DisplayDASDDialog() {
     string caption = _("DASD Disk Management");
 
     term header = `header(
-    // table header
+	// table header
 	_("Sel."),
 	// table header
 	`Right(_("Channel")),
@@ -187,11 +185,12 @@ define void DisplayDASDDialog() {
 	// table header
 	_("Access Type"),
 	// table header
-	_("Use DIAG"));
-    // table header
-    header = add (header, _("Formatted"));
-    // table header
-    header = add (header, _("Partition Information"));
+	_("Use DIAG"),
+	// table header
+	_("Formatted"),
+	// table header
+	_("Partition Information")
+    );
 
     if (Mode::config ())
     {
@@ -207,17 +206,16 @@ define void DisplayDASDDialog() {
 
     list actions = [
 	// menu button id
-	`item (`id (`activate), _("&Activate")),
+	`item(`id(`activate), _("&Activate")),
 	// menu button id
-	`item (`id(`deactivate), _("&Deactivate")),
+	`item(`id(`deactivate), _("&Deactivate")),
+	// menu button id
+	`item(`id(`diag_on), _("Set DIAG O&n")),
+	// menu button id
+	`item(`id(`diag_off), _("Set DIAG O&ff")),
+	// menu button id
+	`item(`id(`format), _("&Format"))
     ];
-    // menu button id
-    actions = add (actions, `item (`id(`diag_on), _("Set DIAG O&n")));
-    // menu button id
-    actions = add (actions, `item (`id(`diag_off), _("Set DIAG O&ff")));
-
-    // menu button id
-    actions = add (actions, `item (`id(`format), _("&Format")));
 
     /* Dialog content */
     term content = `VBox(
@@ -232,7 +230,7 @@ define void DisplayDASDDialog() {
 		`PushButton (`id (`filter), _("&Filter"))
 	    )
 	),
-	`Table(`id(`table), `opt (`notify), header, []),
+	`Table(`id(`table), `opt(`notify), header, []),
 	Mode::config ()
 	    ? `HBox (
 		// push button
@@ -582,7 +580,4 @@ All changes will be lost.")))
 
 }
 
-
-// EOF
 }
-

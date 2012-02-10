@@ -6,9 +6,7 @@
  *
  * $Id$
  */
-
 {
-
 textdomain "s390";
 
 import "Arch";
@@ -98,14 +96,23 @@ void ReloadZFCPDialog()
 /**
  * Show the ZFCP-Dialog
  */
-define void DisplayZFCPDialog () {
-
+void DisplayZFCPDialog()
+{
     /* Minimal text for the help */
     string help = ZFCP_HELPS["disk_selection"]:"";
 
     /* Dialog caption */
     string caption = _("Configured ZFCP Devices");
 
+    term header = `header(
+	// table header
+	`Right(_("Channel Number")),
+	// table header
+	`Right(_("WWPN")),
+	// table header
+	`Right(_("ZFCP-LUN"))
+    );
+    
     /* Dialog content */
     term content = `VBox(
 	`HBox(
@@ -120,18 +127,7 @@ define void DisplayZFCPDialog () {
 	    )
 	),
 	`HBox(
-	    `Table(
-		`id(`table), `opt(`keepSorting, `notify),
-		`header(
-		    // table header
-		    `Right(_("Channel Number")),
-		    // table header
-		    `Right(_("WWPN")),
-		    // table header
-		    `Right(_("zfcp-LUN"))
-		),
-		[]
-	    )
+	    `Table(`id(`table), `opt(`notify), header, [])
 	),
 	`HBox(
 	    `PushButton(`id(`add), Label::AddButton ()),
@@ -378,7 +374,4 @@ All changes will be lost.")))
 
 }
 
-
-// EOF
 }
-
