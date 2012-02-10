@@ -74,42 +74,11 @@ symbol WriteDialog() {
  * @param max_chan integer maximal channel number
  * @return a list of terms for the table
  */
-define list<term> GetDASDDiskItems(string min_channel, string max_channel) ``{
-    integer id = 0;
+list<term> GetDASDDiskItems()
+{
+    map<integer, map<string, any> > devices = DASDController::GetFilteredDevices();
 
     list<term> items = [];
-
-    integer min_css = tointeger(substring (min_channel, 0, 1));
-    integer min_lcss = tointeger(sformat("0x%1",substring (min_channel, 2, 1)));
-    integer min_chan = tointeger(sformat("0x%1",substring (min_channel, 4, 4)));
-
-    integer max_css = tointeger(substring (max_channel, 0, 1));
-    integer max_lcss = tointeger(sformat("0x%1",substring (max_channel, 2, 1)));
-    integer max_chan = tointeger(sformat("0x%1",substring (max_channel, 4, 4)));
-
-    map<integer,map<string,any> > devices = DASDController::devices;
-
-    if (min_chan > 0 || min_lcss > 0 || min_css > 0 ||
-        max_chan < 0xffff || max_lcss < 0xf || max_css < 0xf)
-    {
-        y2milestone ("Filter disks: %1.%2.%3 to %4.%5.%6",
-		    min_css, min_lcss, min_chan,
-		    max_css, max_lcss, max_chan);
-
-	devices = (map<integer,map<string,any> >)filter (
-	    integer k, map<string,any> d, devices,
-        ``{
-	    string channel = d["channel"]:"0.0.0000";
-	    integer tmp_css = tointeger(substring (channel, 0, 1));
-	    integer tmp_lcss = tointeger(sformat("0x%1",substring (channel, 2, 1)));
-	    integer tmp_chan = tointeger(sformat("0x%1",substring (channel, 4, 4)));
-
-	    return (tmp_css >= min_css && tmp_lcss >= min_lcss && tmp_chan >= min_chan 
-		   && tmp_css <= max_css && tmp_lcss <= max_lcss && tmp_chan <= max_chan);
-	});
-    }
-
-    y2milestone ("Current disks: %1", devices);
 
     if (Mode::config ())
     {
@@ -254,9 +223,9 @@ define void DisplayDASDDialog() {
     term content = `VBox(
 	`HBox(
 	    // text entry
-	    `InputField(`id(`min_chan), `opt(`hstretch), _("Mi&nimum Channel"), "0.0.0000"),
+	    `InputField(`id(`min_chan), `opt(`hstretch), _("Mi&nimum Channel"), DASDController::filter_min),
 	    // text entry
-	    `InputField(`id(`max_chan), `opt(`hstretch), _("Ma&ximum Channel"), "0.f.ffff"),
+	    `InputField(`id(`max_chan), `opt(`hstretch), _("Ma&ximum Channel"), DASDController::filter_max),
 	    `VBox (
 		`Label (""),
 		// push button
@@ -285,23 +254,23 @@ define void DisplayDASDDialog() {
     Wizard::SetContents(caption, content, help, true, true);
     Wizard::HideBackButton();
     Wizard::SetAbortButton(`abort, Label::CancelButton() );
+
+    UI::ChangeWidget(`id(`min_chan), `ValidChars, "0123456789abcdefABCDEF.");
+    UI::ChangeWidget(`id(`max_chan), `ValidChars, "0123456789abcdefABCDEF.");
 }
 
 
 /**
  * Redraw the contents of the widgets in the DASD Dialog
  */
-define void ReloadDASDDialog () ``{
-    DASDController::filter_min = (string)
-	UI::QueryWidget(`min_chan, `Value);
-    DASDController::filter_max = (string)
-	UI::QueryWidget(`max_chan, `Value);
+void ReloadDASDDialog()
+{
+    DASDController::filter_min = (string) UI::QueryWidget(`min_chan, `Value);
+    DASDController::filter_max = (string) UI::QueryWidget(`max_chan, `Value);
 
     DASDController::ProbeDisks ();
 
-    list<term> items = GetDASDDiskItems (
-	       DASDController::filter_min,
-	       DASDController::filter_max);
+    list<term> items = GetDASDDiskItems();
 
     UI::ChangeWidget(`id(`table), `Items, items);
     UI::SetFocus (`table);
