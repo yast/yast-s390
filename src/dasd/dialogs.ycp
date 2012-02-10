@@ -257,6 +257,7 @@ symbol DASDDialog()
 	    list<integer> selected = ListSelectedDASD();
 	    if (isempty(selected))
 	    {
+		// error popup message
 		Popup::Message (_("No disk selected."));
 		ret = nil;
 		continue;
@@ -337,9 +338,10 @@ symbol DASDDialog()
 	}
 	else if (ret == `format)
 	{
-	    list<integer> selected = ListSelectedDASD ();
+	    list<integer> selected = ListSelectedDASD();
 	    if (isempty(selected))
 	    {
+		// error popup message
 		Popup::Message (_("No disk selected."));
 		ret = nil;
 		continue;
