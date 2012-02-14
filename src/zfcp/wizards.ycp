@@ -6,9 +6,7 @@
  *
  * $Id$
  */
-
 {
-
 textdomain "s390";
 
 import "Sequencer";
@@ -16,14 +14,16 @@ import "Wizard";
 
 include "s390/zfcp/dialogs.ycp";
 
+
 /**
  * Main dialog
  * @return symbol dialog
  */
-symbol MainZFCPSequence () {
+symbol MainZFCPSequence()
+{
     map aliases = $[
-	"main"		: ``(ZFCPDialog ()),
-	"add"		: ``(AddZFCPDiskDialog ())
+	"main"		: ``(ZFCPDialog()),
+	"add"		: ``(AddZFCPDiskDialog())
     ];
 
     map sequence = $[
@@ -39,15 +39,16 @@ symbol MainZFCPSequence () {
 	],
     ];
 
-    return Sequencer::Run (aliases, sequence);
+    return Sequencer::Run(aliases, sequence);
 }
+
 
 /**
  * Whole configuration of controller
  * @return sequence result
  */
-any ZFCPSequence() {
-
+any ZFCPSequence()
+{
     map aliases = $[
 	"read"	: [ ``( ReadDialog() ), true ],
 	"main"	:   ``( MainZFCPSequence() ),
@@ -75,17 +76,19 @@ any ZFCPSequence() {
 
     any ret = Sequencer::Run(aliases, sequence);
 
-    UI::CloseDialog();
+    Wizard::CloseDialog();
+
     return ret;
 }
+
 
 /**
  * Whole configuration of controller but without reading and writing.
  * For use with autoinstallation.
  * @return sequence result
  */
-any ZFCPAutoSequence() {
-
+any ZFCPAutoSequence()
+{
     /* Initialization dialog caption */
     string caption = _("Controller Configuration");
     /* Initialization dialog contents */
@@ -98,9 +101,9 @@ any ZFCPAutoSequence() {
 
     any ret = MainZFCPSequence();
 
-    UI::CloseDialog();
+    Wizard::CloseDialog();
+
     return ret;
 }
 
-/* EOF */
 }

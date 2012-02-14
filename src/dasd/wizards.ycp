@@ -6,9 +6,7 @@
  *
  * $Id$
  */
-
 {
-
 textdomain "s390";
 
 import "Sequencer";
@@ -16,14 +14,16 @@ import "Wizard";
 
 include "s390/dasd/dialogs.ycp";
 
+
 /**
  * Whole configuration of controller
  * @return symbol MainDASDSequence
  */
-symbol MainDASDSequence () {
+symbol MainDASDSequence()
+{
     map aliases = $[
-	"main"		: ``(DASDDialog ()),
-	"add"		: ``(AddDASDDiskDialog ())
+	"main"		: ``(DASDDialog()),
+	"add"		: ``(AddDASDDiskDialog())
     ];
 
     map sequence = $[
@@ -39,15 +39,16 @@ symbol MainDASDSequence () {
 	],
     ];
 
-    return Sequencer::Run (aliases, sequence);
+    return Sequencer::Run(aliases, sequence);
 }
+
 
 /**
  * Whole configuration of controller
  * @return sequence result
  */
-any DASDSequence() {
-
+any DASDSequence()
+{
     map aliases = $[
 	"read"	: [ ``( ReadDialog() ), true ],
 	"main"	:   ``( MainDASDSequence() ),
@@ -75,17 +76,19 @@ any DASDSequence() {
     
     any ret = Sequencer::Run(aliases, sequence);
 
-    UI::CloseDialog();
+    Wizard::CloseDialog();
+
     return ret;
 }
+
 
 /**
  * Whole configuration of controller but without reading and writing.
  * For use with autoinstallation.
  * @return sequence result
  */
-any DASDAutoSequence() {
-
+any DASDAutoSequence()
+{
     /* Initialization dialog caption */
     string caption = _("Controller Configuration");
     /* Initialization dialog contents */
@@ -98,9 +101,9 @@ any DASDAutoSequence() {
 
     any ret = MainDASDSequence();
 
-    UI::CloseDialog();
+    Wizard::CloseDialog();
+
     return ret;
 }
 
-/* EOF */
 }
