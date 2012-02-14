@@ -399,6 +399,7 @@ $[
     UI::CloseDialog ();
 }
 
+
 /**
  * Report error occured during device activation
  * @param id integer chanel id of the device
@@ -406,50 +407,71 @@ $[
  */
 void ReportActivationError(any id, integer ret)
 {
-    if (ret != 0)
+    switch (ret)
     {
-	if (ret == 1)
+	case 0:
+	    break;
+
+	case 1:
 	    Report::Error (sformat (
 		// error report, %1 is device identification
 		_("%1: sysfs not mounted."), id));
-	else if (ret == 2)
+	    break;
+
+	case 2:
 	    Report::Error (sformat (
 		// error report, %1 is device identification
 		_("%1: Invalid status for <online>."), id));
-	else if (ret == 3)
+	    break;
+
+	case 3:
 	    Report::Error (sformat (
 		// error report, %1 is device identification
 		_("%1: No device found for <ccwid>."), id));
-	else if (ret == 4)
+	    break;
+
+	case 4:
 	    Report::Error (sformat (
 		// error report, %1 is device identification
 		_("%1: Could not change state of the device."), id));
-	else if (ret == 5)
+	    break;
+
+	case 5:
 	    // https://bugzilla.novell.com/show_bug.cgi?id=446998#c15
 	    Report::Error (sformat (
 		// error report, %1 is device identification
 		_("%1: Device is not a DASD."), id));
-	else if (ret == 6)
+	    break;
+
+	case 6:
 	    // https://bugzilla.novell.com/show_bug.cgi?id=446998#c15
 	    Report::Error (sformat (
 		// error report, %1 is device identification
 		_("%1: Could not load module."), id));
-	else if (ret == 7)
-	   //bugzilla.novell.com/show_bug.cgi?id=561876#c8
+	    break;
+
+	case 7:
+	    // http://bugzilla.novell.com/show_bug.cgi?id=561876#c8
 	    Report::Error (sformat (
 		// error report, %1 is device identification
 		_("%1: Failed to activate DASD."), id));
-	else if (ret == 8)
-	   //bugzilla.novell.com/show_bug.cgi?id=561876#c8
+	    break;
+
+	case 8:
+	    // http://bugzilla.novell.com/show_bug.cgi?id=561876#c8
 	    Report::Error (sformat (
 		// error report, %1 is device identification
 		_("%1: DASD is not formatted."), id));
-	else
+	    break;
+
+	default:
 	    Report::Error (sformat (
 		// error report, %1 is device identification, %2 is integer code
 		_("%1: Unknown error %2."), id, ret));
+	    break;
     }
 }
+
 
 /**
  * Activate selected Disks
