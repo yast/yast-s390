@@ -369,7 +369,7 @@ symbol DASDDialog()
 	    string problem = "";
 	    foreach (integer id, selected, {
 		boolean active = DASDController::devices[id, "resource", "io", 0, "active"]:false;
-		string access = DASDController::devices[id, "resource", "io", 0, "mode"]:"ro");
+		string access = DASDController::devices[id, "resource", "io", 0, "mode"]:"ro";
 		if (!active)
 		{
 		    // error report, %1 is device identification
