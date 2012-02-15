@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Feb 15 11:25:49 CET 2012 - aschnell@suse.de
+
+- make DASD module work for autoyast editor
+
+-------------------------------------------------------------------
 Fri Feb 10 14:59:45 CET 2012 - aschnell@suse.de
 
 - used multiselection table in main DASD dialog

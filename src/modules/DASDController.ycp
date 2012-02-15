@@ -14,14 +14,12 @@ module "DASDController";
 textdomain "s390";
 
 import "Mode";
-import "Progress";
 import "Report";
-import "Stage";
-import "Summary";
 import "Arch";
 import "FileUtils";
 import "Popup";
     import "String";
+
 
 global map<integer,map<string,any> > devices = $[];
 
@@ -49,7 +47,7 @@ global boolean Modified();
 /**
  * Data was modified?
  */
-global boolean modified = false;
+global boolean modified = true;	// TODO
 
 /**
  */
@@ -95,21 +93,64 @@ global boolean Available () {
     return true;
 }
 
+
+    string GetDeviceName(string channel)
+    {
+	string cmd = sformat("ls '/sys/bus/ccw/devices/%1/block/' | tr -d '\n'", channel);
+	map<string, any> disk = (map<string, any>) SCR::Execute(.target.bash_output, cmd);
+	if (disk["exit"]:-1 == 0 && !isempty(disk["stdout"]:""))
+	    return sformat("/dev/%1", disk["stdout"]:"");
+
+	return nil;
+    }
+
+
 /**
  * Read all controller settings
  * @return true on success
  */
-global boolean Read() {
+global boolean Read()
+{
+    ProbeDisks();
+
+    devices = mapmap(integer index, map<string, any> d, devices, {
+	    d["format"] = d["format"]:false;
+	    d["diag"] = d["diag"]:false;
+	    return $[ index : d ];
+    });
+
     disk_configured = false;
     return true;
-
 }
+
 
 /**
  * Write all controller settings
  * @return true on success
  */
-global boolean Write() {
+global boolean Write()
+{
+    list<string> to_format = [];
+
+    foreach(integer index, map<string, any> device, devices, {
+	    string channel = device["channel"]:"";
+	    boolean format = device["format"]:false;
+	    boolean do_diag = device["diag"]:false;
+	    ActivateDisk(channel, do_diag);
+
+	    if (format)
+	    {
+		string dev_name = GetDeviceName(channel);
+		if (dev_name != nil)
+		    to_format = add(to_format, dev_name);               
+	    }
+	});
+
+    y2milestone ("Disks to format: %1", to_format);
+
+    if (!isempty(to_format))
+	FormatDisks(to_format, 8, true, true);
+
     if (disk_configured && Mode::normal ())
     {
 	string command = "/sbin/mkinitrd && /sbin/zipl";
@@ -121,6 +162,7 @@ global boolean Write() {
     {
 	y2milestone ("No new disk configured");
     }
+
     return true;
 }
 
@@ -130,50 +172,19 @@ global boolean Write() {
  * @param settings The YCP structure to be imported.
  * @return boolean True on success
  */
-global boolean Import (map settings) {
-    if (Mode::config ())
-    {
+global boolean Import(map settings)
+{
 	integer index = -1;
-	devices = listmap (map<string,any> d, settings["devices"]:[], {
-	    index = index + 1;
+	devices = listmap (map<string, any> d, settings["devices"]:[], {
+	    index = index + 1;	 
+
+	    d = filter(string k, any v, d, {
+		return contains([ "channel", "format", "diag" ], k);
+	    });
+
 	    return $[ index : d ];
 	});
-    }
-    else if (Stage::initial ())
-    {
-	// activate all disks first
-	map<string,boolean> to_format = $[];
-	foreach (map d, settings["devices"]:[], {
-	    boolean format = d["format"]:false;
-	    boolean do_diag = d["diag"]:false;
-	    string channel = d["channel"]:"";
-	    if (channel != "")
-	    {
-		to_format[channel] = format;
-		ActivateDisk (channel, do_diag);
-	    }
-	});
 
-	// now probe all disks to get the mapping between channel and device
-	ProbeDisks ();
-
-	// now map the channels of the disks to format to devices
-	list<string> format_list = [];
-	foreach (integer i, map<string,any> d, devices, {
-	    string channel = d["channel"]:"";
-	    string device = d["dev_name"]:"";
-	    if (channel != "" && device != "")
-	    {
-		if (to_format[channel]:false)
-		    format_list = add (format_list, device);
-	    }
-	});
-	y2milestone ("Disks to format: %1", format_list);
-
-	// now format the disks
-	if (size (format_list) > 0)
-	    FormatDisks (format_list, 8, true, true);
-    }
     return true;
 }
 
@@ -185,44 +196,16 @@ global boolean Import (map settings) {
  */
 global map<string, list> Export()
 {
-    ProbeDisks();
-
-    if (Mode::config())
-    {
 	list<map<string, any> > l = maplist(integer i, map<string, any> d, devices, {
-	    // if possible, use device by-path (bnc#591603)
-	    string tmp = find(string s, d["dev_names"]:[], {
-		return String::StartsWith(s, "/dev/disk/by-path/");
+
+	    d = filter(string k, any v, d, {
+		return contains([ "channel", "format", "diag" ], k);
 	    });
-	    if (tmp != nil)
-		d["dev_name"] = tmp;
+
 	    return d;
 	});
 
-	l = filter(map<string, any> m, l, {
-	    return m["resource", "io", 0, "active"]:false;
-	});
-
-	/*
-	l = maplist(map<string, any> m, l, {
-	    return filter(string k, any v, m, {
-		return contains([ "channel", "dev_name" ], k);
-	    });
-	});
-	*/
-
 	return $[ "devices" : l ];
-    }
-    else
-    {
-	list<map<string, any> > l = maplist (integer i, map<string, any> d, devices, {
-	    return $[ "channel" : d["channel"]:"",
-		      "format" : false,
-		      "diag" : false ];
-        });
-
-	return $[ "devices" : l ];
-    }
 }
 
 
@@ -276,17 +259,15 @@ global map<string, list> Export()
 global list<string> Summary()
 {
     list<string> ret = maplist (integer index, map<string,any> d, devices, {
-	string s = "";
 	// summary text, %1 is channel ID (number),
 	// %2 and %3 are Yes or No
-	s = sformat (_("Channel ID: %1, Format: %2, Use DIAG: %3"),
-	    d["channel"]:"", String::YesNo(d["format"]:false), String::YesNo(d["diag"]:false)
-	);
-	return s;
+	return sformat(_("Channel: %1, Format: %2, Use DIAG: %3"), d["channel"]:"",
+		       String::YesNo(d["format"]:false), String::YesNo(d["diag"]:false));
     });
     y2milestone ("Summary: %1", ret);
     return ret;
 }
+
 
 /**
  * Return packages needed to be installed and removed during
@@ -294,7 +275,8 @@ global list<string> Summary()
  * installed.
  * @return map with 2 lists.
  */
-global map AutoPackages() {
+global map AutoPackages()
+{
     return $[ "install":[], "remove":[] ];
 }
 
@@ -320,18 +302,16 @@ global boolean IsAvailable()
  */
 global void ProbeDisks()
 {
-/*    if (Mode::config ())
-	return; */
-
     // popup label
     UI::OpenDialog (`Label (_("Reading Configured DASD Disks")));
 
     list<map<string, any> > disks = (list<map<string, any> >) SCR::Read(.probe.disk);
     disks = filter (map<string, any> d, disks, { return tolower(d["device"]:"") == "dasd"; });
-   
+
     disks = maplist (map<string,any> d, disks, {
 	string channel = d["sysfs_bus_id"]:"0.0.0000";
 	d["channel"] = channel;
+
 	boolean active = d["resource", "io", 0, "active"]:false;
 	if (active)
 	{
@@ -346,55 +326,28 @@ global void ProbeDisks()
 	    }
 	    d["formatted"] = formatted;
 	    d["partition_info"] = GetPartitionInfo (device);
+
+	    string diag_file = sformat("/sys/%1/device/use_diag", d["sysfs_id"]:"");
+	    if (FileUtils::Exists(diag_file))
+	    {
+		string use_diag = (string) SCR::Read(.target.string, diag_file);
+		d["diag"] = substring(use_diag, 0, 1) == "1";
+		diag[channel] = substring(use_diag, 0, 1) == "1";
+	    }
 	}
 
-	string diag_file = sformat("/sys/%1/device/use_diag", d["sysfs_id"]:"");
-	if (FileUtils::Exists(diag_file))
-	{
-	    string use_diag = (string)SCR::Read(.target.string, diag_file);
-	    diag[channel] = substring(use_diag, 0, 1) == "1";
-	}
+	d = filter(string k, any v, d, { return contains([ "channel", "diag",
+	    "resource", "formatted", "partition_info", "dev_name", "detail",
+	    "device_id", "sub_device_id" ], k); });
 
 	return d;
     });
+
     integer index = -1;
-    DASDController::devices = listmap (map<string,any> d, disks, {
+    devices = listmap (map<string, any> d, disks, {
 	index = index + 1;
 	return $[ index : d ];
     });
-
-/*
-DASDController::devices = (map<integer,map<string,any> >)
-	SCR::Read (.target.ycp, "/root/dasddevices.ycp");
-$[
-0:$[
-"bus":"None",
-"bus_hwcfg":"none",
-"channel":"0.0.0150",
-"class_id":262,
-"detail":$["cu_model":233, "dev_model":10, "lcss":0],
-"dev_name":"/dev/dasda",
-"dev_names":["/dev/dasda"],
-"dev_num":$["major":94, "minor":0, "range":4, "type":"b"],
-"device":"DASD",
-"device_id":276880,
-"driver":"io_subchannel",
-"drivers":[$["active":true, "modprobe":true, "modules":[["dasd_eckd_mod", ""]]]],
-"formatted":true,
-"model":"IBM DASD",
-"old_unique_key":"N5EP.J4gQoPlOYuE",
-"partition_info":"--",
-"prog_if":1,
-"resource":$["disk_log_geo":[$["cylinders":3339, "heads":15, "sectors":12]], "io":[$["active":true, "length":1, "mode":"rw", "start":336]], "size":[$["unit":"sectors", "x":601020, "y":4096]]],
-"sub_class_id":0,
-"sub_device_id":275344,
-"sysfs_bus_id":"0.0.0150",
-"unique_key":"kNlH.ALFATSt_U8F",
-"vendor":"IBM",
-"vendor_id":286721
-],
-];
-*/
 
     UI::CloseDialog ();
 }

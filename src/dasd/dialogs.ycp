@@ -72,7 +72,7 @@ list<term> GetDASDDiskItems()
     if (Mode::config ())
     {
 	items = maplist (integer k, map<string,any> d, devices, {
-	    string channel = d["channel_id"]:"";
+	    string channel = d["channel"]:"";
 	    string diag = String::YesNo(d["diag"]:false);
 	    string format = String::YesNo(d["format"]:false);
 	    return `item(`id(k), channel, format, diag);
@@ -217,8 +217,6 @@ void ReloadDASDDialog()
     DASDController::filter_min = (string) UI::QueryWidget(`min_chan, `Value);
     DASDController::filter_max = (string) UI::QueryWidget(`max_chan, `Value);
 
-    DASDController::ProbeDisks();
-
     list<term> items = GetDASDDiskItems();
 
     list<integer> selected = (list<integer>) UI::QueryWidget(`id(`table), `SelectedItems);
@@ -242,7 +240,8 @@ symbol DASDDialog()
     {
 	ret = UI::UserInput();
 
-	if (ret == `filter) {
+	if (ret == `filter)
+	{
 	    ReloadDASDDialog ();
 	    ret = nil;
 	    continue;
@@ -269,6 +268,8 @@ symbol DASDDialog()
 		DASDController::ActivateDisk(channel, diag);
 	    });
 
+	    DASDController::ProbeDisks();
+
 	    ReloadDASDDialog ();
 	    ret = nil;
 	}
@@ -288,6 +289,8 @@ symbol DASDDialog()
 		boolean diag = DASDController::diag[channel]:false;
 		DASDController::DeactivateDisk(channel, diag);
 	    });
+
+	    DASDController::ProbeDisks();
 
 	    ReloadDASDDialog ();
 	    ret = nil;
@@ -311,6 +314,8 @@ symbol DASDDialog()
 		    DASDController::ActivateDisk(channel, true);
 	    });
 
+	    DASDController::ProbeDisks();
+
 	    ReloadDASDDialog ();
 	    ret = nil;
 	}
@@ -332,6 +337,8 @@ symbol DASDDialog()
 		if (active)
 		    DASDController::ActivateDisk(channel, false);
 	    });
+
+	    DASDController::ProbeDisks();
 
 	    ReloadDASDDialog ();
 	    ret = nil;
@@ -428,6 +435,7 @@ Really format the following disks?<br>
 		return DASDController::devices[id, "dev_name"]:"";
 	    });
 	    DASDController::FormatDisks (devices, par, write_vl, true);
+	    DASDController::ProbeDisks();
 	    ReloadDASDDialog ();
 	    UI::SetFocus (`table);
 	    ret = nil;
@@ -435,6 +443,7 @@ Really format the following disks?<br>
     }
     return (symbol)ret;
 }
+
 
 /**
  * Run the dialog for adding DASDs
@@ -489,19 +498,24 @@ All changes will be lost.")))
 	    {
 		ret = nil;
 	    }
+	}  
+	else if (ret == `next)
+	{
+	    // TODO check for duplicate channel
 	}
     }
 
     if (ret == `next)
     {
-	string channel = (string)UI::QueryWidget (`id (`channel), `Value);
-	boolean format = (boolean)UI::QueryWidget (`id (`format), `Value);
-	boolean diag = (boolean)UI::QueryWidget (`id (`diag), `Value);
+	string channel = (string) UI::QueryWidget(`id(`channel), `Value);
+	boolean format = (boolean) UI::QueryWidget(`id(`format), `Value);
+	boolean diag = (boolean) UI::QueryWidget(`id(`diag), `Value);
 	map<string,any> m = $[
-	    "channel_id" : channel,
+	    "channel" : channel,
 	    "format" : format,
 	    "diag" : diag,
 	];
+
 	integer index = 0;
 	while (haskey (DASDController::devices, index))
 	    index = index + 1;
