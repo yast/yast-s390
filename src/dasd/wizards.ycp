@@ -23,7 +23,8 @@ symbol MainDASDSequence()
 {
     map aliases = $[
 	"main"		: ``(DASDDialog()),
-	"add"		: ``(AddDASDDiskDialog())
+	"add"		: ``(AddDASDDiskDialog()),
+	"delete"	: ``(DeleteDASDDiskDialog())
     ];
 
     map sequence = $[
@@ -32,10 +33,15 @@ symbol MainDASDSequence()
 	    `abort	: `abort,
 	    `next	: `next,
 	    `add	: "add",
+	    `delete	: "delete"
 	],
 	"add" : $[
 	    `abort	: `abort,
-	    `next	: "main",
+	    `next	: "main"
+	],
+	"delete" : $[
+	    `abort	: `abort,
+	    `next	: "main"
 	],
     ];
 
@@ -50,9 +56,9 @@ symbol MainDASDSequence()
 any DASDSequence()
 {
     map aliases = $[
-	"read"	: [ ``( ReadDialog() ), true ],
-	"main"	:   ``( MainDASDSequence() ),
-	"write"	: [ ``( WriteDialog() ), true ]
+	"read"	: [ ``(ReadDialog()), true ],
+	"main"	:   ``(MainDASDSequence()),
+	"write"	: [ ``(WriteDialog()), true ]
     ];
 
     map sequence = $[

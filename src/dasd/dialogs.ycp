@@ -234,11 +234,11 @@ symbol DASDDialog()
 {
     DisplayDASDDialog ();
     ReloadDASDDialog ();
-    any ret = nil;
 
+    symbol ret = nil;
     while (ret == nil)
     {
-	ret = UI::UserInput();
+	ret = (symbol) UI::UserInput();
 
 	if (ret == `filter)
 	{
@@ -395,7 +395,7 @@ symbol DASDDialog()
 		    `PushButton (`id (`cancel), Label::CancelButton ())
 		)
 	    ));
-	    ret = UI::UserInput ();
+	    ret = (symbol) UI::UserInput();
 	    par = (integer) UI::QueryWidget(`id(`par), `Value);
 	    boolean write_vl = (boolean) UI::QueryWidget(`id(`write_label), `Value);
 	    UI::CloseDialog ();
@@ -441,7 +441,7 @@ Really format the following disks?<br>
 	    ret = nil;
 	}
     }
-    return (symbol)ret;
+    return ret;
 }
 
 
@@ -449,11 +449,11 @@ Really format the following disks?<br>
  * Run the dialog for adding DASDs
  * @return symbol from AddDASDDiskDialog
  */
-symbol AddDASDDiskDialog ()
+symbol AddDASDDiskDialog()
 {
-    if (! Mode::config ())
+    if (!Mode::config())
     {
-	y2error ("DASD Add Disk dialog shouldn't be run in Mode::config ()");
+	y2error("DASD Add Disk dialog shouldn't be run in Mode::config()");
 	return `back;
     }
 
@@ -484,11 +484,12 @@ symbol AddDASDDiskDialog ()
     Wizard::RestoreBackButton ();
     Wizard::RestoreAbortButton ();
 
-    any ret = nil;
+    UI::ChangeWidget(`id(`channel), `ValidChars, "0123456789abcdefABCDEF.");
 
+    symbol ret = nil;
     while (ret == nil)
     {
-	ret = UI::UserInput();
+	ret = (symbol) UI::UserInput();
 
 	if (ret == `abort || ret == `cancel)
 	{
@@ -522,7 +523,29 @@ All changes will be lost.")))
 	DASDController::devices[index] = m;
     }
 
-    return (symbol) ret;
+    return ret;
+}
+
+
+/**
+ * Run the dialog for deleting DASDs
+ * @return symbol from DeleteDASDDiskDialog
+ */
+symbol DeleteDASDDiskDialog()
+{
+    if (!Mode::config())
+    {
+	y2error("DASD Delete Disk dialog shouldn't be run in Mode::config()");
+	return `back;
+    }
+
+    list<integer> selected = ListSelectedDASD();
+
+    DASDController::devices = filter(integer index, map<string, any> d, DASDController::devices, {
+	    return !contains(selected, index);
+	});
+
+    return `next;
 }
 
 }
