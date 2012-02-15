@@ -4,7 +4,7 @@
 Group:		System/YaST
 License:        GPL-2.0+
 BuildRequires:	docbook-xsl-stylesheets doxygen libxslt perl-XML-Writer sgml-skel update-desktop-files
-BuildRequires:	yast2 yast2-devtools yast2-testsuite
+BuildRequires:	yast2 yast2-devtools yast2-testsuite yast2-users yast2-bootloader
 ExclusiveArch:  s390 s390x
 Requires:       yast2 s390-tools
 
