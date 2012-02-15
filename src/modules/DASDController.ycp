@@ -44,20 +44,17 @@ boolean disk_configured = false;
  */
 global boolean Modified();
 
+
 /**
  * Data was modified?
  */
-global boolean modified = true;	// TODO
+boolean modified = false;
+
 
 /**
  */
 global boolean proposal_valid = false;
 
-/**
- * Write only, used during autoinstallation.
- * Don't run services and SuSEconfig, it's all done at one place.
- */
-global boolean write_only = false;
 
 /**
  * Abort function
@@ -80,10 +77,17 @@ global boolean Abort()
  * Data was modified?
  * @return true if modified
  */
-global boolean Modified() {
-    y2debug("modified=%1",modified);
+global boolean GetModified()
+{
     return modified;
 }
+
+
+global void SetModified(boolean value)
+{
+    modified = value;
+}
+
 
 /**
  * Is this kind of disk controller available?
@@ -113,11 +117,14 @@ global boolean Read()
 {
     ProbeDisks();
 
-    devices = mapmap(integer index, map<string, any> d, devices, {
+    if (Mode::config())
+    {
+	devices = mapmap(integer index, map<string, any> d, devices, {
 	    d["format"] = d["format"]:false;
 	    d["diag"] = d["diag"]:false;
 	    return $[ index : d ];
-    });
+	});
+    }
 
     disk_configured = false;
     return true;
@@ -130,6 +137,8 @@ global boolean Read()
  */
 global boolean Write()
 {
+    if (Mode::config())
+    {
     list<string> to_format = [];
 
     foreach(integer index, map<string, any> device, devices, {
@@ -150,6 +159,7 @@ global boolean Write()
 
     if (!isempty(to_format))
 	FormatDisks(to_format, 8, true, true);
+    }
 
     if (disk_configured && Mode::normal ())
     {

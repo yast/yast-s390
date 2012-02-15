@@ -10,17 +10,7 @@
  * goes through the configuration and return the setting.
  * Does not do any changes to the configuration.
  */
-
-/**
- * @param function to execute
- * @param map/list of controller settings
- * @return map edited settings, Summary or boolean on success depending on called function
- * @example map mm = $[ "FAIL_DELAY" : "77" ];
- * @example map ret = WFM::CallFunction ("controller_auto", [ "Summary", mm ]);
- */
-
 {
-
 textdomain "s390";
 
 y2milestone("----------------------------------------");
@@ -43,60 +33,88 @@ if(size(WFM::Args()) > 0 && is(WFM::Args(0), string)) {
 y2debug("func=%1", func);
 y2debug("param=%1", param);
 
-/* Create a summary*/
-if(func == "Summary") {
-    ret = HTML::List(DASDController::Summary());
-}
-/* Reset configuration */
-else if (func == "Reset") {
-    DASDController::Import($[]);
-    ret = $[];
-}
-/* Change configuration (run AutoSequence) */
-else if (func == "Change") {
-    ret = DASDAutoSequence();
-}
-/* Import configuration */
-else if (func == "Import") {
-    ret = DASDController::Import(param);
-}
-/* Return actual state */
-else if (func == "Export") {
-    ret = DASDController::Export();
-}
-/* did configuration change */
-else if (func == "GetModified") {
-    ret = DASDController::modified;
-}
-/* set configuration as changed */
-else if (func == "SetModified") {
-    DASDController::modified = true;
-    ret = true;
-}
-/* Return needed packages */
-else if (func == "Packages") {
-    ret = DASDController::AutoPackages();
-}
-/* Read current state */
-else if (func == "Read") {
-    import "Progress";
-    Progress::off();
-    ret = DASDController::Read();
-    Progress::on();
-}
-/* Write given settings */
-else if (func == "Write") {
-    import "Progress";
-    Progress::off();
-    DASDController::write_only = true;
-    ret = DASDController::Write();
-    Progress::on();
-}
-/* Unknown function */
-else {
-    y2error("Unknown function: %1", func);
-    ret = false;
-}
+    switch (func)
+    {
+	case "Summary": // Create a summary
+	{
+	    ret = HTML::List(DASDController::Summary());
+	    break;
+	}
+
+	case "Reset": // Reset configuration
+	{
+	    DASDController::Import($[]);
+	    DASDController::SetModified(true);
+	    ret = $[];
+	    break;
+	}
+
+	case "Change": // Change configuration
+	{
+	    ret = DASDAutoSequence();
+	    DASDController::SetModified(true);
+	    break;
+	}
+
+	case "Import": // Import configuration
+	{
+	    ret = DASDController::Import(param);
+	    DASDController::SetModified(true);
+	    break;
+	}
+
+	case "Export": // Return actual state
+	{
+	    ret = DASDController::Export();
+	    DASDController::SetModified(false);
+	    break;
+	}
+
+	case "GetModified": // Did configuration change
+	{
+	    ret = DASDController::GetModified();
+	    break;
+	}
+
+	case "SetModified": // Set configuration as changed
+	{
+	    DASDController::SetModified(true);
+	    ret = true;
+	    break;
+	}
+
+	case "Packages": // Return needed packages
+	{
+	    ret = DASDController::AutoPackages();
+	    break;
+	}
+
+	case "Read": // Read current state
+	{
+	    import "Progress";
+	    Progress::off();
+	    ret = DASDController::Read();
+	    Progress::on();
+	    DASDController::SetModified(true);
+	    break;
+	}
+
+	case "Write": // Write given settings
+	{
+	    import "Progress";
+	    Progress::off();
+	    ret = DASDController::Write();
+	    Progress::on();
+	    break;
+	}
+
+	default: // Unknown function
+	{
+	    y2error("Unknown function: %1", func);
+	    ret = false;
+	    break;
+	}
+    }
 
 y2debug("ret=%1", ret);
 y2milestone("DASD auto finished");
@@ -104,5 +122,4 @@ y2milestone("----------------------------------------");
 
 return ret;
 
-/* EOF */
 }
