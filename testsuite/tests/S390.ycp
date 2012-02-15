@@ -7,7 +7,7 @@ TESTSUITE_INIT([], nil);
 
 import "DASDController";
 
-DUMP("DASDController::Modified");
-TEST(``(DASDController::Modified()), [], nil);
+DUMP("DASDController::GetModified");
+TEST(``(DASDController::GetModified()), [], nil);
 
 }
