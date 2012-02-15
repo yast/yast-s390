@@ -109,6 +109,13 @@ global boolean Available () {
     }
 
 
+    global boolean ValidChannel(string channel)
+    {
+	string regexp = "^([0-9a-fA-F]{1}).([0-9a-fA-F]{1}).([0-9a-fA-F]{4})$";
+	return regexpmatch(channel, regexp);
+    }
+
+
 /**
  * Read all controller settings
  * @return true on success
@@ -258,6 +265,18 @@ global map<string, list> Export()
 	    });
 	}
 
+	return ret;
+    }
+
+
+    global integer
+    GetDeviceIndex(string channel)
+    {
+	integer ret = nil;
+	foreach(integer index , map<string, any> d, DASDController::devices, {
+		if (d["channel"]:"0.0.0000" == channel)
+		    ret = index;
+	    });
 	return ret;
     }
 

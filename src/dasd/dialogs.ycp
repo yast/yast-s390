@@ -214,9 +214,6 @@ void DisplayDASDDialog()
  */
 void ReloadDASDDialog()
 {
-    DASDController::filter_min = (string) UI::QueryWidget(`min_chan, `Value);
-    DASDController::filter_max = (string) UI::QueryWidget(`max_chan, `Value);
-
     list<term> items = GetDASDDiskItems();
 
     list<integer> selected = (list<integer>) UI::QueryWidget(`id(`table), `SelectedItems);
@@ -242,6 +239,20 @@ symbol DASDDialog()
 
 	if (ret == `filter)
 	{
+	    string filter_min = (string) UI::QueryWidget(`min_chan, `Value);
+	    string filter_max = (string) UI::QueryWidget(`max_chan, `Value);
+
+	    if (!DASDController::ValidChannel(filter_min) || !DASDController::ValidChannel(filter_max))
+	    {
+		// error popup
+		Popup::Error(_("Invalid filter channels."));
+		ret = nil;
+		continue;
+	    }
+
+	    DASDController::filter_min = filter_min;
+	    DASDController::filter_max = filter_max;
+
 	    ReloadDASDDialog ();
 	    ret = nil;
 	    continue;
@@ -499,10 +510,24 @@ All changes will be lost.")))
 	    {
 		ret = nil;
 	    }
-	}  
+	}
 	else if (ret == `next)
 	{
-	    // TODO check for duplicate channel
+	    string channel = (string) UI::QueryWidget(`id(`channel), `Value);
+
+	    if (!DASDController::ValidChannel(channel))
+	    {
+		// error popup
+		Popup::Error(_("Not a valid channel."));
+		ret = nil;
+	    }
+
+	    if (DASDController::GetDeviceIndex(channel) != nil)
+	    {
+		// error popup
+		Popup::Error(_("Channel already exists."));
+		ret = nil;
+	    }
 	}
     }
 
@@ -511,7 +536,8 @@ All changes will be lost.")))
 	string channel = (string) UI::QueryWidget(`id(`channel), `Value);
 	boolean format = (boolean) UI::QueryWidget(`id(`format), `Value);
 	boolean diag = (boolean) UI::QueryWidget(`id(`diag), `Value);
-	map<string,any> m = $[
+
+	map<string, any> d = $[
 	    "channel" : channel,
 	    "format" : format,
 	    "diag" : diag,
@@ -520,7 +546,7 @@ All changes will be lost.")))
 	integer index = 0;
 	while (haskey (DASDController::devices, index))
 	    index = index + 1;
-	DASDController::devices[index] = m;
+	DASDController::devices[index] = d;
     }
 
     return ret;
