@@ -378,6 +378,8 @@ global void ProbeDisks()
 	return $[ index : d ];
     });
 
+    y2milestone("probed dasds %1", devices);
+
     UI::CloseDialog ();
 }
 
@@ -550,7 +552,6 @@ global void FormatDisks(list<string> disks_list, integer par, boolean write_vl,
 			     disks_param, par, additional_param);
 
     y2milestone ("Running command %1", command);
-    index = 0;
     term contents = `VBox (`HSpacing (70));
     index = 0;
     while (index < par)
