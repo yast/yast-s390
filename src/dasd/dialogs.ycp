@@ -445,7 +445,7 @@ Really format the following disks?<br>
 	    list<string> devices = maplist (integer id, selected, {
 		return DASDController::devices[id, "dev_name"]:"";
 	    });
-	    DASDController::FormatDisks (devices, par, write_vl, true);
+	    DASDController::FormatDisks(devices, par, write_vl);
 	    DASDController::ProbeDisks();
 	    ReloadDASDDialog ();
 	    UI::SetFocus (`table);

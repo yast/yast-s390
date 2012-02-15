@@ -32,17 +32,12 @@ global map<string, boolean> diag = $[];
 global void ActivateDisk (string channel, boolean diag);
 global void DeactivateDisk (string channel, boolean diag);
 global void ProbeDisks ();
-global void FormatDisks (list<string> disks_list, integer par,
-    boolean write_vl, boolean interactive);
+global void FormatDisks(list<string> disks_list, integer par, boolean write_vl);
 global string GetPartitionInfo (string disk);
+global boolean GetModified();
+
 
 boolean disk_configured = false;
-
-
-/**
- * Prototypes
- */
-global boolean Modified();
 
 
 /**
@@ -60,7 +55,8 @@ global boolean proposal_valid = false;
  * Abort function
  * return boolean return true if abort
  */
-global boolean() AbortFunction = Modified;
+global boolean() AbortFunction = GetModified;
+
 
 /**
  * Abort function
@@ -93,7 +89,8 @@ global void SetModified(boolean value)
  * Is this kind of disk controller available?
  * @return boolean true if it is
  */
-global boolean Available () {
+global boolean Available()
+{
     return true;
 }
 
@@ -124,7 +121,7 @@ global boolean Read()
 {
     ProbeDisks();
 
-    if (Mode::config())
+    if (Mode::config())		// TODO
     {
 	devices = mapmap(integer index, map<string, any> d, devices, {
 	    d["format"] = d["format"]:false;
@@ -144,7 +141,7 @@ global boolean Read()
  */
 global boolean Write()
 {
-    if (Mode::config())
+    if (Mode::config())		// TODO
     {
     list<string> to_format = [];
 
@@ -165,7 +162,7 @@ global boolean Write()
     y2milestone ("Disks to format: %1", to_format);
 
     if (!isempty(to_format))
-	FormatDisks(to_format, 8, true, true);
+	FormatDisks(to_format, 8, true);
     }
 
     if (disk_configured && Mode::normal ())
@@ -214,12 +211,9 @@ global boolean Import(map settings)
 global map<string, list> Export()
 {
 	list<map<string, any> > l = maplist(integer i, map<string, any> d, devices, {
-
-	    d = filter(string k, any v, d, {
+	    return filter(string k, any v, d, {
 		return contains([ "channel", "format", "diag" ], k);
 	    });
-
-	    return d;
 	});
 
 	return $[ "devices" : l ];
@@ -290,7 +284,7 @@ global list<string> Summary()
     list<string> ret = maplist (integer index, map<string,any> d, devices, {
 	// summary text, %1 is channel ID (number),
 	// %2 and %3 are Yes or No
-	return sformat(_("Channel: %1, Format: %2, Use DIAG: %3"), d["channel"]:"",
+	return sformat(_("Channel: %1, Format: %2, DIAG: %3"), d["channel"]:"",
 		       String::YesNo(d["format"]:false), String::YesNo(d["diag"]:false));
     });
     y2milestone ("Summary: %1", ret);
@@ -485,8 +479,7 @@ press 'Cancel' and select 'Perform Action', 'Format' later on.
 	string cmd = sformat("ls '/sys/bus/ccw/devices/%1/block/' | tr -d '\n'", channel);
 	map<string, any> disk = (map<string, any>)SCR::Execute(.target.bash_output, cmd);
 	if (disk["exit"]:-1 == 0 && size(disk["stdout"]:"")>0){
-	    FormatDisks ([ sformat("/dev/%1", disk["stdout"]:"") ], 1, true, true);
-//	    ReloadDASDDialog ();
+	    FormatDisks([ sformat("/dev/%1", disk["stdout"]:"") ], 1, true);
 	    ActivateDisk(channel, diag);
 	} else {
 		Popup::Error(sformat("Couldn't find device for %1 channel", channel));
@@ -528,10 +521,8 @@ global void DeactivateDisk(string channel, boolean diag)
  * @param disks_list list<string> List of disks to be formated
  * @param par integer Number of disks that can be formated in parallel
  * @param write_vl boolean Write a Volume label
- * @param interactive boolean Interactive yes/no
  */
-global void FormatDisks(list<string> disks_list, integer par, boolean write_vl,
-			boolean interactive)
+global void FormatDisks(list<string> disks_list, integer par, boolean write_vl)
 {
     if (par > size (disks_list))
 	par = size (disks_list);
