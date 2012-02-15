@@ -124,13 +124,17 @@ global boolean Read()
 {
     ProbeDisks();
 
-    if (Mode::config())		// TODO
+    if (!Mode::normal())
     {
+	devices = filter(integer index, map<string, any> d, devices, {
+		return d["resource", "io", 0, "active"]:false;
+	    });
+
 	devices = mapmap(integer index, map<string, any> d, devices, {
-	    d["format"] = d["format"]:false;
-	    d["diag"] = d["diag"]:false;
-	    return $[ index : d ];
-	});
+		d["format"] = d["format"]:false;
+		d["diag"] = d["diag"]:false;
+		return $[ index : d ];
+	    });
     }
 
     disk_configured = false;
@@ -144,49 +148,49 @@ global boolean Read()
  */
 global boolean Write()
 {
-    if (Mode::config())		// TODO
+    if (!Mode::normal())
     {
-    list<string> to_format = [];
+	list<string> to_format = [];
 
-    foreach(integer index, map<string, any> device, devices, {
-	    string channel = device["channel"]:"";
-	    boolean format = device["format"]:false;
-	    boolean do_diag = device["diag"]:false;
-	    ActivateDisk(channel, do_diag);
+	foreach(integer index, map<string, any> device, devices, {
+		string channel = device["channel"]:"";
+		boolean format = device["format"]:false;
+		boolean do_diag = device["diag"]:false;
+		ActivateDisk(channel, do_diag);
 
-	    if (format)
-	    {
-		string dev_name = GetDeviceName(channel);
-		if (dev_name != nil)
-		    to_format = add(to_format, dev_name);               
-	    }
-	});
+		if (format)
+		{
+		    string dev_name = GetDeviceName(channel);
+		    if (dev_name != nil)
+			to_format = add(to_format, dev_name);
+		}
+	    });
 
-    y2milestone ("Disks to format: %1", to_format);
+	y2milestone ("Disks to format: %1", to_format);
 
-    if (!isempty(to_format))
-	FormatDisks(to_format, 8, true);
+	if (!isempty(to_format))
+	    FormatDisks(to_format, 8, true);
     }
 
-    if (disk_configured && Mode::normal ())
+    if (!Mode::installation())
     {
-	// popup label
-	UI::OpenDialog(`Label(_("Running mkinitrd and zipl.")));
+	if (disk_configured)
+	{
+	    // popup label
+	    UI::OpenDialog(`Label(_("Running mkinitrd and zipl.")));
 
-	string command = "/sbin/mkinitrd && /sbin/zipl";
-	y2milestone ("Running command %1", command);
-	any ret = SCR::Execute (.target.bash, command);
-	y2milestone ("Exit code: %1", ret);
+	    string command = "/sbin/mkinitrd && /sbin/zipl";
+	    y2milestone("Running command %1", command);
+	    any ret = SCR::Execute(.target.bash, command);
+	    y2milestone ("Exit code: %1", ret);
 
-	UI::CloseDialog();
-    }
-    else
-    {
-	y2milestone ("No new disk configured");
+	    UI::CloseDialog();
+	}
     }
 
     return true;
 }
+
 
 /**
  * Get all controller settings from the first parameter
@@ -198,7 +202,7 @@ global boolean Import(map settings)
 {
 	integer index = -1;
 	devices = listmap (map<string, any> d, settings["devices"]:[], {
-	    index = index + 1;	 
+	    index = index + 1;
 
 	    d = filter(string k, any v, d, {
 		return contains([ "channel", "format", "diag" ], k);
@@ -588,7 +592,7 @@ global void FormatDisks(list<string> disks_list, integer par, boolean write_vl)
 	    string line = (string) SCR::Read(.process.read_line, process_id);
 	    if (line == nil)
 		break;
-	    
+
 	    		integer siz = tointeger (line);
 			if (siz == 0)
 			    siz = 999999999;
