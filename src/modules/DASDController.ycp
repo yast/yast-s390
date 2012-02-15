@@ -37,6 +37,9 @@ global string GetPartitionInfo (string disk);
 global boolean GetModified();
 
 
+/**
+ * Have DASDs been configured so that mkinitrd and zipl need to be run?
+ */
 boolean disk_configured = false;
 
 
@@ -167,10 +170,15 @@ global boolean Write()
 
     if (disk_configured && Mode::normal ())
     {
+	// popup label
+	UI::OpenDialog(`Label(_("Running mkinitrd and zipl.")));
+
 	string command = "/sbin/mkinitrd && /sbin/zipl";
 	y2milestone ("Running command %1", command);
 	any ret = SCR::Execute (.target.bash, command);
 	y2milestone ("Exit code: %1", ret);
+
+	UI::CloseDialog();
     }
     else
     {
