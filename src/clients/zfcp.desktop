@@ -20,6 +20,6 @@ X-SuSE-YaST-AutoInstClonable=true
 Icon=yast-zfcp
 Exec=xdg-su -c "/sbin/yast2 zfcp"
 
-Name=Zfcp
-GenericName=Configure zfcp
+Name=ZFCP
+GenericName=Configure ZFCP
 StartupNotify=true
