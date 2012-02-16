@@ -9,7 +9,6 @@
 {
 textdomain "s390";
 
-import "Arch";
 import "DASDController";
 import "Label";
 import "Mode";

@@ -15,7 +15,6 @@ textdomain "s390";
 
 import "Mode";
 import "Report";
-import "Arch";
 import "FileUtils";
 import "Popup";
     import "String";
@@ -487,7 +486,6 @@ void ReportActivationError(any id, integer ret)
  */
 global void ActivateDisk(string channel, boolean diag)
 {
-//    if (! Arch::s390_32 ()) diag = false;
     string command = sformat (
 	"/sbin/dasd_configure '%1' '%2' '%3'",
 	channel,
@@ -532,7 +530,6 @@ press 'Cancel' and select 'Perform Action', 'Format' later on.
  */
 global void DeactivateDisk(string channel, boolean diag)
 {
- //   if (! Arch::s390_32 ()) diag = false;
     string command = sformat (
 	"/sbin/dasd_configure '%1' '%2' '%3'",
 	channel,

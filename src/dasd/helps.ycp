@@ -6,9 +6,7 @@
  *
  * $Id$
  */
-
 {
-
 textdomain "s390";
 
 /**
@@ -73,22 +71,17 @@ The action will be performed immediately!</p>"),
     /* Disk add help 1/3 */
     "disk_add_config" : _("<p><b><big>Add New DASD Disk</big></b><br>
 To add a disk, enter the <b>Channel Number</b> of the DASD disk as
-identifier.</p>")
+identifier.</p>") +
 
-+
     /* Disk add help 1/3 */
 _("<p>If the disk should be formatted,
 use <b>Format the Disk</b>.</p>
-")
+") +
 
-+
-(Arch::s390_32 ()
-    /* Disk add help 3/3, optional */
-    ? _("<p>To use DIAG mode, select <b>Use DIAG</b>.</p>
+    /* Disk add help 3/3 */
+    _("<p>To use DIAG mode, select <b>Use DIAG</b>.</p>
 ")
-    : ""),
 
 ];
 
-/* EOF */
 }
