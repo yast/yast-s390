@@ -543,10 +543,7 @@ All changes will be lost.")))
 	    "diag" : diag,
 	];
 
-	integer index = 0;
-	while (haskey (DASDController::devices, index))
-	    index = index + 1;
-	DASDController::devices[index] = d;
+	DASDController::AddDevice(d);
     }
 
     return ret;
@@ -566,10 +563,15 @@ symbol DeleteDASDDiskDialog()
     }
 
     list<integer> selected = ListSelectedDASD();
-
-    DASDController::devices = filter(integer index, map<string, any> d, DASDController::devices, {
-	    return !contains(selected, index);
-	});
+    if (isempty(selected))
+    {
+	// error popup message
+	Popup::Message (_("No disk selected."));
+    }
+    else
+    {
+	foreach(integer index, selected, { DASDController::RemoveDevice(index); });
+    }
 
     return `next;
 }

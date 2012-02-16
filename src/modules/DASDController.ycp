@@ -275,6 +275,23 @@ global map<string, list> Export()
     }
 
 
+    global void
+    AddDevice(map<string, any> d)
+    {
+	integer index = 0;
+	while (haskey(devices, index))
+	    index = index + 1;
+	devices[index] = d;
+    }
+
+
+    global void
+    RemoveDevice(integer index)
+    {
+	devices = remove(devices, index);
+    }
+
+
     global integer
     GetDeviceIndex(string channel)
     {
