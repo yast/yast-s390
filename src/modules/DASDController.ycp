@@ -279,7 +279,7 @@ global map<string, list> Export()
     GetDeviceIndex(string channel)
     {
 	integer ret = nil;
-	foreach(integer index , map<string, any> d, DASDController::devices, {
+	foreach(integer index , map<string, any> d, devices, {
 		if (d["channel"]:"0.0.0000" == channel)
 		    ret = index;
 	    });
