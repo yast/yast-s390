@@ -8,16 +8,9 @@
  *
  * Main file for controller configuration. Uses all other files.
  */
-
 {
-
-/***
- * <h3>Configuration of controller</h3>
- */
-
 textdomain "s390";
 
-/* The main () */
 y2milestone ("----------------------------------------");
 y2milestone ("S/390 Controller module started");
 
@@ -94,15 +87,11 @@ while (ret == nil)
 }
 
 UI::CloseDialog();
-return ret;
 
 y2debug("ret=%1", ret);
 
-/* Finish */
 y2milestone("S/390 controller module finished");
 y2milestone("----------------------------------------");
 
 return ret;
-
-/* EOF */
 }
