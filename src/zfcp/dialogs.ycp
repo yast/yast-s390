@@ -75,9 +75,6 @@ list<term> GetZFCPDiskItems()
  */
 void ReloadZFCPDialog()
 {
-    ZFCPController::filter_min = (string) UI::QueryWidget(`min_chan, `Value);
-    ZFCPController::filter_max = (string) UI::QueryWidget(`max_chan, `Value);
-
     ZFCPController::ProbeDisks();
 
     list<term> items = GetZFCPDiskItems();
@@ -106,7 +103,7 @@ void DisplayZFCPDialog()
 	// table header
 	`Right(_("ZFCP-LUN"))
     );
-    
+
     /* Dialog content */
     term content = `VBox(
 	`HBox(
@@ -160,8 +157,23 @@ symbol ZFCPDialog()
 
 	selected = (integer) UI::QueryWidget (`id (`table), `CurrentItem);
 
-	if (ret == `filter) {
-	    ReloadZFCPDialog ();
+	if (ret == `filter)
+	{
+	    string filter_min = (string) UI::QueryWidget(`min_chan, `Value);
+	    string filter_max = (string) UI::QueryWidget(`max_chan, `Value);
+
+	    if (!ZFCPController::ValidChannel(filter_min) || !ZFCPController::ValidChannel(filter_max))
+	    {
+		// error popup
+		Popup::Error(_("Invalid filter channels."));
+		ret = nil;
+		continue;
+	    }
+
+	    ZFCPController::filter_min = filter_min;
+	    ZFCPController::filter_max = filter_max;
+
+	    ReloadZFCPDialog();
 	    ret = nil;
 	    continue;
 	}
@@ -289,11 +301,13 @@ symbol AddZFCPDiskDialog()
     Wizard::RestoreBackButton ();
     Wizard::RestoreAbortButton ();
 
-    any ret = nil;
+    UI::ChangeWidget(`id(`channel), `ValidChars, "0123456789abcdefABCDEF.");
+    UI::ChangeWidget(`id(`wwpn), `ValidChars, "0123456789abcdefABCDEFx");
 
+    symbol ret = nil;
     while (ret == nil)
     {
-	ret = UI::UserInput();
+	ret = (symbol) UI::UserInput();
 
        if (ret == `get_wwpn){
         list<string> items = ZFCPController::GetWWPNs((string)UI::QueryWidget(`channel, `Value));
@@ -316,45 +330,59 @@ All changes will be lost.")))
 	}
 	else if (ret == `next)
 	{
-	    string wwpn = (string)UI::QueryWidget (`id (`wwpn), `Value);
-	    boolean ok = true;
-	    if (substring (wwpn, 0, 2) != "0x")
-		ok = false;
-	    wwpn = substring (wwpn, 2);
-	    if (size (wwpn) != 16)
-		ok = false;
-	    if (size (filterchars (wwpn, "1234567890abcdef")) != 16)
-		ok = false;
-	    if (! ok)
+	    string channel = (string) UI::QueryWidget(`id(`channel), `Value);
+	    string wwpn = (string) UI::QueryWidget(`id(`wwpn), `Value);
+	    string fcp_lun = (string) UI::QueryWidget(`id(`fcp_lun), `Value);
+
+	    if (!ZFCPController::ValidChannel(channel))
 	    {
-		// error report
-		Report::Error (_("The entered WWPN is invalid."));
-		UI::SetFocus (`wwpn);
+		// error popup
+		Popup::Error(_("Not a valid channel."));
+		UI::SetFocus(`channel);
 		ret = nil;
+		continue;
+	    }
+
+	    if (!ZFCPController::ValidWWPN(wwpn))
+	    {
+		// error popup
+		Report::Error(_("The entered WWPN is invalid."));
+		UI::SetFocus(`wwpn);
+		ret = nil;
+		continue;
+	    }
+
+	    if (!ZFCPController::ValidFCPLUN(fcp_lun))
+	    {
+		// error popup
+		Report::Error(_("The entered FCP-LUN is invalid."));
+		UI::SetFocus(`fcp_lun);
+		ret = nil;
+		continue;
 	    }
 	}
     }
 
     if (ret == `next)
     {
-	string channel = (string)UI::QueryWidget (`id (`channel), `Value);
-	string wwpn = (string)UI::QueryWidget (`id (`wwpn), `Value);
-	string lun = (string)UI::QueryWidget (`id (`fcp_lun), `Value);
+	string channel = (string) UI::QueryWidget(`id(`channel), `Value);
+	string wwpn = (string) UI::QueryWidget(`id(`wwpn), `Value);
+	string lun = (string) UI::QueryWidget(`id(`fcp_lun), `Value);
 	ZFCPController::previous_settings["wwpm"] = wwpn;
 	ZFCPController::previous_settings["fcp_lun"] = lun;
 	ZFCPController::previous_settings["channel"] = channel;
-	if (Mode::config ())
+
+	if (Mode::config())
 	{
 	    map<string,any> m = $[
 		"controller_id" : channel,
 		"wwpn" : wwpn,
 		"fcp_lun" : lun,
 	    ];
+
 	    m = $["detail" : m ];
-	    integer index = -1;
-	    while (haskey (ZFCPController::devices, index))
-		index = index + 1;
-	    ZFCPController::devices[index] = m;
+
+	    ZFCPController::AddDevice(m);
 	}
 	else
 	{
@@ -362,7 +390,7 @@ All changes will be lost.")))
 	}
     }
 
-    return (symbol) ret;
+    return ret;
 }
 
 }
