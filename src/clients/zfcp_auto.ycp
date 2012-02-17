@@ -10,17 +10,7 @@
  * goes through the configuration and return the setting.
  * Does not do any changes to the configuration.
  */
-
-/**
- * @param function to execute
- * @param map/list of controller settings
- * @return map edited settings, Summary or boolean on success depending on called function
- * @example map mm = $[ "FAIL_DELAY" : "77" ];
- * @example map ret = WFM::CallFunction ("controller_auto", [ "Summary", mm ]);
- */
-
 {
-
 textdomain "s390";
 
 y2milestone("----------------------------------------");
@@ -43,66 +33,92 @@ if(size(WFM::Args()) > 0 && is(WFM::Args(0), string)) {
 y2debug("func=%1", func);
 y2debug("param=%1", param);
 
-/* Create a summary*/
-if(func == "Summary") {
-    ret = HTML::List(ZFCPController::Summary());
-}
-/* Reset configuration */
-else if (func == "Reset") {
-    ZFCPController::Import($[]);
-    ret = $[];
-}
-/* Change configuration (run AutoSequence) */
-else if (func == "Change") {
-    ret = ZFCPAutoSequence();
-}
-/* Import configuration */
-else if (func == "Import") {
-    ret = ZFCPController::Import(param);
-}
-/* Return actual state */
-else if (func == "Export") {
-    ret = ZFCPController::Export();
-}
-/* did configuration change */
-else if (func == "GetModified") {
-    ret = ZFCPController::modified;
-}
-/* set configuration as changed */
-else if (func == "SetModified") {
-    ZFCPController::modified = true;
-    ret = true;
-}
-/* Return needed packages */
-else if (func == "Packages") {
-    ret = ZFCPController::AutoPackages();
-}
-/* Read current state */
-else if (func == "Read") {
-    import "Progress";
-    Progress::off();
-    ret = ZFCPController::Read();
-    Progress::on();
-}
-/* Write given settings */
-else if (func == "Write") {
-    import "Progress";
-    Progress::off();
-    ZFCPController::write_only = true;
-    ret = ZFCPController::Write();
-    Progress::on();
-}
-/* Unknown function */
-else {
-    y2error("Unknown function: %1", func);
-    ret = false;
-}
+    switch (func)
+    {
+	case "Summary": // Create a summary
+	{
+	    ret = HTML::List(ZFCPController::Summary());
+	    break;
+	}
+
+	case "Reset": // Reset configuration
+	{
+	    ZFCPController::Import($[]);
+	    ZFCPController::SetModified(true);
+	    ret = $[];
+	    break;
+	}
+
+	case "Change": // Change configuration
+	{
+	    ret = ZFCPAutoSequence();
+	    ZFCPController::SetModified(true);
+	    break;
+	}
+
+	case "Import": // Import configuration
+	{
+	    ret = ZFCPController::Import(param);
+	    ZFCPController::SetModified(true);
+	    break;
+	}
+
+	case "Export": // Return actual state
+	{
+	    ret = ZFCPController::Export();
+	    ZFCPController::SetModified(false);
+	    break;
+	}
+
+	case "GetModified": // Did configuration change
+	{
+	    ret = ZFCPController::GetModified();
+	    break;
+	}
+
+	case "SetModified": // Set configuration as changed
+	{
+	    ZFCPController::SetModified(true);
+	    ret = true;
+	    break;
+	}
+
+	case "Packages": // Return needed packages
+	{
+	    ret = ZFCPController::AutoPackages();
+	    break;
+	}
+
+	case "Read": // Read current state
+	{
+	    import "Progress";
+	    Progress::off();
+	    ret = ZFCPController::Read();
+	    Progress::on();
+	    ZFCPController::SetModified(true);
+	    break;
+	}
+
+	case "Write": // Write given settings
+	{
+	    import "Progress";
+	    Progress::off();
+	    ret = ZFCPController::Write();
+	    Progress::on();
+	    break;
+	}
+
+	default: // Unknown function
+	{
+	    y2error("Unknown function: %1", func);
+	    ret = false;
+	    break;
+	}
+    }
 
 y2debug("ret=%1", ret);
 y2milestone("ZFCP auto finished");
 y2milestone("----------------------------------------");
 
 return ret;
-
-/* EOF */
 }
