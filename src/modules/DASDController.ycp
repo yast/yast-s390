@@ -180,7 +180,7 @@ global boolean Write()
 	    string command = "/sbin/mkinitrd && /sbin/zipl";
 	    y2milestone("Running command %1", command);
 	    any ret = SCR::Execute(.target.bash, command);
-	    y2milestone ("Exit code: %1", ret);
+	    y2milestone("Exit code: %1", ret);
 
 	    UI::CloseDialog();
 	}
@@ -309,12 +309,11 @@ global map<string, list> Export()
 global list<string> Summary()
 {
     list<string> ret = maplist (integer index, map<string,any> d, devices, {
-	// summary text, %1 is channel ID (number),
-	// %2 and %3 are Yes or No
+	// summary text, %1 is channel (number), // %2 and %3 are Yes or No
 	return sformat(_("Channel: %1, Format: %2, DIAG: %3"), d["channel"]:"",
 		       String::YesNo(d["format"]:false), String::YesNo(d["diag"]:false));
     });
-    y2milestone ("Summary: %1", ret);
+    y2milestone("Summary: %1", ret);
     return ret;
 }
 
@@ -407,10 +406,10 @@ global void ProbeDisks()
 
 /**
  * Report error occured during device activation
- * @param id integer chanel id of the device
+ * @param channel string channel of the device
  * @param ret integer exit code of the operation
  */
-void ReportActivationError(any id, integer ret)
+void ReportActivationError(string channel, integer ret)
 {
     switch (ret)
     {
@@ -420,59 +419,59 @@ void ReportActivationError(any id, integer ret)
 	case 1:
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: sysfs not mounted."), id));
+		_("%1: sysfs not mounted."), channel));
 	    break;
 
 	case 2:
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: Invalid status for <online>."), id));
+		_("%1: Invalid status for <online>."), channel));
 	    break;
 
 	case 3:
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: No device found for <ccwid>."), id));
+		_("%1: No device found for <ccwid>."), channel));
 	    break;
 
 	case 4:
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: Could not change state of the device."), id));
+		_("%1: Could not change state of the device."), channel));
 	    break;
 
 	case 5:
 	    // https://bugzilla.novell.com/show_bug.cgi?id=446998#c15
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: Device is not a DASD."), id));
+		_("%1: Device is not a DASD."), channel));
 	    break;
 
 	case 6:
 	    // https://bugzilla.novell.com/show_bug.cgi?id=446998#c15
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: Could not load module."), id));
+		_("%1: Could not load module."), channel));
 	    break;
 
 	case 7:
 	    // http://bugzilla.novell.com/show_bug.cgi?id=561876#c8
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: Failed to activate DASD."), id));
+		_("%1: Failed to activate DASD."), channel));
 	    break;
 
 	case 8:
 	    // http://bugzilla.novell.com/show_bug.cgi?id=561876#c8
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: DASD is not formatted."), id));
+		_("%1: DASD is not formatted."), channel));
 	    break;
 
 	default:
 	    Report::Error (sformat (
 		// error report, %1 is device identification, %2 is integer code
-		_("%1: Unknown error %2."), id, ret));
+		_("%1: Unknown error %2."), channel, ret));
 	    break;
     }
 }

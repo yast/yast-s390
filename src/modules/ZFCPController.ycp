@@ -132,15 +132,17 @@ global boolean Read() {
 global boolean Write() {
     if (disk_configured && Mode::normal ())
     {
+	// popup label
+	UI::OpenDialog(`Label(_("Running mkinitrd and zipl.")));
+
 	string command = "/sbin/mkinitrd && /sbin/zipl";
 	y2milestone ("Running command %1", command);
-	any ret = SCR::Execute (.target.bash, command);
-	y2milestone ("Exit code: %1", ret);
+	any ret = SCR::Execute(.target.bash, command);
+	y2milestone("Exit code: %1", ret);
+
+	UI::CloseDialog();
     }
-    else
-    {
-	y2milestone ("No new disk configured");
-    }
+
     return true;
 
 }
@@ -248,18 +250,16 @@ ProbeDisks();
 global list<string> Summary()
 {
     list<string> ret = maplist (integer index, map<string,any> d, devices, {
-	// summary text, %1 is channel ID, %1 is WWPN, %3 is LUN
+	// summary text, %1 is channel, %1 is WWPN, %3 is LUN
 	// (all of them are numbers)
-	string s = sformat (_("Channel ID: %1, WWPN: %2, ZFCP LUN: %3"),
-	    d["detail","controller_id"]:"",
-	    d["detail","wwpn"]:"",
-	    d["detail","fcp_lun"]:""
-	);
-	return s;
+	return sformat(_("Channel: %1, WWPN: %2, ZFCP LUN: %3"),
+		       d["detail", "controller_id"]:"", d["detail", "wwpn"]:"",
+		       d["detail", "fcp_lun"]:"");
     });
-    y2milestone ("Summary: %1", ret);
+    y2milestone("Summary: %1", ret);
     return ret;
 }
+
 
 /**
  * Return packages needed to be installed and removed during
@@ -267,7 +267,8 @@ global list<string> Summary()
  * installed.
  * @return map with 2 lists.
  */
-global map AutoPackages() {
+global map AutoPackages()
+{
     return $[ "install":[], "remove":[] ];
 }
 
@@ -331,10 +332,10 @@ global void ProbeDisks()
 
 /**
  * Report error occured during device activation
- * @param id integer chanel id of the device
+ * @param channel string channel of the device
  * @param ret integer exit code of the operation
  */
-void ReportActivationError(any id, integer ret)
+void ReportActivationError(string channel, integer ret)
 {
     switch (ret)
     {
@@ -344,61 +345,61 @@ void ReportActivationError(any id, integer ret)
 	case 1:
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: sysfs not mounted."), id));
+		_("%1: sysfs not mounted."), channel));
 	    break;
 
 	case 2:
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: Invalid status for <online>."), id));
+		_("%1: Invalid status for <online>."), channel));
 	    break;
 
 	case 3:
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: No device found for <ccwid>."), id));
+		_("%1: No device found for <ccwid>."), channel));
 	    break;
 
 	case 4:
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: WWPN invalid."), id));
+		_("%1: WWPN invalid."), channel));
 	    break;
 
 	case 5:
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: Could not activate WWPN for adapter %1."), id));
+		_("%1: Could not activate WWPN for adapter %1."), channel));
 	    break;
 
 	case 6:
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: Could not activate ZFCP device."), id));
+		_("%1: Could not activate ZFCP device."), channel));
 	    break;
 
 	case 7:
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: SCSI disk could not be deactivated."), id));
+		_("%1: SCSI disk could not be deactivated."), channel));
 	    break;
 
 	case 8:
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: ZFCP LUN could not be unregistered."), id));
+		_("%1: ZFCP LUN could not be unregistered."), channel));
 	    break;
 
 	case 9:
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: ZFCP WWPN could not be unregistered."), id));
+		_("%1: ZFCP WWPN could not be unregistered."), channel));
 	    break;
 
 	default:
 	    Report::Error (sformat (
 		// error report, %1 is device identification, %2 is integer code
-		_("%1: Unknown error %2."), id, ret));
+		_("%1: Unknown error %2."), channel, ret));
 	    break;
     }
 }
@@ -406,10 +407,10 @@ void ReportActivationError(any id, integer ret)
 
 /**
  * Report error occured during device activation
- * @param id integer chanel id of the device
+ * @param channel string channel of the device
  * @param ret integer exit code of the operation
  */
-void ReportControllerActivationError(any id, integer ret)
+void ReportControllerActivationError(string channel, integer ret)
 {
     switch (ret)
     {
@@ -419,43 +420,43 @@ void ReportControllerActivationError(any id, integer ret)
 	case 1:
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: sysfs not mounted."), id));
+		_("%1: sysfs not mounted."), channel));
 	    break;
 
 	case 2:
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: Invalid status for <online>."), id));
+		_("%1: Invalid status for <online>."), channel));
 	    break;
 
 	case 3:
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: Device <ccwid> does not exist."), id));
+		_("%1: Device <ccwid> does not exist."), channel));
 	    break;
 
 	case 4:
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: Module zfcp could not be loaded."), id));
+		_("%1: Module zfcp could not be loaded."), channel));
 	    break;
 
 	case 5:
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: Adapter status could not be changed."), id));
+		_("%1: Adapter status could not be changed."), channel));
 	    break;
 
 	case 6:
 	    Report::Error (sformat (
 		// error report, %1 is device identification
-		_("%1: WWPN ports still active."), id));
+		_("%1: WWPN ports still active."), channel));
 	    break;
 
 	default:
 	    Report::Error (sformat (
 		// error report, %1 is device identification, %2 is integer code
-		_("%1: Unknown error %2."), id, ret));
+		_("%1: Unknown error %2."), channel, ret));
 	    break;
     }
 }
@@ -463,7 +464,7 @@ void ReportControllerActivationError(any id, integer ret)
 
 /**
  * Activate a disk
- * @param channel string channel id
+ * @param channel string channel
  * @param wwpn string wwpn (hexa number)
  * @param lun string lun   (hexa number)
  */
@@ -499,8 +500,8 @@ global void ActivateDisk(string channel, string wwpn, string lun)
 
 
 /**
- * Activate a disk
- * @param channel string channel id
+ * Deactivate a disk
+ * @param channel string channel
  * @param wwpn string wwpn (hexa number)
  * @param lun string lun   (hexa number)
  */
