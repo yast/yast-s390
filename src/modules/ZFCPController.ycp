@@ -471,16 +471,14 @@ global void ActivateDisk(string channel, string wwpn, string lun)
 {
     if (! activated_controllers[channel]:false)
     {
-	string command = sformat (
-	    "/sbin/zfcp_host_configure '%1' '%2'",
-	    channel,
-	    1
-	);
-	y2milestone ("Running command %1", command);
-	integer ret = (integer)SCR::Execute (.target.bash, command);
+	string command = sformat("/sbin/zfcp_host_configure '%1' %2", channel, 1);
+	y2milestone("Running command \"%1\"", command);
+	integer ret = (integer) SCR::Execute(.target.bash, command);
+	y2milestone("Command \"%1\" returned with exit code %2", command, ret);
+
 	if (ret != 0)
 	{
-	    ReportControllerActivationError (channel, ret);
+	    ReportControllerActivationError(channel, ret);
 	}
 	else
 	{
@@ -488,19 +486,17 @@ global void ActivateDisk(string channel, string wwpn, string lun)
 	}
     }
 
-    string command = sformat (
-	"/sbin/zfcp_disk_configure '%1' '%2' '%3' '%4'",
-	channel,
-	// bugzilla #205503
-	HexNumSize (wwpn, 16),
-	HexNumSize (lun,  16),
-	1
-    );
-    y2milestone ("Running command %1", command);
-    integer ret = (integer)SCR::Execute (.target.bash, command);
-    ReportActivationError (channel, ret);
+    string command = sformat("/sbin/zfcp_disk_configure '%1' '%2' '%3' %4", channel,
+			     HexNumSize(wwpn, 16), HexNumSize(lun, 16), 1);
+    y2milestone("Running command \"%1\"", command);
+    integer ret = (integer) SCR::Execute(.target.bash, command);
+    y2milestone("Command \"%1\" returned with exit code %2", command, ret);
+
+    ReportActivationError(channel, ret);
+
     disk_configured = true;
 }
+
 
 /**
  * Activate a disk
@@ -510,19 +506,17 @@ global void ActivateDisk(string channel, string wwpn, string lun)
  */
 global void DeactivateDisk(string channel, string wwpn, string lun)
 {
-    string command = sformat (
-	"/sbin/zfcp_disk_configure '%1' '%2' '%3' '%4'",
-	channel,
-	// bugzilla #205503
-	HexNumSize (wwpn, 16),
-	HexNumSize (lun,  16),
-	0
-    );
-    y2milestone ("Running command %1", command);
-    integer ret = (integer)SCR::Execute (.target.bash, command);
-    ReportActivationError (channel, ret);
+    string command = sformat("/sbin/zfcp_disk_configure '%1' '%2' '%3' %4", channel,
+			     HexNumSize(wwpn, 16), HexNumSize(lun, 16), 0);
+    y2milestone("Running command \"%1\"", command);
+    integer ret = (integer) SCR::Execute(.target.bash, command);
+    y2milestone("Command \"%1\" returned with exit code %2", command, ret);
+
+    ReportActivationError(channel, ret);
+
     disk_configured = true;
 }
+
 
  list<string> runCommand(string cmd){
   list<string> ret = [];

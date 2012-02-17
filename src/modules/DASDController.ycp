@@ -99,11 +99,10 @@ global boolean Available()
 
     string GetDeviceName(string channel)
     {
-	string cmd = sformat("ls '/sys/bus/ccw/devices/%1/block/' | tr -d '\n'", channel);
-	map<string, any> disk = (map<string, any>) SCR::Execute(.target.bash_output, cmd);
-	if (disk["exit"]:-1 == 0 && !isempty(disk["stdout"]:""))
-	    return sformat("/dev/%1", disk["stdout"]:"");
-
+	string dir = sformat("/sys/bus/ccw/devices/%1/block/", channel);
+	list<string> files = (list<string>) SCR::Read(.target.dir, dir);
+	if (size(files) == 1)
+	    return "/dev/" + files[0]:"";
 	return nil;
     }
 
@@ -480,20 +479,17 @@ void ReportActivationError(any id, integer ret)
 
 
 /**
- * Activate selected Disks
+ * Activate disk
  * @param channel string Name of the disk to activate
  * @param diag boolean Activate DIAG or not
  */
 global void ActivateDisk(string channel, boolean diag)
 {
-    string command = sformat (
-	"/sbin/dasd_configure '%1' '%2' '%3'",
-	channel,
-	1,
-	diag ? 1 : 0
-    );
-    integer ret = (integer)SCR::Execute (.target.bash, command);
-    y2milestone ("Running command %1 with exit code %2", command, ret);
+    string command = sformat("/sbin/dasd_configure '%1' %2 %3", channel, 1, diag ? 1 : 0);
+    y2milestone("Running command \"%1\"", command);
+    integer ret = (integer) SCR::Execute(.target.bash, command);
+    y2milestone("Command \"%1\" returned with exit code %2", command, ret);
+
     if (ret == 8)
     {
       string popup = sformat (_("Device %1 is not formatted. Format device now?
@@ -518,32 +514,33 @@ press 'Cancel' and select 'Perform Action', 'Format' later on.
                 DeactivateDisk(channel, diag);
                }
        else {
-        ReportActivationError (channel, ret);
+        ReportActivationError(channel, ret);
     }
+
     disk_configured = true;
 }
 
+
 /**
- * Activate selected Disks
+ * Deactivate disk
  * @param channel string Name of the disk to deactivate
  * @param diag boolean Activate DIAG or not
  */
 global void DeactivateDisk(string channel, boolean diag)
 {
-    string command = sformat (
-	"/sbin/dasd_configure '%1' '%2' '%3'",
-	channel,
-	0,
-	diag ? 1 : 0
-    );
-    y2milestone ("Running command %1", command);
-    integer ret = (integer)SCR::Execute (.target.bash, command);
-    ReportActivationError (channel, ret);
+    string command = sformat("/sbin/dasd_configure '%1' %2 %3", channel, 0, diag ? 1 : 0);
+    y2milestone("Running command \"%1\"", command);
+    integer ret = (integer) SCR::Execute(.target.bash, command);
+    y2milestone("Command \"%1\" returned with exit code %2", command, ret);
+
+    ReportActivationError(channel, ret);
+
     disk_configured = true;
 }
 
+
 /**
- * Activate selected Disks
+ * Format disks
  * @param disks_list list<string> List of disks to be formated
  * @param par integer Number of disks that can be formated in parallel
  * @param write_vl boolean Write a Volume label
