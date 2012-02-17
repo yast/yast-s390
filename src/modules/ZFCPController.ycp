@@ -34,6 +34,7 @@ map<string,boolean> activated_controllers = $[];
 
 global void ActivateDisk(string channel, string wwpn, string lun);
 global void ProbeDisks();
+global boolean GetModified();
 
 boolean disk_configured = false;
 
@@ -61,10 +62,6 @@ global string HexNumSize (string hex, integer digits) {
     return hex;
 }
 
-/**
- * Prototypes
- */
-global boolean Modified();
 
 /**
  * Data was modified?
@@ -75,17 +72,12 @@ global boolean modified = false;
  */
 global boolean proposal_valid = false;
 
-/**
- * Write only, used during autoinstallation.
- * Don't run services and SuSEconfig, it's all done at one place.
- */
-global boolean write_only = false;
 
 /**
  * Abort function
  * return boolean return true if abort
  */
-global boolean() AbortFunction = Modified;
+global boolean() AbortFunction = GetModified;
 
 
 /**
@@ -103,24 +95,53 @@ global boolean Abort()
  * Data was modified?
  * @return true if modified
  */
-global boolean Modified() {
-    y2debug("modified=%1",modified);
+global boolean GetModified()
+{
     return modified;
 }
+
+
+global void SetModified(boolean value)
+{
+    modified = value;
+}
+
 
 /**
  * Is this kind of disk controller available?
  * @return boolean true if it is
  */
-global boolean Available () {
+global boolean Available()
+{
     return true;
 }
+
+
+    global boolean ValidChannel(string channel)
+    {
+	string regexp = "^([0-9a-fA-F]{1}).([0-9a-fA-F]{1}).([0-9a-fA-F]{4})$";
+	return regexpmatch(channel, regexp);
+    }
+
+    global boolean ValidWWPN(string wwpn)
+    {
+	string regexp = "^0x([0-9a-fA-F]{16})$";
+	return regexpmatch(wwpn, regexp);
+    }
+
+    global boolean ValidFCPLUN(string fcp_lun)
+    {
+	string regexp = "^0x([0-9a-fA-F]{16})$";
+	return regexpmatch(fcp_lun, regexp);
+    }
+
 
 /**
  * Read all controller settings
  * @return true on success
  */
-global boolean Read() {
+global boolean Read()
+{
     disk_configured = false;
     return true;
 }
@@ -129,7 +150,8 @@ global boolean Read() {
  * Write all controller settings
  * @return true on success
  */
-global boolean Write() {
+global boolean Write()
+{
     if (disk_configured && Mode::normal ())
     {
 	// popup label
@@ -153,7 +175,8 @@ global boolean Write() {
  * @param settings The YCP structure to be imported.
  * @return boolean True on success
  */
-global boolean Import (map settings) {
+global boolean Import(map settings)
+{
     if (Mode::config ())
     {
 	integer index = -1;
@@ -183,7 +206,8 @@ global boolean Import (map settings) {
  * (For use by autoinstallation.)
  * @return map Dumped settings (later acceptable by Import ())
  */
-global map Export () {
+global map Export()
+{
 ProbeDisks();
     list<map<string,any> > l = maplist (integer k, map<string,any> v,
 	devices,
@@ -243,6 +267,35 @@ ProbeDisks();
     }
 
 
+    global void
+    AddDevice(map<string, any> d)
+    {
+	integer index = 0;
+	while (haskey(devices, index))
+	    index = index + 1;
+	devices[index] = d;
+    }
+
+
+    global void
+    RemoveDevice(integer index)
+    {
+	devices = remove(devices, index);
+    }
+
+
+    global integer
+    GetDeviceIndex(string channel)
+    {
+	integer ret = nil;
+	foreach(integer index , map<string, any> d, devices, {
+		if (d["channel"]:"0.0.0000" == channel)
+		    ret = index;
+	    });
+	return ret;
+    }
+
+
 /**
  * Create a textual summary and a list of unconfigured cards
  * @return summary of the current configuration
@@ -297,7 +350,7 @@ global list<map<string, any> > GetControllers()
  */
 global boolean IsAvailable()
 {
-    return size(GetControllers()) > 0;
+    return !isempty(GetControllers());
 }
 
 
