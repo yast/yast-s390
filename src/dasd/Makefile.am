@@ -1,4 +1,6 @@
-# Makefile.am for dasd/src
+#
+# Makefile.am for s390/src/dasd
+#
 
 yncludedir = @yncludedir@/s390/dasd
 

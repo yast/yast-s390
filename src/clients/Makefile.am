@@ -1,6 +1,6 @@
-# Makefile.am for zfcp/src
-
-yncludedir = @yncludedir@/s390/zfcp
+#
+# Makefile.am for s390/src/clients
+#
 
 client_DATA =			\
 	zfcp.ycp		\
@@ -26,7 +26,6 @@ desktop_DATA =			\
 	onpanic.desktop		\
 	iucvterminal.desktop	\
 	iucvterminal-server.desktop
-
 
 EXTRA_DIST = $(client_DATA) $(desktop_DATA)
 
