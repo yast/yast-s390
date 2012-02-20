@@ -23,7 +23,8 @@ symbol MainZFCPSequence()
 {
     map aliases = $[
 	"main"		: ``(ZFCPDialog()),
-	"add"		: ``(AddZFCPDiskDialog())
+	"add"		: ``(AddZFCPDiskDialog()),
+	"delete"	: ``(DeleteZFCPDiskDialog())
     ];
 
     map sequence = $[
@@ -31,12 +32,17 @@ symbol MainZFCPSequence()
 	"main" : $[
 	    `abort	: `abort,
 	    `next	: `next,
-	    `add	: "add",
+	    `add	: "add", 
+	    `delete	: "delete"
 	],
 	"add" : $[
 	    `abort	: `abort,
-	    `next	: "main",
+	    `next	: "main"
 	],
+	"delete" : $[
+	    `abort	: `abort,
+	    `next	: "main"
+	]
     ];
 
     return Sequencer::Run(aliases, sequence);

@@ -8,16 +8,9 @@
  *
  * Main file for controller configuration. Uses all other files.
  */
-
 {
-
-/***
- * <h3>Configuration of controller</h3>
- */
-
 textdomain "s390";
 
-/* The main () */
 y2milestone ("----------------------------------------");
 y2milestone ("ZFCP module started");
 
@@ -31,8 +24,8 @@ include "s390/zfcp/wizards.ycp";
 map cmdline_description = $[
     "id" 	: "ZFCP",
     // Command line help text for the Xcontroller module
-    "help"	: _("ZFCP configuration"),
-    "guihandler"        : ZFCPSequence, //ControllerSequence,
+    "help"	: _("Configuration of ZFCP"),
+    "guihandler"        : ZFCPSequence,
     "initialize"        : ZFCPController::Read,
     "finish"            : ZFCPController::Write,
     "actions"           : $[
@@ -46,20 +39,11 @@ map cmdline_description = $[
     ]
 ];
 
-
-/* main ui function */
-any ret = nil;
-
-//ret = CommandLine::Run(cmdline_description);
-//ret = ZFCPSequence ();
-ret = CommandLine::Run(cmdline_description);
+any ret = CommandLine::Run(cmdline_description);
 y2debug("ret=%1", ret);
 
-/* Finish */
 y2milestone("ZFCP module finished");
 y2milestone("----------------------------------------");
 
 return ret;
-
-/* EOF */
 }

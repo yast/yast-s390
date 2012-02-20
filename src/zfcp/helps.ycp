@@ -6,9 +6,7 @@
  *
  * $Id$
  */
-
 {
-
 textdomain "s390";
 
 /**
@@ -74,5 +72,4 @@ Otherwise there is a potential risk of data corruption.</p>"),
 
 ];
 
-/* EOF */
 }

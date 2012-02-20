@@ -121,5 +121,4 @@ y2milestone("DASD auto finished");
 y2milestone("----------------------------------------");
 
 return ret;
-
 }

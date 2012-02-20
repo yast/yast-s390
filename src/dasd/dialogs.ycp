@@ -38,9 +38,9 @@ include "s390/dasd/helps.ycp";
  * Read settings dialog
  * @return `abort if aborted and `next otherwise
  */
-symbol ReadDialog() {
+symbol ReadDialog()
+{
     Wizard::RestoreHelp(DASD_HELPS["read"]:"");
-    // Controller::AbortFunction = PollAbort;
     boolean ret = DASDController::Read();
     return ret ? `next : `abort;
 }
@@ -49,9 +49,9 @@ symbol ReadDialog() {
  * Write settings dialog
  * @return `abort if aborted and `next otherwise
  */
-symbol WriteDialog() {
+symbol WriteDialog()
+{
     Wizard::RestoreHelp(DASD_HELPS["write"]:"");
-    // Controller::AbortFunction = PollAbort;
     boolean ret = DASDController::Write();
     return ret ? `next : `abort;
 }
@@ -273,7 +273,7 @@ symbol DASDDialog()
 	    }
 
 	    foreach (integer id, selected, {
-		string channel = DASDController::devices[id,"channel"]:"";
+		string channel = DASDController::devices[id, "channel"]:"";
 		boolean diag = DASDController::diag[channel]:false;
 		DASDController::ActivateDisk(channel, diag);
 	    });
@@ -295,7 +295,7 @@ symbol DASDDialog()
 	    }
 
 	    foreach (integer id, selected, {
-		string channel = DASDController::devices[id,"channel"]:"";
+		string channel = DASDController::devices[id, "channel"]:"";
 		boolean diag = DASDController::diag[channel]:false;
 		DASDController::DeactivateDisk(channel, diag);
 	    });
@@ -461,12 +461,6 @@ Really format the following disks?<br>
  */
 symbol AddDASDDiskDialog()
 {
-    if (!Mode::config())
-    {
-	y2error("DASD Add Disk dialog shouldn't be run in Mode::config()");
-	return `back;
-    }
-
     /* Minimal text for the help */
     string help = DASD_HELPS["disk_add_config"]:"";
 
@@ -559,12 +553,6 @@ All changes will be lost.")))
  */
 symbol DeleteDASDDiskDialog()
 {
-    if (!Mode::config())
-    {
-	y2error("DASD Delete Disk dialog shouldn't be run in Mode::config()");
-	return `back;
-    }
-
     list<integer> selected = ListSelectedDASD();
     if (isempty(selected))
     {

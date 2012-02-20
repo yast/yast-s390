@@ -14,11 +14,9 @@ module "ZFCPController";
 textdomain "s390";
 
 import "Mode";
-import "Progress";
 import "Report";
-import "Stage";
-import "Summary";
 import "Popup";
+
 
 global map<integer,map<string,any> > devices = $[];
 
@@ -35,6 +33,7 @@ map<string,boolean> activated_controllers = $[];
 global void ActivateDisk(string channel, string wwpn, string lun);
 global void ProbeDisks();
 global boolean GetModified();
+
 
 boolean disk_configured = false;
 
@@ -136,15 +135,40 @@ global boolean Available()
     }
 
 
+    global string GetNextLUN(string fcp_lun)
+    {
+	if (fcp_lun == nil || fcp_lun == "")
+	    fcp_lun = "0";
+
+	integer old_lun = tointeger(fcp_lun);
+	integer new_lun = old_lun;
+
+	foreach (integer k, map<string, any> v, devices, {
+	    if (old_lun == tointeger(v["detail", "fcp_lun"]:""))
+	    {
+		if (v["vendor"]:"" == "IBM" && v["device"]:"" == "25f03")
+		    new_lun = old_lun + 0x100000000;
+		else
+		    new_lun = old_lun + 1;
+	    }
+	});
+
+	return tohexstring(new_lun, 16);
+    }
+
+
 /**
  * Read all controller settings
  * @return true on success
  */
 global boolean Read()
 {
+    ProbeDisks();
+
     disk_configured = false;
     return true;
 }
+
 
 /**
  * Write all controller settings
@@ -152,22 +176,35 @@ global boolean Read()
  */
 global boolean Write()
 {
-    if (disk_configured && Mode::normal ())
+    if (!Mode::normal())
     {
-	// popup label
-	UI::OpenDialog(`Label(_("Running mkinitrd and zipl.")));
+	foreach (integer index, map<string, any> device, devices, {
+		string channel = device["controller_id"]:"";
+		string wwpn = device["wwpn"]:"";
+		string lun = device["fcp_lun"]:"";
+		ActivateDisk(channel, wwpn, lun);
+	});
+    }
 
-	string command = "/sbin/mkinitrd && /sbin/zipl";
-	y2milestone ("Running command %1", command);
-	any ret = SCR::Execute(.target.bash, command);
-	y2milestone("Exit code: %1", ret);
+    if (!Mode::installation())
+    {
+	if (disk_configured)
+	{
+	    // popup label
+	    UI::OpenDialog(`Label(_("Running mkinitrd and zipl.")));
 
-	UI::CloseDialog();
+	    string command = "/sbin/mkinitrd && /sbin/zipl";
+	    y2milestone ("Running command %1", command);
+	    any ret = SCR::Execute(.target.bash, command);
+	    y2milestone("Exit code: %1", ret);
+
+	    UI::CloseDialog();
+	}
     }
 
     return true;
-
 }
+
 
 /**
  * Get all controller settings from the first parameter
@@ -177,12 +214,10 @@ global boolean Write()
  */
 global boolean Import(map settings)
 {
-    if (Mode::config ())
-    {
 	integer index = -1;
 	devices = listmap (map d, settings["devices"]:[], {
 	    index = index + 1;
-	    map<string,any> m = $[
+	    map<string, any> m = $[
 		"detail" : $[
 		    "controller_id" : d["controller_id"]:"",
 		    "wwpn" : d["wwpn"]:"",
@@ -191,15 +226,10 @@ global boolean Import(map settings)
 	    ];
 	    return $[ index : m ];
 	});
-    }
-    else if (Stage::initial ())
-    {
-	foreach (map d, settings["devices"]:[], {
-	    ActivateDisk (d["controller_id"]:"", d["wwpn"]:"", d["fcp_lun"]:"");
-	});
-    }
+
     return true;
 }
+
 
 /**
  * Dump the controller settings to a single map
@@ -208,19 +238,14 @@ global boolean Import(map settings)
  */
 global map Export()
 {
-ProbeDisks();
-    list<map<string,any> > l = maplist (integer k, map<string,any> v,
-	devices,
-    {
+    list<map<string, any> > l = maplist (integer k, map<string, any> v, devices, {
 	return $[
-	    "controller_id" : v["detail","controller_id"]:"",
-	    "wwpn" : v["detail","wwpn"]:"",
-	    "fcp_lun" : v["detail","fcp_lun"]:"",
-	];
-    });
-    return $[
-	"devices" : l,
-    ];
+	    "controller_id" : v["detail", "controller_id"]:"",
+	    "wwpn" : v["detail", "wwpn"]:"",
+	    "fcp_lun" : v["detail", "fcp_lun"]:"",
+	]; });
+
+    return $[ "devices" : l, ];
 }
 
 
@@ -359,9 +384,6 @@ global boolean IsAvailable()
  */
 global void ProbeDisks()
 {
-/*    if (Mode::config ())
-	return;*/
-
     // popup label
     UI::OpenDialog(`Label(_("Reading Configured ZFCP Devices")));
 
@@ -378,6 +400,8 @@ global void ProbeDisks()
 	index = index + 1;
 	return $[ index : d ];
     });
+
+    y2milestone("probed zfcps %1", devices);
 
     UI::CloseDialog();
 }

@@ -42,7 +42,7 @@ symbol MainDASDSequence()
 	"delete" : $[
 	    `abort	: `abort,
 	    `next	: "main"
-	],
+	]
     ];
 
     return Sequencer::Run(aliases, sequence);

@@ -20,13 +20,26 @@ import "ZFCPController";
 
 include "s390/zfcp/helps.ycp";
 
+
+    /**
+     * List ZFCP devices that are currently being selected
+     * @return list<integer> list of IDs of selected ZFCP devices
+     */
+    list<integer> ListSelectedZFCP()
+    {
+	list<integer> selected = (list<integer>) UI::QueryWidget(`id(`table), `SelectedItems);
+	y2milestone("selected %1", selected);
+	return selected;
+    }
+
+
 /**
  * Read settings dialog
  * @return `abort if aborted and `next otherwise
  */
-symbol ReadDialog() {
+symbol ReadDialog()
+{
     Wizard::RestoreHelp(ZFCP_HELPS["read"]:"");
-    // Controller::AbortFunction = PollAbort;
     boolean ret = ZFCPController::Read();
     return ret ? `next : `abort;
 }
@@ -35,9 +48,9 @@ symbol ReadDialog() {
  * Write settings dialog
  * @return `abort if aborted and `next otherwise
  */
-symbol WriteDialog() {
+symbol WriteDialog()
+{
     Wizard::RestoreHelp(ZFCP_HELPS["write"]:"");
-    // Controller::AbortFunction = PollAbort;
     boolean ret = ZFCPController::Write();
     return ret ? `next : `abort;
 }
@@ -69,20 +82,6 @@ list<term> GetZFCPDiskItems()
     return items;
 }
 
-
-/**
- * Restart the ZFCP-Dialog
- */
-void ReloadZFCPDialog()
-{
-    ZFCPController::ProbeDisks();
-
-    list<term> items = GetZFCPDiskItems();
-
-    UI::ChangeWidget(`id(`table), `Items, items);
-    UI::ChangeWidget(`id(`delete), `Enabled, !isempty(items));
-    UI::SetFocus(`table);
-}
 
 /**
  * Show the ZFCP-Dialog
@@ -118,7 +117,7 @@ void DisplayZFCPDialog()
 	    )
 	),
 	`HBox(
-	    `Table(`id(`table), `opt(`notify), header, [])
+	    `Table(`id(`table), `opt(`multiSelection), header, [])
 	),
 	`HBox(
 	    `PushButton(`id(`add), Label::AddButton ()),
@@ -127,14 +126,26 @@ void DisplayZFCPDialog()
 	)
     );
 
-    y2debug("Content: %1\n", content);
-        /* Apply the settings */
     Wizard::SetContentsButtons(caption, content, help, Label::BackButton(), Label::NextButton());
     Wizard::HideBackButton();
     Wizard::SetAbortButton(`abort, Label::CancelButton() );
 
     UI::ChangeWidget(`id(`min_chan), `ValidChars, "0123456789abcdefABCDEF.");
     UI::ChangeWidget(`id(`max_chan), `ValidChars, "0123456789abcdefABCDEF.");
+}
+
+
+/**
+ * Restart the ZFCP-Dialog
+ */
+void ReloadZFCPDialog()
+{
+    list<term> items = GetZFCPDiskItems();
+
+    list<integer> selected = (list<integer>) UI::QueryWidget(`id(`table), `SelectedItems);
+    UI::ChangeWidget(`id(`table), `Items, items);
+    UI::ChangeWidget(`id(`table), `SelectedItems, selected);
+    UI::SetFocus(`table);
 }
 
 
@@ -147,15 +158,10 @@ symbol ZFCPDialog()
     DisplayZFCPDialog ();
     ReloadZFCPDialog ();
 
-    any ret = nil;
-
-    integer selected = 0;
-
+    symbol ret = nil;
     while (ret == nil)
     {
-	ret = UI::UserInput();
-
-	selected = (integer) UI::QueryWidget (`id (`table), `CurrentItem);
+	ret = (symbol) UI::UserInput();
 
 	if (ret == `filter)
 	{
@@ -177,6 +183,11 @@ symbol ZFCPDialog()
 	    ret = nil;
 	    continue;
 	}
+	else if (ret == `table)
+	{
+	    ret = nil;
+	    continue;
+	}
 	else if (ret == `abort || ret == `cancel)
 	{
 	    // yes-no popup
@@ -185,45 +196,13 @@ All changes will be lost.")))
 	    {
 		ret = nil;
 	    }
+	    continue;
 	}
-	else if (ret == `delete)
-	{
-	    map<string,any> descr = ZFCPController::devices[selected]:$[];
-	    string dev_name = (string)(descr["dev_name"]:"");
-	    string channel = descr["detail", "controller_id"]:"unknown";
-	    string wwpn = descr["detail", "wwpn"]:"unknown";
-	    string fcp_lun = descr["detail", "fcp_lun"]:"unknown";
+    }
 
-	    // popup qestion, %1 is device name (eg. /dev/sda)
-	    if (! Popup::YesNo (sformat (_("Remove device %1?"), dev_name)))
-	    {
-		ret = nil;
-		continue;
-	    }
-	    if (Mode::config ())
-	    {
-		ZFCPController::devices
-		    = remove (ZFCPController::devices, selected);
-	    }
-	    else
-	    {
-		ZFCPController::DeactivateDisk (channel, wwpn, fcp_lun);
-	    }
-	    ReloadZFCPDialog ();
-	    ret = nil;
-	}
-    }
-    if (ret == `add)
-    {
-	map<string,any> descr = ZFCPController::devices[selected]:$[];
-	string dev_name = (string)(descr["dev_name"]:"");
-	string channel = descr["controller_id"]:"unknown";
-	string wwpn = descr["detail", "wwpn"]:"unknown";
-	if (wwpn != "unknown")
-	    ZFCPController::previous_settings["wwpn"] = wwpn;
-    }
-    return (symbol) ret;
+    return ret;
 }
+
 
 /**
  * Add ZFCP-Dialog
@@ -238,25 +217,9 @@ symbol AddZFCPDiskDialog()
     string caption = _("Add New ZFCP Device");
 
     string fcp_lun = ZFCPController::previous_settings["fcp_lun"]:"";
-    if (fcp_lun == nil || fcp_lun == "")
-	fcp_lun = "0";
-    integer i_lun = tointeger (fcp_lun);
-    integer new_lun = i_lun;
+    fcp_lun = ZFCPController::GetNextLUN(fcp_lun);
 
-    foreach (integer k, map<string,any> v, ZFCPController::devices, {
-	if (i_lun == tointeger (v["detail", "fcp_lun"]:""))
-	{
-	    if (v["vendor"]:"" == "IBM" && v["device"]:"" == "25f03")
-		new_lun = i_lun + tointeger ("0x100000000");
-	    else
-		new_lun = i_lun + 1;
-	}
-    });
-    fcp_lun = tohexstring (new_lun);
-    if (fcp_lun != "")
-	fcp_lun = ZFCPController::HexNumSize (fcp_lun, 16);
-
-    list<string>items = [];
+    list<string> items = [];
     if (Mode::config ())
     {
 	items = maplist (integer index, map<string, any> d, ZFCPController::devices, {
@@ -368,9 +331,10 @@ All changes will be lost.")))
 	string channel = (string) UI::QueryWidget(`id(`channel), `Value);
 	string wwpn = (string) UI::QueryWidget(`id(`wwpn), `Value);
 	string lun = (string) UI::QueryWidget(`id(`fcp_lun), `Value);
-	ZFCPController::previous_settings["wwpm"] = wwpn;
-	ZFCPController::previous_settings["fcp_lun"] = lun;
+
 	ZFCPController::previous_settings["channel"] = channel;
+	ZFCPController::previous_settings["wwpn"] = wwpn;
+	ZFCPController::previous_settings["fcp_lun"] = lun;
 
 	if (Mode::config())
 	{
@@ -391,6 +355,42 @@ All changes will be lost.")))
     }
 
     return ret;
+}
+
+
+/**
+ * Run the dialog for deleting ZFCPs
+ * @return symbol from DeleteZFCPDiskDialog
+ */
+symbol DeleteZFCPDiskDialog()
+{
+    list<integer> selected = ListSelectedZFCP();
+    if (isempty(selected))
+    {
+	// error popup message
+	Popup::Message (_("No disk selected."));
+    }
+    else
+    {
+	if (Mode::config())
+	{
+	    foreach(integer index, selected, { ZFCPController::RemoveDevice(index); });
+	}
+	else
+	{
+	    foreach(integer index, selected, {
+		    map d = ZFCPController::devices[index]:$[];
+		    string channel = d["detail", "controller_id"]:"unknown";
+		    string wwpn = d["detail", "wwpn"]:"unknown";
+		    string fcp_lun = d["detail", "fcp_lun"]:"unknown";
+		    ZFCPController::DeactivateDisk(channel, wwpn, fcp_lun);
+		});
+	    
+	    ZFCPController::ProbeDisks();
+	}
+    }
+    
+    return `next;
 }
 
 }
