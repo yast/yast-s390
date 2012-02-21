@@ -410,7 +410,7 @@ global void ProbeDisks()
 	return $[ index : d ];
     });
 
-    y2milestone("probed dasds %1", devices);
+    y2milestone("probed DASD devices %1", devices);
 
     UI::CloseDialog ();
 }

@@ -366,7 +366,8 @@ global list<map<string, any> > GetControllers()
 	controllers = filter (map<string,any> c, controllers, {
 	    return c["device"]:"" == "zFCP controller";
 	});
-	y2milestone ("Found %1 zfcp controllers", size (controllers));
+
+	y2milestone ("probed ZFCP controllers %1", controllers);
     }
     return controllers;
 }
@@ -404,7 +405,7 @@ global void ProbeDisks()
 	return $[ index : d ];
     });
 
-    y2milestone("probed zfcps %1", devices);
+    y2milestone("probed ZFCP devices %1", devices);
 
     UI::CloseDialog();
 }
