@@ -6,9 +6,7 @@
  *
  * Proposal function dispatcher for zfcp configuration.
  */
-
 {
-
     textdomain "s390";
 
     import "ZFCPController";
@@ -22,7 +20,7 @@
     if ( func == "MakeProposal" )
     {
 	list summary = ZFCPController::Summary();
-	if (size (summary) == 0)
+	if (isempty(summary))
 	    // text for installation summary
 	    summary = [ _("No zFCP device configured") ];
 	// Fill return map
@@ -37,7 +35,7 @@
     {
 	Wizard::CreateDialog ();
 	any sequence = WFM::CallFunction ("inst_zfcp", []);
-	UI::CloseDialog ();
+	Wizard::CloseDialog ();
 	// Fill return map
 	ret =
 	    $[ "workflow_sequence" : sequence
@@ -63,7 +61,4 @@
     }
 
     return ret;
-
-/* EOF */
 }
-

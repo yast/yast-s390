@@ -8,33 +8,19 @@
  *
  * Main file for controller configuration. Uses all other files.
  */
-
 {
-
-/***
- * <h3>Configuration of controller</h3>
- */
-
 textdomain "s390";
 
-/* The main () */
 y2milestone ("----------------------------------------");
 y2milestone ("DASD installation module started");
 
 include "s390/dasd/wizards.ycp";
 
-/* main ui function */
-any ret = nil;
-
-//ret = CommandLine::Run(cmdline_description);
-ret = MainDASDSequence ();
+any ret = MainDASDSequence();
 y2debug("ret=%1", ret);
 
-/* Finish */
 y2milestone("DASD installation module finished");
 y2milestone("----------------------------------------");
 
 return ret;
-
-/* EOF */
 }

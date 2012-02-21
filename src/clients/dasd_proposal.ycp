@@ -6,9 +6,7 @@
  *
  * Proposal function dispatcher for dasd configuration.
  */
-
 {
-
     textdomain "s390";
 
     import "DASDController";
@@ -22,7 +20,7 @@
     if ( func == "MakeProposal" )
     {
 	list summary = DASDController::Summary();
-	if (size (summary) == 0)
+	if (isempty(summary))
 	    // text for installation summary
 	    summary = [ _("No DASD disk detected") ];
 	// Fill return map
@@ -37,7 +35,7 @@
     {
 	Wizard::CreateDialog ();
 	any sequence = WFM::CallFunction ("inst_dasd", []);
-	UI::CloseDialog ();
+	Wizard::CloseDialog ();
 	// Fill return map
 	ret =
 	    $[ "workflow_sequence" : sequence
@@ -63,7 +61,4 @@
     }
 
     return ret;
-
-/* EOF */
 }
-
