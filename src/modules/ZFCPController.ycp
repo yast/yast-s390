@@ -16,6 +16,7 @@ textdomain "s390";
 import "Mode";
 import "Report";
 import "Popup";
+    import "String";
 
 
 global map<integer,map<string,any> > devices = $[];
@@ -116,22 +117,48 @@ global boolean Available()
 }
 
 
-    global boolean ValidChannel(string channel)
+    global boolean IsValidChannel(string channel)
     {
-	string regexp = "^([0-9a-fA-F]{1}).([0-9a-fA-F]{1}).([0-9a-fA-F]{4})$";
+	string regexp = "^([0-9a-fA-F]{1}).([0-9a-fA-F]{1}).([0-9a-fA-F]{1,4})$";
 	return regexpmatch(channel, regexp);
     }
 
-    global boolean ValidWWPN(string wwpn)
+    global string FormatChannel(string channel)
     {
-	string regexp = "^0x([0-9a-fA-F]{16})$";
+	if (!IsValidChannel(channel))
+	    return channel;
+
+	list<string> strs = splitstring(channel, ".");
+	strs[2] = String::PadZeros(strs[2]:"", 4);
+	return mergestring(strs, ".");
+    }
+
+    global boolean IsValidWWPN(string wwpn)
+    {
+	string regexp = "^0x([0-9a-fA-F]{1,16})$";
 	return regexpmatch(wwpn, regexp);
     }
 
-    global boolean ValidFCPLUN(string fcp_lun)
+    global string FormatWWPN(string wwpn)
     {
-	string regexp = "^0x([0-9a-fA-F]{16})$";
+	if (!IsValidWWPN(wwpn))
+	    return wwpn;
+
+	return tohexstring(tointeger(wwpn), 16);
+    }
+
+    global boolean IsValidFCPLUN(string fcp_lun)
+    {
+	string regexp = "^0x([0-9a-fA-F]{1,16})$";
 	return regexpmatch(fcp_lun, regexp);
+    }
+
+    global string FormatFCPLUN(string fcp_lun)
+    {
+	if (!IsValidFCPLUN(fcp_lun))
+	    return fcp_lun;
+
+	return tohexstring(tointeger(fcp_lun), 16);
     }
 
 
@@ -219,9 +246,9 @@ global boolean Import(map settings)
 	    index = index + 1;
 	    map<string, any> m = $[
 		"detail" : $[
-		    "controller_id" : d["controller_id"]:"",
-		    "wwpn" : d["wwpn"]:"",
-		    "fcp_lun" : d["fcp_lun"]:"",
+		    "controller_id" : FormatChannel(d["controller_id"]:""),
+		    "wwpn" : FormatWWPN(d["wwpn"]:""),
+		    "fcp_lun" : FormatFCPLUN(d["fcp_lun"]:""),
 		],
 	    ];
 	    return $[ index : m ];

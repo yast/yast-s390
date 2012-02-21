@@ -185,10 +185,8 @@ void DisplayDASDDialog()
 	`Table(`id(`table), `opt(`multiSelection), header, []),
 	Mode::config ()
 	    ? `HBox (
-		// push button
-		`PushButton (`id (`add), _("A&dd New Disk")),
-		// push button
-		`PushButton (`id (`delete), _("De&lete Disk")),
+		`PushButton(`id(`add), Label::AddButton()),
+		`PushButton(`id(`delete), Label::DeleteButton()),
 		`HStretch ()
 	    )
 	    : `HBox (
@@ -241,7 +239,7 @@ symbol DASDDialog()
 	    string filter_min = (string) UI::QueryWidget(`min_chan, `Value);
 	    string filter_max = (string) UI::QueryWidget(`max_chan, `Value);
 
-	    if (!DASDController::ValidChannel(filter_min) || !DASDController::ValidChannel(filter_max))
+	    if (!DASDController::IsValidChannel(filter_min) || !DASDController::IsValidChannel(filter_max))
 	    {
 		// error popup
 		Popup::Error(_("Invalid filter channels."));
@@ -249,8 +247,8 @@ symbol DASDDialog()
 		continue;
 	    }
 
-	    DASDController::filter_min = filter_min;
-	    DASDController::filter_max = filter_max;
+	    DASDController::filter_min = DASDController::FormatChannel(filter_min);
+	    DASDController::filter_max = DASDController::FormatChannel(filter_max);
 
 	    ReloadDASDDialog ();
 	    ret = nil;
@@ -508,7 +506,7 @@ All changes will be lost.")))
 	{
 	    string channel = (string) UI::QueryWidget(`id(`channel), `Value);
 
-	    if (!DASDController::ValidChannel(channel))
+	    if (!DASDController::IsValidChannel(channel))
 	    {
 		// error popup
 		Popup::Error(_("Not a valid channel."));
@@ -516,6 +514,8 @@ All changes will be lost.")))
 		ret = nil;
 		continue;
 	    }
+
+	    channel = DASDController::FormatChannel(channel);
 
 	    if (DASDController::GetDeviceIndex(channel) != nil)
 	    {
@@ -533,6 +533,8 @@ All changes will be lost.")))
 	string channel = (string) UI::QueryWidget(`id(`channel), `Value);
 	boolean format = (boolean) UI::QueryWidget(`id(`format), `Value);
 	boolean diag = (boolean) UI::QueryWidget(`id(`diag), `Value);
+
+	channel = DASDController::FormatChannel(channel);
 
 	map<string, any> d = $[
 	    "channel" : channel,

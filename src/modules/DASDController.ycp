@@ -107,10 +107,20 @@ global boolean Available()
     }
 
 
-    global boolean ValidChannel(string channel)
+    global boolean IsValidChannel(string channel)
     {
-	string regexp = "^([0-9a-fA-F]{1}).([0-9a-fA-F]{1}).([0-9a-fA-F]{4})$";
+	string regexp = "^([0-9a-fA-F]{1}).([0-9a-fA-F]{1}).([0-9a-fA-F]{1,4})$";
 	return regexpmatch(channel, regexp);
+    }
+ 
+    global string FormatChannel(string channel)
+    {
+	if (!IsValidChannel(channel))
+	    return channel;
+
+	list<string> strs = splitstring(channel, ".");
+	strs[2] = String::PadZeros(strs[2]:"", 4);
+	return mergestring(strs, ".");
     }
 
 
@@ -201,6 +211,8 @@ global boolean Import(map settings)
 	integer index = -1;
 	devices = listmap (map<string, any> d, settings["devices"]:[], {
 	    index = index + 1;
+
+	    d["channel"] = FormatChannel(d["channel"]:"");
 
 	    d = filter(string k, any v, d, {
 		return contains([ "channel", "format", "diag" ], k);

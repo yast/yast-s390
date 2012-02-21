@@ -168,7 +168,7 @@ symbol ZFCPDialog()
 	    string filter_min = (string) UI::QueryWidget(`min_chan, `Value);
 	    string filter_max = (string) UI::QueryWidget(`max_chan, `Value);
 
-	    if (!ZFCPController::ValidChannel(filter_min) || !ZFCPController::ValidChannel(filter_max))
+	    if (!ZFCPController::IsValidChannel(filter_min) || !ZFCPController::IsValidChannel(filter_max))
 	    {
 		// error popup
 		Popup::Error(_("Invalid filter channels."));
@@ -176,8 +176,8 @@ symbol ZFCPDialog()
 		continue;
 	    }
 
-	    ZFCPController::filter_min = filter_min;
-	    ZFCPController::filter_max = filter_max;
+	    ZFCPController::filter_min = ZFCPController::FormatChannel(filter_min);
+	    ZFCPController::filter_max = ZFCPController::FormatChannel(filter_max);
 
 	    ReloadZFCPDialog();
 	    ret = nil;
@@ -297,7 +297,7 @@ All changes will be lost.")))
 	    string wwpn = (string) UI::QueryWidget(`id(`wwpn), `Value);
 	    string fcp_lun = (string) UI::QueryWidget(`id(`fcp_lun), `Value);
 
-	    if (!ZFCPController::ValidChannel(channel))
+	    if (!ZFCPController::IsValidChannel(channel))
 	    {
 		// error popup
 		Popup::Error(_("Not a valid channel."));
@@ -306,7 +306,7 @@ All changes will be lost.")))
 		continue;
 	    }
 
-	    if (!ZFCPController::ValidWWPN(wwpn))
+	    if (!ZFCPController::IsValidWWPN(wwpn))
 	    {
 		// error popup
 		Report::Error(_("The entered WWPN is invalid."));
@@ -315,7 +315,7 @@ All changes will be lost.")))
 		continue;
 	    }
 
-	    if (!ZFCPController::ValidFCPLUN(fcp_lun))
+	    if (!ZFCPController::IsValidFCPLUN(fcp_lun))
 	    {
 		// error popup
 		Report::Error(_("The entered FCP-LUN is invalid."));
@@ -331,6 +331,10 @@ All changes will be lost.")))
 	string channel = (string) UI::QueryWidget(`id(`channel), `Value);
 	string wwpn = (string) UI::QueryWidget(`id(`wwpn), `Value);
 	string lun = (string) UI::QueryWidget(`id(`fcp_lun), `Value);
+
+	channel = ZFCPController::FormatChannel(channel);
+	wwpn = ZFCPController::FormatWWPN(wwpn);
+	lun = ZFCPController::FormatFCPLUN(lun);
 
 	ZFCPController::previous_settings["channel"] = channel;
 	ZFCPController::previous_settings["wwpn"] = wwpn;
