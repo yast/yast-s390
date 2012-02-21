@@ -45,6 +45,7 @@ symbol ReadDialog()
     return ret ? `next : `abort;
 }
 
+
 /**
  * Write settings dialog
  * @return `abort if aborted and `next otherwise
@@ -55,6 +56,7 @@ symbol WriteDialog()
     boolean ret = DASDController::Write();
     return ret ? `next : `abort;
 }
+
 
 /**
  * Get the list of items for the table of DASD devices
@@ -111,6 +113,7 @@ list<term> GetDASDDiskItems()
 
     return items;
 }
+
 
 /**
  * Draw the DASD dialog

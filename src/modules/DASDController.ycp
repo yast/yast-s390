@@ -253,14 +253,14 @@ global map<string, list> Export()
     GetFilteredDevices()
     {
 	list<string> min_strs = splitstring(filter_min, ".");
-	integer min_css = tointeger("0x" + min_strs[0]:"0");
-	integer min_lcss = tointeger("0x" + min_strs[1]:"0");
-	integer min_chan = tointeger("0x" + min_strs[2]:"0");
+	integer min_css = tointeger("0x" + min_strs[0]:"");
+	integer min_lcss = tointeger("0x" + min_strs[1]:"");
+	integer min_chan = tointeger("0x" + min_strs[2]:"");
 
 	list<string> max_strs = splitstring(filter_max, ".");
-	integer max_css = tointeger("0x" + max_strs[0]:"0");
-	integer max_lcss = tointeger("0x" + max_strs[1]:"0");
-	integer max_chan = tointeger("0x" + max_strs[2]:"0");
+	integer max_css = tointeger("0x" + max_strs[0]:"");
+	integer max_lcss = tointeger("0x" + max_strs[1]:"");
+	integer max_chan = tointeger("0x" + max_strs[2]:"");
 
 	map<integer, map<string, any> > ret = GetDevices();
 
@@ -271,10 +271,10 @@ global map<string, list> Export()
 			max_css, max_lcss, max_chan);
 
 	    ret = filter(integer k, map<string, any> d, ret, {
-		list<string> tmp_strs = splitstring(d["channel"]:"0.0.0000", ".");
-		integer tmp_css = tointeger("0x" + tmp_strs[0]:"0");
-		integer tmp_lcss = tointeger("0x" + tmp_strs[1]:"0");
-		integer tmp_chan = tointeger("0x" + tmp_strs[2]:"0");
+		list<string> tmp_strs = splitstring(d["channel"]:"", ".");
+		integer tmp_css = tointeger("0x" + tmp_strs[0]:"");
+		integer tmp_lcss = tointeger("0x" + tmp_strs[1]:"");
+		integer tmp_chan = tointeger("0x" + tmp_strs[2]:"");
 
 		return tmp_css >= min_css && tmp_lcss >= min_lcss && tmp_chan >= min_chan &&
 		    tmp_css <= max_css && tmp_lcss <= max_lcss && tmp_chan <= max_chan;
@@ -307,7 +307,7 @@ global map<string, list> Export()
     {
 	integer ret = nil;
 	foreach(integer index , map<string, any> d, devices, {
-		if (d["channel"]:"0.0.0000" == channel)
+		if (d["channel"]:"" == channel)
 		    ret = index;
 	    });
 	return ret;
@@ -370,7 +370,7 @@ global void ProbeDisks()
     disks = filter (map<string, any> d, disks, { return tolower(d["device"]:"") == "dasd"; });
 
     disks = maplist (map<string,any> d, disks, {
-	string channel = d["sysfs_bus_id"]:"0.0.0000";
+	string channel = d["sysfs_bus_id"]:"";
 	d["channel"] = channel;
 
 	boolean active = d["resource", "io", 0, "active"]:false;
