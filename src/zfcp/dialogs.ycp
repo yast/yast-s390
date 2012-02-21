@@ -261,6 +261,7 @@ symbol AddZFCPDiskDialog()
 
     UI::ChangeWidget(`id(`channel), `ValidChars, "0123456789abcdefABCDEF.");
     UI::ChangeWidget(`id(`wwpn), `ValidChars, "0123456789abcdefABCDEFx");
+    UI::ChangeWidget(`id(`fcp_lun), `ValidChars, "0123456789abcdefABCDEFx");
 
     symbol ret = nil;
     while (ret == nil)
