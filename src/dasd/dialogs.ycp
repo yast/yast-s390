@@ -89,7 +89,7 @@ list<term> GetDASDDiskItems()
 	string device = d["dev_name"]:"";
 	string type = toupper(sformat("%1/%2, %3/%4",
 	    substring(tohexstring(d["device_id"]:0 & 0xffff, 4), 2),
-	    substring(tohexstring(d["detail", "cu_model"]:0, 4), 4), 
+	    substring(tohexstring(d["detail", "cu_model"]:0, 4), 4),
 	    substring(tohexstring(d["sub_device_id"]:0 & 0xffff, 4), 2),
 	    substring(tohexstring(d["detail", "dev_model"]:0, 4), 4)
 	));
@@ -490,6 +490,8 @@ symbol AddDASDDiskDialog()
     Wizard::RestoreAbortButton ();
 
     UI::ChangeWidget(`id(`channel), `ValidChars, "0123456789abcdefABCDEF.");
+
+    UI::SetFocus(`id(`channel));
 
     symbol ret = nil;
     while (ret == nil)
