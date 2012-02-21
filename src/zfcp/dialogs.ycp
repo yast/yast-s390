@@ -112,9 +112,7 @@ void DisplayZFCPDialog()
 		`PushButton (`id (`filter), _("&Filter"))
 	    )
 	),
-	`HBox(
-	    `Table(`id(`table), `opt(`multiSelection), header, [])
-	),
+	`Table(`id(`table), `opt(`multiSelection), header, []),
 	`HBox(
 	    `PushButton(`id(`add), Label::AddButton ()),
 	    `PushButton(`id(`delete), Label::DeleteButton ()),
