@@ -69,12 +69,25 @@ list<term> GetZFCPDiskItems()
 
     list<term> items = [];
 
-    items = maplist(integer k, map<string, any> d, devices, {
-	string channel = d["detail", "controller_id"]:"";
-	string wwpn = d["detail", "wwpn"]:"";
-	string fcp_lun = d["detail", "fcp_lun"]:"";
-	return `item(`id(k), channel, wwpn, fcp_lun);
-    });
+    if (Mode::config())
+    {
+	items = maplist(integer k, map<string, any> d, devices, {
+		string channel = d["detail", "controller_id"]:"";
+		string wwpn = d["detail", "wwpn"]:"";
+		string fcp_lun = d["detail", "fcp_lun"]:"";
+		return `item(`id(k), channel, wwpn, fcp_lun);
+	    });
+    }
+    else
+    {
+	items = maplist(integer k, map<string, any> d, devices, {
+		string channel = d["detail", "controller_id"]:"";
+		string wwpn = d["detail", "wwpn"]:"";
+		string fcp_lun = d["detail", "fcp_lun"]:"";
+		string dev_name = d["dev_name"]:"";
+		return `item(`id(k), channel, wwpn, fcp_lun, dev_name);
+	    });
+    }
 
     return items;
 }
@@ -91,14 +104,32 @@ void DisplayZFCPDialog()
     /* Dialog caption */
     string caption = _("Configured ZFCP Devices");
 
-    term header = `header(
-	// table header
-	`Right(_("Channel Number")),
-	// table header
-	`Right(_("WWPN")),
-	// table header
-	`Right(_("ZFCP-LUN"))
-    );
+    term header = `Empty();
+
+    if (Mode::config())
+    {
+	header = `header(
+	    // table header
+	    `Right(_("Channel Number")),
+	    // table header
+	    `Right(_("WWPN")),
+	    // table header
+	    `Right(_("ZFCP-LUN"))
+	    );
+    }
+    else
+    {
+	header = `header(
+	    // table header
+	    `Right(_("Channel Number")),
+	    // table header
+	    `Right(_("WWPN")),
+	    // table header
+	    `Right(_("ZFCP-LUN")),
+	    // table header
+	    _("Device")
+	    );
+    }
 
     /* Dialog content */
     term content = `VBox(

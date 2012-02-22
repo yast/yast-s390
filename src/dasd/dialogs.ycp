@@ -130,24 +130,9 @@ void DisplayDASDDialog()
     /* Dialog caption */
     string caption = _("DASD Disk Management");
 
-    term header = `header(
-	// table header
-	`Right(_("Channel")),
-	// table header
-	_("Device"),
-	// table header
-	_("Type"),
-	// table header
-	_("Access Type"),
-	// table header
-	_("Use DIAG"),
-	// table header
-	_("Formatted"),
-	// table header
-	_("Partition Information")
-    );
+    term header = `Empty();
 
-    if (Mode::config ())
+    if (Mode::config())
     {
 	header = `header(
 	    // table header
@@ -156,7 +141,26 @@ void DisplayDASDDialog()
 	    _("Format"),
 	    // table header
 	    _("Use DIAG")
-	);
+	    );
+    }
+    else
+    {
+	header = `header(
+	    // table header
+	    `Right(_("Channel")),
+	    // table header
+	    _("Device"),
+	    // table header
+	    _("Type"),
+	    // table header
+	    _("Access Type"),
+	    // table header
+	    _("Use DIAG"),
+	    // table header
+	    _("Formatted"),
+	    // table header
+	    _("Partition Information")
+	    );
     }
 
     list actions = [
