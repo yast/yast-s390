@@ -104,7 +104,7 @@ global boolean Available()
 	if (!IsValidChannel(channel))
 	    return channel;
 
-	list<string> strs = splitstring(channel, ".");
+	list<string> strs = splitstring(tolower(channel), ".");
 	strs[2] = String::PadZeros(strs[2]:"", 4);
 	return mergestring(strs, ".");
     }
