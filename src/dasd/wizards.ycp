@@ -53,7 +53,7 @@ symbol MainDASDSequence()
  * Whole configuration of controller
  * @return sequence result
  */
-any DASDSequence()
+symbol DASDSequence()
 {
     map aliases = $[
 	"read"	: [ ``(ReadDialog()), true ],
@@ -80,7 +80,7 @@ any DASDSequence()
     Wizard::CreateDialog();
     Wizard::SetDesktopIcon("dasd");
     
-    any ret = Sequencer::Run(aliases, sequence);
+    symbol ret = Sequencer::Run(aliases, sequence);
 
     Wizard::CloseDialog();
 
@@ -93,7 +93,7 @@ any DASDSequence()
  * For use with autoinstallation.
  * @return sequence result
  */
-any DASDAutoSequence()
+symbol DASDAutoSequence()
 {
     /* Initialization dialog caption */
     string caption = _("Controller Configuration");
@@ -105,7 +105,7 @@ any DASDAutoSequence()
     Wizard::SetContentsButtons(caption, contents, "",
 	    Label::BackButton(), Label::NextButton());
 
-    any ret = MainDASDSequence();
+    symbol ret = MainDASDSequence();
 
     Wizard::CloseDialog();
 

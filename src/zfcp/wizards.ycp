@@ -53,12 +53,12 @@ symbol MainZFCPSequence()
  * Whole configuration of controller
  * @return sequence result
  */
-any ZFCPSequence()
+symbol ZFCPSequence()
 {
     map aliases = $[
-	"read"	: [ ``( ReadDialog() ), true ],
-	"main"	:   ``( MainZFCPSequence() ),
-	"write"	: [ ``( WriteDialog() ), true ]
+	"read"	: [ ``(ReadDialog()), true ],
+	"main"	:   ``(MainZFCPSequence()),
+	"write"	: [ ``(WriteDialog()), true ]
     ];
 
     map sequence = $[
@@ -80,7 +80,7 @@ any ZFCPSequence()
     Wizard::CreateDialog();
     Wizard::SetDesktopIcon("zfcp");
 
-    any ret = Sequencer::Run(aliases, sequence);
+    symbol ret = Sequencer::Run(aliases, sequence);
 
     Wizard::CloseDialog();
 
@@ -93,7 +93,7 @@ any ZFCPSequence()
  * For use with autoinstallation.
  * @return sequence result
  */
-any ZFCPAutoSequence()
+symbol ZFCPAutoSequence()
 {
     /* Initialization dialog caption */
     string caption = _("Controller Configuration");
@@ -105,7 +105,7 @@ any ZFCPAutoSequence()
     Wizard::SetContentsButtons(caption, contents, "",
 	    Label::BackButton(), Label::NextButton());
 
-    any ret = MainZFCPSequence();
+    symbol ret = MainZFCPSequence();
 
     Wizard::CloseDialog();
 
