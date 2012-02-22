@@ -51,24 +51,6 @@ global boolean proposal_valid = false;
 
 
 /**
- * Abort function
- * return boolean return true if abort
- */
-global boolean() AbortFunction = GetModified;
-
-
-/**
- * Abort function
- * @return blah blah lahjk
- */
-global boolean Abort()
-{
-    if(AbortFunction != nil)
-	return AbortFunction ();
-    return false;
-}
-
-/**
  * Data was modified?
  * @return true if modified
  */
