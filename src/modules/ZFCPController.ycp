@@ -406,7 +406,8 @@ global void ProbeDisks()
     list<map<string, any> > disks_tapes = (list<map<string, any> >) merge(disks, tapes);
 
     disks_tapes = maplist (map<string, any> d, disks_tapes, {
-	    return filter(string k, any v, d, { return contains([ "dev_name", "detail" ], k); });
+	    return filter(string k, any v, d, { return contains([ "dev_name", "detail",
+		"vendor", "device" ], k); });
 	});
 
     integer index = -1;
