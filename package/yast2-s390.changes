@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Feb 22 12:21:42 CET 2012 - aschnell@suse.de
+
+- make ZFCP module work with AutoYaST editor
+
+-------------------------------------------------------------------
 Wed Feb 15 11:25:49 CET 2012 - aschnell@suse.de
 
 - make DASD module work with AutoYaST editor

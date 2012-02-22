@@ -529,8 +529,7 @@ All changes will be lost.")))
 	    if (DASDController::GetDeviceIndex(channel) != nil)
 	    {
 		// error popup
-		Popup::Error(_("Channel already exists."));
-		UI::SetFocus(`channel);
+		Popup::Error(_("Device already exists."));
 		ret = nil;
 		continue;
 	    }

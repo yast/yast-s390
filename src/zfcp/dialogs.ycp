@@ -243,7 +243,8 @@ symbol AddZFCPDiskDialog()
     string caption = _("Add New ZFCP Device");
 
     string fcp_lun = ZFCPController::previous_settings["fcp_lun"]:"";
-    fcp_lun = ZFCPController::GetNextLUN(fcp_lun);
+    if (!isempty(fcp_lun))
+	fcp_lun = ZFCPController::GetNextLUN(fcp_lun);
 
     list<string> items = [];
     if (Mode::config ())
@@ -252,13 +253,11 @@ symbol AddZFCPDiskDialog()
 	    return d["detail", "controller_id"]:"";
 	});
 	items = toset (items);
-	items = filter (string i, items, { return i != "" && i != nil; });
     }
     else
     {
 	items = maplist (map<string, any> c, ZFCPController::GetControllers(), {
-	    string channel = c["sysfs_bus_id"]:"";
-	    return channel;
+		return c["sysfs_bus_id"]:"";
 	});
     }
 
@@ -391,6 +390,18 @@ All changes will be lost.")))
 		ret = nil;
 		continue;
 	    }
+
+	    channel = ZFCPController::FormatChannel(channel);
+	    wwpn = ZFCPController::FormatWWPN(wwpn);
+	    fcp_lun = ZFCPController::FormatFCPLUN(fcp_lun);
+
+	    if (ZFCPController::GetDeviceIndex(channel, wwpn, fcp_lun) != nil)
+	    {
+		// error popup
+		Popup::Error(_("Device already exists."));
+		ret = nil;
+		continue;
+	    }
 	}
     }
 
@@ -423,6 +434,8 @@ All changes will be lost.")))
 	else
 	{
 	    ZFCPController::ActivateDisk (channel, wwpn, lun);
+
+	    ZFCPController::ProbeDisks();
 	}
     }
 

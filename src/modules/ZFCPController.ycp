@@ -182,9 +182,9 @@ global boolean Write()
     if (!Mode::normal())
     {
 	foreach (integer index, map<string, any> device, devices, {
-		string channel = device["controller_id"]:"";
-		string wwpn = device["wwpn"]:"";
-		string lun = device["fcp_lun"]:"";
+		string channel = device["detail", "controller_id"]:"";
+		string wwpn = device["detail", "wwpn"]:"";
+		string lun = device["detail", "fcp_lun"]:"";
 		ActivateDisk(channel, wwpn, lun);
 	});
     }
@@ -313,11 +313,13 @@ global map Export()
 
 
     global integer
-    GetDeviceIndex(string channel)
+    GetDeviceIndex(string channel, string wwpn, string lun)
     {
 	integer ret = nil;
 	foreach(integer index , map<string, any> d, devices, {
-		if (d["channel"]:"" == channel)
+		if (d["detail", "controller_id"]:"" == channel &&
+		    d["detail", "wwpn"]:"" == wwpn &&
+		    d["detail", "fcp_lun"]:"" == lun)
 		    ret = index;
 	    });
 	return ret;
@@ -367,6 +369,10 @@ global list<map<string, any> > GetControllers()
 	    return c["device"]:"" == "zFCP controller";
 	});
 
+	controllers = maplist (map<string, any> c, controllers, {
+		return filter(string k, any v, c, { return contains([ "sysfs_bus_id" ], k); });
+	    });
+
 	y2milestone ("probed ZFCP controllers %1", controllers);
     }
     return controllers;
@@ -398,6 +404,10 @@ global void ProbeDisks()
     tapes = filter(map<string, any> d, tapes, { return d["bus"]:"" == "SCSI"; });
 
     list<map<string, any> > disks_tapes = (list<map<string, any> >) merge(disks, tapes);
+
+    disks_tapes = maplist (map<string, any> d, disks_tapes, {
+	    return filter(string k, any v, d, { return contains([ "dev_name", "detail" ], k); });
+	});
 
     integer index = -1;
     devices = listmap (map<string, any> d, disks_tapes, {
