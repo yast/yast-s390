@@ -91,7 +91,7 @@ global boolean Available()
 
     global boolean IsValidChannel(string channel)
     {
-	string regexp = "^([0-9a-fA-F]{1}).([0-9a-fA-F]{1}).([0-9a-fA-F]{1,4})$";
+	string regexp = "^([[:xdigit:]]{1}).([[:xdigit:]]{1}).([[:xdigit:]]{4})$";
 	return regexpmatch(channel, regexp);
     }
 
@@ -100,9 +100,7 @@ global boolean Available()
 	if (!IsValidChannel(channel))
 	    return channel;
 
-	list<string> strs = splitstring(tolower(channel), ".");
-	strs[2] = String::PadZeros(strs[2]:"", 4);
-	return mergestring(strs, ".");
+	return tolower(channel);
     }
 
 
