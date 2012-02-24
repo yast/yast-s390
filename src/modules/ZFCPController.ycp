@@ -302,18 +302,32 @@ global map Export()
 
 
 /**
- * Create a textual summary and a list of unconfigured cards
+ * Create a textual summary and a list of configured devices
  * @return summary of the current configuration
  */
 global list<string> Summary()
 {
-    list<string> ret = maplist (integer index, map<string,any> d, devices, {
-	// summary text, %1 is channel, %1 is WWPN, %3 is LUN
-	// (all of them are numbers)
-	return sformat(_("Channel: %1, WWPN: %2, ZFCP LUN: %3"),
-		       d["detail", "controller_id"]:"", d["detail", "wwpn"]:"",
-		       d["detail", "fcp_lun"]:"");
-    });
+    list<string> ret = [];
+
+    if (Mode::config())
+    {
+	ret = maplist (integer index, map<string,any> d, devices, {
+		// summary text, %1 is channel, %2 is WWPN, %3 is LUN
+		return sformat(_("Channel: %1, WWPN: %2, ZFCP LUN: %3"),
+			       d["detail", "controller_id"]:"", d["detail", "wwpn"]:"",
+			       d["detail", "fcp_lun"]:"");
+	    });
+    }
+    else
+    {
+	ret = maplist (integer index, map<string,any> d, devices, {
+		// summary text, %1 is channel, %2 is WWPN, %3 is LUN, %4 is device name
+		return sformat(_("Channel: %1, WWPN: %2, ZFCP LUN: %3, Device: %4"),
+			       d["detail", "controller_id"]:"", d["detail", "wwpn"]:"",
+			       d["detail", "fcp_lun"]:"", d["dev_name"]:"");
+	    });
+    }
+
     y2milestone("Summary: %1", ret);
     return ret;
 }

@@ -290,16 +290,35 @@ global map<string, list> Export()
 
 
 /**
- * Create a textual summary and a list of unconfigured cards
+ * Create a textual summary and a list of configured devices
  * @return summary of the current configuration
  */
 global list<string> Summary()
 {
-    list<string> ret = maplist (integer index, map<string,any> d, devices, {
-	// summary text, %1 is channel (number), // %2 and %3 are Yes or No
-	return sformat(_("Channel: %1, Format: %2, DIAG: %3"), d["channel"]:"",
-		       String::YesNo(d["format"]:false), String::YesNo(d["diag"]:false));
-    });
+    list<string> ret = [];
+
+    if (Mode::config())
+    {
+	ret = maplist (integer index, map<string, any> d, devices, {
+		// summary text, %1 is channel, %2 and %3 are Yes or No
+		return sformat(_("Channel: %1, Format: %2, DIAG: %3"), d["channel"]:"",
+			       String::YesNo(d["format"]:false), String::YesNo(d["diag"]:false));
+	});
+    }
+    else
+    {
+	map<integer, map<string, any> > active_devices =
+	    filter(integer index, map<string, any> device, devices, {
+		return device["resource", "io", 0, "active"]:false;
+	    });
+
+	ret = maplist (integer index, map<string, any> d, active_devices, {
+		// summary text, %1 is channel, %2 is device name, %3 is Yes or No
+		return sformat(_("Channel: %1, Device: %2, DIAG: %3"), d["channel"]:"",
+			       d["dev_name"]:"", String::YesNo(d["diag"]:false));
+	    });
+    }
+
     y2milestone("Summary: %1", ret);
     return ret;
 }
