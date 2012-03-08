@@ -54,11 +54,11 @@ Otherwise there is a potential risk of data corruption.</p>"),
     /* Disk add help 1/2 */
     "disk_add" : _("<p><b><big>Add New ZFCP Device</big></b><br>
 Enter the identifier of the device to add, the
-<b>Channel Number</b> of the ZFCP controller, the worldwide port number
-(<b>WWPN</b>) and the <b>FCP-LUN</b> number.</p>
+<b>Channel ID</b> of the ZFCP controller, the worldwide port number
+(<b>WWPN</b>) and the <b>LUN</b> number.</p>
 ") +
     /* Disk add help 2/2, This is HTML, so finally "&lt;devno&gt;" is displayed as "<devno>" */
-_("<p>The <b>Channel Number</b> must be entered with lowercase letters in a sysfs conforming
+_("<p>The <b>Channel ID</b> must be entered with lowercase letters in a sysfs conforming
 format 0.0.&lt;devno&gt;, such as <tt>0.0.5c51</tt>.</p>
 <p>The WWPN must be entered with lowercase letters as a 16-digit hex value, such as
 <tt>0x5005076300c40e5a</tt>.</p>

@@ -110,22 +110,22 @@ void DisplayZFCPDialog()
     {
 	header = `header(
 	    // table header
-	    `Right(_("Channel Number")),
+	    `Right(_("Channel ID")),
 	    // table header
 	    `Right(_("WWPN")),
 	    // table header
-	    `Right(_("ZFCP-LUN"))
+	    `Right(_("LUN"))
 	    );
     }
     else
     {
 	header = `header(
 	    // table header
-	    `Right(_("Channel Number")),
+	    `Right(_("Channel ID")),
 	    // table header
 	    `Right(_("WWPN")),
 	    // table header
-	    `Right(_("ZFCP-LUN")),
+	    `Right(_("LUN")),
 	    // table header
 	    _("Device")
 	    );
@@ -135,9 +135,9 @@ void DisplayZFCPDialog()
     term content = `VBox(
 	`HBox(
 	    // text entry
-	    `InputField(`id(`min_chan), `opt(`hstretch), _("Mi&nimum Channel"), ZFCPController::filter_min),
+	    `InputField(`id(`min_chan), `opt(`hstretch), _("Mi&nimum Channel ID"), ZFCPController::filter_min),
 	    // text entry
-	    `InputField(`id(`max_chan), `opt(`hstretch), _("Ma&ximum Channel"), ZFCPController::filter_max),
+	    `InputField(`id(`max_chan), `opt(`hstretch), _("Ma&ximum Channel ID"), ZFCPController::filter_max),
 	    `VBox (
 		`Label (""),
 		// push button
@@ -197,7 +197,7 @@ symbol ZFCPDialog()
 	    if (!ZFCPController::IsValidChannel(filter_min) || !ZFCPController::IsValidChannel(filter_max))
 	    {
 		// error popup
-		Popup::Error(_("Invalid filter channels."));
+		Popup::Error(_("Invalid filter channel IDs."));
 		ret = nil;
 		continue;
 	    }
@@ -239,47 +239,62 @@ symbol AddZFCPDiskDialog()
     /* Minimal text for the help */
     string help = ZFCP_HELPS["disk_add"]:"";
 
-    /* Dialog caption */
+    // dialog caption
     string caption = _("Add New ZFCP Device");
 
-    string fcp_lun = ZFCPController::previous_settings["fcp_lun"]:"";
-    if (!isempty(fcp_lun))
-	fcp_lun = ZFCPController::GetNextLUN(fcp_lun);
+    list<string> channels = [];
+    list<string> wwpns = [];
+    list<string> luns = [];
 
-    list<string> items = [];
     if (Mode::config ())
     {
-	items = maplist (integer index, map<string, any> d, ZFCPController::devices, {
+	channels = maplist(integer index, map<string, any> d, ZFCPController::devices, {
 	    return d["detail", "controller_id"]:"";
 	});
-	items = toset (items);
+	channels = toset(channels);
+
+	wwpns = maplist(integer index, map<string, any> d, ZFCPController::devices, {
+	    return d["detail", "wwpn"]:"";
+	});
+	wwpns = toset(wwpns);
+
+	luns = maplist(integer index, map<string, any> d, ZFCPController::devices, {
+	    return d["detail", "zfp_lun"]:"";
+	});
+	luns = toset(luns);
     }
     else
     {
-	items = maplist (map<string, any> c, ZFCPController::GetControllers(), {
+	channels = maplist (map<string, any> c, ZFCPController::GetControllers(), {
 		return c["sysfs_bus_id"]:"";
 	});
+
+	wwpns = [ ZFCPController::previous_settings["wwpn"]:"" ];
+
+	string fcp_lun = ZFCPController::previous_settings["fcp_lun"]:"";
+	if (!isempty(fcp_lun))
+	    fcp_lun = ZFCPController::GetNextLUN(fcp_lun);
+
+	luns = [ fcp_lun ];
     }
 
-    /* Dialog content */
     term content = `HBox (`HStretch (), `VBox(
 	`VStretch (),
-	`ComboBox (`id(`channel), `opt (`editable, `hstretch),
-	    // combo box
-	    _("&Channel Number"),
-	    items),
+	// combo box
+	`ComboBox(`id(`channel), `opt (`editable, `hstretch), _("&Channel ID"), channels),
 	`VSpacing (2),
-       `HBox(
-         // text entry
-         `ComboBox(`id(`wwpn), `opt(`hstretch, `editable), _("&WWPN"),
-           [ ZFCPController::previous_settings["wwpn"]:"" ]),
-         `PushButton(`id(`get_wwpn), _("Get WWPNs"))
+	`HBox(
+	    // combo box
+	    `ComboBox(`id(`wwpn), `opt(`hstretch, `editable), _("&WWPN"), wwpns),
+	    // push button
+	    Mode::config() ? `Empty() : `PushButton(`id(`get_wwpn), _("Get WWPNs"))
             ),
 	`VSpacing (2),
-       `HBox(
-	// text entry
-        `ComboBox(`id(`fcp_lun), `opt(`hstretch, `editable), _("&FCP-LUN"), [ fcp_lun ]),
-        `PushButton(`id(`get_lun), _("Get LUNs"))
+	`HBox(
+	    // combobox
+	    `ComboBox(`id(`fcp_lun), `opt(`hstretch, `editable), _("&LUN"), luns),
+	    // push button
+	    Mode::config() ? `Empty() : `PushButton(`id(`get_lun), _("Get LUNs"))
             ),
 	`VStretch ()
     ), `HStretch ());
@@ -307,7 +322,7 @@ symbol AddZFCPDiskDialog()
 	    if (!ZFCPController::IsValidChannel(channel))
 	    {
 		// error popup
-		Popup::Error(_("Not a valid channel."));
+		Popup::Error(_("Not a valid channel ID."));
 		UI::SetFocus(`channel);
 		ret = nil;
 		continue;
@@ -315,8 +330,8 @@ symbol AddZFCPDiskDialog()
 
 	    channel = ZFCPController::FormatChannel(channel);
 
-	    list<string> items = ZFCPController::GetWWPNs(channel);
-	    UI::ChangeWidget(`wwpn, `Items, items);
+	    wwpns = ZFCPController::GetWWPNs(channel);
+	    UI::ChangeWidget(`wwpn, `Items, wwpns);
 	    ret = nil;
 	}
 	else if (ret == `get_lun)
@@ -327,7 +342,7 @@ symbol AddZFCPDiskDialog()
 	    if (!ZFCPController::IsValidChannel(channel))
 	    {
 		// error popup
-		Popup::Error(_("Not a valid channel."));
+		Popup::Error(_("Not a valid channel ID."));
 		UI::SetFocus(`channel);
 		ret = nil;
 		continue;
@@ -345,8 +360,8 @@ symbol AddZFCPDiskDialog()
 	    channel = ZFCPController::FormatChannel(channel);
 	    wwpn = ZFCPController::FormatWWPN(wwpn);
 
-	    list<string> items = ZFCPController::GetLUNs(channel, wwpn);
-	    UI::ChangeWidget(`fcp_lun, `Items, items);
+	    luns = ZFCPController::GetLUNs(channel, wwpn);
+	    UI::ChangeWidget(`fcp_lun, `Items, luns);
 	    ret = nil;
 	}
        else if (ret == `abort || ret == `cancel)
@@ -367,7 +382,7 @@ All changes will be lost.")))
 	    if (!ZFCPController::IsValidChannel(channel))
 	    {
 		// error popup
-		Popup::Error(_("Not a valid channel."));
+		Popup::Error(_("Not a valid channel ID."));
 		UI::SetFocus(`channel);
 		ret = nil;
 		continue;
@@ -385,7 +400,7 @@ All changes will be lost.")))
 	    if (!ZFCPController::IsValidFCPLUN(fcp_lun))
 	    {
 		// error popup
-		Report::Error(_("The entered FCP-LUN is invalid."));
+		Report::Error(_("The entered LUN is invalid."));
 		UI::SetFocus(`fcp_lun);
 		ret = nil;
 		continue;

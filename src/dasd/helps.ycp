@@ -39,8 +39,8 @@ An additional dialog will inform you whether it is safe to do so.</p>
 In this dialog, manage DASD disks on your system.</p>") +
 
     /* Disk selection dialog help 2/4 */
-_("<p>To filter the displayed disks, set the <b>Minimum Channel</b> and 
-the <b>Maximum Channel</b> and click <b>Filter</b>.</p>
+_("<p>To filter the displayed disks, set the <b>Minimum Channel ID</b> and 
+the <b>Maximum Channel ID</b> and click <b>Filter</b>.</p>
 ") +
 
     /* Disk selection dialog help 4/4 */
@@ -55,8 +55,8 @@ _("<p>To remove a configured DASD disk, select it and click
 In this dialog, manage DASD disks on your system.</p>") +
 
     /* Disk selection dialog help 2/4 */
-_("<p>To filter the displayed disks, set the <b>Minimum Channel</b> and 
-the <b>Maximum Channel</b> and click <b>Filter</b>.</p>
+_("<p>To filter the displayed disks, set the <b>Minimum Channel ID</b> and 
+the <b>Maximum Channel ID</b> and click <b>Filter</b>.</p>
 ") +
 
     /* Disk selection dialog help 3/4 */
@@ -70,7 +70,7 @@ The action will be performed immediately!</p>"),
 
     /* Disk add help 1/3 */
     "disk_add_config" : _("<p><b><big>Add New DASD Disk</big></b><br>
-To add a disk, enter the <b>Channel Number</b> of the DASD disk as
+To add a disk, enter the <b>Channel ID</b> of the DASD disk as
 identifier.</p>") +
 
     /* Disk add help 1/3 */

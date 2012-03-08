@@ -301,7 +301,7 @@ global list<string> Summary()
     {
 	ret = maplist (integer index, map<string, any> d, devices, {
 		// summary text, %1 is channel, %2 and %3 are Yes or No
-		return sformat(_("Channel: %1, Format: %2, DIAG: %3"), d["channel"]:"",
+		return sformat(_("Channel ID: %1, Format: %2, DIAG: %3"), d["channel"]:"",
 			       String::YesNo(d["format"]:false), String::YesNo(d["diag"]:false));
 	});
     }
@@ -314,7 +314,7 @@ global list<string> Summary()
 
 	ret = maplist (integer index, map<string, any> d, active_devices, {
 		// summary text, %1 is channel, %2 is device name, %3 is Yes or No
-		return sformat(_("Channel: %1, Device: %2, DIAG: %3"), d["channel"]:"",
+		return sformat(_("Channel ID: %1, Device: %2, DIAG: %3"), d["channel"]:"",
 			       d["dev_name"]:"", String::YesNo(d["diag"]:false));
 	    });
     }

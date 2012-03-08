@@ -136,7 +136,7 @@ void DisplayDASDDialog()
     {
 	header = `header(
 	    // table header
-	    `Right(_("Channel")),
+	    `Right(_("Channel ID")),
 	    // table header
 	    _("Format"),
 	    // table header
@@ -147,7 +147,7 @@ void DisplayDASDDialog()
     {
 	header = `header(
 	    // table header
-	    `Right(_("Channel")),
+	    `Right(_("Channel ID")),
 	    // table header
 	    _("Device"),
 	    // table header
@@ -180,9 +180,9 @@ void DisplayDASDDialog()
     term content = `VBox(
 	`HBox(
 	    // text entry
-	    `InputField(`id(`min_chan), `opt(`hstretch), _("Mi&nimum Channel"), DASDController::filter_min),
+	    `InputField(`id(`min_chan), `opt(`hstretch), _("Mi&nimum Channel ID"), DASDController::filter_min),
 	    // text entry
-	    `InputField(`id(`max_chan), `opt(`hstretch), _("Ma&ximum Channel"), DASDController::filter_max),
+	    `InputField(`id(`max_chan), `opt(`hstretch), _("Ma&ximum Channel ID"), DASDController::filter_max),
 	    `VBox (
 		`Label (""),
 		// push button
@@ -249,7 +249,7 @@ symbol DASDDialog()
 	    if (!DASDController::IsValidChannel(filter_min) || !DASDController::IsValidChannel(filter_max))
 	    {
 		// error popup
-		Popup::Error(_("Invalid filter channels."));
+		Popup::Error(_("Invalid filter channel IDs."));
 		ret = nil;
 		continue;
 	    }
@@ -477,7 +477,7 @@ symbol AddDASDDiskDialog()
 	`VStretch (),
 	`TextEntry (`id(`channel), `opt (`hstretch),
 	    // text entry
-	    _("&Channel Number")
+	    _("&Channel ID")
 	),
 	`VSpacing (2),
 	// check box
@@ -518,7 +518,7 @@ All changes will be lost.")))
 	    if (!DASDController::IsValidChannel(channel))
 	    {
 		// error popup
-		Popup::Error(_("Not a valid channel."));
+		Popup::Error(_("Not a valid channel ID."));
 		UI::SetFocus(`channel);
 		ret = nil;
 		continue;
