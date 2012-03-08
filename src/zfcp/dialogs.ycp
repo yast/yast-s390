@@ -74,8 +74,8 @@ list<term> GetZFCPDiskItems()
 	items = maplist(integer k, map<string, any> d, devices, {
 		string channel = d["detail", "controller_id"]:"";
 		string wwpn = d["detail", "wwpn"]:"";
-		string fcp_lun = d["detail", "fcp_lun"]:"";
-		return `item(`id(k), channel, wwpn, fcp_lun);
+		string lun = d["detail", "fcp_lun"]:"";
+		return `item(`id(k), channel, wwpn, lun);
 	    });
     }
     else
@@ -83,9 +83,9 @@ list<term> GetZFCPDiskItems()
 	items = maplist(integer k, map<string, any> d, devices, {
 		string channel = d["detail", "controller_id"]:"";
 		string wwpn = d["detail", "wwpn"]:"";
-		string fcp_lun = d["detail", "fcp_lun"]:"";
+		string lun = d["detail", "fcp_lun"]:"";
 		string dev_name = d["dev_name"]:"";
-		return `item(`id(k), channel, wwpn, fcp_lun, dev_name);
+		return `item(`id(k), channel, wwpn, lun, dev_name);
 	    });
     }
 
@@ -259,7 +259,7 @@ symbol AddZFCPDiskDialog()
 	wwpns = toset(wwpns);
 
 	luns = maplist(integer index, map<string, any> d, ZFCPController::devices, {
-	    return d["detail", "zfp_lun"]:"";
+	    return d["detail", "fcp_lun"]:"";
 	});
 	luns = toset(luns);
     }
@@ -271,11 +271,11 @@ symbol AddZFCPDiskDialog()
 
 	wwpns = [ ZFCPController::previous_settings["wwpn"]:"" ];
 
-	string fcp_lun = ZFCPController::previous_settings["fcp_lun"]:"";
-	if (!isempty(fcp_lun))
-	    fcp_lun = ZFCPController::GetNextLUN(fcp_lun);
+	string lun = ZFCPController::previous_settings["fcp_lun"]:"";
+	if (!isempty(lun))
+	    lun = ZFCPController::GetNextLUN(lun);
 
-	luns = [ fcp_lun ];
+	luns = [ lun ];
     }
 
     term content = `HBox (`HStretch (), `VBox(
@@ -292,7 +292,7 @@ symbol AddZFCPDiskDialog()
 	`VSpacing (2),
 	`HBox(
 	    // combobox
-	    `ComboBox(`id(`fcp_lun), `opt(`hstretch, `editable), _("&LUN"), luns),
+	    `ComboBox(`id(`lun), `opt(`hstretch, `editable), _("&LUN"), luns),
 	    // push button
 	    Mode::config() ? `Empty() : `PushButton(`id(`get_lun), _("Get LUNs"))
             ),
@@ -306,7 +306,7 @@ symbol AddZFCPDiskDialog()
 
     UI::ChangeWidget(`id(`channel), `ValidChars, "0123456789abcdefABCDEF.");
     UI::ChangeWidget(`id(`wwpn), `ValidChars, "0123456789abcdefABCDEFx");
-    UI::ChangeWidget(`id(`fcp_lun), `ValidChars, "0123456789abcdefABCDEFx");
+    UI::ChangeWidget(`id(`lun), `ValidChars, "0123456789abcdefABCDEFx");
 
     UI::SetFocus(`id(`channel));
 
@@ -361,7 +361,7 @@ symbol AddZFCPDiskDialog()
 	    wwpn = ZFCPController::FormatWWPN(wwpn);
 
 	    luns = ZFCPController::GetLUNs(channel, wwpn);
-	    UI::ChangeWidget(`fcp_lun, `Items, luns);
+	    UI::ChangeWidget(`lun, `Items, luns);
 	    ret = nil;
 	}
        else if (ret == `abort || ret == `cancel)
@@ -377,7 +377,7 @@ All changes will be lost.")))
 	{
 	    string channel = (string) UI::QueryWidget(`id(`channel), `Value);
 	    string wwpn = (string) UI::QueryWidget(`id(`wwpn), `Value);
-	    string fcp_lun = (string) UI::QueryWidget(`id(`fcp_lun), `Value);
+	    string lun = (string) UI::QueryWidget(`id(`lun), `Value);
 
 	    if (!ZFCPController::IsValidChannel(channel))
 	    {
@@ -397,20 +397,20 @@ All changes will be lost.")))
 		continue;
 	    }
 
-	    if (!ZFCPController::IsValidFCPLUN(fcp_lun))
+	    if (!ZFCPController::IsValidLUN(lun))
 	    {
 		// error popup
 		Report::Error(_("The entered LUN is invalid."));
-		UI::SetFocus(`fcp_lun);
+		UI::SetFocus(`lun);
 		ret = nil;
 		continue;
 	    }
 
 	    channel = ZFCPController::FormatChannel(channel);
 	    wwpn = ZFCPController::FormatWWPN(wwpn);
-	    fcp_lun = ZFCPController::FormatFCPLUN(fcp_lun);
+	    lun = ZFCPController::FormatLUN(lun);
 
-	    if (ZFCPController::GetDeviceIndex(channel, wwpn, fcp_lun) != nil)
+	    if (ZFCPController::GetDeviceIndex(channel, wwpn, lun) != nil)
 	    {
 		// error popup
 		Popup::Error(_("Device already exists."));
@@ -424,11 +424,11 @@ All changes will be lost.")))
     {
 	string channel = (string) UI::QueryWidget(`id(`channel), `Value);
 	string wwpn = (string) UI::QueryWidget(`id(`wwpn), `Value);
-	string lun = (string) UI::QueryWidget(`id(`fcp_lun), `Value);
+	string lun = (string) UI::QueryWidget(`id(`lun), `Value);
 
 	channel = ZFCPController::FormatChannel(channel);
 	wwpn = ZFCPController::FormatWWPN(wwpn);
-	lun = ZFCPController::FormatFCPLUN(lun);
+	lun = ZFCPController::FormatLUN(lun);
 
 	ZFCPController::previous_settings["channel"] = channel;
 	ZFCPController::previous_settings["wwpn"] = wwpn;
@@ -482,8 +482,8 @@ symbol DeleteZFCPDiskDialog()
 		    map d = ZFCPController::devices[index]:$[];
 		    string channel = d["detail", "controller_id"]:"";
 		    string wwpn = d["detail", "wwpn"]:"";
-		    string fcp_lun = d["detail", "fcp_lun"]:"";
-		    ZFCPController::DeactivateDisk(channel, wwpn, fcp_lun);
+		    string lun = d["detail", "fcp_lun"]:"";
+		    ZFCPController::DeactivateDisk(channel, wwpn, lun);
 		});
 
 	    ZFCPController::ProbeDisks();

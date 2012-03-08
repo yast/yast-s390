@@ -103,27 +103,27 @@ global boolean Available()
 	return tohexstring(tointeger(wwpn), 16);
     }
 
-    global boolean IsValidFCPLUN(string fcp_lun)
+    global boolean IsValidLUN(string lun)
     {
 	string regexp = "^0x([[:xdigit:]]{1,16})$";
-	return regexpmatch(fcp_lun, regexp);
+	return regexpmatch(lun, regexp);
     }
 
-    global string FormatFCPLUN(string fcp_lun)
+    global string FormatLUN(string lun)
     {
-	if (!IsValidFCPLUN(fcp_lun))
-	    return fcp_lun;
+	if (!IsValidLUN(lun))
+	    return lun;
 
-	return tohexstring(tointeger(fcp_lun), 16);
+	return tohexstring(tointeger(lun), 16);
     }
 
 
-    global string GetNextLUN(string fcp_lun)
+    global string GetNextLUN(string lun)
     {
-	if (fcp_lun == nil || fcp_lun == "")
-	    fcp_lun = "0";
+	if (lun == nil || lun == "")
+	    lun = "0";
 
-	integer old_lun = tointeger(fcp_lun);
+	integer old_lun = tointeger(lun);
 	integer new_lun = old_lun;
 
 	foreach (integer k, map<string, any> v, devices, {
@@ -206,7 +206,7 @@ global boolean Import(map settings)
 		"detail" : $[
 		    "controller_id" : FormatChannel(d["controller_id"]:""),
 		    "wwpn" : FormatWWPN(d["wwpn"]:""),
-		    "fcp_lun" : FormatFCPLUN(d["fcp_lun"]:""),
+		    "fcp_lun" : FormatLUN(d["fcp_lun"]:""),
 		],
 	    ];
 	    return $[ index : m ];
