@@ -401,7 +401,10 @@ define symbol DASDDialog() {
 	    }
 	    foreach (integer id, to_activate, ``{
 		string channel = DASDController::devices[id,"channel"]:"";
+		boolean active = DASDController::devices[id, "resource", "io", 0, "active"]:false;
 		DASDController::diag[channel] = true;
+		if (active)
+                    DASDController::ActivateDisk(channel, true);
 	    });
 
 	    ReloadDASDDialog ();
@@ -421,7 +424,10 @@ define symbol DASDDialog() {
 	    }
 	    foreach (integer id, to_activate, ``{
 		string channel = DASDController::devices[id,"channel"]:"";
+		boolean active = DASDController::devices[id, "resource", "io", 0, "active"]:false;
 		DASDController::diag[channel] = false;
+		if (active)
+                    DASDController::ActivateDisk(channel, false);
 	    });
 
 	    ReloadDASDDialog ();

@@ -4,7 +4,7 @@
 BuildRequires:	docbook-xsl-stylesheets doxygen libxslt perl-XML-Writer sgml-skel update-desktop-files yast2 yast2-devtools yast2-testsuite
 
 %ifarch s390 s390x
-Requires:	yast2 s390-tools
+Requires:	yast2 s390-tools yast2-hardware-detection >= 2.13.8
 %endif
 
 Summary:	Configuration of s390
