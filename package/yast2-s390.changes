@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Apr 05 11:40:27 CEST 2012 - aschnell@suse.de
+
+- do not show partition info for unformatted DASDs
+
+-------------------------------------------------------------------
 Wed Feb 22 12:21:42 CET 2012 - aschnell@suse.de
 
 - make ZFCP module work with AutoYaST editor

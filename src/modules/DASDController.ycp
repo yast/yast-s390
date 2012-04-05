@@ -380,7 +380,9 @@ global void ProbeDisks()
 		formatted = ! regexpmatch (toupper (out), "NOT[ \t]*FORMATTED");
 	    }
 	    d["formatted"] = formatted;
-	    d["partition_info"] = GetPartitionInfo (device);
+
+	    if (formatted)
+		d["partition_info"] = GetPartitionInfo(device);
 
 	    string diag_file = sformat("/sys/%1/device/use_diag", d["sysfs_id"]:"");
 	    if (FileUtils::Exists(diag_file))
