@@ -1,6 +1,8 @@
 -------------------------------------------------------------------
 Thu Apr 05 11:40:27 CEST 2012 - aschnell@suse.de
 
+- added context menu to DASD module
+- allow to change diag and format setting for DASDs in config mode
 - do not show partition info for unformatted DASDs
 
 -------------------------------------------------------------------
