@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Apr 10 17:02:55 CEST 2012 - aschnell@suse.de
+
+- changed license to GPL-2.0
+
+-------------------------------------------------------------------
 Thu Apr 05 11:40:27 CEST 2012 - aschnell@suse.de
 
 - added context menu to DASD module
