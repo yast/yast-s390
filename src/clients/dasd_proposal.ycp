@@ -13,6 +13,7 @@
 
     import "DASDController";
     import "Wizard";
+    import "Storage";
 
     string func  = (string) WFM::Args(0);
     map    param = (map) WFM::Args(1);
@@ -35,9 +36,12 @@
     // Run an interactive workflow
     else if ( func == "AskUser" )
     {
-	Wizard::CreateDialog ();
+	Wizard::CreateDialog();
+	Storage::ActivateHld(false);
 	any sequence = WFM::CallFunction ("inst_dasd", []);
-	UI::CloseDialog ();
+	Storage::ReReadTargetMap();
+	Wizard::CloseDialog();
+
 	// Fill return map
 	ret =
 	    $[ "workflow_sequence" : sequence

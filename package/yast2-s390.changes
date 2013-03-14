@@ -3,6 +3,7 @@ Thu Mar 14 14:30:30 CET 2013 - aschnell@suse.de
 
 - removed non-functioning button to not write label during DASD
   formatting (bnc#808275)
+- reread storage after DASD configuration (bnc#808695)
 - 2.17.29
 
 -------------------------------------------------------------------
