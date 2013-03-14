@@ -39,8 +39,7 @@ global map<string, boolean> diag = $[];
 global define void ActivateDisk (string channel, boolean diag);
 global define void DeactivateDisk (string channel, boolean diag);
 global define void ProbeDisks ();
-global define void FormatDisks (list<string> disks_list, integer par,
-    boolean write_vl, boolean interactive);
+global define void FormatDisks (list<string> disks_list, integer par);
 global define string GetPartitionInfo (string disk);
 
 boolean disk_configured = false;
@@ -176,7 +175,7 @@ global boolean Import (map settings) {
 
 	// now format the disks
 	if (size (format_list) > 0)
-	    FormatDisks (format_list, 8, true, true);
+	    FormatDisks (format_list, 8);
     }
     return true;
 }
@@ -466,7 +465,7 @@ global define void ActivateDisk (string channel, boolean diag) {
 	string cmd = sformat("ls /sys/bus/ccw/devices/%1/block/|tr -d '\n'", channel);
 	map<string, any> disk = (map<string, any>)SCR::Execute(.target.bash_output, cmd);
 	if (disk["exit"]:-1 == 0 && size(disk["stdout"]:"")>0){
-	    FormatDisks ([ sformat("/dev/%1", disk["stdout"]:"") ], 1, true, true);
+	    FormatDisks ([ sformat("/dev/%1", disk["stdout"]:"") ], 1);
 //	    ReloadDASDDialog ();
 	    ActivateDisk(channel, diag);
 	} else {
@@ -507,11 +506,8 @@ global define void DeactivateDisk (string channel, boolean diag) {
  * Format selected Disks
  * @param disks_list list<string> List of disks to be formatted
  * @param par integer Number of disks that can be formatted in parallel
- * @param write_vl boolean Write a Volume label
- * @param interactive boolean Interactive yes/no
  */
-global define void FormatDisks (list<string> disks_list, integer par,
-    boolean write_vl, boolean interactive)
+global define void FormatDisks (list<string> disks_list, integer par)
 {
     if (par > size (disks_list))
 	par = size (disks_list);
@@ -525,12 +521,8 @@ global define void FormatDisks (list<string> disks_list, integer par,
 	disks_cmd = add (disks_cmd, sformat ("-f %1", device));
     });
     string disks_param = mergestring (disks_cmd, " ");
-    string additional_param = "";
-    if (! write_vl)
-	additional_param = "--no-label";
     string command = sformat (
-	"/sbin/dasdfmt -Y -P %2 -b 4096 -y -m 1 %3 %1", disks_param, par,
-	    additional_param);
+	"/sbin/dasdfmt -Y -P %1 -b 4096 -y -m 1 %2", par, disks_param);
 
     y2milestone ("Running command %1", command);
     index = 0;

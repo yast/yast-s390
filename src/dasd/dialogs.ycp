@@ -481,9 +481,6 @@ symbol DASDDialog()
 		`IntField (`id (`par),
 		    // integer field (count of disks formatted at parallely)
 		    _("&Parallel Formatted Disks"), 1, par, par),
-		`Left (`CheckBox (`id (`write_label),
-		    // check box
-		    _("&Write the Volume Label"), true)),
 		`HBox (
 		    `HStretch (),
 		    `PushButton (`id (`ok), Label::OKButton ()),
@@ -493,8 +490,6 @@ symbol DASDDialog()
 	    ));
 	    ret = UI::UserInput ();
 	    par = (integer)UI::QueryWidget (`id (`par), `Value);
-	    boolean write_vl = (boolean)
-		UI::QueryWidget (`id (`write_label), `Value);
 	    UI::CloseDialog ();
 	    if (ret == `cancel)
 	    {
@@ -531,7 +526,7 @@ Really format the following disks?<br>
 	    list<string> devices = maplist (integer id, to_activate, ``{
 		return DASDController::devices[id, "dev_name"]:"";
 	    });
-	    DASDController::FormatDisks (devices, par, write_vl, true);
+	    DASDController::FormatDisks (devices, par);
 	    ReloadDASDDialog ();
 	    UI::SetFocus (`table);
 	    ret = nil;
