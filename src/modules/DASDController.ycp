@@ -52,7 +52,7 @@ global map<string, boolean> diag = $[];
 global void ActivateDisk (string channel, boolean diag);
 global void DeactivateDisk (string channel, boolean diag);
 global void ProbeDisks ();
-global void FormatDisks(list<string> disks_list, integer par, boolean write_vl);
+global void FormatDisks(list<string> disks_list, integer par);
 global string GetPartitionInfo (string disk);
 global boolean GetModified();
 
@@ -178,7 +178,7 @@ global boolean Write()
 	y2milestone ("Disks to format: %1", to_format);
 
 	if (!isempty(to_format))
-	    FormatDisks(to_format, 8, true);
+	    FormatDisks(to_format, 8);
     }
 
     if (!Mode::installation())
@@ -530,7 +530,7 @@ press 'Cancel' and select 'Perform Action', 'Format' later on.
 	string cmd = sformat("ls '/sys/bus/ccw/devices/%1/block/' | tr -d '\n'", channel);
 	map<string, any> disk = (map<string, any>)SCR::Execute(.target.bash_output, cmd);
 	if (disk["exit"]:-1 == 0 && size(disk["stdout"]:"")>0){
-	    FormatDisks([ sformat("/dev/%1", disk["stdout"]:"") ], 1, true);
+	    FormatDisks([ sformat("/dev/%1", disk["stdout"]:"") ], 1);
 	    ActivateDisk(channel, diag);
 	} else {
 		Popup::Error(sformat("Couldn't find device for %1 channel", channel));
@@ -571,9 +571,8 @@ global void DeactivateDisk(string channel, boolean diag)
  * Format disks
  * @param disks_list list<string> List of disks to be formated
  * @param par integer Number of disks that can be formated in parallel
- * @param write_vl boolean Write a Volume label
  */
-global void FormatDisks(list<string> disks_list, integer par, boolean write_vl)
+global void FormatDisks(list<string> disks_list, integer par)
 {
     if (par > size (disks_list))
 	par = size (disks_list);
@@ -587,11 +586,8 @@ global void FormatDisks(list<string> disks_list, integer par, boolean write_vl)
 	disks_cmd = add(disks_cmd, sformat("-f '%1'", device));
     });
     string disks_param = mergestring (disks_cmd, " ");
-    string additional_param = "";
-    if (! write_vl)
-	additional_param = "--no-label";
-    string command = sformat("/sbin/dasdfmt -Y -P %2 -b 4096 -y -m 1 %3 %1",
-			     disks_param, par, additional_param);
+    string command = sformat("/sbin/dasdfmt -Y -P %1 -b 4096 -y -m 1 %2",
+			     par, disks_param);
 
     y2milestone ("Running command %1", command);
     term contents = `VBox (`HSpacing (70));

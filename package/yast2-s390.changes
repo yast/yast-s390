@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Mar 14 14:30:30 CET 2013 - aschnell@suse.de
+
+- removed non-functioning button to not write label during DASD
+  formatting (bnc#808275)
+- 2.22.2
+
+-------------------------------------------------------------------
 Tue Apr 10 17:02:55 CEST 2012 - aschnell@suse.de
 
 - changed license to GPL-2.0
