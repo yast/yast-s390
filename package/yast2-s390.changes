@@ -2,6 +2,7 @@
 Mon Apr 15 12:41:01 CEST 2013 - aschnell@suse.de
 
 - reread storage after zFCP configuration (bnc#814953)
+- 2.17.30
 
 -------------------------------------------------------------------
 Thu Mar 14 14:30:30 CET 2013 - aschnell@suse.de
