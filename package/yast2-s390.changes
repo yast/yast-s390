@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Jun 12 15:52:04 CEST 2013 - aschnell@suse.de
+
+- fixed adding nw DASDs in AutoYaST editor (bnc#824417)
+- 2.17.31
+
+-------------------------------------------------------------------
 Mon Apr 15 12:41:01 CEST 2013 - aschnell@suse.de
 
 - reread storage after zFCP configuration (bnc#814953)
