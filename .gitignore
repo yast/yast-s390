@@ -1,5 +1,5 @@
 Makefile
-Makefile.am
+/Makefile.am
 Makefile.am.common
 Makefile.in
 aclocal.m4
@@ -18,3 +18,4 @@ mkinstalldirs
 stamp-h
 s390.pot
 autom4te.cache
+*.ami
