@@ -103,6 +103,7 @@ global boolean Available () {
  * @return true on success
  */
 global boolean Read() {
+    ProbeDisks();
     disk_configured = false;
     return true;
 
@@ -188,8 +189,6 @@ global boolean Import (map settings) {
  */
 global map<string, list> Export()
 {
-    ProbeDisks();
-
     if (Mode::config())
     {
 	list<map<string, any> > l = maplist(integer i, map<string, any> d, devices, {
@@ -202,9 +201,11 @@ global map<string, list> Export()
 	    return d;
 	});
 
+	/*
 	l = filter(map<string, any> m, l, {
 	    return m["resource", "io", 0, "active"]:false;
 	});
+	*/
 
 	/*
 	l = maplist(map<string, any> m, l, {

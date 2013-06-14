@@ -114,7 +114,7 @@ define list<term> GetDASDDiskItems(string min_channel, string max_channel) ``{
     if (Mode::config ())
     {
 	items = (list<term>) maplist (integer k, map<string,any> d, devices, {
-	    string channel = d["channel_id"]:"";
+	    string channel = d["channel"]:"";
 	    string diag = d["diag"]:false
 		// table cell
 		? _("Yes")
@@ -297,7 +297,10 @@ define void ReloadDASDDialog () ``{
     DASDController::filter_max = (string)
 	UI::QueryWidget(`max_chan, `Value);
 
-    DASDController::ProbeDisks ();
+    if (!Mode::config())
+    {
+	DASDController::ProbeDisks ();
+    }
 
     list<term> items = GetDASDDiskItems (
 	       DASDController::filter_min,
@@ -596,7 +599,7 @@ All changes will be lost.")))
 	boolean format = (boolean)UI::QueryWidget (`id (`format), `Value);
 	boolean diag = (boolean)UI::QueryWidget (`id (`diag), `Value);
 	map<string,any> m = $[
-	    "channel_id" : channel,
+	    "channel" : channel,
 	    "format" : format,
 	    "diag" : diag,
 	];
