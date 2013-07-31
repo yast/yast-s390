@@ -5,9 +5,7 @@ Group:		System/YaST
 License:        GPL-2.0
 BuildRequires:	docbook-xsl-stylesheets doxygen libxslt perl-XML-Writer sgml-skel update-desktop-files
 BuildRequires:	yast2 yast2-devtools yast2-testsuite yast2-users yast2-bootloader
-# TODO FIXME: temporarily enable build on non-s390 arch to check if it actually builds
-# uncomment this back at production
-#ExclusiveArch:  s390 s390x
+ExclusiveArch:  s390 s390x
 Requires:       yast2 s390-tools
 
 Requires:       yast2-ruby-bindings >= 1.0.0
