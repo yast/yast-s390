@@ -1,3 +1,4 @@
-Makefile
-Makefile.in
+css
+js
+.yardoc
 *.html
