@@ -58,7 +58,8 @@ module Yast
       # Data was modified?
       @modified = false
 
-
+      # format all unformated devices upon activation?
+      @format_unformatted = false
 
       @proposal_valid = false
     end
@@ -137,21 +138,34 @@ module Yast
     def Write
       if !Mode.normal
         to_format = []
+        to_reactivate = []
 
         Builtins.foreach(@devices) do |index, device|
           channel = Ops.get_string(device, "channel", "")
           format = Ops.get_boolean(device, "format", false)
           do_diag = Ops.get_boolean(device, "diag", false)
-          ActivateDisk(channel, do_diag)
+          act_ret = ActivateDisk(channel, do_diag)
+          # for AutoInstall, format unformatted disks later at once
+          # even disks manually selected for formatting must be reactivated
+          if Mode.autoinst && act_ret == 8 && ( @format_unformatted || format )
+            format = true
+            to_reactivate << device
+          end
           if format
             dev_name = GetDeviceName(channel)
-            to_format = Builtins.add(to_format, dev_name) if dev_name != nil
+            to_format << device
           end
         end
 
         Builtins.y2milestone("Disks to format: %1", to_format)
 
         FormatDisks(to_format, 8) if !Builtins.isempty(to_format)
+
+        to_reactivate.each do | device |
+          channel = device["channel"] || ""
+          do_diag = device["diag"] || false
+          act_ret = ActivateDisk(channel, do_diag)
+        end
       end
 
       if !Mode.installation
@@ -190,6 +204,8 @@ module Yast
         { index => d }
       end
 
+      @format_unformatted = settings["format_unformatted"] || false
+
       true
     end
 
@@ -202,7 +218,10 @@ module Yast
         Builtins.contains(["channel", "format", "diag"], k)
       end }
 
-      { "devices" => l }
+      {
+        "devices" => l,
+        "format_unformatted" => @format_unformatted
+      }
     end
 
 
@@ -512,6 +531,7 @@ module Yast
     # Activate disk
     # @param [String] channel string Name of the disk to activate
     # @param [Boolean] diag boolean Activate DIAG or not
+    # @return [Integer] exit code of the activation command
     def ActivateDisk(channel, diag)
       command = Builtins.sformat(
         "/sbin/dasd_configure '%1' %2 %3",
@@ -536,8 +556,8 @@ module Yast
           ),
           channel
         )
-        if Mode.autoinst && Popup.TimedOKCancel(popup, 10) ||
-            Popup.ContinueCancel(popup)
+        # for autoinst, format unformatted disks later
+        if (! Mode.autoinst) && Popup.ContinueCancel(popup)
           cmd = Builtins.sformat(
             "ls '/sys/bus/ccw/devices/%1/block/' | tr -d '\n'",
             channel
@@ -573,7 +593,7 @@ module Yast
 
       @disk_configured = true
 
-      nil
+      ret
     end
 
 
@@ -806,7 +826,7 @@ module Yast
     publish :variable => :filter_min, :type => "string"
     publish :variable => :filter_max, :type => "string"
     publish :variable => :diag, :type => "map <string, boolean>"
-    publish :function => :ActivateDisk, :type => "void (string, boolean)"
+    publish :function => :ActivateDisk, :type => "integer (string, boolean)"
     publish :function => :DeactivateDisk, :type => "void (string, boolean)"
     publish :function => :ProbeDisks, :type => "void ()"
     publish :function => :FormatDisks, :type => "void (list <string>, integer)"

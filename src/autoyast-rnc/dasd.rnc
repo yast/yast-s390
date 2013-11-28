@@ -10,5 +10,6 @@ dasd = element dasd {
             element format { BOOLEAN }? &
             element diag { BOOLEAN }?
         }*
-    }?
+    }? &
+    element format_unformatted { BOOLEAN }?
 }
