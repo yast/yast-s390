@@ -145,6 +145,7 @@ module Yast
           format = Ops.get_boolean(device, "format", false)
           do_diag = Ops.get_boolean(device, "diag", false)
           act_ret = ActivateDisk(channel, do_diag)
+          # FIXME: general activation error handling - also in sync with below
           # for AutoInstall, format unformatted disks later at once
           # even disks manually selected for formatting must be reactivated
           if Mode.autoinst && act_ret == 8 && ( @format_unformatted || format )
@@ -164,7 +165,8 @@ module Yast
         to_reactivate.each do | device |
           channel = device["channel"] || ""
           do_diag = device["diag"] || false
-          act_ret = ActivateDisk(channel, do_diag)
+          # FIXME: general activation error handling - also in sync with above
+          ActivateDisk(channel, do_diag)
         end
       end
 
