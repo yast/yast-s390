@@ -241,7 +241,7 @@ module Yast
                       ["/dev/#{disk["stdout"]}"]
                       1
                     )
-                    diag = DASDController.diag[channel]
+                    diag = !!DASDController.diag[channel]
                     DASDController.ActivateDisk(channel, diag)
                   else
                     Popup.Error( Builtins.sformat("Couldn't find device for %1 channel", channel))
