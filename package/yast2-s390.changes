@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Jan 23 11:17:15 UTC 2014 - jsrain@suse.cz
+
+- enhanced handling of large amount of disks (fate#313402,
+  fate#313403, fate#315984)
+- 3.1.1
+
+-------------------------------------------------------------------
 Thu Sep 19 15:39:14 UTC 2013 - lslezak@suse.cz
 
 - do not use *.spec.in template, use *.spec file with RPM macros

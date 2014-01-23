@@ -139,6 +139,7 @@ module Yast
       if !Mode.normal
         to_format = []
         to_reactivate = []
+        unformatted_devices = []
 
         Builtins.foreach(@devices) do |index, device|
           channel = Ops.get_string(device, "channel", "")
@@ -155,6 +156,23 @@ module Yast
           if format
             dev_name = GetDeviceName(channel)
             to_format << device
+          # unformtted disk, manual (not AutoYaS)
+          elsif act_ret == 8
+            unformatted_devices << device
+          end
+        end
+
+        if unformatted_devices.size > 0
+          if unformatted_devices.size == 1
+            message = Builtins.sformat(_("Device %1 is not formatted. Format device now?"), unformatted_devices[0])
+          else
+            message = BUiltins.sformat(_("There are %1 unformatted devices. Format them now?"), unformatted_devices.size)
+          end
+          if Popup.ContinueCancel( message )
+            unformatted_devices.each do | device | 
+              to_format << device
+              to_reactivate << device
+            end
           end
         end
 
@@ -550,41 +568,8 @@ module Yast
       )
 
       if ret == 8
-        popup = Builtins.sformat(
-          _(
-            "Device %1 is not formatted. Format device now?\n" +
-              "If you want to format multiple devices in parallel,\n" +
-              "press 'Cancel' and select 'Perform Action', 'Format' later on.\n"
-          ),
-          channel
-        )
-        # for autoinst, format unformatted disks later
-        if (! Mode.autoinst) && Popup.ContinueCancel(popup)
-          cmd = Builtins.sformat(
-            "ls '/sys/bus/ccw/devices/%1/block/' | tr -d '\n'",
-            channel
-          )
-          disk = Convert.convert(
-            SCR.Execute(path(".target.bash_output"), cmd),
-            :from => "any",
-            :to   => "map <string, any>"
-          )
-          if Ops.get_integer(disk, "exit", -1) == 0 &&
-              Ops.greater_than(
-                Builtins.size(Ops.get_string(disk, "stdout", "")),
-                0
-              )
-            FormatDisks(
-              [Builtins.sformat("/dev/%1", Ops.get_string(disk, "stdout", ""))],
-              1
-            )
-            ActivateDisk(channel, diag)
-          else
-            Popup.Error(
-              Builtins.sformat("Couldn't find device for %1 channel", channel)
-            )
-          end
-        end
+        # unformatted disk is now handled now outside this function
+        # however, don't issue any error
       elsif ret == 7
         # when return code is 7, set DASD offline
         # https://bugzilla.novell.com/show_bug.cgi?id=561876#c9
