@@ -17,7 +17,7 @@
 
 
 Name:           yast2-s390
-Version:        3.1.1
+Version:        3.1.2
 Release:        0
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -27,7 +27,7 @@ Group:		System/YaST
 License:        GPL-2.0
 BuildRequires:	docbook-xsl-stylesheets doxygen libxslt perl-XML-Writer sgml-skel update-desktop-files
 BuildRequires:	yast2 yast2-testsuite yast2-users yast2-bootloader
-BuildRequires:  yast2-devtools >= 3.0.6
+BuildRequires:  yast2-devtools >= 3.1.10
 ExclusiveArch:  s390 s390x
 Requires:       yast2 s390-tools
 
