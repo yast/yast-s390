@@ -220,7 +220,7 @@ module Yast
               else
                 DASDController.DeactivateDisk(channel, diag)
               end
-              if act_ret == 8
+              if act_ret == 8 # 8 means disk is not formatted
                 unformatted_disks << channel
               end
             end
@@ -233,22 +233,15 @@ module Yast
               # for autoinst, format unformatted disks later
               if (! Mode.autoinst) && Popup.ContinueCancel(popup)
                 unformatted_disks.each do | channel |
-                  cmd = Builtins.sformat(
-                    "ls '/sys/bus/ccw/devices/%1/block/' | tr -d '\n'",
-                    channel
-                  )     
-                  disk = Convert.convert(
-                    SCR.Execute(path(".target.bash_output"), cmd),
-                    :from => "any",
-                    :to   => "map <string, any>"
-                  )     
-                  if Ops.get_integer(disk, "exit", -1) == 0 &&
-                    Ops.greater_than( Builtins.size(Ops.get_string(disk, "stdout", "")), 0)
+                  #FIXME: possibly disks can be formatted in parallel
+                  cmd = "ls '/sys/bus/ccw/devices/#{channel}/block/' | tr -d '\n'"
+                  disk = SCR.Execute(path(".target.bash_output"), cmd)
+                  if disk["exit"] == 0 && !disk["stdout"].empty?
                     DASDController.FormatDisks(
-                      [Builtins.sformat("/dev/%1", Ops.get_string(disk, "stdout", ""))],
+                      ["/dev/#{disk["stdout"]}"]
                       1
                     )
-                    diag = Ops.get(DASDController.diag, channel, false)
+                    diag = DASDController.diag[channel]
                     DASDController.ActivateDisk(channel, diag)
                   else
                     Popup.Error( Builtins.sformat("Couldn't find device for %1 channel", channel))
