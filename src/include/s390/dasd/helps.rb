@@ -74,7 +74,7 @@ module Yast
           ) +
           # Disk selection dialog help 3/4
           _(
-            "<p>To perform actions on multiple disks at once, mark these disks and click\n<b>Select or Deselect</b>.</p>\n"
+            "<p>To perform actions on multiple disks at once, mark these disks. To select all displayed disk (possibly after applying a filter), click\n<b>Select All</b> or <b>Deselect All</b>.</p>\n"
           ) +
           # Disk selection dialog help 4/4
           _(

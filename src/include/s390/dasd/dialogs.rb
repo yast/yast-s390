@@ -205,6 +205,7 @@ module Yast
         case action
           when :activate, :deactivate
             value = action == :activate
+            unformatted_disks = []
 
             Builtins.foreach(selected) do |id|
               channel = Ops.get_string(
@@ -212,13 +213,42 @@ module Yast
                 [id, "channel"],
                 ""
               )
+              act_ret = 0
               diag = Ops.get(DASDController.diag, channel, false)
               if value
-                DASDController.ActivateDisk(channel, diag)
+                act_ret = DASDController.ActivateDisk(channel, diag)
               else
                 DASDController.DeactivateDisk(channel, diag)
               end
+              if act_ret == 8 # 8 means disk is not formatted
+                unformatted_disks << channel
+              end
             end
+            if unformatted_disks.size > 0
+              if unformatted_disks.size == 1
+                popup = Builtins.sformat(_("Device %1 is not formatted. Format device now?"), unformatted_disks[0])
+              else
+                popup = BUiltins.sformat(_("There are %1 unformatted devices. Format them now?"), unformatted_sisks.size)
+              end
+              # for autoinst, format unformatted disks later
+              if (! Mode.autoinst) && Popup.ContinueCancel(popup)
+                unformatted_disks.each do | channel |
+                  #FIXME: possibly disks can be formatted in parallel
+                  cmd = "ls '/sys/bus/ccw/devices/#{channel}/block/' | tr -d '\n'"
+                  disk = SCR.Execute(path(".target.bash_output"), cmd)
+                  if disk["exit"] == 0 && !disk["stdout"].empty?
+                    DASDController.FormatDisks(
+                      ["/dev/#{disk["stdout"]}"]
+                      1
+                    )
+                    diag = !!DASDController.diag[channel]
+                    DASDController.ActivateDisk(channel, diag)
+                  else
+                    Popup.Error( Builtins.sformat("Couldn't find device for %1 channel", channel))
+                  end
+                end
+              end
+            end           
             DASDController.ProbeDisks
 
             return true
@@ -430,6 +460,8 @@ module Yast
             MenuButton(Id(:operation), _("Perform &Action"), PossibleActions())
           ) :
           HBox(
+            PushButton(Id(:select_all), _("&Select All")),
+            PushButton(Id(:deselect_all), _("&Deselect All")),
             HStretch(),
             # menu button
             MenuButton(Id(:operation), _("Perform &Action"), PossibleActions())
@@ -485,7 +517,15 @@ module Yast
 
         ret = Ops.get_symbol(event, "ID")
 
-        if ret == :filter
+        if ret == :select_all
+          
+          UI.ChangeWidget(Id(:table), :SelectedItems,
+            UI.QueryWidget(Id(:table), :Items).map { | item | item[0][0] })
+          ret = nil
+        elsif ret == :deselect_all
+          UI.ChangeWidget(Id(:table), :SelectedItems, [])
+          ret = nil
+        elsif ret == :filter
           filter_min = Convert.to_string(UI.QueryWidget(:min_chan, :Value))
           filter_max = Convert.to_string(UI.QueryWidget(:max_chan, :Value))
 

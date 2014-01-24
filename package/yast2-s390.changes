@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Jan 23 11:17:15 UTC 2014 - jsrain@suse.cz
+
+- enhanced handling of large amount of disks (fate#313402,
+  fate#313403, fate#315984)
+- 3.1.2
+
+-------------------------------------------------------------------
 Mon Dec  9 10:28:47 UTC 2013 - jreidinger@suse.com
 
 - add COPYING to fix building
