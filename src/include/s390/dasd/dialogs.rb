@@ -238,7 +238,7 @@ module Yast
                   disk = SCR.Execute(path(".target.bash_output"), cmd)
                   if disk["exit"] == 0 && !disk["stdout"].empty?
                     DASDController.FormatDisks(
-                      ["/dev/#{disk["stdout"]}"]
+                      ["/dev/#{disk["stdout"]}"],
                       1
                     )
                     diag = !!DASDController.diag[channel]
