@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-# Copyright (c) 2012 Novell, Inc.
+# Copyright (c) [2012-2014] Novell, Inc.
 #
 # All Rights Reserved.
 #
@@ -27,25 +27,28 @@
 # $Id$
 module Yast
   module S390DasdWizardsInclude
+
+
     def initialize_s390_dasd_wizards(include_target)
       Yast.import "UI"
       textdomain "s390"
 
       Yast.import "Sequencer"
       Yast.import "Wizard"
+      Yast.import "DASDController"
 
       Yast.include include_target, "s390/dasd/dialogs.rb"
     end
 
+
     # Whole configuration of controller
     # @return [Symbol] MainDASDSequence
     def MainDASDSequence
-      aliases = { "main" => lambda { DASDDialog() }, "add" => lambda do
-        AddDASDDiskDialog()
-      end, "delete" => lambda(
-      ) do
-        DeleteDASDDiskDialog()
-      end }
+      aliases = {
+        "main" => lambda { DASDDialog() },
+        "add" => lambda do AddDASDDiskDialog() end,
+        "delete" => lambda() do DeleteDASDDiskDialog() end
+      }
 
       sequence = {
         "ws_start" => "main",
@@ -59,6 +62,7 @@ module Yast
         "delete"   => { :abort => :abort, :next => "main" }
       }
 
+      DASDController.Read()
       Sequencer.Run(aliases, sequence)
     end
 
@@ -115,5 +119,7 @@ module Yast
 
       ret
     end
+
+
   end
 end
