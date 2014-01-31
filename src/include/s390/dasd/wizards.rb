@@ -46,8 +46,8 @@ module Yast
     def MainDASDSequence
       aliases = {
         "main" => lambda { DASDDialog() },
-        "add" => lambda do AddDASDDiskDialog() end,
-        "delete" => lambda() do DeleteDASDDiskDialog() end
+        "add" => lambda { AddDASDDiskDialog() },
+        "delete" => lambda() { DeleteDASDDiskDialog() }
       }
 
       sequence = {
