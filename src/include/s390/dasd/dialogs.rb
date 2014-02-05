@@ -228,24 +228,25 @@ module Yast
               if unformatted_disks.size == 1
                 popup = Builtins.sformat(_("Device %1 is not formatted. Format device now?"), unformatted_disks[0])
               else
-                popup = BUiltins.sformat(_("There are %1 unformatted devices. Format them now?"), unformatted_sisks.size)
+                popup = Builtins.sformat(_("There are %1 unformatted devices. Format them now?"), unformatted_disks.size)
               end
               # for autoinst, format unformatted disks later
               if (! Mode.autoinst) && Popup.ContinueCancel(popup)
-                unformatted_disks.each do | channel |
-                  #FIXME: possibly disks can be formatted in parallel
+                devices = unformatted_disks.map do | channel |
+                  device = nil
                   cmd = "ls '/sys/bus/ccw/devices/#{channel}/block/' | tr -d '\n'"
                   disk = SCR.Execute(path(".target.bash_output"), cmd)
                   if disk["exit"] == 0 && !disk["stdout"].empty?
-                    DASDController.FormatDisks(
-                      ["/dev/#{disk["stdout"]}"],
-                      1
-                    )
-                    diag = !!DASDController.diag[channel]
-                    DASDController.ActivateDisk(channel, diag)
+                    device = "/dev/#{disk["stdout"]}"
                   else
                     Popup.Error( Builtins.sformat("Couldn't find device for %1 channel", channel))
                   end
+                  device
+                end
+                DASDController.FormatDisks(devices, 8) #don't format more than 8 disks in parallel
+                unformatted_disks.each do | channel |
+                  diag = !!DASDController.diag[channel]
+                  DASDController.ActivateDisk(channel, diag)
                 end
               end
             end           

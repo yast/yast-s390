@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Wed Feb  5 12:44:00 UTC 2014 - jsrain@suse.cz
+
+- enhanced unformatted disks handling during activation
+  (fate#313403)
+- fixed typos
+- 3.1.4
+
+-------------------------------------------------------------------
 Fri Jan 31 17:06:14 CET 2014 - aschnell@suse.de
 
 - fixed initialisation during installation (bnc#853929)
