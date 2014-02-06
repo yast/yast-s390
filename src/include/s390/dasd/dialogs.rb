@@ -239,10 +239,11 @@ module Yast
                   if disk["exit"] == 0 && !disk["stdout"].empty?
                     device = "/dev/#{disk["stdout"]}"
                   else
-                    Popup.Error( Builtins.sformat("Couldn't find device for %1 channel", channel))
+                    Popup.Error( Builtins.sformat(_("Couldn't find device for channel %1."), channel))
                   end
                   device
                 end
+                devices.reject! { | d | d.nil? }
                 DASDController.FormatDisks(devices, 8) #don't format more than 8 disks in parallel
                 unformatted_disks.each do | channel |
                   diag = !!DASDController.diag[channel]
