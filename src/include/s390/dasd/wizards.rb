@@ -24,7 +24,6 @@
 # Summary:	Wizards definitions
 # Authors:	Jiri Srain <jsrain@suse.cz>
 #
-# $Id$
 module Yast
   module S390DasdWizardsInclude
 

@@ -24,8 +24,6 @@
 # Summary:	Client for autoinstallation
 # Authors:	Jiri Srain <jsrain@suse.cz>
 #
-# $Id$
-#
 # This is a client for autoinstallation. It takes its arguments,
 # goes through the configuration and return the setting.
 # Does not do any changes to the configuration.
@@ -55,6 +53,7 @@ module Yast
           @param = Convert.to_map(WFM.Args(1))
         end
       end
+
       Builtins.y2debug("func=%1", @func)
       Builtins.y2debug("param=%1", @param)
 
