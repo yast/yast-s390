@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-# Copyright (c) 2012 Novell, Inc.
+# Copyright (c) [2012-2014] Novell, Inc.
 #
 # All Rights Reserved.
 #
@@ -115,10 +115,6 @@ module Yast
       ProbeDisks()
 
       if !Mode.normal
-        @devices = Builtins.filter(@devices) do |index, d|
-          Ops.get_boolean(d, ["resource", "io", 0, "active"], false)
-        end
-
         @devices = Builtins.mapmap(@devices) do |index, d|
           Ops.set(d, "format", Ops.get_boolean(d, "format", false))
           Ops.set(d, "diag", Ops.get_boolean(d, "diag", false))

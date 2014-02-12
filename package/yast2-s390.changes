@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Feb 12 15:17:53 CET 2014 - aschnell@suse.de
+
+- fixed DASD probing (bnc#860398)
+- 3.1.5
+
+-------------------------------------------------------------------
 Wed Feb  5 12:44:00 UTC 2014 - jsrain@suse.cz
 
 - enhanced unformatted disks handling during activation

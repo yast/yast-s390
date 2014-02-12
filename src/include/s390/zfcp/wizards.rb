@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-# Copyright (c) 2012 Novell, Inc.
+# Copyright (c) [2012-2014] Novell, Inc.
 #
 # All Rights Reserved.
 #
@@ -24,7 +24,6 @@
 # Summary:	Wizards definitions
 # Authors:	Jiri Srain <jsrain@suse.cz>
 #
-# $Id$
 module Yast
   module S390ZfcpWizardsInclude
     def initialize_s390_zfcp_wizards(include_target)
@@ -40,12 +39,11 @@ module Yast
     # Main dialog
     # @return [Symbol] dialog
     def MainZFCPSequence
-      aliases = { "main" => lambda { ZFCPDialog() }, "add" => lambda do
-        AddZFCPDiskDialog()
-      end, "delete" => lambda(
-      ) do
-        DeleteZFCPDiskDialog()
-      end }
+      aliases = {
+        "main" => lambda { ZFCPDialog() },
+        "add" => lambda { AddZFCPDiskDialog() },
+        "delete" => lambda { DeleteZFCPDiskDialog() }
+      }
 
       sequence = {
         "ws_start" => "main",

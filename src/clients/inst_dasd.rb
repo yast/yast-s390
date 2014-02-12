@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-# Copyright (c) 2012 Novell, Inc.
+# Copyright (c) [2012-2014] Novell, Inc.
 #
 # All Rights Reserved.
 #
@@ -24,8 +24,6 @@
 # Summary:	Main file
 # Authors:	Jiri Srain <jsrain@suse.cz>
 #
-# $Id$
-#
 # Main file for controller configuration. Uses all other files.
 module Yast
   class InstDasdClient < Client
@@ -38,6 +36,7 @@ module Yast
 
       Yast.include self, "s390/dasd/wizards.rb"
 
+      DASDController.Read()
       @ret = MainDASDSequence()
       Builtins.y2debug("ret=%1", @ret)
 
