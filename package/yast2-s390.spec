@@ -1,7 +1,7 @@
 #
 # spec file for package yast2-s390
 #
-# Copyright (c) 2013 SUSE LINUX Products GmbH, Nuernberg, Germany.
+# Copyright (c) 2014 SUSE LINUX Products GmbH, Nuernberg, Germany.
 #
 # All modifications and additions to the file contributed by third parties
 # remain the property of their copyright owners, unless otherwise agreed
@@ -28,11 +28,12 @@ License:        GPL-2.0
 BuildRequires:	docbook-xsl-stylesheets doxygen libxslt perl-XML-Writer sgml-skel update-desktop-files
 BuildRequires:	yast2 yast2-testsuite yast2-users yast2-bootloader
 BuildRequires:  yast2-devtools >= 3.1.10
+BuildRequires:	yast2-ruby-bindings >= 3.1.7
+BuildRequires:  rubygem-rspec
 ExclusiveArch:  s390 s390x
-Requires:       yast2 s390-tools
-
-Requires:       yast2-ruby-bindings >= 1.0.0
-
+Requires:	yast2
+Requires:	yast2-ruby-bindings >= 3.1.7
+Requires:	s390-tools
 Summary:	YaST2 - S/390 Specific Features Configuration
 
 %description

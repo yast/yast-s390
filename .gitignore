@@ -19,3 +19,4 @@ stamp-h
 s390.pot
 autom4te.cache
 *.ami
+test-driver
