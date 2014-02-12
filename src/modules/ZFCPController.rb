@@ -78,13 +78,6 @@ module Yast
     end
 
 
-    # Is this kind of disk controller available?
-    # @return [Boolean] true if it is
-    def Available
-      true
-    end
-
-
     def IsValidChannel(channel)
       regexp = "^([[:xdigit:]]{1}).([[:xdigit:]]{1}).([[:xdigit:]]{4})$"
       Builtins.regexpmatch(channel, regexp)
@@ -698,7 +691,6 @@ module Yast
     publish :variable => :modified, :type => "boolean"
     publish :variable => :proposal_valid, :type => "boolean"
     publish :function => :SetModified, :type => "void (boolean)"
-    publish :function => :Available, :type => "boolean ()"
     publish :function => :IsValidChannel, :type => "boolean (string)"
     publish :function => :FormatChannel, :type => "string (string)"
     publish :function => :IsValidWWPN, :type => "boolean (string)"

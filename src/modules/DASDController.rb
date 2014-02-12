@@ -32,6 +32,11 @@ require "yast"
 
 module Yast
   class DASDControllerClass < Module
+
+
+    include Yast::Logger
+
+
     def main
       Yast.import "UI"
       textdomain "s390"
@@ -75,13 +80,6 @@ module Yast
       @modified = value
 
       nil
-    end
-
-
-    # Is this kind of disk controller available?
-    # @return [Boolean] true if it is
-    def Available
-      true
     end
 
 
@@ -359,19 +357,10 @@ module Yast
     # Check if DASD subsystem is available
     # @return [Boolean] True if more than one disk
     def IsAvailable
-      disks = Convert.convert(
-        SCR.Read(path(".probe.disk")),
-        :from => "any",
-        :to   => "list <map <string, any>>"
-      )
-      disks = Builtins.filter(disks) do |d|
-        Builtins.tolower(Ops.get_string(d, "device", "")) == "dasd"
-      end
-
-      count = Builtins.size(disks)
-      Builtins.y2milestone("number of probed DASD devices %1", count)
-
-      Ops.greater_than(count, 0)
+      disks = SCR.Read(path(".probe.disk"))
+      count = disks.count { |d| d["device"] == "DASD" }
+      log.info("number of probed DASD devices #{count}")
+      return count > 0
     end
 
 
@@ -821,7 +810,6 @@ module Yast
     publish :function => :GetModified, :type => "boolean ()"
     publish :variable => :proposal_valid, :type => "boolean"
     publish :function => :SetModified, :type => "void (boolean)"
-    publish :function => :Available, :type => "boolean ()"
     publish :function => :IsValidChannel, :type => "boolean (string)"
     publish :function => :FormatChannel, :type => "string (string)"
     publish :function => :Read, :type => "boolean ()"
