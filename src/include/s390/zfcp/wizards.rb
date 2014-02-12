@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-# Copyright (c) 2012 Novell, Inc.
+# Copyright (c) [2012-2014] Novell, Inc.
 #
 # All Rights Reserved.
 #
@@ -57,6 +57,7 @@ module Yast
         "delete"   => { :abort => :abort, :next => "main" }
       }
 
+      ZFCPController.Read()
       Sequencer.Run(aliases, sequence)
     end
 
