@@ -11,7 +11,7 @@ Yast.import "DASDController"
 describe "DASDController#IsAvailable" do
 
 
-  it "configures snapper" do
+  it "returns true if .probe.disk contains DASDs" do
 
     data = [
       { "bus" => "CCW", "bus_hwcfg" => "ccw", "class_id" => 262, "detail" => {
