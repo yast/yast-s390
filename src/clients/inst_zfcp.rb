@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-# Copyright (c) 2012 Novell, Inc.
+# Copyright (c) [2012-2014] Novell, Inc.
 #
 # All Rights Reserved.
 #
@@ -24,8 +24,6 @@
 # Summary:	Main file
 # Authors:	Jiri Srain <jsrain@suse.cz>
 #
-# $Id$
-#
 # Main file for controller configuration. Uses all other files.
 module Yast
   class InstZfcpClient < Client
@@ -38,6 +36,7 @@ module Yast
 
       Yast.include self, "s390/zfcp/wizards.rb"
 
+      ZFCPController.Read()
       @ret = MainZFCPSequence()
       Builtins.y2debug("ret=%1", @ret)
 

@@ -61,7 +61,6 @@ module Yast
         "delete"   => { :abort => :abort, :next => "main" }
       }
 
-      DASDController.Read()
       Sequencer.Run(aliases, sequence)
     end
 

@@ -57,7 +57,6 @@ module Yast
         "delete"   => { :abort => :abort, :next => "main" }
       }
 
-      ZFCPController.Read()
       Sequencer.Run(aliases, sequence)
     end
 
