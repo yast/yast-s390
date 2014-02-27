@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Feb 27 15:36:12 CET 2014 - thardeck@suse.de
+
+- fixed iucvterminal module to work with systemd (fate#314946)
+- 3.1.6
+
+-------------------------------------------------------------------
 Wed Feb 12 15:17:53 CET 2014 - aschnell@suse.de
 
 - fixed DASD probing (bnc#860398)

@@ -27,6 +27,7 @@
 require "yast"
 
 module Yast
+  import "Service"
   class IUCVTerminalClass < Module
     def main
       textdomain "s390"
@@ -37,34 +38,17 @@ module Yast
       Yast.import "Progress"
       Yast.import "Integer"
       Yast.import "Bootloader"
+      Yast.import "Service"
 
-      # Maximal allowed IUCV ttys, 999 is the absolute maximum
-      @MAX_IUCV_TTYS = 99
+      # Maximal allowed IUCV ttys
+      @MAX_IUCV_TTYS = 999
 
-      # Default Emulation for HVC
-      @DEFAULT_HVC_EMULATION = "linux"
+      # Maximal allowed HVC ttys (there are only 8 hvc devices)
+      @MAX_HVC_TTYS = 8
 
-      # Text field for changing settings of all HVC instances
-      @TEXT_INSTANCES_ALL = _("<all>")
-
-      # Text field for not changing the HVC emulation
-      @TEXT_EMU_NO_CHANGE = _("<don't change>")
-
-      # List of all possible HVC terminals
-      @POSSIBLE_HVC_INSTANCES = [
-        @TEXT_INSTANCES_ALL,
-        "hvc0",
-        "hvc1",
-        "hvc2",
-        "hvc3",
-        "hvc4",
-        "hvc5",
-        "hvc6",
-        "hvc7"
-      ]
-
-      # List of all HVC emulations
-      @HVC_EMULATIONS = [@TEXT_EMU_NO_CHANGE, "linux", "dumb", "xterm", "vt220"]
+      # Systemd service template prefix
+      @HVC_PREFIX = "serial-getty"
+      @IUCV_PREFIX = "iucvtty"
 
       # Data was modified?
       @modified = false
@@ -78,10 +62,6 @@ module Yast
       # Number of HVC instances
       @hvc_instances = 0
 
-      # List of emulations per HVC device (first entry for hvc0, second for
-      # hvc1 and so on)
-      @hvc_emulations = []
-
       # Show kernel output on hvc0?
       @show_kernel_out_on_hvc = false
 
@@ -90,6 +70,70 @@ module Yast
 
       # Has the bootloader configuration changed?
       @has_bootloader_changed = false
+
+      # getty.target.wants directory
+      @getty_conf_dir = "/etc/systemd/system/getty.target.wants/"
+    end
+
+    def tty_entries(prefix)
+      Dir.entries(@getty_conf_dir).select{ |e| e =~ /^#{prefix}@.+\.service$/ }
+    end
+
+    def get_tty_num(prefix)
+      tty_entries(prefix).count
+    end
+
+    def get_iucv_num
+      get_tty_num(@IUCV_PREFIX)
+    end
+
+    def get_hvc_num
+      get_tty_num(@HVC_PREFIX)
+    end
+
+    def get_iucv_name
+      entry = tty_entries(@IUCV_PREFIX).sort.first
+      if entry
+        match = entry.scan(/^#{@IUCV_PREFIX}@(.+)0\.service$/).first
+        name = match.first if match
+      end
+      name ||= @iucv_name
+    end
+
+    def setup_iucv(target_num)
+      target_num = @MAX_IUCV_TTYS if target_num > @MAX_IUCV_TTYS
+      current_name = get_iucv_name
+
+      # make sure to remove the old entries if the terminal name has changed
+      if current_name != @iucv_name
+        setup_tty_instances(0, @IUCV_PREFIX, current_name)
+      end
+      setup_tty_instances(target_num, @IUCV_PREFIX, @iucv_name)
+    end
+
+    def setup_hvc(target_num)
+      target_num = @MAX_HVC_TTYS if target_num > @MAX_HVC_TTYS
+      setup_tty_instances(target_num, @HVC_PREFIX, "hvc")
+    end
+
+    def setup_tty_instances(target_num, prefix, name)
+      existing_num = get_tty_num(prefix) - 1
+      target_num -= 1
+      return if existing_num == target_num
+
+      if target_num > existing_num
+        for i in (existing_num + 1)..target_num do
+          service_name = "#{prefix}@#{name}#{i}.service"
+          SCR.Execute(path(".target.bash"), "systemctl enable #{service_name}")
+          SCR.Execute(path(".target.bash"), "systemctl start #{service_name}")
+        end
+      else
+        existing_num.downto(target_num + 1) do |i|
+          service_name = "#{prefix}@#{name}#{i}.service"
+          SCR.Execute(path(".target.bash"), "systemctl disable #{service_name}")
+          SCR.Execute(path(".target.bash"), "systemctl stop #{service_name}")
+        end
+      end
     end
 
     # Read all settings
@@ -126,68 +170,12 @@ module Yast
 
       # Load IUCVtty settings
       Progress.NextStage
-      if FileUtils.Exists("/etc/inittab")
-        @iucv_instances = 0
-        if SCR.Read(path(".etc.inittab.i001")) != nil
-          id = ""
-          # count the iucvtty instances
-          Builtins.foreach(Integer.RangeFrom(1, Ops.add(@MAX_IUCV_TTYS, 1))) do |i|
-            id = "i"
-            if Ops.less_than(i, 10)
-              id = Ops.add(id, "00")
-            elsif Ops.less_than(i, 100)
-              id = Ops.add(id, "0")
-            end
-            if SCR.Read(
-                Ops.add(path(".etc.inittab"), Ops.add(id, Builtins.tostring(i)))
-              ) != nil
-              @iucv_instances = Ops.add(@iucv_instances, 1)
-            else
-              raise Break
-            end
-          end
-          # extract IUCVtty Terminal name
-          if Ops.greater_than(@iucv_instances, 0)
-            value = Convert.to_string(SCR.Read(path(".etc.inittab") + "i001"))
-            # remove the following number
-            temp = Builtins.regexptokenize(value, " ([a-z0-9]{1,7})1$")
-            @iucv_name = Ops.get(temp, 0, "lxterm")
-          end
-        end
-      end
+      @iucv_instances = get_iucv_num
+      @iucv_name = get_iucv_name
 
       # Load HVC settings
       Progress.NextStage
-      if FileUtils.Exists("/etc/inittab")
-        @hvc_instances = 0
-        if SCR.Read(path(".etc.inittab.h0")) != nil
-          id = ""
-          console2 = nil
-          # count the hvc instances
-          Builtins.foreach(Integer.RangeFrom(0, 8)) do |i|
-            id = "h"
-            console2 = Convert.to_string(
-              SCR.Read(
-                Ops.add(path(".etc.inittab"), Ops.add(id, Builtins.tostring(i)))
-              )
-            )
-            if console2 != nil
-              @hvc_instances = Ops.add(@hvc_instances, 1)
-              # read emulation
-              @hvc_emulations = Convert.convert(
-                Builtins.merge(
-                  @hvc_emulations,
-                  Builtins.regexptokenize(console2, " (.{4,5})$")
-                ),
-                :from => "list",
-                :to   => "list <string>"
-              )
-            else
-              raise Break
-            end
-          end
-        end
-      end
+      @hvc_instances = get_hvc_num
 
       # Extract settings from the kernel parameters
       Progress.NextStage
@@ -235,11 +223,11 @@ module Yast
     # Write all settings
     # @return true on success
     def Write
-      return true if !@modified
+      return true unless @modified
 
       # Inittab write dialog caption
       caption = _("Saving IUCV Terminal Configuration")
-      steps = 2
+      steps = 3
 
       Progress.New(
         caption,
@@ -251,9 +239,7 @@ module Yast
           # Progress stage 2/4
           _("Write HVC settings"),
           # Progress stage 3/4
-          _("Write kernel parameters"),
-          # Progress stage 4/4
-          _("Initialize Init")
+          _("Write kernel parameters")
         ],
         [
           # Progress step 1/4
@@ -262,8 +248,6 @@ module Yast
           _("Writing HVC settings..."),
           # Progress step 3/4
           _("Writing kernel parameters..."),
-          # Progress step 4/4
-          _("Initializing Init..."),
           # Progress finished
           _("Finished")
         ],
@@ -272,65 +256,11 @@ module Yast
 
       # save IUCVtty settings
       Progress.NextStage
-      id = ""
-      Builtins.foreach(Integer.RangeFrom(1, Ops.add(@MAX_IUCV_TTYS, 1))) do |i|
-        id = "i"
-        if Ops.less_than(i, 10)
-          id = Ops.add(id, "00")
-        elsif Ops.less_than(i, 100)
-          id = Ops.add(id, "0")
-        end
-        if Ops.less_or_equal(i, @iucv_instances)
-          # the maximum for terminal ids are 8 characters
-          SCR.Write(
-            Ops.add(path(".etc.inittab"), Ops.add(id, Builtins.tostring(i))),
-            Ops.add(
-              Ops.add("2345:respawn:/usr/bin/iucvtty ", @iucv_name),
-              Builtins.tostring(i)
-            )
-          )
-        else
-          # delete all other iucv inittab entries
-          SCR.Write(
-            Ops.add(path(".etc.inittab"), Ops.add(id, Builtins.tostring(i))),
-            nil
-          )
-        end
-      end
+      setup_iucv(@iucv_instances)
 
       # save HVC settings
       Progress.NextStage
-      console = ""
-      Builtins.foreach(Integer.RangeFrom(0, 8)) do |i|
-        id = "h"
-        # hvc starts with zero instead of 1
-        if Ops.less_than(i, @hvc_instances)
-          # this console was build according to the documentation from 2009 but SP2 seems to have already inittab entries
-          # for HVC so using the same syntax
-          # console = "2345:respawn:/sbin/agetty -L 9600 hvc" + tostring(i) + " " + hvc_emulations[i]:DEFAULT_HVC_EMULATION;
-
-          console = Ops.add(
-            Ops.add(
-              Ops.add("2345:respawn:/sbin/ttyrun hvc", Builtins.tostring(i)),
-              " /sbin/agetty -L 9600 %t "
-            ),
-            Ops.get(@hvc_emulations, i, @DEFAULT_HVC_EMULATION)
-          )
-          SCR.Write(
-            Ops.add(path(".etc.inittab"), Ops.add(id, Builtins.tostring(i))),
-            console
-          )
-        else
-          # delete all other hvc inittab entries
-          SCR.Write(
-            Ops.add(path(".etc.inittab"), Ops.add(id, Builtins.tostring(i))),
-            nil
-          )
-        end
-      end
-
-      # flush cache
-      SCR.Write(path(".etc.inittab"), nil)
+      setup_hvc(@hvc_instances)
 
       # writing Kernel parameters
       Progress.NextStage
@@ -362,32 +292,15 @@ module Yast
         Progress.set(old_progress)
       end
 
-      # initialize init system
-      Progress.NextStage
-      cmd = "init q"
-      Builtins.y2milestone("Running command %1", cmd)
-      output = Convert.to_map(SCR.Execute(path(".target.bash_output"), cmd))
-      message = Ops.add(
-        Ops.get_string(output, "stdout", ""),
-        Ops.get_string(output, "stderr", "")
-      )
-      Builtins.y2milestone("%1 output: %2", cmd, message)
-
       Progress.NextStage
       true
     end
 
     publish :variable => :MAX_IUCV_TTYS, :type => "const integer"
-    publish :variable => :DEFAULT_HVC_EMULATION, :type => "const string"
-    publish :variable => :TEXT_INSTANCES_ALL, :type => "const string"
-    publish :variable => :TEXT_EMU_NO_CHANGE, :type => "const string"
-    publish :variable => :POSSIBLE_HVC_INSTANCES, :type => "const list <string>"
-    publish :variable => :HVC_EMULATIONS, :type => "const list <string>"
     publish :variable => :modified, :type => "boolean"
     publish :variable => :iucv_instances, :type => "integer"
     publish :variable => :iucv_name, :type => "string"
     publish :variable => :hvc_instances, :type => "integer"
-    publish :variable => :hvc_emulations, :type => "list <string>"
     publish :variable => :show_kernel_out_on_hvc, :type => "boolean"
     publish :variable => :restrict_hvc_to_srvs, :type => "string"
     publish :variable => :has_bootloader_changed, :type => "boolean"
