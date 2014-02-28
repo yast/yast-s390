@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Feb 28 14:51:50 UTC 2014 - thardeck@suse.com
+
+- fixed iucvterminal-server behavior on inital start
+- 3.1.8
+
+-------------------------------------------------------------------
 Fri Feb 28 10:26:39 UTC 2014 - thardeck@suse.com
 
 - readded SCR agent files for iucvterminal-server module
