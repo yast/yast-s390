@@ -1521,13 +1521,6 @@ module Yast
       # initialize screen
       DrawMainDialog()
 
-      # disable Dumbtab if no proper z/VM IDs are defined
-      UI.ChangeWidget(
-        Id(:tab),
-        :Enabled,
-        Ops.greater_than(Builtins.size(@zvm_id_list), 0)
-      )
-
       ret = nil
       begin
         ret = Convert.to_symbol(UI.UserInput)
