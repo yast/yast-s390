@@ -61,6 +61,7 @@ ynclude6_DATA = \
 scrconf_DATA = \
   scrconf/cfg_xpram.scr \
   scrconf/cfg_iucv_terminal_server.scr \
+  scrconf/etc_iucv_ts-authorization.scr \
   scrconf/cfg_dumpconf.scr
 
 schemafilesdir = $(schemadir)/autoyast/rnc
