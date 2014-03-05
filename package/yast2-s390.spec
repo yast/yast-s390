@@ -35,6 +35,7 @@ Requires:	yast2
 Requires:	yast2-ruby-bindings >= 3.1.7
 Requires:	s390-tools
 Summary:	YaST2 - S/390 Specific Features Configuration
+Url:		http://github.com/yast/yast-s390/
 
 %description
 This package contains the YaST component for configuration of
