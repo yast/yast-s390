@@ -160,7 +160,7 @@ module Yast
           if unformatted_devices.size == 1
             message = Builtins.sformat(_("Device %1 is not formatted. Format device now?"), unformatted_devices[0])
           else
-            message = BUiltins.sformat(_("There are %1 unformatted devices. Format them now?"), unformatted_devices.size)
+            message = Builtins.sformat(_("There are %1 unformatted devices. Format them now?"), unformatted_devices.size)
           end
           if Popup.ContinueCancel( message )
             unformatted_devices.each do | device | 
