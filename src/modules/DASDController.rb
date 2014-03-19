@@ -56,7 +56,7 @@ module Yast
       @diag = {}
 
 
-      # Have DASDs been configured so that mkinitrd and zipl need to be run?
+      # Have DASDs been configured so that mkinitrd needs to be run?
       @disk_configured = false
 
 
@@ -185,9 +185,9 @@ module Yast
       if !Mode.installation
         if @disk_configured
           # popup label
-          UI.OpenDialog(Label(_("Running mkinitrd and zipl.")))
+          UI.OpenDialog(Label(_("Running mkinitrd.")))
 
-          command = "/sbin/mkinitrd && /sbin/zipl"
+          command = "/sbin/mkinitrd"
           Builtins.y2milestone("Running command %1", command)
           ret = SCR.Execute(path(".target.bash"), command)
           Builtins.y2milestone("Exit code: %1", ret)
