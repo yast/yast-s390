@@ -1,0 +1,17 @@
+/**
+ * File:
+ *   cfg_iucv_terminal_server.scr
+ * Summary:
+ *   SCR Agent for reading/writing /etc/sysconfig/iucv_terminal_server
+ *   using the sysconfig-agent
+ *   this file is only relevant for the Yast IUCV Terminal Server
+ *   configuration
+ *
+ * Read/Sets the values defined in <tt>/etc/sysconfig/iucv_terminal_server</tt>
+ * in an easy manner.
+ */
+.sysconfig.iucv_terminal_server
+
+`ag_ini(
+  `SysConfigFile("/etc/sysconfig/iucv_terminal_server")
+)
