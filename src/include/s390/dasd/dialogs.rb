@@ -360,6 +360,12 @@ module Yast
               Ops.get_string(DASDController.devices, [id, "dev_name"], "")
             end
             DASDController.FormatDisks(devices, par)
+
+            channels.each do |channel|
+              diag = DASDController.diag.fetch(channel, false)
+              DASDController.ActivateDisk(channel, diag)
+            end
+
             DASDController.ProbeDisks
 
             return true
