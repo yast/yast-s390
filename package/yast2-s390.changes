@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Mar 28 07:48:04 UTC 2014 - jsrain@suse.cz
+
+- re-activate DASD disks after formating (bnc#867267)
+  (patch by Arvin)
+- 3.1.10
+
+-------------------------------------------------------------------
 Wed Mar 19 14:30:54 CET 2014 - aschnell@suse.de
 
 - do not execute zipl after DASD or zFCP configuration (bnc#869123)

@@ -596,7 +596,7 @@ module Yast
 
 
     # Format disks
-    # @param [Array<String>] disks_list list<string> List of disks to be formated
+    # @param [Array<String>] disks_list list<string> List of disks to be formatted
     # @param [Fixnum] par integer Number of disks that can be formated in parallel
     def FormatDisks(disks_list, par)
       disks_list = deep_copy(disks_list)
