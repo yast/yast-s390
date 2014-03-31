@@ -808,7 +808,8 @@ module Yast
               Builtins.union(non_ts_users_list, usermap)
             )
 
-            error = Users.EditGroup(group)
+            changes = { "userlist" => group["userlist"] || [] }
+            error = Users.EditGroup(changes)
             if error == ""
               Users.CommitGroup
             else
