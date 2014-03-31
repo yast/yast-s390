@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Mar 31 12:07:12 UTC 2014 - thardeck@suse.com
+
+- pass along group changes properly in IUCV module (bnc#870891)
+- reset group cache before adding new ones
+- 3.1.11
+
+-------------------------------------------------------------------
 Fri Mar 28 07:48:04 UTC 2014 - jsrain@suse.cz
 
 - re-activate DASD disks after formating (bnc#867267)
