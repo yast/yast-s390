@@ -781,6 +781,7 @@ module Yast
         if !Builtins.haskey(groups, groupname)
           group = { "cn" => groupname, "userlist" => usermap }
 
+          Users.ResetCurrentGroup
           error = Users.AddGroup(group)
           if error == ""
             Users.CommitGroup
