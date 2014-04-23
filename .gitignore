@@ -20,3 +20,4 @@ s390.pot
 autom4te.cache
 *.ami
 test-driver
+package/*.bz2
