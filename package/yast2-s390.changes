@@ -1,4 +1,16 @@
 -------------------------------------------------------------------
+Tue Apr 22 15:34:08 UTC 2014 - mpost@suse.com
+
+- Changed the code that creates the dasdfmt command to use
+  variables for the request size (-r) and the "cylinders per
+  hashmark" value (-m)
+- Adapted the progress bar for formatting DASD to match what is
+  specified on the dasdfmt command.
+- Set the values of both -r and -m to the new default value of 10
+  that came in with s390-tools 1.24.1.
+- 3.1.12
+
+-------------------------------------------------------------------
 Mon Mar 31 12:07:12 UTC 2014 - thardeck@suse.com
 
 - pass along group changes properly in IUCV module (bnc#870891)

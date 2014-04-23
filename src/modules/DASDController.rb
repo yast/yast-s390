@@ -607,6 +607,11 @@ module Yast
       disks = {}
       disks_cmd = []
       index = -1
+      reqsize = 10   # The default request size for dasdfmt is 10
+      msize = 10     # The "cylinders per hashmark" value must be >= the request size
+      if msize < reqsize
+        msize=reqsize
+      end
       Builtins.foreach(disks_list) do |device|
         index = Ops.add(index, 1)
         Ops.set(disks, index, device)
@@ -614,8 +619,10 @@ module Yast
       end
       disks_param = Builtins.mergestring(disks_cmd, " ")
       command = Builtins.sformat(
-        "/sbin/dasdfmt -Y -P %1 -b 4096 -y -m 1 %2",
+        "/sbin/dasdfmt -Y -P %1 -b 4096 -y -r %2 -m %3 %4",
         par,
+        reqsize,
+        msize,
         disks_param
       )
 
@@ -694,7 +701,7 @@ module Yast
         Builtins.foreach(progress) do |d|
           if d != ""
             i = Builtins.tointeger(d)
-            Ops.set(this_step, i, Ops.add(Ops.get(this_step, i, 0), 1))
+            Ops.set(this_step, i, Ops.add(Ops.get(this_step, i, 0), msize))
           end
         end
         Builtins.foreach(this_step) do |k, v|
