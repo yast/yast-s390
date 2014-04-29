@@ -44,7 +44,7 @@ module Yast
       @devices = {}
 
       @filter_min = "0.0.0000"
-      @filter_max = "0.0.ffff"
+      @filter_max = "ff.f.ffff"
 
       @previous_settings = {}
 
