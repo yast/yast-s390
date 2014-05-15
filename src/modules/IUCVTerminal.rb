@@ -183,24 +183,18 @@ module Yast
       Bootloader.Read
       Progress.set(old_progress)
 
-      # load actual boot selection
-      actual_boot_section = Bootloader.getDefaultSection
-
-      restrict_hvc_to_srvs_output = Bootloader.getKernelParam(
-        actual_boot_section,
-        "hvc_iucv_allow"
-      )
-      if restrict_hvc_to_srvs_output != "false"
+      restrict_hvc_to_srvs_output = Bootloader.kernel_param(:common, "hvc_iucv_allow")
+      if restrict_hvc_to_srvs_output != :missing
         @restrict_hvc_to_srvs = restrict_hvc_to_srvs_output
       end
 
-      console = Bootloader.getKernelParam(actual_boot_section, "console")
+      console = Bootloader.kernel_param(:common, "console")
       # if console is defined
-      if console != "false"
+      if console != :missing
         if console == "hvc0"
           @show_kernel_out_on_hvc = true
         else
-          # since it is possible to use more than one console parameter and getKernelParam
+          # since it is possible to use more than one console parameter and kernel_param
           # is only able to read one, cmdline is used as fallback
           parameters = Convert.convert(
             SCR.Read(path(".proc.cmdline")),
@@ -264,26 +258,21 @@ module Yast
 
       # writing Kernel parameters
       Progress.NextStage
-      actual_boot_section = Bootloader.getDefaultSection
       # only change/save the bootloader configuration if it was adjusted
       if @has_bootloader_changed
         # removing empty option
-        @restrict_hvc_to_srvs = "false" if @restrict_hvc_to_srvs == ""
-        Bootloader.setKernelParam(
-          actual_boot_section,
-          "hvc_iucv_allow",
-          @restrict_hvc_to_srvs
-        )
+        @restrict_hvc_to_srvs = :missing if @restrict_hvc_to_srvs == ""
+        Bootloader.modify_kernel_params("hvc_iucv_allow" => @restrict_hvc_to_srvs)
 
         # this might overwrite other console options but this is mentioned in the help text
         if @show_kernel_out_on_hvc
-          Bootloader.setKernelParam(actual_boot_section, "console", "hvc0")
+          Bootloader.modify_kernel_params("console" => "hvc0")
         else
           # remove console entry if there is only one or the last is hvc0
           # otherwise it might not be possible to access it with SetKernelParm
           # make sure not to remove other console tags
-          if Bootloader.getKernelParam(actual_boot_section, "console") == "hvc0"
-            Bootloader.setKernelParam(actual_boot_section, "console", "false")
+          if Bootloader.kernel_param(:common, "console") == "hvc0"
+            Bootloader.modify_kernel_params("console" => :missing)
           end
         end
 
