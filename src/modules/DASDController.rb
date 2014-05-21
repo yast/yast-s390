@@ -98,7 +98,7 @@ module Yast
 
 
     def IsValidChannel(channel)
-      regexp = "^([[:xdigit:]]{1}).([[:xdigit:]]{1}).([[:xdigit:]]{4})$"
+      regexp = "^([[:xdigit:]]{1,2}).([[:xdigit:]]{1}).([[:xdigit:]]{4})$"
       Builtins.regexpmatch(channel, regexp)
     end
 
