@@ -228,7 +228,23 @@ module Yast
     # (For use by autoinstallation.)
     # @return [Hash] Dumped settings (later acceptable by Import ())
     def Export
-      l = Builtins.maplist(@devices) { |i, d| Builtins.filter(d) do |k, v|
+      # Exporting active DASD only.
+      # (bnc#
+      active_devices = @devices.select { |nr, device|
+        device.has_key?("resource") &&
+        device["resource"].has_key?("io") &&
+        !device["resource"]["io"].empty? &&
+        device["resource"]["io"].first["active"]
+      }
+
+      if active_devices.empty?
+        # If no device is active we are exporting all. So the admin
+        # can patch this manually.
+        Builtins.y2milestone("No active DASD found. --> Taking all")
+        active_devices = @devices
+      end
+
+      l = Builtins.maplist(active_devices) { |i, d| Builtins.filter(d) do |k, v|
         Builtins.contains(["channel", "format", "diag"], k)
       end }
 
