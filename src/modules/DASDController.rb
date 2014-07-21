@@ -229,7 +229,7 @@ module Yast
     # @return [Hash] Dumped settings (later acceptable by Import ())
     def Export
       # Exporting active DASD only.
-      # (bnc#
+      # (bnc#887407)
       active_devices = @devices.select { |nr, device|
         device.has_key?("resource") &&
         device["resource"].has_key?("io") &&
