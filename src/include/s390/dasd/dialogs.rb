@@ -27,6 +27,7 @@
 # $Id$
 module Yast
   module S390DasdDialogsInclude
+
     def initialize_s390_dasd_dialogs(include_target)
       Yast.import "UI"
       textdomain "s390"
@@ -162,7 +163,6 @@ module Yast
     end
 
 
-
     def PossibleActions
       if !Mode.config
         return [
@@ -191,6 +191,31 @@ module Yast
       end
     end
 
+
+    def AskNumParallel(max_num_parallel)
+
+      UI.OpenDialog(
+        VBox(
+          IntField(
+            # integer field (count of disks formatted parallel)
+            Id(:num_parallel), _("&Parallel Formatted Disks"),
+            1, max_num_parallel, max_num_parallel
+          ),
+          ButtonBox(
+            PushButton(Id(:ok), Label.OKButton),
+            PushButton(Id(:cancel), Label.CancelButton)
+          )
+        )
+      )
+
+      ret = UI.UserInput()
+      num_parallel = UI.QueryWidget(Id(:num_parallel), :Value).to_i
+
+      UI.CloseDialog()
+
+      return ret == :ok ? num_parallel : 0
+
+    end
 
 
     def PerformAction(action)
@@ -254,6 +279,7 @@ module Yast
             DASDController.ProbeDisks
 
             return true
+
           when :diag_off, :diag_on
             value = action == :diag_on
 
@@ -274,6 +300,7 @@ module Yast
             DASDController.ProbeDisks
 
             return true
+
           when :format
             # check if disks are R/W and active
             problem = ""
@@ -307,29 +334,12 @@ module Yast
               return false
             end
 
-            par = Integer.Min([Builtins.size(selected), 8])
+            num_parallel = [selected.size(), 8].min
+            if num_parallel > 1
+              num_parallel = AskNumParallel(num_parallel)
+            end
 
-            cancel = false
-            UI.OpenDialog(
-              VBox(
-                IntField(
-                  Id(:par),
-                  # integer field (count of disks formatted at parallely)
-                  _("&Parallel Formatted Disks"),
-                  1,
-                  par,
-                  par
-                ),
-                ButtonBox(
-                  PushButton(Id(:ok), Label.OKButton),
-                  PushButton(Id(:cancel), Label.CancelButton)
-                )
-              )
-            )
-            ret = Convert.to_symbol(UI.UserInput)
-            par = Convert.to_integer(UI.QueryWidget(Id(:par), :Value))
-            UI.CloseDialog
-            return false if ret == :cancel
+            return false if num_parallel == 0
 
             # final confirmation before formatting the discs
             channels = Builtins.maplist(selected) do |id|
@@ -359,7 +369,7 @@ module Yast
             devices = Builtins.maplist(selected) do |id|
               Ops.get_string(DASDController.devices, [id, "dev_name"], "")
             end
-            DASDController.FormatDisks(devices, par)
+            DASDController.FormatDisks(devices, num_parallel)
 
             channels.each do |channel|
               diag = DASDController.diag.fetch(channel, false)
@@ -681,5 +691,6 @@ module Yast
 
       :next
     end
+
   end
 end
