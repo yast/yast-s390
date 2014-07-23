@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Jul 23 11:51:53 CEST 2014 - aschnell@suse.de
+
+- omit asking for parallel formatting if only one DASD is
+  formatted (see bnc#888090)
+- 3.1.17
+
+-------------------------------------------------------------------
 Thu Jul 17 09:36:30 CEST 2014 - schubi@suse.de
 
 - Autoyast export:  Exporting active DASD only
