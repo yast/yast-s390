@@ -192,18 +192,14 @@ module Yast
     end
 
 
-    def AskNumParallel(num_devices)
-
-      if num_devices == 1
-        return 1
-      end
+    def AskNumParallel(max_num_parallel)
 
       UI.OpenDialog(
         VBox(
           IntField(
             # integer field (count of disks formatted parallel)
             Id(:num_parallel), _("&Parallel Formatted Disks"),
-            1, num_devices, num_devices
+            1, max_num_parallel, max_num_parallel
           ),
           ButtonBox(
             PushButton(Id(:ok), Label.OKButton),
@@ -213,7 +209,7 @@ module Yast
       )
 
       ret = UI.UserInput()
-      num_parallel = Convert.to_integer(UI.QueryWidget(Id(:num_parallel), :Value))
+      num_parallel = UI.QueryWidget(Id(:num_parallel), :Value).to_i
 
       UI.CloseDialog()
 
@@ -338,7 +334,11 @@ module Yast
               return false
             end
 
-            num_parallel = AskNumParallel(Integer.Min([Builtins.size(selected), 8]))
+            num_parallel = [selected.size(), 8].min
+            if num_parallel > 1
+              num_parallel = AskNumParallel(num_parallel)
+            end
+
             return false if num_parallel == 0
 
             # final confirmation before formatting the discs
