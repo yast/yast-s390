@@ -17,7 +17,7 @@
 
 
 Name:           yast2-s390
-Version:        3.1.17
+Version:        3.1.18
 Release:        0
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -30,7 +30,7 @@ BuildRequires:	yast2 yast2-testsuite yast2-users
 BuildRequires:  yast2-bootloader >= 3.1.35
 BuildRequires:  yast2-devtools >= 3.1.10
 BuildRequires:	yast2-ruby-bindings >= 3.1.7
-BuildRequires:  rubygem-rspec
+BuildRequires:  rubygem(rspec)
 ExclusiveArch:  s390 s390x
 Requires:	yast2
 Requires:	yast2-ruby-bindings >= 3.1.7
