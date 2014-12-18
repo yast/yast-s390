@@ -24,17 +24,17 @@
 # Summary:	Main file
 # Authors:	Jiri Srain <jsrain@suse.cz>
 #
-# $Id$
-#
 # Main file for controller configuration. Uses all other files.
 module Yast
   class ZfcpClient < Client
+    include Yast::Logger
+
     def main
       Yast.import "UI"
       textdomain "s390"
 
-      Builtins.y2milestone("----------------------------------------")
-      Builtins.y2milestone("ZFCP module started")
+      log.info "----------------------------------------"
+      log.info "ZFCP module started"
 
       Yast.import "Progress"
       Yast.import "Report"
@@ -46,28 +46,15 @@ module Yast
       @cmdline_description = {
         "id"         => "ZFCP",
         # Command line help text for the Xcontroller module
-        "help"       => _(
-          "Configuration of ZFCP"
-        ),
+        "help"       => _("Configuration of ZFCP"),
         "guihandler" => fun_ref(method(:ZFCPSequence), "symbol ()"),
-        "initialize" => fun_ref(ZFCPController.method(:Read), "boolean ()"),
-        "finish"     => fun_ref(ZFCPController.method(:Write), "boolean ()"),
-        "actions" =>
-          # FIXME TODO: fill the functionality description here
-          {},
-        "options" =>
-          # FIXME TODO: fill the option descriptions here
-          {},
-        "mapping" =>
-          # FIXME TODO: fill the mappings of actions and options here
-          {}
       }
 
       @ret = CommandLine.Run(@cmdline_description)
-      Builtins.y2debug("ret=%1", @ret)
+      log.debug "ret=#{@ret}"
 
-      Builtins.y2milestone("ZFCP module finished")
-      Builtins.y2milestone("----------------------------------------")
+      log.info "ZFCP module finished"
+      log.info "----------------------------------------"
 
       deep_copy(@ret)
     end
