@@ -21,3 +21,4 @@ autom4te.cache
 *.ami
 test-driver
 package/*.bz2
+/testsuite/raw.tmp.err.*
