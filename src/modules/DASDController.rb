@@ -148,7 +148,7 @@ module Yast
             to_reactivate << device
           end
           if format
-            dev_name = GetDeviceName(channel)
+            device["dev_name"] = GetDeviceName(channel) unless device["dev_name"]
             to_format << device
           # unformtted disk, manual (not AutoYaS)
           elsif act_ret == 8
@@ -631,7 +631,7 @@ module Yast
       Builtins.foreach(disks_list) do |device|
         index = Ops.add(index, 1)
         Ops.set(disks, index, device)
-        disks_cmd = Builtins.add(disks_cmd, Builtins.sformat("-f '%1'", device))
+        disks_cmd = Builtins.add(disks_cmd, Builtins.sformat("-f '%1'", device["dev_name"]))
       end
       disks_param = Builtins.mergestring(disks_cmd, " ")
       command = Builtins.sformat(

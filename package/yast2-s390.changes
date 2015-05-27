@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed May 27 14:05:25 CEST 2015 - schubi@suse.de
+
+- dasd: Evaluating device name of channel (needed for format call).
+  (bnc#928388)
+- 3.1.22
+
+-------------------------------------------------------------------
 Thu Dec 18 10:27:06 CET 2014 - locilka@suse.com
 
 - Command-line cleanup
