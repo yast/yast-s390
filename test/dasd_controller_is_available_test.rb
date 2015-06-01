@@ -8,10 +8,9 @@ include Yast
 Yast.import "DASDController"
 
 
-describe "DASDController#IsAvailable" do
+describe "DASDController" do
 
-
-  it "returns true if .probe.disk contains DASDs" do
+  it "IsAvailable returns true if .probe.disk contains DASDs" do
 
     data = [
       { "bus" => "CCW", "bus_hwcfg" => "ccw", "class_id" => 262, "detail" => {
@@ -26,11 +25,28 @@ describe "DASDController#IsAvailable" do
       "vendor" => "IBM", "vendor_id" => 286721 }
     ]
 
-    Yast::SCR.stub(:Read).with(path(".probe.disk")).once.and_return(data)
-
-    expect(Yast::DASDController.IsAvailable()).to be_true
+    expect(Yast::SCR).to receive(:Read).with(path(".probe.disk")).once.and_return(data)
+    expect(Yast::DASDController.IsAvailable()).to eq(true)
 
   end
 
+  it "writes dasd settings to target (formating disks)" do
+    # bnc 928388
+
+    data = { "devices" => [{"channel" => "0.0.0100", "diag" => false,
+     "format" => true}], "format_unformatted" => true }
+
+    allow(Yast::Mode).to receive(:normal).and_return(false)
+    allow(Yast::Mode).to receive(:installation).and_return(true)
+    allow(Yast::Mode).to receive(:autoinst).and_return(true)
+    allow(Yast::DASDController).to receive(:ActivateDisk).and_return(0)
+    expect(Yast::DASDController).to receive(:GetDeviceName).and_return("/dev/dasda")
+    expect(Yast::SCR).to receive(:Execute).with(Yast::Path.new(".process.start_shell"),
+      "/sbin/dasdfmt -Y -P 1 -b 4096 -y -r 10 -m 10 -f '/dev/dasda'")
+
+    expect(Yast::DASDController.Import(data)).to eq(true)
+    expect(Yast::DASDController.Write).to eq(true)
+
+  end
 
 end
