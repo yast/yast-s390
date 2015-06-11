@@ -32,6 +32,8 @@ require "yast"
 
 module Yast
   class ZFCPControllerClass < Module
+    include Yast::Logger
+
     def main
       Yast.import "UI"
       textdomain "s390"
@@ -149,9 +151,7 @@ module Yast
     def Write
       Builtins.foreach(@devices) do |index, device|
         channel = Ops.get_string(device, ["detail", "controller_id"], "")
-        wwpn = Ops.get_string(device, ["detail", "wwpn"], "")
-        lun = Ops.get_string(device, ["detail", "fcp_lun"], "")
-        ActivateDisk(channel, wwpn, lun)
+        ActivateDisk(channel)
       end if !Mode.normal(
       )
 
@@ -268,25 +268,15 @@ module Yast
       nil
     end
 
-
-
     def RemoveDevice(index)
       @devices = Builtins.remove(@devices, index)
 
       nil
     end
 
-
-
-    def GetDeviceIndex(channel, wwpn, lun)
-      ret = nil
-      Builtins.foreach(@devices) do |index, d|
-        if Ops.get_string(d, ["detail", "controller_id"], "") == channel &&
-            Ops.get_string(d, ["detail", "wwpn"], "") == wwpn &&
-            Ops.get_string(d, ["detail", "fcp_lun"], "") == lun
-          ret = index
-        end
-      end
+    def GetDeviceIndex(channel)
+      ret = @devices.find{|key,d| Ops.get_string(d, ["detail", "controller_id"], "") == channel}
+      ret = ret.first if ret
       ret
     end
 
@@ -335,6 +325,23 @@ module Yast
     # @return [Array<Hash{String => Object>}] of availabel Controllers
     def GetControllers
       if @controllers == nil
+        # Checking if it is a z/VM and evaluating all fcp controllers in
+        # order to activate
+        ret_vmcp = SCR.Execute(path(".target.bash_output"),"/sbin/vmcp q v fcp")
+        if ret_vmcp["exit"] == 0
+          devices = ret_vmcp["stdout"].split("\n").collect do |line|
+            columns = line.split
+            columns[1].downcase if columns[0] == "FCP"
+          end.compact
+
+          # Remove all needed devices from CIO device driver blacklist
+          # in order to see it
+          devices.each do |device|
+            log.info "Removing #{device} from the CIO device driver blacklist"
+            SCR.Execute(path(".target.bash"), "/sbin/cio_ignore -r #{device}")
+          end
+        end
+
         @controllers = Convert.convert(
           SCR.Read(path(".probe.storage")),
           :from => "any",
@@ -348,6 +355,10 @@ module Yast
           Builtins.contains(["sysfs_bus_id"], k)
         end }
 
+        if ret_vmcp != 0 && @controllers.size == 0
+          # TRANSLATORS: warning message
+          Report.Warning(_("Cannot evaluate ZFCP controllers (e.g. in LPAR).\nYou will have to set it manually."))
+        end
         Builtins.y2milestone("probed ZFCP controllers %1", @controllers)
       end
       deep_copy(@controllers)
@@ -406,101 +417,6 @@ module Yast
 
       nil
     end
-
-
-    # Report error occured during device activation
-    # @param [String] channel string channel of the device
-    # @param [Fixnum] ret integer exit code of the operation
-    def ReportActivationError(channel, ret)
-      case ret
-        when 0
-
-        when 1
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: sysfs not mounted."),
-              channel
-            )
-          )
-        when 2
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: Invalid status for <online>."),
-              channel
-            )
-          )
-        when 3
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: No device found for <ccwid>."),
-              channel
-            )
-          )
-        when 4
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: WWPN invalid."),
-              channel
-            )
-          )
-        when 5
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: Could not activate WWPN for adapter %1."),
-              channel
-            )
-          )
-        when 6
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: Could not activate ZFCP device."),
-              channel
-            )
-          )
-        when 7
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: SCSI disk could not be deactivated."),
-              channel
-            )
-          )
-        when 8
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: LUN could not be unregistered."),
-              channel
-            )
-          )
-        when 9
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: WWPN could not be unregistered."),
-              channel
-            )
-          )
-        else
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification, %2 is integer code
-              _("%1: Unknown error %2."),
-              channel,
-              ret
-            )
-          )
-      end
-
-      nil
-    end
-
 
     # Report error occured during device activation
     # @param [String] channel string channel of the device
@@ -574,9 +490,7 @@ module Yast
 
     # Activate a disk
     # @param [String] channel string channel
-    # @param [String] wwpn string wwpn (hexa number)
-    # @param [String] lun string lun   (hexa number)
-    def ActivateDisk(channel, wwpn, lun)
+    def ActivateDisk(channel)
       if !Ops.get(@activated_controllers, channel, false)
         command2 = Builtins.sformat(
           "/sbin/zfcp_host_configure '%1' %2",
@@ -597,51 +511,6 @@ module Yast
           Ops.set(@activated_controllers, channel, true)
         end
       end
-
-      command = Builtins.sformat(
-        "/sbin/zfcp_disk_configure '%1' '%2' '%3' %4",
-        channel,
-        wwpn,
-        lun,
-        1
-      )
-      Builtins.y2milestone("Running command \"%1\"", command)
-      ret = Convert.to_integer(SCR.Execute(path(".target.bash"), command))
-      Builtins.y2milestone(
-        "Command \"%1\" returned with exit code %2",
-        command,
-        ret
-      )
-
-      ReportActivationError(channel, ret)
-
-      @disk_configured = true
-
-      nil
-    end
-
-
-    # Deactivate a disk
-    # @param [String] channel string channel
-    # @param [String] wwpn string wwpn (hexa number)
-    # @param [String] lun string lun   (hexa number)
-    def DeactivateDisk(channel, wwpn, lun)
-      command = Builtins.sformat(
-        "/sbin/zfcp_disk_configure '%1' '%2' '%3' %4",
-        channel,
-        wwpn,
-        lun,
-        0
-      )
-      Builtins.y2milestone("Running command \"%1\"", command)
-      ret = Convert.to_integer(SCR.Execute(path(".target.bash"), command))
-      Builtins.y2milestone(
-        "Command \"%1\" returned with exit code %2",
-        command,
-        ret
-      )
-
-      ReportActivationError(channel, ret)
 
       @disk_configured = true
 
@@ -685,7 +554,7 @@ module Yast
     publish :variable => :filter_min, :type => "string"
     publish :variable => :filter_max, :type => "string"
     publish :variable => :previous_settings, :type => "map <string, any>"
-    publish :function => :ActivateDisk, :type => "void (string, string, string)"
+    publish :function => :ActivateDisk, :type => "void (string)"
     publish :function => :ProbeDisks, :type => "void ()"
     publish :function => :GetModified, :type => "boolean ()"
     publish :variable => :modified, :type => "boolean"
@@ -706,12 +575,11 @@ module Yast
     publish :function => :GetFilteredDevices, :type => "map <integer, map <string, any>> ()"
     publish :function => :AddDevice, :type => "void (map <string, any>)"
     publish :function => :RemoveDevice, :type => "void (integer)"
-    publish :function => :GetDeviceIndex, :type => "integer (string, string, string)"
+    publish :function => :GetDeviceIndex, :type => "integer (string)"
     publish :function => :Summary, :type => "list <string> ()"
     publish :function => :AutoPackages, :type => "map ()"
     publish :function => :GetControllers, :type => "list <map <string, any>> ()"
     publish :function => :IsAvailable, :type => "boolean ()"
-    publish :function => :DeactivateDisk, :type => "void (string, string, string)"
     publish :function => :GetWWPNs, :type => "list <string> (string)"
     publish :function => :GetLUNs, :type => "list <string> (string, string)"
   end

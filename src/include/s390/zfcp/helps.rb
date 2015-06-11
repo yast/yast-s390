@@ -70,18 +70,12 @@ module Yast
         # Disk add help 1/2
         "disk_add"       => _(
           "<p><b><big>Add New ZFCP Device</big></b><br>\n" +
-            "Enter the identifier of the device to add, the\n" +
-            "<b>Channel ID</b> of the ZFCP controller, the worldwide port number\n" +
-            "(<b>WWPN</b>) and the <b>LUN</b> number.</p>\n"
+            "Enter the <b>Channel ID</b> of the ZFCP controller.\n"
         ) +
           # Disk add help 2/2, This is HTML, so finally "&lt;devno&gt;" is displayed as "<devno>"
           _(
             "<p>The <b>Channel ID</b> must be entered with lowercase letters in a sysfs conforming\n" +
-              "format 0.0.&lt;devno&gt;, such as <tt>0.0.5c51</tt>.</p>\n" +
-              "<p>The WWPN must be entered with lowercase letters as a 16-digit hex value, such as\n" +
-              "<tt>0x5005076300c40e5a</tt>.</p>\n" +
-              "<p>The LUN must be entered with lowercase letters as a 16-digit hex value with\n" +
-              "all trailing zeros, such as <tt>0x52ca000000000000</tt>.</p>"
+              "format 0.0.&lt;devno&gt;, such as <tt>0.0.5c51</tt>.</p>\n"
           ) +
           # Disk selection dialog Warning
           _("<h1>Warning</h1>") +

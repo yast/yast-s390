@@ -82,15 +82,15 @@ module Yast
           @ret = ZFCPController.AutoPackages
         when "Read"
           Yast.import "Progress"
-          Progress.off
+          Progress.set(false)
           @ret = ZFCPController.Read
-          Progress.on
+          Progress.set(true)
           ZFCPController.SetModified(true)
         when "Write"
           Yast.import "Progress"
-          Progress.off
+          Progress.set(false)
           @ret = ZFCPController.Write
-          Progress.on
+          Progress.set(true)
         else
           Builtins.y2error("Unknown function: %1", @func)
           @ret = false # Unknown function
