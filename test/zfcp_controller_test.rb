@@ -69,6 +69,9 @@ describe "ZFCPController" do
       {"controller_id" => "0.0.f800"},
       {"controller_id" => "0.0.f900"}]}
 
+    expect(Yast::ZFCPController.Import(import_data)).to eq(true)
+    expect(Yast::ZFCPController.GetDeviceIndex("0.0.f800")).to eq(2)
+
   end
 
 end
