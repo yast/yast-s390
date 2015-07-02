@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Jul  2 14:56:29 CEST 2015 - schubi@suse.de
+
+- Formating DASD: taking the device name instead of the map entry.
+  (bnc#936112)
+- 3.1.23
+
+-------------------------------------------------------------------
 Wed May 27 14:05:25 CEST 2015 - schubi@suse.de
 
 - dasd: Evaluating device name of channel (needed for format call).
