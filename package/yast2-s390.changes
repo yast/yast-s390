@@ -5,7 +5,6 @@ Fri Jun 12 14:51:50 CEST 2015 - schubi@suse.de
  -- Do not use the zfcp_disk_configure call anymore.
  -- Removing wwpn and lun parameter while adding new devices.
  -- Removing delete option.
- -- Fate #318149
  -- bnc#928574
 - 3.1.23
 
