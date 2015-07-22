@@ -1,11 +1,19 @@
 -------------------------------------------------------------------
-Fri Jun 12 14:51:50 CEST 2015 - schubi@suse.de
+Fri Jul 22 14:51:50 CEST 2015 - schubi@suse.de
 
 - Fixes in ZFCP
  -- Do not use the zfcp_disk_configure call anymore.
  -- Removing wwpn and lun parameter while adding new devices.
  -- Removing delete option.
  -- bnc#928574
+- 3.1.24
+
+-------------------------------------------------------------------
+Thu Jul  2 14:56:29 CEST 2015 - schubi@suse.de
+
+- Formating DASD: taking the device name instead of the map entry.
+  (bnc#936112)
+
 - 3.1.23
 
 -------------------------------------------------------------------
