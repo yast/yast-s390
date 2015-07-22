@@ -41,8 +41,7 @@ module Yast
     def MainZFCPSequence
       aliases = {
         "main" => lambda { ZFCPDialog() },
-        "add" => lambda { AddZFCPDiskDialog() },
-        "delete" => lambda { DeleteZFCPDiskDialog() }
+        "add" => lambda { AddZFCPDiskDialog() }
       }
 
       sequence = {
@@ -50,11 +49,9 @@ module Yast
         "main"     => {
           :abort  => :abort,
           :next   => :next,
-          :add    => "add",
-          :delete => "delete"
+          :add    => "add"
         },
-        "add"      => { :abort => :abort, :next => "main" },
-        "delete"   => { :abort => :abort, :next => "main" }
+        "add"      => { :abort => :abort, :next => "main" }
       }
 
       Sequencer.Run(aliases, sequence)
@@ -66,15 +63,13 @@ module Yast
     def ZFCPSequence
       aliases = {
         "read"  => [lambda { ReadDialog() }, true],
-        "main"  => lambda { MainZFCPSequence() },
-        "write" => [lambda { WriteDialog() }, true]
+        "main"  => lambda { MainZFCPSequence() }
       }
 
       sequence = {
         "ws_start" => "read",
         "read"     => { :abort => :abort, :next => "main" },
-        "main"     => { :abort => :abort, :next => "write" },
-        "write"    => { :abort => :abort, :next => :next }
+        "main"     => { :abort => :abort, :next => :next }
       }
 
       Wizard.CreateDialog

@@ -162,7 +162,6 @@ module Yast
         Table(Id(:table), Opt(:multiSelection), header, []),
         HBox(
           PushButton(Id(:add), Label.AddButton),
-          PushButton(Id(:delete), Label.DeleteButton),
           HStretch()
         )
       )
@@ -172,9 +171,10 @@ module Yast
         content,
         help,
         Label.BackButton,
-        Label.NextButton
+        Label.OKButton
       )
       Wizard.HideBackButton
+      Wizard.HideNextButton
       Wizard.SetAbortButton(:abort, Label.CancelButton)
 
       UI.ChangeWidget(Id(:min_chan), :ValidChars, "0123456789abcdefABCDEF.")
@@ -232,16 +232,6 @@ module Yast
         elsif ret == :table
           ret = nil
           next
-        elsif ret == :abort || ret == :cancel
-          # yes-no popup
-          if !Popup.YesNo(
-              _(
-                "Really leave the ZFCP device configuration without saving?\nAll changes will be lost."
-              )
-            )
-            ret = nil
-          end
-          next
         end
       end
 
@@ -259,35 +249,15 @@ module Yast
       caption = _("Add New ZFCP Device")
 
       channels = []
-      wwpns = []
-      luns = []
-
       if Mode.config
         channels = Builtins.maplist(ZFCPController.devices) do |index, d|
           Ops.get_string(d, ["detail", "controller_id"], "")
         end
         channels = Builtins.toset(channels)
-
-        wwpns = Builtins.maplist(ZFCPController.devices) do |index, d|
-          Ops.get_string(d, ["detail", "wwpn"], "")
-        end
-        wwpns = Builtins.toset(wwpns)
-
-        luns = Builtins.maplist(ZFCPController.devices) do |index, d|
-          Ops.get_string(d, ["detail", "fcp_lun"], "")
-        end
-        luns = Builtins.toset(luns)
       else
         channels = Builtins.maplist(ZFCPController.GetControllers) do |c|
           Ops.get_string(c, "sysfs_bus_id", "")
         end
-
-        wwpns = [Ops.get_string(ZFCPController.previous_settings, "wwpn", "")]
-
-        lun = Ops.get_string(ZFCPController.previous_settings, "fcp_lun", "")
-        lun = ZFCPController.GetNextLUN(lun) if !Builtins.isempty(lun)
-
-        luns = [lun]
       end
 
       content = HBox(
@@ -301,24 +271,6 @@ module Yast
             _("&Channel ID"),
             channels
           ),
-          VSpacing(2),
-          HBox(
-            # combo box
-            ComboBox(Id(:wwpn), Opt(:hstretch, :editable), _("&WWPN"), wwpns),
-            # push button
-            Mode.config ?
-              Empty() :
-              PushButton(Id(:get_wwpn), _("Get WWPNs"))
-          ),
-          VSpacing(2),
-          HBox(
-            # combobox
-            ComboBox(Id(:lun), Opt(:hstretch, :editable), _("&LUN"), luns),
-            # push button
-            Mode.config ?
-              Empty() :
-              PushButton(Id(:get_lun), _("Get LUNs"))
-          ),
           VStretch()
         ),
         HStretch()
@@ -328,60 +280,17 @@ module Yast
       Wizard.SetContents(caption, content, help, true, true)
       Wizard.RestoreBackButton
       Wizard.RestoreAbortButton
+      Wizard.RestoreNextButton
+      Wizard.SetNextButton(:next, Label.OKButton)
 
       UI.ChangeWidget(Id(:channel), :ValidChars, "0123456789abcdefABCDEF.")
-      UI.ChangeWidget(Id(:wwpn), :ValidChars, "0123456789abcdefABCDEFx")
-      UI.ChangeWidget(Id(:lun), :ValidChars, "0123456789abcdefABCDEFx")
-
       UI.SetFocus(Id(:channel))
 
       ret = nil
       while ret == nil
         ret = Convert.to_symbol(UI.UserInput)
 
-        if ret == :get_wwpn
-          channel = Convert.to_string(UI.QueryWidget(:channel, :Value))
-
-          if !ZFCPController.IsValidChannel(channel)
-            # error popup
-            Popup.Error(_("Not a valid channel ID."))
-            UI.SetFocus(:channel)
-            ret = nil
-            next
-          end
-
-          channel = ZFCPController.FormatChannel(channel)
-
-          wwpns = ZFCPController.GetWWPNs(channel)
-          UI.ChangeWidget(:wwpn, :Items, wwpns)
-          ret = nil
-        elsif ret == :get_lun
-          channel = Convert.to_string(UI.QueryWidget(:channel, :Value))
-          wwpn = Convert.to_string(UI.QueryWidget(:wwpn, :Value))
-
-          if !ZFCPController.IsValidChannel(channel)
-            # error popup
-            Popup.Error(_("Not a valid channel ID."))
-            UI.SetFocus(:channel)
-            ret = nil
-            next
-          end
-
-          if !ZFCPController.IsValidWWPN(wwpn)
-            # error popup
-            Report.Error(_("The entered WWPN is invalid."))
-            UI.SetFocus(:wwpn)
-            ret = nil
-            next
-          end
-
-          channel = ZFCPController.FormatChannel(channel)
-          wwpn = ZFCPController.FormatWWPN(wwpn)
-
-          luns = ZFCPController.GetLUNs(channel, wwpn)
-          UI.ChangeWidget(:lun, :Items, luns)
-          ret = nil
-        elsif ret == :abort || ret == :cancel
+        if ret == :abort || ret == :cancel
           # yes-no popup
           if !Popup.YesNo(
               _(
@@ -392,8 +301,6 @@ module Yast
           end
         elsif ret == :next
           channel = Convert.to_string(UI.QueryWidget(Id(:channel), :Value))
-          wwpn = Convert.to_string(UI.QueryWidget(Id(:wwpn), :Value))
-          lun = Convert.to_string(UI.QueryWidget(Id(:lun), :Value))
 
           if !ZFCPController.IsValidChannel(channel)
             # error popup
@@ -403,27 +310,8 @@ module Yast
             next
           end
 
-          if !ZFCPController.IsValidWWPN(wwpn)
-            # error popup
-            Report.Error(_("The entered WWPN is invalid."))
-            UI.SetFocus(:wwpn)
-            ret = nil
-            next
-          end
-
-          if !ZFCPController.IsValidLUN(lun)
-            # error popup
-            Report.Error(_("The entered LUN is invalid."))
-            UI.SetFocus(:lun)
-            ret = nil
-            next
-          end
-
           channel = ZFCPController.FormatChannel(channel)
-          wwpn = ZFCPController.FormatWWPN(wwpn)
-          lun = ZFCPController.FormatLUN(lun)
-
-          if ZFCPController.GetDeviceIndex(channel, wwpn, lun) != nil
+          if ZFCPController.GetDeviceIndex(channel) != nil
             # error popup
             Popup.Error(_("Device already exists."))
             ret = nil
@@ -434,26 +322,19 @@ module Yast
 
       if ret == :next
         channel = Convert.to_string(UI.QueryWidget(Id(:channel), :Value))
-        wwpn = Convert.to_string(UI.QueryWidget(Id(:wwpn), :Value))
-        lun = Convert.to_string(UI.QueryWidget(Id(:lun), :Value))
-
         channel = ZFCPController.FormatChannel(channel)
-        wwpn = ZFCPController.FormatWWPN(wwpn)
-        lun = ZFCPController.FormatLUN(lun)
 
         Ops.set(ZFCPController.previous_settings, "channel", channel)
-        Ops.set(ZFCPController.previous_settings, "wwpn", wwpn)
-        Ops.set(ZFCPController.previous_settings, "fcp_lun", lun)
 
         if Mode.config
-          m = { "controller_id" => channel, "wwpn" => wwpn, "fcp_lun" => lun }
+          m = { "controller_id" => channel}
 
           m = { "detail" => m }
 
           ZFCPController.AddDevice(m)
         else
-          ZFCPController.ActivateDisk(channel, wwpn, lun)
-
+          ZFCPController.ActivateDisk(channel)
+          WriteDialog()
           ZFCPController.ProbeDisks
         end
       end
@@ -461,33 +342,5 @@ module Yast
       ret
     end
 
-
-    # Run the dialog for deleting ZFCPs
-    # @return [Symbol] from DeleteZFCPDiskDialog
-    def DeleteZFCPDiskDialog
-      selected = ListSelectedZFCP()
-      if Builtins.isempty(selected)
-        # error popup message
-        Popup.Message(_("No disk selected."))
-      else
-        if Mode.config
-          Builtins.foreach(selected) do |index|
-            ZFCPController.RemoveDevice(index)
-          end
-        else
-          Builtins.foreach(selected) do |index|
-            d = Ops.get(ZFCPController.devices, index, {})
-            channel = Ops.get_string(d, ["detail", "controller_id"], "")
-            wwpn = Ops.get_string(d, ["detail", "wwpn"], "")
-            lun = Ops.get_string(d, ["detail", "fcp_lun"], "")
-            ZFCPController.DeactivateDisk(channel, wwpn, lun)
-          end
-
-          ZFCPController.ProbeDisks
-        end
-      end
-
-      :next
-    end
   end
 end
