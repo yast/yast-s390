@@ -174,7 +174,6 @@ module Yast
         Label.OKButton
       )
       Wizard.HideBackButton
-      Wizard.HideNextButton
       Wizard.SetAbortButton(:abort, Label.CancelButton)
 
       UI.ChangeWidget(Id(:min_chan), :ValidChars, "0123456789abcdefABCDEF.")
