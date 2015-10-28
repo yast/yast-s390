@@ -581,6 +581,14 @@ module Yast
               channel
             )
           )
+        when 10
+          Report.Message(
+            Builtins.sformat(
+              # message, %1 is device identification
+              _("%1: This host adapter supports allow_lun_scan."),
+              channel
+            )
+          )
         else
           Report.Error(
             Builtins.sformat(
