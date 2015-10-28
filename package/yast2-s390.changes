@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Wed Oct 28 13:20:48 CET 2015 - schubi@suse.de
+
+- Reverting fix of version 3.1.24:
+  -- added zfcp_disk_configure
+  -- added wwpn and lun parameter while adding new devices
+  -- removing delete option
+  (bnc#951547, bnc#928574)
+- 3.1.26
+
+-------------------------------------------------------------------
 Mon Aug 10 08:24:53 UTC 2015 - ancor@suse.com
 
 - Brings back accidentally removed 'ok' button to the zFCP dialog
