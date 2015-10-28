@@ -303,21 +303,21 @@ module Yast
           ),
           VSpacing(2),
           HBox(
-            # combo box
-            ComboBox(Id(:wwpn), Opt(:hstretch, :editable), _("&WWPN"), wwpns),
             # push button
             Mode.config ?
               Empty() :
-              PushButton(Id(:get_wwpn), _("Get WWPNs"))
+              PushButton(Id(:get_wwpn), _("Get WWPNs")),
+            # combo box
+            ComboBox(Id(:wwpn), Opt(:hstretch, :editable), _("&WWPN"), wwpns)
           ),
           VSpacing(2),
           HBox(
-            # combobox
-            ComboBox(Id(:lun), Opt(:hstretch, :editable), _("&LUN"), luns),
             # push button
             Mode.config ?
               Empty() :
-              PushButton(Id(:get_lun), _("Get LUNs"))
+              PushButton(Id(:get_lun), _("Get LUNs")),
+            # combobox
+            ComboBox(Id(:lun), Opt(:hstretch, :editable), _("&LUN"), luns)
           ),
           VStretch()
         ),
