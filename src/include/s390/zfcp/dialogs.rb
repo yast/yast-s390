@@ -307,6 +307,7 @@ module Yast
             Mode.config ?
               Empty() :
               PushButton(Id(:get_wwpn), _("Get WWPNs")),
+            HSpacing(3),
             # combo box
             ComboBox(Id(:wwpn), Opt(:hstretch, :editable), _("&WWPN"), wwpns)
           ),
@@ -316,6 +317,7 @@ module Yast
             Mode.config ?
               Empty() :
               PushButton(Id(:get_lun), _("Get LUNs")),
+            HSpacing(3),
             # combobox
             ComboBox(Id(:lun), Opt(:hstretch, :editable), _("&LUN"), luns)
           ),
