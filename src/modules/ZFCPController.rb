@@ -32,6 +32,8 @@ require "yast"
 
 module Yast
   class ZFCPControllerClass < Module
+    include Yast::Logger
+
     def main
       Yast.import "UI"
       textdomain "s390"
