@@ -407,7 +407,7 @@ module Yast
             next
           end
 
-          if wwpn != "" || lun != "" # We are not evaluate these values via allow_lun_scan.
+          if wwpn != "" || lun != "" # We are not evaluating these values via allow_lun_scan.
             if !ZFCPController.IsValidWWPN(wwpn)
               # error popup
               Report.Error(_("The entered WWPN is invalid."))
