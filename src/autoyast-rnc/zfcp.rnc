@@ -6,7 +6,9 @@ zfcp = element zfcp {
     element devices {
         LIST,
         element listentry {
-            element controller_id { text }
+            element controller_id { text } &
+            element wwpn { text } &
+            element fcp_lun { text }
         }*
     }?
 }
