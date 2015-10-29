@@ -81,7 +81,8 @@ module Yast
               "<p>The WWPN must be entered with lowercase letters as a 16-digit hex value, such as\n" +
               "<tt>0x5005076300c40e5a</tt>.</p>\n" +
               "<p>The LUN must be entered with lowercase letters as a 16-digit hex value with\n" +
-              "all trailing zeros, such as <tt>0x52ca000000000000</tt>.</p>"
+              "all trailing zeros, such as <tt>0x52ca000000000000</tt>.</p>" +
+              "<p>If no WWPN <b>and</b> no LUN have been defined the system tries to use allow_lun_scan</p>"
           ) +
           # Disk selection dialog Warning
           _("<h1>Warning</h1>") +

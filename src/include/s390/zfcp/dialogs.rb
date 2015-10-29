@@ -405,20 +405,22 @@ module Yast
             next
           end
 
-          if !ZFCPController.IsValidWWPN(wwpn)
-            # error popup
-            Report.Error(_("The entered WWPN is invalid."))
-            UI.SetFocus(:wwpn)
-            ret = nil
-            next
-          end
+          if wwpn != "" || lun != "" # We are not evaluate these values via allow_lun_scan.
+            if !ZFCPController.IsValidWWPN(wwpn)
+              # error popup
+              Report.Error(_("The entered WWPN is invalid."))
+              UI.SetFocus(:wwpn)
+              ret = nil
+              next
+            end
 
-          if !ZFCPController.IsValidLUN(lun)
-            # error popup
-            Report.Error(_("The entered LUN is invalid."))
-            UI.SetFocus(:lun)
-            ret = nil
-            next
+            if !ZFCPController.IsValidLUN(lun)
+              # error popup
+              Report.Error(_("The entered LUN is invalid."))
+              UI.SetFocus(:lun)
+              ret = nil
+              next
+            end
           end
 
           channel = ZFCPController.FormatChannel(channel)

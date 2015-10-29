@@ -630,22 +630,24 @@ module Yast
         end
       end
 
-      command = Builtins.sformat(
-        "/sbin/zfcp_disk_configure '%1' '%2' '%3' %4",
-        channel,
-        wwpn,
-        lun,
-        1
-      )
-      Builtins.y2milestone("Running command \"%1\"", command)
-      ret = Convert.to_integer(SCR.Execute(path(".target.bash"), command))
-      Builtins.y2milestone(
-        "Command \"%1\" returned with exit code %2",
-        command,
-        ret
-      )
+      if wwpn != "" || lun != "" # we are not using allow_lun_scan
+        command = Builtins.sformat(
+          "/sbin/zfcp_disk_configure '%1' '%2' '%3' %4",
+          channel,
+          wwpn,
+          lun,
+          1
+        )
+        Builtins.y2milestone("Running command \"%1\"", command)
+        ret = Convert.to_integer(SCR.Execute(path(".target.bash"), command))
+        Builtins.y2milestone(
+          "Command \"%1\" returned with exit code %2",
+          command,
+          ret
+        )
 
-      ReportActivationError(channel, ret)
+        ReportActivationError(channel, ret)
+      end
 
       @disk_configured = true
 
