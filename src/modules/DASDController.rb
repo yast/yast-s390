@@ -148,9 +148,8 @@ module Yast
             to_reactivate << device
           end
           if format
-            dev_name = GetDeviceName(channel)
-            to_format << device
-          # unformtted disk, manual (not AutoYaS)
+            to_format << (device["dev_name"] || GetDeviceName(channel))
+          # unformtted disk, manual (not AutoYaST)
           elsif act_ret == 8
             unformatted_devices << device
           end
