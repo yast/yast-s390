@@ -1,7 +1,7 @@
 -------------------------------------------------------------------
 Fri Jan 15 14:36:34 CET 2016 - schubi@suse.de
 
-- DASD fix in formating disks which have not been defined by
+- DASD fix in formatting disks which have not been defined by
   AutoYaST. (bnc#959946)
 - 3.1.26.1
 
