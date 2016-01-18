@@ -26,14 +26,15 @@
 #
 module Yast
   class IucvterminalClient < Client
+    include Yast::Logger
+
     def main
       Yast.import "UI"
 
       textdomain "s390"
 
-      # The main ()
-      Builtins.y2milestone("----------------------------------------")
-      Builtins.y2milestone("IUCV Terminal module started")
+      log.info "----------------------------------------"
+      log.info "IUCV Terminal module started"
 
       Yast.import "CommandLine"
       Yast.include self, "s390/iucvterminal/ui.rb"
@@ -41,34 +42,20 @@ module Yast
       @cmdline_description = {
         "id"         => "iucvterminal",
         # Command line help text for the Xcontroller module
-        "help"       => _(
-          "Configuration of IUCV terminal settings"
-        ),
+        "help"       => _("Configuration of IUCV terminal settings"),
         "guihandler" => fun_ref(method(:IUCVTerminalSequence), "symbol ()"),
-        "actions" =>
-          # FIXME TODO: fill the functionality description here
-          {},
-        "options" =>
-          # FIXME TODO: fill the option descriptions here
-          {},
-        "mapping" =>
-          # FIXME TODO: fill the mappings of actions and options here
-          {}
       }
-
 
       # main ui function
       @ret = CommandLine.Run(@cmdline_description)
 
-      Builtins.y2debug("ret=%1", @ret)
+      log.debug "ret=#{@ret}"
 
       # Finish
-      Builtins.y2milestone("IUCV Terminal module finished")
-      Builtins.y2milestone("----------------------------------------")
+      log.info "IUCV Terminal module finished"
+      log.info "----------------------------------------"
 
-      deep_copy(@ret) 
-
-      # EOF
+      deep_copy(@ret)
     end
   end
 end

@@ -19,7 +19,7 @@
 # To contact Novell about this file by physical or electronic mail, you may
 # find current contact information at www.novell.com.
 
-# File:	clients/dump.ycp
+# File:	clients/dump.rb
 # Package:	Creation of s390 dump devices
 # Summary:	Main file
 # Authors:	Tim Hardeck <thardeck@suse.de>
@@ -27,6 +27,8 @@
 # Main file for s390 dump devices creation. Uses all other files.
 module Yast
   class DumpClient < Client
+    include Yast::Logger
+
     def main
       Yast.import "UI"
 
@@ -36,8 +38,8 @@ module Yast
       textdomain "s390"
 
       # The main ()
-      Builtins.y2milestone("----------------------------------------")
-      Builtins.y2milestone("Dump module started")
+      log.info "----------------------------------------"
+      log.info "Dump module started"
 
       Yast.import "CommandLine"
       Yast.include self, "s390/dump/ui.rb"
@@ -45,33 +47,20 @@ module Yast
       @cmdline_description = {
         "id"         => "dumpdevices",
         # Command line help text for the Xcontroller module
-        "help"       => _(
-          "Creation of S/390 dump devices"
-        ),
+        "help"       => _("Creation of S/390 dump devices"),
         "guihandler" => fun_ref(method(:DumpSequence), "symbol ()"),
-        "actions" =>
-          # FIXME TODO: fill the functionality description here
-          {},
-        "options" =>
-          # FIXME TODO: fill the option descriptions here
-          {},
-        "mapping" =>
-          # FIXME TODO: fill the mappings of actions and options here
-          {}
       }
-
 
       # main ui function
       @ret = CommandLine.Run(@cmdline_description)
 
-      #ret = DumpSequence ();
-      Builtins.y2debug("ret=%1", @ret)
+      log.debug "ret=#{@ret}"
 
       # Finish
-      Builtins.y2milestone("Dump module finished")
-      Builtins.y2milestone("----------------------------------------")
+      log.info "Dump module finished"
+      log.info "----------------------------------------"
 
-      deep_copy(@ret) 
+      deep_copy(@ret)
 
       # EOF
     end

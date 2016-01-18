@@ -1,9 +1,33 @@
--------------------------------------------------------------------
-Tue Dec  1 10:37:14 CET 2015 - schubi@suse.de
+ -------------------------------------------------------------------
+-Tue Dec  1 10:37:14 CET 2015 - schubi@suse.de
 
 - Formating DASD: taking the device name instead of the map entry.
   (bnc#936112)
-- 3.1.19.1
+- DASD fix in formatting disks which have not been defined by
+  AutoYaST.
+  (bnc#959946)
+
+- 3.1.22.1
+
+
+-------------------------------------------------------------------
+Wed May 27 14:05:25 CEST 2015 - schubi@suse.de
+
+- dasd: Evaluating device name of channel (needed for format call).
+  (bnc#928388)
+- 3.1.22
+
+-------------------------------------------------------------------
+Thu Dec 18 10:27:06 CET 2014 - locilka@suse.com
+
+- Command-line cleanup
+- 3.1.21
+
+-------------------------------------------------------------------
+Thu Dec  4 09:51:26 UTC 2014 - jreidinger@suse.com
+
+- remove X-KDE-Library from desktop file (bnc#899104)
+- 3.1.20
 
 -------------------------------------------------------------------
 Wed Oct 22 18:51:11 UTC 2014 - lslezak@suse.cz
