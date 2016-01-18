@@ -151,7 +151,7 @@ module Yast
             to_format << (device["dev_name"] || GetDeviceName(channel))
           # unformtted disk, manual (not AutoYaST)
           elsif act_ret == 8
-            unformatted_devices << device
+            unformatted_devices << (device["dev_name"] || GetDeviceName(channel))
           end
         end
 
