@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Jun 20 14:15:50 UTC 2016 - igonzalezsosa@suse.com
+
+- Stop generating autodocs (fate#320356)
+- 3.1.28
+
+-------------------------------------------------------------------
 Fri Jan 15 14:36:34 CET 2016 - schubi@suse.de
 
 - DASD fix in formatting disks which have not been defined by
