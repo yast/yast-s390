@@ -9,7 +9,8 @@ X-SuSE-YaST-Call=dasd
 X-SuSE-YaST-Group=Hardware
 X-SuSE-YaST-Argument=
 X-SuSE-YaST-RootOnly=true
-X-SuSE-YaST-AutoInst=all
+# Import,Write will be called manually by AY in first stage (bnc#1014696)
+X-SuSE-YaST-AutoInst=configure
 X-SuSE-YaST-Geometry=
 X-SuSE-YaST-SortKey=
 X-SuSE-YaST-AutoInstResource=dasd
