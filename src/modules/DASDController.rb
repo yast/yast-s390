@@ -347,7 +347,7 @@ module Yast
       disks = SCR.Read(path(".probe.disk"))
       count = disks.count { |d| d["device"] == "DASD" }
       log.info("number of probed DASD devices #{count}")
-      return count > 0
+      count > 0
     end
 
     # Probe for DASD disks

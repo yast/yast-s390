@@ -207,7 +207,7 @@ module Yast
 
       UI.CloseDialog()
 
-      return ret == :ok ? num_parallel : 0
+      ret == :ok ? num_parallel : 0
 
     end
 
