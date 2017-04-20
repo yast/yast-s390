@@ -76,7 +76,7 @@ module Yast
     end
 
     def tty_entries(prefix)
-      Dir.entries(@getty_conf_dir).select{ |e| e =~ /^#{prefix}@.+\.service$/ }
+      Dir.entries(@getty_conf_dir).select { |e| e =~ /^#{prefix}@.+\.service$/ }
     end
 
     def get_tty_num(prefix)
