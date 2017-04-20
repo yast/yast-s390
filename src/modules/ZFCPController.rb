@@ -113,7 +113,7 @@ module Yast
       old_lun = Builtins.tointeger(lun)
       new_lun = old_lun
 
-      Builtins.foreach(@devices) do |k, v|
+      Builtins.foreach(@devices) do |_k, v|
         if old_lun ==
             Builtins.tointeger(Ops.get_string(v, ["detail", "fcp_lun"], ""))
           if Ops.get_string(v, "vendor", "") == "IBM" &&
@@ -140,7 +140,7 @@ module Yast
     # Write all controller settings
     # @return true on success
     def Write
-      Builtins.foreach(@devices) do |index, device|
+      Builtins.foreach(@devices) do |_index, device|
         channel = Ops.get_string(device, ["detail", "controller_id"], "")
         wwpn = Ops.get_string(device, ["detail", "wwpn"], "")
         lun = Ops.get_string(device, ["detail", "fcp_lun"], "")
@@ -195,7 +195,7 @@ module Yast
     # (For use by autoinstallation.)
     # @return [Hash] Dumped settings (later acceptable by Import ())
     def Export
-      l = Builtins.maplist(@devices) do |k, v|
+      l = Builtins.maplist(@devices) do |_k, v|
         {
           "controller_id" => Ops.get_string(v, ["detail", "controller_id"], ""),
           "wwpn"          => Ops.get_string(v, ["detail", "wwpn"], ""),
@@ -223,7 +223,7 @@ module Yast
 
       ret = GetDevices()
 
-      ret = Builtins.filter(ret) do |k, d|
+      ret = Builtins.filter(ret) do |_k, d|
         tmp_strs = Builtins.splitstring(
           Ops.get_string(d, ["detail", "controller_id"], ""),
           "."
@@ -277,7 +277,7 @@ module Yast
       ret = []
 
       if Mode.config
-        ret = Builtins.maplist(@devices) do |index, d|
+        ret = Builtins.maplist(@devices) do |_index, d|
           Builtins.sformat(
             _("Channel ID: %1, WWPN: %2, LUN: %3"),
             Ops.get_string(d, ["detail", "controller_id"], ""),
@@ -286,7 +286,7 @@ module Yast
           )
         end
       else
-        ret = Builtins.maplist(@devices) do |index, d|
+        ret = Builtins.maplist(@devices) do |_index, d|
           Builtins.sformat(
             _("Channel ID: %1, WWPN: %2, LUN: %3, Device: %4"),
             Ops.get_string(d, ["detail", "controller_id"], ""),
@@ -339,7 +339,7 @@ module Yast
           Ops.get_string(c, "device", "") == "zFCP controller"
         end
 
-        @controllers = Builtins.maplist(@controllers) { |c| Builtins.filter(c) do |k, v|
+        @controllers = Builtins.maplist(@controllers) { |c| Builtins.filter(c) do |k, _v|
           Builtins.contains(["sysfs_bus_id"], k)
         end }
 
@@ -389,7 +389,7 @@ module Yast
         to: "list <map <string, any>>"
       )
 
-      disks_tapes = Builtins.maplist(disks_tapes) { |d| Builtins.filter(d) do |k, v|
+      disks_tapes = Builtins.maplist(disks_tapes) { |d| Builtins.filter(d) do |k, _v|
         Builtins.contains(["dev_name", "detail", "vendor", "device"], k)
       end }
 

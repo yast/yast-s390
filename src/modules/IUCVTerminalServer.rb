@@ -603,7 +603,7 @@ module Yast
         passwd = @ts_enabled ?
           "/usr/bin/passwd -u " : # unlock user
           "/usr/bin/passwd -l " # lock user
-        Builtins.foreach(@ts_member_conf) do |name, entries|
+        Builtins.foreach(@ts_member_conf) do |name, _entries|
           # groups don't need to be disabled
           if !Builtins.regexpmatch(name, "^@")
             cmd = Ops.add(passwd, name)

@@ -125,7 +125,7 @@ module Yast
         to_reactivate = []
         unformatted_devices = []
 
-        Builtins.foreach(@devices) do |index, device|
+        Builtins.foreach(@devices) do |_index, device|
           channel = Ops.get_string(device, "channel", "")
           format = Ops.get_boolean(device, "format", false)
           do_diag = Ops.get_boolean(device, "diag", false)
@@ -200,7 +200,7 @@ module Yast
       @devices = Builtins.listmap(Ops.get_list(settings, "devices", [])) do |d|
         index = Ops.add(index, 1)
         Ops.set(d, "channel", FormatChannel(Ops.get_string(d, "channel", "")))
-        d = Builtins.filter(d) do |k, v|
+        d = Builtins.filter(d) do |k, _v|
           Builtins.contains(["channel", "format", "diag"], k)
         end
         { index => d }
@@ -217,7 +217,7 @@ module Yast
     def Export
       # Exporting active DASD only.
       # (bnc#887407)
-      active_devices = @devices.select { |nr, device|
+      active_devices = @devices.select { |_nr, device|
         device.has_key?("resource") &&
         device["resource"].has_key?("io") &&
         !device["resource"]["io"].empty? &&
@@ -231,7 +231,7 @@ module Yast
         active_devices = @devices
       end
 
-      l = Builtins.maplist(active_devices) { |i, d| Builtins.filter(d) do |k, v|
+      l = Builtins.maplist(active_devices) { |_i, d| Builtins.filter(d) do |k, _v|
         Builtins.contains(["channel", "format", "diag"], k)
       end }
 
@@ -258,7 +258,7 @@ module Yast
 
       ret = GetDevices()
 
-      ret = Builtins.filter(ret) do |k, d|
+      ret = Builtins.filter(ret) do |_k, d|
         tmp_strs = Builtins.splitstring(Ops.get_string(d, "channel", ""), ".")
         tmp_css = Builtins.tointeger(Ops.add("0x", Ops.get(tmp_strs, 0, "")))
         tmp_lcss = Builtins.tointeger(Ops.add("0x", Ops.get(tmp_strs, 1, "")))
@@ -305,7 +305,7 @@ module Yast
       ret = []
 
       if Mode.config
-        ret = Builtins.maplist(@devices) do |index, d|
+        ret = Builtins.maplist(@devices) do |_index, d|
           Builtins.sformat(
             _("Channel ID: %1, Format: %2, DIAG: %3"),
             Ops.get_string(d, "channel", ""),
@@ -314,11 +314,11 @@ module Yast
           )
         end
       else
-        active_devices = Builtins.filter(@devices) do |index, device|
+        active_devices = Builtins.filter(@devices) do |_index, device|
           Ops.get_boolean(device, ["resource", "io", 0, "active"], false)
         end
 
-        ret = Builtins.maplist(active_devices) do |index, d|
+        ret = Builtins.maplist(active_devices) do |_index, d|
           Builtins.sformat(
             _("Channel ID: %1, Device: %2, DIAG: %3"),
             Ops.get_string(d, "channel", ""),
@@ -399,7 +399,7 @@ module Yast
             Ops.set(@diag, channel, Builtins.substring(use_diag, 0, 1) == "1")
           end
         end
-        d = Builtins.filter(d) do |k, v|
+        d = Builtins.filter(d) do |k, _v|
           Builtins.contains(
             [
               "channel",
@@ -692,7 +692,7 @@ module Yast
         Builtins.foreach(this_step) do |k, v|
           Ops.set(done, k, Ops.add(Ops.get(done, k, 0), v))
         end
-        this_step = Builtins.filter(this_step) do |k, v|
+        this_step = Builtins.filter(this_step) do |k, _v|
           Ops.less_than(Ops.get(done, k, 0), Ops.get(cylinders, k, 0))
         end
         difference = Ops.subtract(
@@ -709,7 +709,7 @@ module Yast
         end
         index = 0
         siz = Builtins.size(this_step)
-        Builtins.foreach(this_step) do |k, v|
+        Builtins.foreach(this_step) do |k, _v|
           UI.ChangeWidget(
             Id(index),
             :Label,

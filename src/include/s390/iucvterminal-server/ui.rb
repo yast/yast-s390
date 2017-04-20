@@ -141,13 +141,13 @@ module Yast
     # @return [Array<Yast::Term>] of items
     def GenerateTsMembersTable
       ts_users_groups = []
-      Builtins.foreach(@ts_member_conf) do |name, conf|
+      Builtins.foreach(@ts_member_conf) do |name, _conf|
         if Builtins.regexpmatch(name, "^@")
           # remove the leading @
           groupname = Builtins.substring(name, 1)
           group = Users.GetGroupByName(groupname, "local")
 
-          userlist = Builtins.maplist(Ops.get_map(group, "userlist", {})) do |k, v|
+          userlist = Builtins.maplist(Ops.get_map(group, "userlist", {})) do |k, _v|
             k
           end
           # filter non ts users
@@ -168,7 +168,7 @@ module Yast
           )
         else
           user = Users.GetUserByName(name, "local")
-          grouplist = Builtins.maplist(Ops.get_map(user, "grouplist", {})) do |k, v|
+          grouplist = Builtins.maplist(Ops.get_map(user, "grouplist", {})) do |k, _v|
             k
           end
           groups = Builtins.mergestring(grouplist, ",")
@@ -468,7 +468,7 @@ module Yast
 
     def TsUserDialogContent
       # initialize list with additional groups
-      groups = Builtins.maplist(GetGroupsWithoutUsers()) { |name, v| name }
+      groups = Builtins.maplist(GetGroupsWithoutUsers()) { |name, _v| name }
 
       content = HBox(
         HWeight(
@@ -660,7 +660,7 @@ module Yast
         if !Builtins.haskey(@ts_member_conf, Ops.add("@", name))
           ts_auth_status = @TEXT_NO
         end
-        userlist = Builtins.maplist(Ops.get_map(group, "userlist", {})) do |k, v|
+        userlist = Builtins.maplist(Ops.get_map(group, "userlist", {})) do |k, _v|
           k
         end
         # filter non ts users
@@ -798,7 +798,7 @@ module Yast
             # filter all TS-Entries from current user list to remove deselected ones
             non_ts_users_list = Builtins.filter(
               Ops.get_map(group, "userlist", {})
-            ) do |username, number|
+            ) do |username, _number|
               !Builtins.haskey(@ts_member_conf, username)
             end
             Ops.set(

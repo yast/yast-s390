@@ -256,17 +256,17 @@ module Yast
       luns = []
 
       if Mode.config
-        channels = Builtins.maplist(ZFCPController.devices) do |index, d|
+        channels = Builtins.maplist(ZFCPController.devices) do |_index, d|
           Ops.get_string(d, ["detail", "controller_id"], "")
         end
         channels = Builtins.toset(channels)
 
-        wwpns = Builtins.maplist(ZFCPController.devices) do |index, d|
+        wwpns = Builtins.maplist(ZFCPController.devices) do |_index, d|
           Ops.get_string(d, ["detail", "wwpn"], "")
         end
         wwpns = Builtins.toset(wwpns)
 
-        luns = Builtins.maplist(ZFCPController.devices) do |index, d|
+        luns = Builtins.maplist(ZFCPController.devices) do |_index, d|
           Ops.get_string(d, ["detail", "fcp_lun"], "")
         end
         luns = Builtins.toset(luns)
