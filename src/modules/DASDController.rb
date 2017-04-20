@@ -217,12 +217,12 @@ module Yast
     def Export
       # Exporting active DASD only.
       # (bnc#887407)
-      active_devices = @devices.select { |_nr, device|
+      active_devices = @devices.select do |_nr, device|
         device.has_key?("resource") &&
           device["resource"].has_key?("io") &&
           !device["resource"]["io"].empty? &&
           device["resource"]["io"].first["active"]
-      }
+      end
 
       if active_devices.empty?
         # If no device is active we are exporting all. So the admin
@@ -231,10 +231,10 @@ module Yast
         active_devices = @devices
       end
 
-      l = Builtins.maplist(active_devices) { |_i, d| Builtins.filter(d) do |k, _v|
+      l = Builtins.maplist(active_devices) do |_i, d| Builtins.filter(d) do |k, _v|
         Builtins.contains(["channel", "format", "diag"], k)
       end
-      }
+      end
 
       {
         "devices"            => l,

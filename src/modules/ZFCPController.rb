@@ -339,10 +339,10 @@ module Yast
           Ops.get_string(c, "device", "") == "zFCP controller"
         end
 
-        @controllers = Builtins.maplist(@controllers) { |c| Builtins.filter(c) do |k, _v|
+        @controllers = Builtins.maplist(@controllers) do |c| Builtins.filter(c) do |k, _v|
           Builtins.contains(["sysfs_bus_id"], k)
         end
-        }
+        end
 
         # zKVM uses virtio devices instead of ZFCP, skip the warning in that case
         if ret_vmcp != 0 && @controllers.size == 0 && !Arch.is_zkvm
@@ -390,10 +390,10 @@ module Yast
         to:   "list <map <string, any>>"
       )
 
-      disks_tapes = Builtins.maplist(disks_tapes) { |d| Builtins.filter(d) do |k, _v|
+      disks_tapes = Builtins.maplist(disks_tapes) do |d| Builtins.filter(d) do |k, _v|
         Builtins.contains(["dev_name", "detail", "vendor", "device"], k)
       end
-      }
+      end
 
       index = -1
       @devices = Builtins.listmap(disks_tapes) do |d|
