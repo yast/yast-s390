@@ -296,7 +296,7 @@ module Yast
           return true
 
         when :format
-            # check if disks are R/W and active
+          # check if disks are R/W and active
           problem = ""
           Builtins.foreach(selected) do |id|
             active = Ops.get_boolean(
@@ -335,14 +335,14 @@ module Yast
 
           return false if num_parallel == 0
 
-            # final confirmation before formatting the discs
+          # final confirmation before formatting the discs
           channels = Builtins.maplist(selected) do |id|
             Ops.get_string(DASDController.devices, [id, "channel"], "")
           end
           channels_str = Builtins.mergestring(channels, ", ")
           if !Popup.AnyQuestionRichText(
             Popup.NoHeadline,
-              # popup question
+            # popup question
             Builtins.sformat(
               _(
                 "Formatting these disks destroys all data on them.<br>\n" +

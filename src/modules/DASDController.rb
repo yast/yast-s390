@@ -471,7 +471,7 @@ module Yast
           )
         )
       when 5
-          # https://bugzilla.novell.com/show_bug.cgi?id=446998#c15
+        # https://bugzilla.novell.com/show_bug.cgi?id=446998#c15
         Report.Error(
           Builtins.sformat(
             # error report, %1 is device identification
@@ -480,7 +480,7 @@ module Yast
           )
         )
       when 6
-          # https://bugzilla.novell.com/show_bug.cgi?id=446998#c15
+        # https://bugzilla.novell.com/show_bug.cgi?id=446998#c15
         Report.Error(
           Builtins.sformat(
             # error report, %1 is device identification
@@ -489,7 +489,7 @@ module Yast
           )
         )
       when 7
-          # http://bugzilla.novell.com/show_bug.cgi?id=561876#c8
+        # http://bugzilla.novell.com/show_bug.cgi?id=561876#c8
         Report.Error(
           Builtins.sformat(
             # error report, %1 is device identification
@@ -498,7 +498,7 @@ module Yast
           )
         )
       when 8
-          # http://bugzilla.novell.com/show_bug.cgi?id=561876#c8
+        # http://bugzilla.novell.com/show_bug.cgi?id=561876#c8
         Report.Error(
           Builtins.sformat(
             # error report, %1 is device identification
