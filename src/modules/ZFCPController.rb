@@ -340,7 +340,7 @@ module Yast
         end
 
         @controllers = Builtins.maplist(@controllers) do |c|
-                         Builtins.filter(c) do |k, _v|
+          Builtins.filter(c) do |k, _v|
           Builtins.contains(["sysfs_bus_id"], k)
         end
         end
@@ -392,7 +392,7 @@ module Yast
       )
 
       disks_tapes = Builtins.maplist(disks_tapes) do |d|
-                      Builtins.filter(d) do |k, _v|
+        Builtins.filter(d) do |k, _v|
         Builtins.contains(["dev_name", "detail", "vendor", "device"], k)
       end
       end
