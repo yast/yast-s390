@@ -40,17 +40,17 @@ module Yast
     # @return [Symbol] dialog
     def MainZFCPSequence
       aliases = {
-        "main" => -> { ZFCPDialog() },
-        "add" => -> { AddZFCPDiskDialog() },
+        "main"   => -> { ZFCPDialog() },
+        "add"    => -> { AddZFCPDiskDialog() },
         "delete" => -> { DeleteZFCPDiskDialog() }
       }
 
       sequence = {
         "ws_start" => "main",
         "main"     => {
-          abort: :abort,
-          next: :next,
-          add: "add",
+          abort:  :abort,
+          next:   :next,
+          add:    "add",
           delete: "delete"
         },
         "add"      => { abort: :abort, next: "main" },

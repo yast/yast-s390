@@ -81,7 +81,7 @@ module Yast
       files = Convert.convert(
         SCR.Read(path(".target.dir"), dir),
         from: "any",
-        to: "list <string>"
+        to:   "list <string>"
       )
       if Builtins.size(files) == 1
         return Ops.add("/dev/", Ops.get(files, 0, ""))
@@ -236,7 +236,7 @@ module Yast
       end }
 
       {
-        "devices" => l,
+        "devices"            => l,
         "format_unformatted" => @format_unformatted
       }
     end
@@ -357,7 +357,7 @@ module Yast
       disks = Convert.convert(
         SCR.Read(path(".probe.disk")),
         from: "any",
-        to: "list <map <string, any>>"
+        to:   "list <map <string, any>>"
       )
       disks = Builtins.filter(disks) do |d|
         Builtins.tolower(Ops.get_string(d, "device", "")) == "dasd"

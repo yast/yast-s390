@@ -167,7 +167,7 @@ module Yast
             selected_items = Convert.convert(
               UI.QueryWidget(Id(:dasd_disks), :SelectedItems),
               from: "any",
-              to: "list <string>"
+              to:   "list <string>"
             )
             Builtins.foreach(selected_items) do |dev_line|
               entries = Builtins.splitstring(dev_line, "\t")

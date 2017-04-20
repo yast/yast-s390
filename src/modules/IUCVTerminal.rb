@@ -198,7 +198,7 @@ module Yast
           parameters = Convert.convert(
             SCR.Read(path(".proc.cmdline")),
             from: "any",
-            to: "list <string>"
+            to:   "list <string>"
           )
           Builtins.foreach(parameters) do |parameter|
             if Builtins.regexpmatch(parameter, "console=hvc0")

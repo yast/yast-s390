@@ -42,17 +42,17 @@ module Yast
     # @return [Symbol] MainDASDSequence
     def MainDASDSequence
       aliases = {
-        "main" => -> { DASDDialog() },
-        "add" => -> { AddDASDDiskDialog() },
+        "main"   => -> { DASDDialog() },
+        "add"    => -> { AddDASDDiskDialog() },
         "delete" => lambda() { DeleteDASDDiskDialog() }
       }
 
       sequence = {
         "ws_start" => "main",
         "main"     => {
-          abort: :abort,
-          next: :next,
-          add: "add",
+          abort:  :abort,
+          next:   :next,
+          add:    "add",
           delete: "delete"
         },
         "add"      => { abort: :abort, next: "main" },

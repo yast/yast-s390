@@ -333,7 +333,7 @@ module Yast
         @controllers = Convert.convert(
           SCR.Read(path(".probe.storage")),
           from: "any",
-          to: "list <map <string, any>>"
+          to:   "list <map <string, any>>"
         )
         @controllers = Builtins.filter(@controllers) do |c|
           Ops.get_string(c, "device", "") == "zFCP controller"
@@ -368,7 +368,7 @@ module Yast
       disks = Convert.convert(
         SCR.Read(path(".probe.disk")),
         from: "any",
-        to: "list <map <string, any>>"
+        to:   "list <map <string, any>>"
       )
       disks = Builtins.filter(disks) do |d|
         Ops.get_string(d, "bus", "") == "SCSI"
@@ -377,7 +377,7 @@ module Yast
       tapes = Convert.convert(
         SCR.Read(path(".probe.tape")),
         from: "any",
-        to: "list <map <string, any>>"
+        to:   "list <map <string, any>>"
       )
       tapes = Builtins.filter(tapes) do |d|
         Ops.get_string(d, "bus", "") == "SCSI"
@@ -386,7 +386,7 @@ module Yast
       disks_tapes = Convert.convert(
         Builtins.merge(disks, tapes),
         from: "list",
-        to: "list <map <string, any>>"
+        to:   "list <map <string, any>>"
       )
 
       disks_tapes = Builtins.maplist(disks_tapes) { |d| Builtins.filter(d) do |k, _v|
@@ -658,7 +658,7 @@ module Yast
       cmd_output = Convert.convert(
         SCR.Execute(path(".target.bash_output"), cmd),
         from: "any",
-        to: "map <string, any>"
+        to:   "map <string, any>"
       )
       if Ops.get_integer(cmd_output, "exit", -1) == 0
         ret = Builtins.splitstring(

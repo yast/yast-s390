@@ -724,7 +724,7 @@ module Yast
         grouplist = Convert.convert(
           UI.QueryWidget(Id(:ts_additional_groups), :SelectedItems),
           from: "any",
-          to: "list <string>"
+          to:   "list <string>"
         )
         groups = Builtins.mergestring(grouplist, ",")
         groupmap = Builtins.listmap(grouplist) { |g| { g => "1" } }
@@ -745,10 +745,10 @@ module Yast
             @ts_member_conf,
             username,
             {
-              type: :rb_ts_list,
-              rb_ts_list: [],
+              type:        :rb_ts_list,
+              rb_ts_list:  [],
               rb_ts_regex: "",
-              rb_ts_file: ""
+              rb_ts_file:  ""
             }
           )
         else
@@ -766,7 +766,7 @@ module Yast
       items = Convert.convert(
         UI.QueryWidget(Id(:ts_table_add_groups), :Items),
         from: "any",
-        to: "list <term>"
+        to:   "list <term>"
       )
       groups = IUCVTerminalServer.GetGroups(true)
 
@@ -834,10 +834,10 @@ module Yast
               @ts_member_conf,
               identification,
               {
-                type: :rb_ts_list,
-                rb_ts_list: [],
+                type:        :rb_ts_list,
+                rb_ts_list:  [],
                 rb_ts_regex: "",
-                rb_ts_file: ""
+                rb_ts_file:  ""
               }
             )
           end
@@ -936,7 +936,7 @@ module Yast
       items = Convert.convert(
         UI.QueryWidget(Id(:ts_table_add_groups), :Items),
         from: "any",
-        to: "list <term>"
+        to:   "list <term>"
       )
       current_group = Convert.to_string(
         UI.QueryWidget(Id(:ts_table_add_groups), :CurrentItem)
@@ -963,7 +963,7 @@ module Yast
       items = Convert.convert(
         UI.QueryWidget(Id(:ts_table_add_groups), :Items),
         from: "any",
-        to: "list <term>"
+        to:   "list <term>"
       )
       current_group = Convert.to_string(
         UI.QueryWidget(Id(:ts_table_add_groups), :CurrentItem)
@@ -1100,7 +1100,7 @@ module Yast
       ids = Convert.convert(
         UI.QueryWidget(Id(widget), :SelectedItems),
         from: "any",
-        to: "list <string>"
+        to:   "list <string>"
       )
 
       # make sure that only available ids are compared
@@ -1350,7 +1350,7 @@ module Yast
           @zvm_id_list = Convert.convert(
             Builtins.union(id_list, id_list),
             from: "list",
-            to: "list <string>"
+            to:   "list <string>"
           )
           # sort list
           @zvm_id_list = Builtins.sort(@zvm_id_list)
@@ -1359,7 +1359,7 @@ module Yast
           @zvm_id_entries = Convert.convert(
             Builtins.merge([@TEXT_ALL], @zvm_id_list),
             from: "list",
-            to: "list <string>"
+            to:   "list <string>"
           )
         else
           # reset list to prevent saving the previous settings
@@ -1380,7 +1380,7 @@ module Yast
           Convert.convert(
             UI.QueryWidget(Id(:ts_table_add_groups), :Items),
             from: "any",
-            to: "list <term>"
+            to:   "list <term>"
           )
         UI.ChangeWidget(Id(:ts_groups_members), :Enabled, groups_exist)
         UI.ChangeWidget(Id(:ts_groups_select), :Enabled, groups_exist)
@@ -1397,7 +1397,7 @@ module Yast
         table_data = Convert.convert(
           UI.QueryWidget(Id(:ts_table_add_groups), :Items),
           from: "any",
-          to: "list <term>"
+          to:   "list <term>"
         )
         groupname = Convert.to_string(
           UI.QueryWidget(Id(:ts_groups_name), :Value)
@@ -1416,7 +1416,7 @@ module Yast
           items = Convert.convert(
             UI.QueryWidget(Id(:ts_table_add_groups), :Items),
             from: "any",
-            to: "list <term>"
+            to:   "list <term>"
           )
 
           item = Item(Id(groupname), groupname, @TEXT_YES, "new", "")
@@ -1435,7 +1435,7 @@ module Yast
         items = Convert.convert(
           UI.QueryWidget(Id(:ts_table_add_groups), :Items),
           from: "any",
-          to: "list <term>"
+          to:   "list <term>"
         )
         groupname = Convert.to_string(
           UI.QueryWidget(Id(:ts_table_add_groups), :CurrentItem)
@@ -1459,7 +1459,7 @@ module Yast
         user_list = Convert.convert(
           UI.QueryWidget(Id(:ts_groups_members), :SelectedItems),
           from: "any",
-          to: "list <string>"
+          to:   "list <string>"
         )
         SetTSGroupTableUserList(user_list)
       end
@@ -1509,7 +1509,7 @@ module Yast
       @zvm_id_entries = Convert.convert(
         Builtins.merge([@TEXT_ALL], @zvm_id_list),
         from: "list",
-        to: "list <string>"
+        to:   "list <string>"
       )
 
       # initialize screen
@@ -1546,7 +1546,7 @@ module Yast
             current_items = Convert.convert(
               UI.QueryWidget(Id(:ts_table_add_groups), :Items),
               from: "any",
-              to: "list <term>"
+              to:   "list <term>"
             )
             if @current_dialog == :ts_open_group_dialog &&
                 @ts_groups_items != current_items &&

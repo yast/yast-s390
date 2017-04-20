@@ -95,13 +95,13 @@ module Yast
       users = Convert.convert(
         Users.GetUsers("uid", "local"),
         from: "map",
-        to: "map <string, map>"
+        to:   "map <string, map>"
       )
       if !local
         users = Convert.convert(
           Builtins.union(users, Users.GetUsers("uid", "system")),
           from: "map",
-          to: "map <string, map>"
+          to:   "map <string, map>"
         )
       end
       deep_copy(users)
@@ -114,13 +114,13 @@ module Yast
       groups = Convert.convert(
         Users.GetGroups("cn", "local"),
         from: "map",
-        to: "map <string, map>"
+        to:   "map <string, map>"
       )
       if !local
         groups = Convert.convert(
           Builtins.union(groups, Users.GetGroups("cn", "system")),
           from: "map",
-          to: "map <string, map>"
+          to:   "map <string, map>"
         )
       end
       deep_copy(groups)
@@ -274,10 +274,10 @@ module Yast
           @ts_member_conf,
           name,
           {
-            type: :rb_ts_list,
-            rb_ts_list: [],
+            type:        :rb_ts_list,
+            rb_ts_list:  [],
             rb_ts_regex: "",
-            rb_ts_file: ""
+            rb_ts_file:  ""
           }
         )
       end
@@ -394,7 +394,7 @@ module Yast
           @ts_audited_ids = Convert.convert(
             Builtins.merge([@TEXT_ALL], @zvm_id_list),
             from: "list",
-            to: "list <string>"
+            to:   "list <string>"
           )
         else
           # only add known ids
@@ -411,7 +411,7 @@ module Yast
         @ts_authorization_map = Convert.convert(
           SCR.Read(path(".etc.iucvterm-ts-authorization.all")),
           from: "any",
-          to: "map <string, any>"
+          to:   "map <string, any>"
         )
         ts_auth_list = Ops.get_list(@ts_authorization_map, "value", [])
         Builtins.foreach(ts_auth_list) do |entry|

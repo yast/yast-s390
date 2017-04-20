@@ -20,7 +20,7 @@ describe "Yast::ZFCPController" do
 
       # Removing all fcp devices from blacklist
       expect(Yast::SCR).to receive(:Execute).with(anything, /\/sbin\/vmcp q v fcp/).and_return(
-        "exit" => 0,
+        "exit"   => 0,
         "stdout" => "FCP  F800 ON FCP   F807 CHPID 1C SUBCHANNEL = 000B\n  F800 TOKEN = 0000000362A42C00")
       expect(Yast::SCR).to receive(:Execute).with(anything, /\/sbin\/cio_ignore -r f800/).and_return(0)
 
@@ -37,7 +37,7 @@ describe "Yast::ZFCPController" do
 
   describe "#Import" do
     it "Imports the devices from a Hash" do
-      import_data = { "devices"=>[{"controller_id" => "0.0.fa00"},
+      import_data = { "devices" => [{"controller_id" => "0.0.fa00"},
         {"controller_id" => "0.0.fc00"},
         {"controller_id" => "0.0.f800"},
         {"controller_id" => "0.0.f900"}]}
@@ -59,7 +59,7 @@ describe "Yast::ZFCPController" do
 
   describe "#GetFilteredDevices" do
     it "Filters the devices" do
-      import_data = { "devices"=>[{"controller_id" => "0.0.fa00"},
+      import_data = { "devices" => [{"controller_id" => "0.0.fa00"},
         {"controller_id" => "0.0.fb00"},
         {"controller_id" => "0.0.fc00"},
         {"controller_id" => "0.0.f800"},
@@ -69,8 +69,8 @@ describe "Yast::ZFCPController" do
       Yast::ZFCPController.filter_max = Yast::ZFCPController.FormatChannel("0.0.FA00")
       Yast::ZFCPController.filter_min = Yast::ZFCPController.FormatChannel("0.0.f900")
       expect(Yast::ZFCPController.GetFilteredDevices()).to eq({
-        0=>{"detail"=>{"controller_id"=>"0.0.fa00", "wwpn"=>"", "fcp_lun"=>""}},
-        4=>{"detail"=>{"controller_id"=>"0.0.f900", "wwpn"=>"", "fcp_lun"=>""}}})
+        0 => {"detail"=>{"controller_id"=>"0.0.fa00", "wwpn"=>"", "fcp_lun"=>""}},
+        4 => {"detail"=>{"controller_id"=>"0.0.f900", "wwpn"=>"", "fcp_lun"=>""}}})
     end
   end
 end
