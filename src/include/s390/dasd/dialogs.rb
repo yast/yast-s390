@@ -223,7 +223,7 @@ module Yast
       if !Mode.config
         case action
         when :activate, :deactivate
-            value = action == :activate
+          value = action == :activate
             unformatted_disks = []
 
             Builtins.foreach(selected) do |id|
@@ -275,7 +275,7 @@ module Yast
             return true
 
         when :diag_off, :diag_on
-            value = action == :diag_on
+          value = action == :diag_on
 
             Builtins.foreach(selected) do |id|
               channel = Ops.get_string(
@@ -297,7 +297,7 @@ module Yast
 
         when :format
             # check if disks are R/W and active
-            problem = ""
+          problem = ""
             Builtins.foreach(selected) do |id|
               active = Ops.get_boolean(
                 DASDController.devices,
@@ -377,7 +377,7 @@ module Yast
       else
         case action
         when :diag_off, :diag_on
-            value = action == :diag_on
+          value = action == :diag_on
 
             Builtins.foreach(selected) do |id|
               Ops.set(DASDController.devices, [id, "diag"], value)
@@ -385,7 +385,7 @@ module Yast
 
             return true
         when :format_off, :format_on
-            value = action == :format_on
+          value = action == :format_on
 
             Builtins.foreach(selected) do |id|
               Ops.set(DASDController.devices, [id, "format"], value)

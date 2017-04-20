@@ -59,40 +59,40 @@ module Yast
 
       case @func
       when "Summary"
-          @ret = HTML.List(ZFCPController.Summary)
+        @ret = HTML.List(ZFCPController.Summary)
       when "Reset"
-          ZFCPController.Import({})
+        ZFCPController.Import({})
           ZFCPController.SetModified(true)
           @ret = {}
       when "Change"
-          @ret = ZFCPAutoSequence()
+        @ret = ZFCPAutoSequence()
           ZFCPController.SetModified(true)
       when "Import"
-          @ret = ZFCPController.Import(@param)
+        @ret = ZFCPController.Import(@param)
           ZFCPController.SetModified(true)
       when "Export"
-          @ret = ZFCPController.Export
+        @ret = ZFCPController.Export
           ZFCPController.SetModified(false)
       when "GetModified"
-          @ret = ZFCPController.GetModified
+        @ret = ZFCPController.GetModified
       when "SetModified"
-          ZFCPController.SetModified(true)
+        ZFCPController.SetModified(true)
           @ret = true
       when "Packages"
-          @ret = ZFCPController.AutoPackages
+        @ret = ZFCPController.AutoPackages
       when "Read"
-          Yast.import "Progress"
+        Yast.import "Progress"
           Progress.set(false)
           @ret = ZFCPController.Read
           Progress.set(true)
           ZFCPController.SetModified(true)
       when "Write"
-          Yast.import "Progress"
+        Yast.import "Progress"
           Progress.set(false)
           @ret = ZFCPController.Write
           Progress.set(true)
         else
-          Builtins.y2error("Unknown function: %1", @func)
+        Builtins.y2error("Unknown function: %1", @func)
           @ret = false # Unknown function
       end
 

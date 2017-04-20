@@ -439,82 +439,82 @@ module Yast
       when 0
 
       when 1
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: sysfs not mounted."),
-              channel
-            )
+        Report.Error(
+          Builtins.sformat(
+            # error report, %1 is device identification
+            _("%1: sysfs not mounted."),
+            channel
           )
+        )
       when 2
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: Invalid status for <online>."),
-              channel
-            )
+        Report.Error(
+          Builtins.sformat(
+            # error report, %1 is device identification
+            _("%1: Invalid status for <online>."),
+            channel
           )
+        )
       when 3
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: No device found for <ccwid>."),
-              channel
-            )
+        Report.Error(
+          Builtins.sformat(
+            # error report, %1 is device identification
+            _("%1: No device found for <ccwid>."),
+            channel
           )
+        )
       when 4
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: Could not change state of the device."),
-              channel
-            )
+        Report.Error(
+          Builtins.sformat(
+            # error report, %1 is device identification
+            _("%1: Could not change state of the device."),
+            channel
           )
+        )
       when 5
           # https://bugzilla.novell.com/show_bug.cgi?id=446998#c15
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: Device is not a DASD."),
-              channel
-            )
+        Report.Error(
+          Builtins.sformat(
+            # error report, %1 is device identification
+            _("%1: Device is not a DASD."),
+            channel
           )
+        )
       when 6
           # https://bugzilla.novell.com/show_bug.cgi?id=446998#c15
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: Could not load module."),
-              channel
-            )
+        Report.Error(
+          Builtins.sformat(
+            # error report, %1 is device identification
+            _("%1: Could not load module."),
+            channel
           )
+        )
       when 7
           # http://bugzilla.novell.com/show_bug.cgi?id=561876#c8
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: Failed to activate DASD."),
-              channel
-            )
+        Report.Error(
+          Builtins.sformat(
+            # error report, %1 is device identification
+            _("%1: Failed to activate DASD."),
+            channel
           )
+        )
       when 8
           # http://bugzilla.novell.com/show_bug.cgi?id=561876#c8
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: DASD is not formatted."),
-              channel
-            )
+        Report.Error(
+          Builtins.sformat(
+            # error report, %1 is device identification
+            _("%1: DASD is not formatted."),
+            channel
           )
+        )
         else
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification, %2 is integer code
-              _("%1: Unknown error %2."),
-              channel,
-              ret
-            )
+        Report.Error(
+          Builtins.sformat(
+            # error report, %1 is device identification, %2 is integer code
+            _("%1: Unknown error %2."),
+            channel,
+            ret
           )
+        )
       end
 
       nil

@@ -414,86 +414,86 @@ module Yast
       when 0
 
       when 1
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: sysfs not mounted."),
-              channel
-            )
+        Report.Error(
+          Builtins.sformat(
+            # error report, %1 is device identification
+            _("%1: sysfs not mounted."),
+            channel
           )
+        )
       when 2
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: Invalid status for <online>."),
-              channel
-            )
+        Report.Error(
+          Builtins.sformat(
+            # error report, %1 is device identification
+            _("%1: Invalid status for <online>."),
+            channel
           )
+        )
       when 3
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: No device found for <ccwid>."),
-              channel
-            )
+        Report.Error(
+          Builtins.sformat(
+            # error report, %1 is device identification
+            _("%1: No device found for <ccwid>."),
+            channel
           )
+        )
       when 4
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: WWPN invalid."),
-              channel
-            )
+        Report.Error(
+          Builtins.sformat(
+            # error report, %1 is device identification
+            _("%1: WWPN invalid."),
+            channel
           )
+        )
       when 5
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: Could not activate WWPN for adapter %1."),
-              channel
-            )
+        Report.Error(
+          Builtins.sformat(
+            # error report, %1 is device identification
+            _("%1: Could not activate WWPN for adapter %1."),
+            channel
           )
+        )
       when 6
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: Could not activate ZFCP device."),
-              channel
-            )
+        Report.Error(
+          Builtins.sformat(
+            # error report, %1 is device identification
+            _("%1: Could not activate ZFCP device."),
+            channel
           )
+        )
       when 7
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: SCSI disk could not be deactivated."),
-              channel
-            )
+        Report.Error(
+          Builtins.sformat(
+            # error report, %1 is device identification
+            _("%1: SCSI disk could not be deactivated."),
+            channel
           )
+        )
       when 8
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: LUN could not be unregistered."),
-              channel
-            )
+        Report.Error(
+          Builtins.sformat(
+            # error report, %1 is device identification
+            _("%1: LUN could not be unregistered."),
+            channel
           )
+        )
       when 9
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: WWPN could not be unregistered."),
-              channel
-            )
+        Report.Error(
+          Builtins.sformat(
+            # error report, %1 is device identification
+            _("%1: WWPN could not be unregistered."),
+            channel
           )
+        )
         else
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification, %2 is integer code
-              _("%1: Unknown error %2."),
-              channel,
-              ret
-            )
+        Report.Error(
+          Builtins.sformat(
+            # error report, %1 is device identification, %2 is integer code
+            _("%1: Unknown error %2."),
+            channel,
+            ret
           )
+        )
       end
 
       nil
@@ -507,70 +507,70 @@ module Yast
       when 0
 
       when 1
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: sysfs not mounted."),
-              channel
-            )
+        Report.Error(
+          Builtins.sformat(
+            # error report, %1 is device identification
+            _("%1: sysfs not mounted."),
+            channel
           )
+        )
       when 2
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: Invalid status for <online>."),
-              channel
-            )
+        Report.Error(
+          Builtins.sformat(
+            # error report, %1 is device identification
+            _("%1: Invalid status for <online>."),
+            channel
           )
+        )
       when 3
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: Device <ccwid> does not exist."),
-              channel
-            )
+        Report.Error(
+          Builtins.sformat(
+            # error report, %1 is device identification
+            _("%1: Device <ccwid> does not exist."),
+            channel
           )
+        )
       when 4
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: Module zfcp could not be loaded."),
-              channel
-            )
+        Report.Error(
+          Builtins.sformat(
+            # error report, %1 is device identification
+            _("%1: Module zfcp could not be loaded."),
+            channel
           )
+        )
       when 5
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: Adapter status could not be changed."),
-              channel
-            )
+        Report.Error(
+          Builtins.sformat(
+            # error report, %1 is device identification
+            _("%1: Adapter status could not be changed."),
+            channel
           )
+        )
       when 6
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: WWPN ports still active."),
-              channel
-            )
+        Report.Error(
+          Builtins.sformat(
+            # error report, %1 is device identification
+            _("%1: WWPN ports still active."),
+            channel
           )
+        )
       when 10
-          Report.Message(
-            Builtins.sformat(
-              # message, %1 is device identification
-              _("%1: This host adapter supports allow_lun_scan."),
-              channel
-            )
+        Report.Message(
+          Builtins.sformat(
+            # message, %1 is device identification
+            _("%1: This host adapter supports allow_lun_scan."),
+            channel
           )
+        )
         else
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification, %2 is integer code
-              _("%1: Unknown error %2."),
-              channel,
-              ret
-            )
+        Report.Error(
+          Builtins.sformat(
+            # error report, %1 is device identification, %2 is integer code
+            _("%1: Unknown error %2."),
+            channel,
+            ret
           )
+        )
       end
 
       nil
