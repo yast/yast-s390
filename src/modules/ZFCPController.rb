@@ -43,7 +43,6 @@ module Yast
       Yast.import "Popup"
       Yast.import "Arch"
 
-
       @devices = {}
 
       @filter_min = "0.0.0000"
@@ -55,14 +54,10 @@ module Yast
 
       @activated_controllers = {}
 
-
       @disk_configured = false
-
 
       # Data was modified?
       @modified = false
-
-
 
       @proposal_valid = false
     end
@@ -73,13 +68,11 @@ module Yast
       @modified
     end
 
-
     def SetModified(value)
       @modified = value
 
       nil
     end
-
 
     def IsValidChannel(channel)
       regexp = "^([[:xdigit:]]{1,2}).([[:xdigit:]]{1}).([[:xdigit:]]{4})$"
@@ -114,7 +107,6 @@ module Yast
       Builtins.tohexstring(Builtins.tointeger(lun), 16)
     end
 
-
     def GetNextLUN(lun)
       lun = "0" if lun == nil || lun == ""
 
@@ -136,7 +128,6 @@ module Yast
       Builtins.tohexstring(new_lun, 16)
     end
 
-
     # Read all controller settings
     # @return true on success
     def Read
@@ -145,7 +136,6 @@ module Yast
       @disk_configured = false
       true
     end
-
 
     # Write all controller settings
     # @return true on success
@@ -177,7 +167,6 @@ module Yast
       true
     end
 
-
     # Get all controller settings from the first parameter
     # (For use by autoinstallation.)
     # @param [Hash] settings The YCP structure to be imported.
@@ -202,7 +191,6 @@ module Yast
       true
     end
 
-
     # Dump the controller settings to a single map
     # (For use by autoinstallation.)
     # @return [Hash] Dumped settings (later acceptable by Import ())
@@ -218,13 +206,9 @@ module Yast
       { "devices" => l }
     end
 
-
-
     def GetDevices
       deep_copy(@devices)
     end
-
-
 
     def GetFilteredDevices
       min_strs = Builtins.splitstring(@filter_min, ".")
@@ -258,8 +242,6 @@ module Yast
       deep_copy(ret)
     end
 
-
-
     def AddDevice(d)
       d = deep_copy(d)
       index = 0
@@ -271,15 +253,11 @@ module Yast
       nil
     end
 
-
-
     def RemoveDevice(index)
       @devices = Builtins.remove(@devices, index)
 
       nil
     end
-
-
 
     def GetDeviceIndex(channel, wwpn, lun)
       ret = nil
@@ -292,7 +270,6 @@ module Yast
       end
       ret
     end
-
 
     # Create a textual summary and a list of configured devices
     # @return summary of the current configuration
@@ -324,7 +301,6 @@ module Yast
       deep_copy(ret)
     end
 
-
     # Return packages needed to be installed and removed during
     # Autoinstallation to insure module has all needed software
     # installed.
@@ -332,7 +308,6 @@ module Yast
     def AutoPackages
       { "install" => [], "remove" => [] }
     end
-
 
     # Get available zfcp controllers
     # @return [Array<Hash{String => Object>}] of availabel Controllers
@@ -379,13 +354,11 @@ module Yast
       deep_copy(@controllers)
     end
 
-
     # Check if ZFCP subsystem is available
     # @return [Boolean] whether the ZFCP-System is availble at all
     def IsAvailable
       !Builtins.isempty(GetControllers())
     end
-
 
     # Get available disks
     def ProbeDisks
@@ -432,7 +405,6 @@ module Yast
 
       nil
     end
-
 
     # Report error occured during device activation
     # @param [String] channel string channel of the device
@@ -527,7 +499,6 @@ module Yast
       nil
     end
 
-
     # Report error occured during device activation
     # @param [String] channel string channel of the device
     # @param [Fixnum] ret integer exit code of the operation
@@ -605,7 +576,6 @@ module Yast
       nil
     end
 
-
     # Activate a disk
     # @param [String] channel string channel
     # @param [String] wwpn string wwpn (hexa number)
@@ -656,7 +626,6 @@ module Yast
       nil
     end
 
-
     # Deactivate a disk
     # @param [String] channel string channel
     # @param [String] wwpn string wwpn (hexa number)
@@ -683,7 +652,6 @@ module Yast
 
       nil
     end
-
 
     def runCommand(cmd)
       ret = []

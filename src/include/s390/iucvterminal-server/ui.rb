@@ -602,7 +602,6 @@ module Yast
       deep_copy(contents)
     end
 
-
     # Initializes the main dialogs (zvmid, ts-shell and iucvconn)
     # @param the symbol of the activated tab
     # @return [void]
@@ -690,7 +689,6 @@ module Yast
 
       nil
     end
-
 
     # Checks the input for the new user and creates it if valid
     # @return true if successful
@@ -855,7 +853,6 @@ module Yast
       nil
     end
 
-
     def DrawMainDialog
       Wizard.SetContentsButtons(
         _("Configure IUCV Terminal Server Settings"),
@@ -904,7 +901,6 @@ module Yast
 
       nil
     end
-
 
     # Updates the TS-Shell Group table widget with new items and tries to keep the current selection
     # @param list<term> of table items
@@ -987,7 +983,6 @@ module Yast
 
       nil
     end
-
 
     def CheckPassword(field1, field2)
       pw1 = Convert.to_string(UI.QueryWidget(Id(field1), :Value))
@@ -1195,7 +1190,6 @@ module Yast
         )
       end
 
-
       if widget == :ts_users_groups
         ts_isnt_empty = Ops.greater_than(
           Builtins.size(GenerateTsMembersTable()),
@@ -1295,7 +1289,6 @@ module Yast
           UI.ChangeWidget(Id(:ts_auth_file), :Value, file)
         end
       end
-
 
       # reset repeated password on change
       UI.ChangeWidget(Id(:ic_pw2), :Value, "") if widget == :ic_pw1
@@ -1471,7 +1464,6 @@ module Yast
         SetTSGroupTableUserList(user_list)
       end
 
-
       # tab handling
       if widget == :t_zvmids
         #SaveSettings( $[ "ID" : widget ] );
@@ -1609,7 +1601,6 @@ module Yast
           end
         end
       end while !Builtins.contains([:back, :abort, :cancel, :next, :ok, :finish], ret)
-
 
       # commit changes
       if IUCVTerminalServer.modified &&

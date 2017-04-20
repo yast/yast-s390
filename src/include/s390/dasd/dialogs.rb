@@ -60,7 +60,6 @@ module Yast
       deep_copy(selected)
     end
 
-
     # Read settings dialog
     # @return `abort if aborted and `next otherwise
     def ReadDialog
@@ -69,7 +68,6 @@ module Yast
       ret ? :next : :abort
     end
 
-
     # Write settings dialog
     # @return `abort if aborted and `next otherwise
     def WriteDialog
@@ -77,7 +75,6 @@ module Yast
       ret = DASDController.Write
       ret ? :next : :abort
     end
-
 
     # Get the list of items for the table of DASD devices
     # @param min_chan integer minimal channel number
@@ -162,7 +159,6 @@ module Yast
       deep_copy(items)
     end
 
-
     def PossibleActions
       if !Mode.config
         return [
@@ -191,7 +187,6 @@ module Yast
       end
     end
 
-
     def AskNumParallel(max_num_parallel)
 
       UI.OpenDialog(
@@ -216,7 +211,6 @@ module Yast
       return ret == :ok ? num_parallel : 0
 
     end
-
 
     def PerformAction(action)
       selected = ListSelectedDASD()
@@ -404,7 +398,6 @@ module Yast
       false
     end
 
-
     # Draw the DASD dialog
     def DisplayDASDDialog
       help_key = Mode.config ? "disk_selection_config" : "disk_selection"
@@ -497,7 +490,6 @@ module Yast
       nil
     end
 
-
     # Redraw the contents of the widgets in the DASD Dialog
     def ReloadDASDDialog
       items = GetDASDDiskItems()
@@ -513,7 +505,6 @@ module Yast
 
       nil
     end
-
 
     # Run the dialog for DASD disks configuration
     # @return [Symbol] for wizard sequencer
@@ -585,7 +576,6 @@ module Yast
 
       ret
     end
-
 
     # Run the dialog for adding DASDs
     # @return [Symbol] from AddDASDDiskDialog
@@ -676,7 +666,6 @@ module Yast
 
       ret
     end
-
 
     # Run the dialog for deleting DASDs
     # @return [Symbol] from DeleteDASDDiskDialog

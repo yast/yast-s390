@@ -67,7 +67,6 @@ module Yast
         return WFM.call("zfcp")
       end
 
-
       # Initialization dialog caption
       @caption = _("S/390 Disk Controller Configuration")
       # Initialization dialog contents
@@ -98,7 +97,6 @@ module Yast
         ),
         HWeight(999, HStretch())
       )
-
 
       Label(_("Initializing..."))
 

@@ -38,7 +38,6 @@ module Yast
       Yast.import "Popup"
       Yast.import "Wizard"
 
-
       # Should dumpconf be started?
       @start = false
     end
@@ -208,7 +207,6 @@ module Yast
         ),
         HSpacing(3)
       )
-
 
       Wizard.SetContentsButtons(
         caption,

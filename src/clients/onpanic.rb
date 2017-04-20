@@ -53,7 +53,6 @@ module Yast
         "guihandler" => fun_ref(method(:OnPanicSequence), "symbol ()"),
       }
 
-
       # main ui function
       @ret = CommandLine.Run(@cmdline_description)
 

@@ -96,7 +96,6 @@ module Yast
         }
       }
 
-
       # main ui function
       @ret = CommandLine.Run(@cmdline_description)
 

@@ -33,9 +33,7 @@ require "yast"
 module Yast
   class DASDControllerClass < Module
 
-
     include Yast::Logger
-
 
     def main
       Yast.import "UI"
@@ -47,7 +45,6 @@ module Yast
       Yast.import "Popup"
       Yast.import "String"
 
-
       @devices = {}
 
       @filter_min = "0.0.0000"
@@ -55,10 +52,8 @@ module Yast
 
       @diag = {}
 
-
       # Have DASDs been configured so that mkinitrd needs to be run?
       @disk_configured = false
-
 
       # Data was modified?
       @modified = false
@@ -75,13 +70,11 @@ module Yast
       @modified
     end
 
-
     def SetModified(value)
       @modified = value
 
       nil
     end
-
 
     def GetDeviceName(channel)
       dir = Builtins.sformat("/sys/bus/ccw/devices/%1/block/", channel)
@@ -96,7 +89,6 @@ module Yast
       nil
     end
 
-
     def IsValidChannel(channel)
       regexp = "^([[:xdigit:]]{1,2}).([[:xdigit:]]{1}).([[:xdigit:]]{4})$"
       Builtins.regexpmatch(channel, regexp)
@@ -107,7 +99,6 @@ module Yast
 
       Builtins.tolower(channel)
     end
-
 
     # Read all controller settings
     # @return true on success
@@ -125,7 +116,6 @@ module Yast
       @disk_configured = false
       true
     end
-
 
     # Write all controller settings
     # @return true on success
@@ -200,7 +190,6 @@ module Yast
       true
     end
 
-
     # Get all controller settings from the first parameter
     # (For use by autoinstallation.)
     # @param [Hash] settings The YCP structure to be imported.
@@ -221,7 +210,6 @@ module Yast
 
       true
     end
-
 
     # Dump the controller settings to a single map
     # (For use by autoinstallation.)
@@ -253,13 +241,9 @@ module Yast
       }
     end
 
-
-
     def GetDevices
       deep_copy(@devices)
     end
-
-
 
     def GetFilteredDevices
       min_strs = Builtins.splitstring(@filter_min, ".")
@@ -290,8 +274,6 @@ module Yast
       deep_copy(ret)
     end
 
-
-
     def AddDevice(d)
       d = deep_copy(d)
       index = 0
@@ -303,15 +285,11 @@ module Yast
       nil
     end
 
-
-
     def RemoveDevice(index)
       @devices = Builtins.remove(@devices, index)
 
       nil
     end
-
-
 
     def GetDeviceIndex(channel)
       ret = nil
@@ -320,7 +298,6 @@ module Yast
       end
       ret
     end
-
 
     # Create a textual summary and a list of configured devices
     # @return summary of the current configuration
@@ -355,7 +332,6 @@ module Yast
       deep_copy(ret)
     end
 
-
     # Return packages needed to be installed and removed during
     # Autoinstallation to insure module has all needed software
     # installed.
@@ -363,7 +339,6 @@ module Yast
     def AutoPackages
       { "install" => [], "remove" => [] }
     end
-
 
     # Check if DASD subsystem is available
     # @return [Boolean] True if more than one disk
@@ -373,7 +348,6 @@ module Yast
       log.info("number of probed DASD devices #{count}")
       return count > 0
     end
-
 
     # Probe for DASD disks
     def ProbeDisks
@@ -456,7 +430,6 @@ module Yast
 
       nil
     end
-
 
     # Report error occured during device activation
     # @param [String] channel string channel of the device
@@ -547,7 +520,6 @@ module Yast
       nil
     end
 
-
     # Activate disk
     # @param [String] channel string Name of the disk to activate
     # @param [Boolean] diag boolean Activate DIAG or not
@@ -583,7 +555,6 @@ module Yast
       ret
     end
 
-
     # Deactivate disk
     # @param [String] channel string Name of the disk to deactivate
     # @param [Boolean] diag boolean Activate DIAG or not
@@ -608,7 +579,6 @@ module Yast
 
       nil
     end
-
 
     # Format disks
     # @param [Array<String>] disks_list list<string> List of disks to be formatted

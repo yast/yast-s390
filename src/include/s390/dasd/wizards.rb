@@ -27,7 +27,6 @@
 module Yast
   module S390DasdWizardsInclude
 
-
     def initialize_s390_dasd_wizards(include_target)
       Yast.import "UI"
       textdomain "s390"
@@ -38,7 +37,6 @@ module Yast
 
       Yast.include include_target, "s390/dasd/dialogs.rb"
     end
-
 
     # Whole configuration of controller
     # @return [Symbol] MainDASDSequence
@@ -63,7 +61,6 @@ module Yast
 
       Sequencer.Run(aliases, sequence)
     end
-
 
     # Whole configuration of controller
     # @return sequence result
@@ -91,7 +88,6 @@ module Yast
       ret
     end
 
-
     # Whole configuration of controller but without reading and writing.
     # For use with autoinstallation.
     # @return sequence result
@@ -117,7 +113,6 @@ module Yast
 
       ret
     end
-
 
   end
 end

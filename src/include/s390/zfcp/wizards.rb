@@ -60,7 +60,6 @@ module Yast
       Sequencer.Run(aliases, sequence)
     end
 
-
     # Whole configuration of controller
     # @return sequence result
     def ZFCPSequence
@@ -86,7 +85,6 @@ module Yast
 
       ret
     end
-
 
     # Whole configuration of controller but without reading and writing.
     # For use with autoinstallation.

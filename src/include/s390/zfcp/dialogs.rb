@@ -55,7 +55,6 @@ module Yast
       deep_copy(selected)
     end
 
-
     # Read settings dialog
     # @return `abort if aborted and `next otherwise
     def ReadDialog
@@ -64,7 +63,6 @@ module Yast
       ret ? :next : :abort
     end
 
-
     # Write settings dialog
     # @return `abort if aborted and `next otherwise
     def WriteDialog
@@ -72,7 +70,6 @@ module Yast
       ret = ZFCPController.Write
       ret ? :next : :abort
     end
-
 
     # Get the list of items for the table of ZFCP devices
     # @param min_chan integer minimal channel number
@@ -102,7 +99,6 @@ module Yast
 
       deep_copy(items)
     end
-
 
     # Show the ZFCP-Dialog
     def DisplayZFCPDialog
@@ -183,7 +179,6 @@ module Yast
       nil
     end
 
-
     # Restart the ZFCP-Dialog
     def ReloadZFCPDialog
       items = GetZFCPDiskItems()
@@ -199,7 +194,6 @@ module Yast
 
       nil
     end
-
 
     # Show the ZFCP-Dialog
     # @return [Symbol] From the dialog
@@ -247,7 +241,6 @@ module Yast
 
       ret
     end
-
 
     # Add ZFCP-Dialog
     # @return [Symbol] the dialog
@@ -466,7 +459,6 @@ module Yast
 
       ret
     end
-
 
     # Run the dialog for deleting ZFCPs
     # @return [Symbol] from DeleteZFCPDiskDialog

@@ -75,7 +75,6 @@ module Yast
           # Dump dialog help 8/8
           _("DASD columns: Device, Size, ID, Dump</p>")
 
-
       dasd_disks = deep_copy(Dump.dasd_disks)
       zfcp_disks = deep_copy(Dump.zfcp_disks)
 
@@ -222,7 +221,6 @@ module Yast
       end while !Builtins.contains([:abort, :cancel, :again], ret)
       ret
     end
-
 
     # The whole squence
     # @return sequence result

@@ -74,7 +74,6 @@ module Yast
       # Map of the loaded ts-authorization.conf settings (for saving purposes)
       @ts_authorization_map = {}
 
-
       # Is IUCVConn enabled?
       @ic_enabled = false
 
@@ -501,7 +500,6 @@ module Yast
       SCR.Write(path(".sysconfig.iucv_terminal_server.TSSHELL_HOME"), @ts_home)
       SCR.Write(path(".sysconfig.iucv_terminal_server"), nil)
 
-
       filename = "/etc/iucvterm/ts-audit-systems.conf"
       Builtins.y2milestone("Writing configuration to %1.", filename)
       if Ops.get(@ts_audited_ids, 0) == @TEXT_ALL
@@ -514,7 +512,6 @@ module Yast
           Builtins.mergestring(@ts_audited_ids, "\n")
         )
       end
-
 
       filename = "/etc/iucvterm/ts-authorization.conf"
       Builtins.y2milestone("Writing configuration to %1.", filename)
@@ -583,7 +580,6 @@ module Yast
         @ts_authorization_map
       )
       SCR.Write(path(".etc.iucvterm-ts-authorization"), nil)
-
 
       Progress.NextStage
       if Users.Modified

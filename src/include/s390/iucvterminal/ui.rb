@@ -156,7 +156,6 @@ module Yast
             "<h3>Warning: HVC Terminals stay logged on without a manual logout through the shortcut: ctrl _ d</h3>"
           )
 
-
       # Dialog content
       content = HBox(
         HSpacing(3),
@@ -348,7 +347,6 @@ module Yast
         end
       end while ![:back, :abort, :cancel, :next, :ok, :finish].include?(ret)
 
-
       # commit changes
       if IUCVTerminal.modified && [:next, :ok, :finish].include?(ret)
         # set instances to zero if it is disabled
@@ -378,7 +376,6 @@ module Yast
       end
       ret
     end
-
 
     # The whole squence
     # @return sequence result

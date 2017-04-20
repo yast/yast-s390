@@ -157,7 +157,6 @@ module Yast
       mkdump
     end
 
-
     # Read OnPanic settings from /etc/sysconfig/dumpconf
     # @return true when file exists
     def ReadSysconfig

@@ -167,7 +167,6 @@ module Yast
         ""
       )
 
-
       # Load IUCVtty settings
       Progress.NextStage
       @iucv_instances = get_iucv_num
@@ -212,7 +211,6 @@ module Yast
       Progress.NextStage
       true
     end
-
 
     # Write all settings
     # @return true on success
