@@ -40,9 +40,9 @@ module Yast
     # @return [Symbol] dialog
     def MainZFCPSequence
       aliases = {
-        "main" => lambda { ZFCPDialog() },
-        "add" => lambda { AddZFCPDiskDialog() },
-        "delete" => lambda { DeleteZFCPDiskDialog() }
+        "main" => -> { ZFCPDialog() },
+        "add" => -> { AddZFCPDiskDialog() },
+        "delete" => -> { DeleteZFCPDiskDialog() }
       }
 
       sequence = {
@@ -64,9 +64,9 @@ module Yast
     # @return sequence result
     def ZFCPSequence
       aliases = {
-        "read"  => [lambda { ReadDialog() }, true],
-        "main"  => lambda { MainZFCPSequence() },
-        "write" => [lambda { WriteDialog() }, true]
+        "read"  => [-> { ReadDialog() }, true],
+        "main"  => -> { MainZFCPSequence() },
+        "write" => [-> { WriteDialog() }, true]
       }
 
       sequence = {

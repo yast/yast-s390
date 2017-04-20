@@ -42,8 +42,8 @@ module Yast
     # @return [Symbol] MainDASDSequence
     def MainDASDSequence
       aliases = {
-        "main" => lambda { DASDDialog() },
-        "add" => lambda { AddDASDDiskDialog() },
+        "main" => -> { DASDDialog() },
+        "add" => -> { AddDASDDiskDialog() },
         "delete" => lambda() { DeleteDASDDiskDialog() }
       }
 
@@ -66,9 +66,9 @@ module Yast
     # @return sequence result
     def DASDSequence
       aliases = {
-        "read"  => [lambda { ReadDialog() }, true],
-        "main"  => lambda { MainDASDSequence() },
-        "write" => [lambda { WriteDialog() }, true]
+        "read"  => [-> { ReadDialog() }, true],
+        "main"  => -> { MainDASDSequence() },
+        "write" => [-> { WriteDialog() }, true]
       }
 
       sequence = {
