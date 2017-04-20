@@ -356,7 +356,7 @@ module Yast
               Label.YesButton,
               Label.NoButton,
               :focus_no
-            )
+          )
             return false
           end
 
@@ -566,7 +566,7 @@ module Yast
             :format_off
           ],
             ret
-          )
+        )
           ReloadDASDDialog() if PerformAction(ret)
 
           ret = nil
@@ -627,7 +627,7 @@ module Yast
             _(
               "Really leave the DASD disk configuration without saving?\nAll changes will be lost."
             )
-            )
+          )
             ret = nil
           end
         elsif ret == :next

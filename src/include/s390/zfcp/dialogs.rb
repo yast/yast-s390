@@ -232,7 +232,7 @@ module Yast
             _(
               "Really leave the ZFCP device configuration without saving?\nAll changes will be lost."
             )
-            )
+          )
             ret = nil
           end
           next
@@ -384,7 +384,7 @@ module Yast
             _(
               "Really leave the ZFCP device configuration without saving?\nAll changes will be lost."
             )
-            )
+          )
             ret = nil
           end
         elsif ret == :next

@@ -259,7 +259,7 @@ module Yast
             if Builtins.regexpmatch(
               Convert.to_string(UI.QueryWidget(Id(:onpanic), :Value)),
                 "^dump"
-              ) &&
+            ) &&
                 Convert.to_string(UI.QueryWidget(Id(:dumpdevice), :Value)) == ""
               Popup.Notify(
                 _(
