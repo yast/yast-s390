@@ -343,19 +343,19 @@ module Yast
           if !Popup.AnyQuestionRichText(
             Popup.NoHeadline,
               # popup question
-              Builtins.sformat(
-                _(
-                  "Formatting these disks destroys all data on them.<br>\n" +
-                    "Really format the following disks?<br>\n" +
-                    "%1"
-                ),
-                channels_str
+            Builtins.sformat(
+              _(
+                "Formatting these disks destroys all data on them.<br>\n" +
+                  "Really format the following disks?<br>\n" +
+                  "%1"
               ),
-              60,
-              20,
-              Label.YesButton,
-              Label.NoButton,
-              :focus_no
+              channels_str
+            ),
+            60,
+            20,
+            Label.YesButton,
+            Label.NoButton,
+            :focus_no
           )
             return false
           end
@@ -565,7 +565,7 @@ module Yast
             :format_on,
             :format_off
           ],
-            ret
+          ret
         )
           ReloadDASDDialog() if PerformAction(ret)
 

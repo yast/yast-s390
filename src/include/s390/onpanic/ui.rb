@@ -258,7 +258,7 @@ module Yast
             # don't allow dumps if no device is available
             if Builtins.regexpmatch(
               Convert.to_string(UI.QueryWidget(Id(:onpanic), :Value)),
-                "^dump"
+              "^dump"
             ) &&
                 Convert.to_string(UI.QueryWidget(Id(:dumpdevice), :Value)) == ""
               Popup.Notify(
