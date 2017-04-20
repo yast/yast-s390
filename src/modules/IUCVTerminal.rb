@@ -197,8 +197,8 @@ module Yast
           # is only able to read one, cmdline is used as fallback
           parameters = Convert.convert(
             SCR.Read(path(".proc.cmdline")),
-            :from => "any",
-            :to   => "list <string>"
+            from: "any",
+            to: "list <string>"
           )
           Builtins.foreach(parameters) do |parameter|
             if Builtins.regexpmatch(parameter, "console=hvc0")
@@ -283,16 +283,16 @@ module Yast
       true
     end
 
-    publish :variable => :MAX_IUCV_TTYS, :type => "const integer"
-    publish :variable => :modified, :type => "boolean"
-    publish :variable => :iucv_instances, :type => "integer"
-    publish :variable => :iucv_name, :type => "string"
-    publish :variable => :hvc_instances, :type => "integer"
-    publish :variable => :show_kernel_out_on_hvc, :type => "boolean"
-    publish :variable => :restrict_hvc_to_srvs, :type => "string"
-    publish :variable => :has_bootloader_changed, :type => "boolean"
-    publish :function => :Read, :type => "boolean ()"
-    publish :function => :Write, :type => "boolean ()"
+    publish variable: :MAX_IUCV_TTYS, type: "const integer"
+    publish variable: :modified, type: "boolean"
+    publish variable: :iucv_instances, type: "integer"
+    publish variable: :iucv_name, type: "string"
+    publish variable: :hvc_instances, type: "integer"
+    publish variable: :show_kernel_out_on_hvc, type: "boolean"
+    publish variable: :restrict_hvc_to_srvs, type: "string"
+    publish variable: :has_bootloader_changed, type: "boolean"
+    publish function: :Read, type: "boolean ()"
+    publish function: :Write, type: "boolean ()"
   end
 
   IUCVTerminal = IUCVTerminalClass.new

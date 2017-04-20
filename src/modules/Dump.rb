@@ -173,10 +173,10 @@ module Yast
       true
     end
 
-    publish :variable => :dasd_disks, :type => "list <string>"
-    publish :variable => :zfcp_disks, :type => "list <string>"
-    publish :function => :Read, :type => "boolean ()"
-    publish :function => :FormatDisk, :type => "boolean (string, boolean)"
+    publish variable: :dasd_disks, type: "list <string>"
+    publish variable: :zfcp_disks, type: "list <string>"
+    publish function: :Read, type: "boolean ()"
+    publish function: :FormatDisk, type: "boolean (string, boolean)"
   end
 
   Dump = DumpClass.new

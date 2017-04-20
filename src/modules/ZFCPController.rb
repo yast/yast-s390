@@ -332,8 +332,8 @@ module Yast
 
         @controllers = Convert.convert(
           SCR.Read(path(".probe.storage")),
-          :from => "any",
-          :to   => "list <map <string, any>>"
+          from: "any",
+          to: "list <map <string, any>>"
         )
         @controllers = Builtins.filter(@controllers) do |c|
           Ops.get_string(c, "device", "") == "zFCP controller"
@@ -367,8 +367,8 @@ module Yast
 
       disks = Convert.convert(
         SCR.Read(path(".probe.disk")),
-        :from => "any",
-        :to   => "list <map <string, any>>"
+        from: "any",
+        to: "list <map <string, any>>"
       )
       disks = Builtins.filter(disks) do |d|
         Ops.get_string(d, "bus", "") == "SCSI"
@@ -376,8 +376,8 @@ module Yast
 
       tapes = Convert.convert(
         SCR.Read(path(".probe.tape")),
-        :from => "any",
-        :to   => "list <map <string, any>>"
+        from: "any",
+        to: "list <map <string, any>>"
       )
       tapes = Builtins.filter(tapes) do |d|
         Ops.get_string(d, "bus", "") == "SCSI"
@@ -385,8 +385,8 @@ module Yast
 
       disks_tapes = Convert.convert(
         Builtins.merge(disks, tapes),
-        :from => "list",
-        :to   => "list <map <string, any>>"
+        from: "list",
+        to: "list <map <string, any>>"
       )
 
       disks_tapes = Builtins.maplist(disks_tapes) { |d| Builtins.filter(d) do |k, v|
@@ -657,8 +657,8 @@ module Yast
       ret = []
       cmd_output = Convert.convert(
         SCR.Execute(path(".target.bash_output"), cmd),
-        :from => "any",
-        :to   => "map <string, any>"
+        from: "any",
+        to: "map <string, any>"
       )
       if Ops.get_integer(cmd_output, "exit", -1) == 0
         ret = Builtins.splitstring(
@@ -685,39 +685,39 @@ module Yast
       )
     end
 
-    publish :variable => :devices, :type => "map <integer, map <string, any>>"
-    publish :variable => :filter_min, :type => "string"
-    publish :variable => :filter_max, :type => "string"
-    publish :variable => :previous_settings, :type => "map <string, any>"
-    publish :function => :ActivateDisk, :type => "void (string, string, string)"
-    publish :function => :ProbeDisks, :type => "void ()"
-    publish :function => :GetModified, :type => "boolean ()"
-    publish :variable => :modified, :type => "boolean"
-    publish :variable => :proposal_valid, :type => "boolean"
-    publish :function => :SetModified, :type => "void (boolean)"
-    publish :function => :IsValidChannel, :type => "boolean (string)"
-    publish :function => :FormatChannel, :type => "string (string)"
-    publish :function => :IsValidWWPN, :type => "boolean (string)"
-    publish :function => :FormatWWPN, :type => "string (string)"
-    publish :function => :IsValidLUN, :type => "boolean (string)"
-    publish :function => :FormatLUN, :type => "string (string)"
-    publish :function => :GetNextLUN, :type => "string (string)"
-    publish :function => :Read, :type => "boolean ()"
-    publish :function => :Write, :type => "boolean ()"
-    publish :function => :Import, :type => "boolean (map)"
-    publish :function => :Export, :type => "map ()"
-    publish :function => :GetDevices, :type => "map <integer, map <string, any>> ()"
-    publish :function => :GetFilteredDevices, :type => "map <integer, map <string, any>> ()"
-    publish :function => :AddDevice, :type => "void (map <string, any>)"
-    publish :function => :RemoveDevice, :type => "void (integer)"
-    publish :function => :GetDeviceIndex, :type => "integer (string, string, string)"
-    publish :function => :Summary, :type => "list <string> ()"
-    publish :function => :AutoPackages, :type => "map ()"
-    publish :function => :GetControllers, :type => "list <map <string, any>> ()"
-    publish :function => :IsAvailable, :type => "boolean ()"
-    publish :function => :DeactivateDisk, :type => "void (string, string, string)"
-    publish :function => :GetWWPNs, :type => "list <string> (string)"
-    publish :function => :GetLUNs, :type => "list <string> (string, string)"
+    publish variable: :devices, type: "map <integer, map <string, any>>"
+    publish variable: :filter_min, type: "string"
+    publish variable: :filter_max, type: "string"
+    publish variable: :previous_settings, type: "map <string, any>"
+    publish function: :ActivateDisk, type: "void (string, string, string)"
+    publish function: :ProbeDisks, type: "void ()"
+    publish function: :GetModified, type: "boolean ()"
+    publish variable: :modified, type: "boolean"
+    publish variable: :proposal_valid, type: "boolean"
+    publish function: :SetModified, type: "void (boolean)"
+    publish function: :IsValidChannel, type: "boolean (string)"
+    publish function: :FormatChannel, type: "string (string)"
+    publish function: :IsValidWWPN, type: "boolean (string)"
+    publish function: :FormatWWPN, type: "string (string)"
+    publish function: :IsValidLUN, type: "boolean (string)"
+    publish function: :FormatLUN, type: "string (string)"
+    publish function: :GetNextLUN, type: "string (string)"
+    publish function: :Read, type: "boolean ()"
+    publish function: :Write, type: "boolean ()"
+    publish function: :Import, type: "boolean (map)"
+    publish function: :Export, type: "map ()"
+    publish function: :GetDevices, type: "map <integer, map <string, any>> ()"
+    publish function: :GetFilteredDevices, type: "map <integer, map <string, any>> ()"
+    publish function: :AddDevice, type: "void (map <string, any>)"
+    publish function: :RemoveDevice, type: "void (integer)"
+    publish function: :GetDeviceIndex, type: "integer (string, string, string)"
+    publish function: :Summary, type: "list <string> ()"
+    publish function: :AutoPackages, type: "map ()"
+    publish function: :GetControllers, type: "list <map <string, any>> ()"
+    publish function: :IsAvailable, type: "boolean ()"
+    publish function: :DeactivateDisk, type: "void (string, string, string)"
+    publish function: :GetWWPNs, type: "list <string> (string)"
+    publish function: :GetLUNs, type: "list <string> (string, string)"
   end
 
   ZFCPController = ZFCPControllerClass.new

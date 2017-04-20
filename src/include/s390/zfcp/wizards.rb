@@ -48,13 +48,13 @@ module Yast
       sequence = {
         "ws_start" => "main",
         "main"     => {
-          :abort  => :abort,
-          :next   => :next,
-          :add    => "add",
-          :delete => "delete"
+          abort: :abort,
+          next: :next,
+          add: "add",
+          delete: "delete"
         },
-        "add"      => { :abort => :abort, :next => "main" },
-        "delete"   => { :abort => :abort, :next => "main" }
+        "add"      => { abort: :abort, next: "main" },
+        "delete"   => { abort: :abort, next: "main" }
       }
 
       Sequencer.Run(aliases, sequence)
@@ -71,9 +71,9 @@ module Yast
 
       sequence = {
         "ws_start" => "read",
-        "read"     => { :abort => :abort, :next => "main" },
-        "main"     => { :abort => :abort, :next => "write" },
-        "write"    => { :abort => :abort, :next => :next }
+        "read"     => { abort: :abort, next: "main" },
+        "main"     => { abort: :abort, next: "write" },
+        "write"    => { abort: :abort, next: :next }
       }
 
       Wizard.CreateDialog

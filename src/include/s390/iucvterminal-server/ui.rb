@@ -434,7 +434,7 @@ module Yast
                       VSpacing(
                         Ops.multiply(
                           @VSPACING,
-                          Convert.convert(2, :from => "integer", :to => "float")
+                          Convert.convert(2, from: "integer", to: "float")
                         )
                       ),
                       Top(
@@ -723,8 +723,8 @@ module Yast
 
         grouplist = Convert.convert(
           UI.QueryWidget(Id(:ts_additional_groups), :SelectedItems),
-          :from => "any",
-          :to   => "list <string>"
+          from: "any",
+          to: "list <string>"
         )
         groups = Builtins.mergestring(grouplist, ",")
         groupmap = Builtins.listmap(grouplist) { |g| { g => "1" } }
@@ -745,10 +745,10 @@ module Yast
             @ts_member_conf,
             username,
             {
-              :type        => :rb_ts_list,
-              :rb_ts_list  => [],
-              :rb_ts_regex => "",
-              :rb_ts_file  => ""
+              type: :rb_ts_list,
+              rb_ts_list: [],
+              rb_ts_regex: "",
+              rb_ts_file: ""
             }
           )
         else
@@ -765,8 +765,8 @@ module Yast
     def CommitTsGroupDialogSettings
       items = Convert.convert(
         UI.QueryWidget(Id(:ts_table_add_groups), :Items),
-        :from => "any",
-        :to   => "list <term>"
+        from: "any",
+        to: "list <term>"
       )
       groups = IUCVTerminalServer.GetGroups(true)
 
@@ -834,10 +834,10 @@ module Yast
               @ts_member_conf,
               identification,
               {
-                :type        => :rb_ts_list,
-                :rb_ts_list  => [],
-                :rb_ts_regex => "",
-                :rb_ts_file  => ""
+                type: :rb_ts_list,
+                rb_ts_list: [],
+                rb_ts_regex: "",
+                rb_ts_file: ""
               }
             )
           end
@@ -935,8 +935,8 @@ module Yast
       # get table items and position
       items = Convert.convert(
         UI.QueryWidget(Id(:ts_table_add_groups), :Items),
-        :from => "any",
-        :to   => "list <term>"
+        from: "any",
+        to: "list <term>"
       )
       current_group = Convert.to_string(
         UI.QueryWidget(Id(:ts_table_add_groups), :CurrentItem)
@@ -962,8 +962,8 @@ module Yast
       # get table items and position
       items = Convert.convert(
         UI.QueryWidget(Id(:ts_table_add_groups), :Items),
-        :from => "any",
-        :to   => "list <term>"
+        from: "any",
+        to: "list <term>"
       )
       current_group = Convert.to_string(
         UI.QueryWidget(Id(:ts_table_add_groups), :CurrentItem)
@@ -1099,8 +1099,8 @@ module Yast
       previous_ids = deep_copy(previous_ids)
       ids = Convert.convert(
         UI.QueryWidget(Id(widget), :SelectedItems),
-        :from => "any",
-        :to   => "list <string>"
+        from: "any",
+        to: "list <string>"
       )
 
       # make sure that only available ids are compared
@@ -1349,8 +1349,8 @@ module Yast
           # remove possible duplicates
           @zvm_id_list = Convert.convert(
             Builtins.union(id_list, id_list),
-            :from => "list",
-            :to   => "list <string>"
+            from: "list",
+            to: "list <string>"
           )
           # sort list
           @zvm_id_list = Builtins.sort(@zvm_id_list)
@@ -1358,8 +1358,8 @@ module Yast
           # update the zvm_id_entries
           @zvm_id_entries = Convert.convert(
             Builtins.merge([@TEXT_ALL], @zvm_id_list),
-            :from => "list",
-            :to   => "list <string>"
+            from: "list",
+            to: "list <string>"
           )
         else
           # reset list to prevent saving the previous settings
@@ -1379,8 +1379,8 @@ module Yast
         groups_exist = [] !=
           Convert.convert(
             UI.QueryWidget(Id(:ts_table_add_groups), :Items),
-            :from => "any",
-            :to   => "list <term>"
+            from: "any",
+            to: "list <term>"
           )
         UI.ChangeWidget(Id(:ts_groups_members), :Enabled, groups_exist)
         UI.ChangeWidget(Id(:ts_groups_select), :Enabled, groups_exist)
@@ -1396,8 +1396,8 @@ module Yast
       if widget == :ts_groups_create
         table_data = Convert.convert(
           UI.QueryWidget(Id(:ts_table_add_groups), :Items),
-          :from => "any",
-          :to   => "list <term>"
+          from: "any",
+          to: "list <term>"
         )
         groupname = Convert.to_string(
           UI.QueryWidget(Id(:ts_groups_name), :Value)
@@ -1415,8 +1415,8 @@ module Yast
             IUCVTerminalServer.CheckUserGroupName(groupname)
           items = Convert.convert(
             UI.QueryWidget(Id(:ts_table_add_groups), :Items),
-            :from => "any",
-            :to   => "list <term>"
+            from: "any",
+            to: "list <term>"
           )
 
           item = Item(Id(groupname), groupname, @TEXT_YES, "new", "")
@@ -1434,8 +1434,8 @@ module Yast
       if widget == :ts_groups_select
         items = Convert.convert(
           UI.QueryWidget(Id(:ts_table_add_groups), :Items),
-          :from => "any",
-          :to   => "list <term>"
+          from: "any",
+          to: "list <term>"
         )
         groupname = Convert.to_string(
           UI.QueryWidget(Id(:ts_table_add_groups), :CurrentItem)
@@ -1458,8 +1458,8 @@ module Yast
       if widget == :ts_groups_members
         user_list = Convert.convert(
           UI.QueryWidget(Id(:ts_groups_members), :SelectedItems),
-          :from => "any",
-          :to   => "list <string>"
+          from: "any",
+          to: "list <string>"
         )
         SetTSGroupTableUserList(user_list)
       end
@@ -1508,8 +1508,8 @@ module Yast
       # initialize z/VM IDs
       @zvm_id_entries = Convert.convert(
         Builtins.merge([@TEXT_ALL], @zvm_id_list),
-        :from => "list",
-        :to   => "list <string>"
+        from: "list",
+        to: "list <string>"
       )
 
       # initialize screen
@@ -1545,8 +1545,8 @@ module Yast
             # ask for confirmation if the ts group dialog has changed
             current_items = Convert.convert(
               UI.QueryWidget(Id(:ts_table_add_groups), :Items),
-              :from => "any",
-              :to   => "list <term>"
+              from: "any",
+              to: "list <term>"
             )
             if @current_dialog == :ts_open_group_dialog &&
                 @ts_groups_items != current_items &&

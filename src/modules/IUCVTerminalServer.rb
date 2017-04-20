@@ -94,14 +94,14 @@ module Yast
     def GetUsers(local)
       users = Convert.convert(
         Users.GetUsers("uid", "local"),
-        :from => "map",
-        :to   => "map <string, map>"
+        from: "map",
+        to: "map <string, map>"
       )
       if !local
         users = Convert.convert(
           Builtins.union(users, Users.GetUsers("uid", "system")),
-          :from => "map",
-          :to   => "map <string, map>"
+          from: "map",
+          to: "map <string, map>"
         )
       end
       deep_copy(users)
@@ -113,14 +113,14 @@ module Yast
     def GetGroups(local)
       groups = Convert.convert(
         Users.GetGroups("cn", "local"),
-        :from => "map",
-        :to   => "map <string, map>"
+        from: "map",
+        to: "map <string, map>"
       )
       if !local
         groups = Convert.convert(
           Builtins.union(groups, Users.GetGroups("cn", "system")),
-          :from => "map",
-          :to   => "map <string, map>"
+          from: "map",
+          to: "map <string, map>"
         )
       end
       deep_copy(groups)
@@ -274,10 +274,10 @@ module Yast
           @ts_member_conf,
           name,
           {
-            :type        => :rb_ts_list,
-            :rb_ts_list  => [],
-            :rb_ts_regex => "",
-            :rb_ts_file  => ""
+            type: :rb_ts_list,
+            rb_ts_list: [],
+            rb_ts_regex: "",
+            rb_ts_file: ""
           }
         )
       end
@@ -393,8 +393,8 @@ module Yast
           # add all if configured
           @ts_audited_ids = Convert.convert(
             Builtins.merge([@TEXT_ALL], @zvm_id_list),
-            :from => "list",
-            :to   => "list <string>"
+            from: "list",
+            to: "list <string>"
           )
         else
           # only add known ids
@@ -410,8 +410,8 @@ module Yast
         # the settings map is globally kept for saving purposes
         @ts_authorization_map = Convert.convert(
           SCR.Read(path(".etc.iucvterm-ts-authorization.all")),
-          :from => "any",
-          :to   => "map <string, any>"
+          from: "any",
+          to: "map <string, any>"
         )
         ts_auth_list = Ops.get_list(@ts_authorization_map, "value", [])
         Builtins.foreach(ts_auth_list) do |entry|
@@ -625,26 +625,26 @@ module Yast
       true
     end
 
-    publish :variable => :TEXT_ALL, :type => "const string"
-    publish :variable => :modified, :type => "boolean"
-    publish :variable => :zvm_id_list, :type => "list <string>"
-    publish :variable => :ts_enabled, :type => "boolean"
-    publish :variable => :ts_home, :type => "string"
-    publish :variable => :ts_audited_ids, :type => "list <string>"
-    publish :variable => :ts_has_status_changed, :type => "boolean"
-    publish :variable => :ts_member_conf, :type => "map <string, map <symbol, any>>"
-    publish :variable => :ic_enabled, :type => "boolean"
-    publish :variable => :ic_home, :type => "string"
-    publish :function => :CheckUserGroupName, :type => "boolean (string)"
-    publish :function => :GetUsers, :type => "map <string, map> (boolean)"
-    publish :function => :GetGroups, :type => "map <string, map> (boolean)"
-    publish :function => :DeleteUser, :type => "boolean (string)"
-    publish :function => :GetTsUsersList, :type => "list <string> ()"
-    publish :function => :GetIcUsersList, :type => "list <string> ()"
-    publish :function => :SyncIucvConnUsers, :type => "void (list <string>, string)"
-    publish :function => :AddTsUser, :type => "string (string, string, string, map <string, string>, boolean)"
-    publish :function => :Read, :type => "boolean ()"
-    publish :function => :Write, :type => "boolean ()"
+    publish variable: :TEXT_ALL, type: "const string"
+    publish variable: :modified, type: "boolean"
+    publish variable: :zvm_id_list, type: "list <string>"
+    publish variable: :ts_enabled, type: "boolean"
+    publish variable: :ts_home, type: "string"
+    publish variable: :ts_audited_ids, type: "list <string>"
+    publish variable: :ts_has_status_changed, type: "boolean"
+    publish variable: :ts_member_conf, type: "map <string, map <symbol, any>>"
+    publish variable: :ic_enabled, type: "boolean"
+    publish variable: :ic_home, type: "string"
+    publish function: :CheckUserGroupName, type: "boolean (string)"
+    publish function: :GetUsers, type: "map <string, map> (boolean)"
+    publish function: :GetGroups, type: "map <string, map> (boolean)"
+    publish function: :DeleteUser, type: "boolean (string)"
+    publish function: :GetTsUsersList, type: "list <string> ()"
+    publish function: :GetIcUsersList, type: "list <string> ()"
+    publish function: :SyncIucvConnUsers, type: "void (list <string>, string)"
+    publish function: :AddTsUser, type: "string (string, string, string, map <string, string>, boolean)"
+    publish function: :Read, type: "boolean ()"
+    publish function: :Write, type: "boolean ()"
   end
 
   IUCVTerminalServer = IUCVTerminalServerClass.new

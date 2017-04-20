@@ -80,8 +80,8 @@ module Yast
       dir = Builtins.sformat("/sys/bus/ccw/devices/%1/block/", channel)
       files = Convert.convert(
         SCR.Read(path(".target.dir"), dir),
-        :from => "any",
-        :to   => "list <string>"
+        from: "any",
+        to: "list <string>"
       )
       if Builtins.size(files) == 1
         return Ops.add("/dev/", Ops.get(files, 0, ""))
@@ -356,8 +356,8 @@ module Yast
 
       disks = Convert.convert(
         SCR.Read(path(".probe.disk")),
-        :from => "any",
-        :to   => "list <map <string, any>>"
+        from: "any",
+        to: "list <map <string, any>>"
       )
       disks = Builtins.filter(disks) do |d|
         Builtins.tolower(Ops.get_string(d, "device", "")) == "dasd"
@@ -786,32 +786,32 @@ module Yast
       Builtins.mergestring(l, ", ")
     end
 
-    publish :variable => :devices, :type => "map <integer, map <string, any>>"
-    publish :variable => :filter_min, :type => "string"
-    publish :variable => :filter_max, :type => "string"
-    publish :variable => :diag, :type => "map <string, boolean>"
-    publish :function => :ActivateDisk, :type => "integer (string, boolean)"
-    publish :function => :DeactivateDisk, :type => "void (string, boolean)"
-    publish :function => :ProbeDisks, :type => "void ()"
-    publish :function => :FormatDisks, :type => "void (list <string>, integer)"
-    publish :function => :GetPartitionInfo, :type => "string (string)"
-    publish :function => :GetModified, :type => "boolean ()"
-    publish :variable => :proposal_valid, :type => "boolean"
-    publish :function => :SetModified, :type => "void (boolean)"
-    publish :function => :IsValidChannel, :type => "boolean (string)"
-    publish :function => :FormatChannel, :type => "string (string)"
-    publish :function => :Read, :type => "boolean ()"
-    publish :function => :Write, :type => "boolean ()"
-    publish :function => :Import, :type => "boolean (map)"
-    publish :function => :Export, :type => "map <string, list> ()"
-    publish :function => :GetDevices, :type => "map <integer, map <string, any>> ()"
-    publish :function => :GetFilteredDevices, :type => "map <integer, map <string, any>> ()"
-    publish :function => :AddDevice, :type => "void (map <string, any>)"
-    publish :function => :RemoveDevice, :type => "void (integer)"
-    publish :function => :GetDeviceIndex, :type => "integer (string)"
-    publish :function => :Summary, :type => "list <string> ()"
-    publish :function => :AutoPackages, :type => "map ()"
-    publish :function => :IsAvailable, :type => "boolean ()"
+    publish variable: :devices, type: "map <integer, map <string, any>>"
+    publish variable: :filter_min, type: "string"
+    publish variable: :filter_max, type: "string"
+    publish variable: :diag, type: "map <string, boolean>"
+    publish function: :ActivateDisk, type: "integer (string, boolean)"
+    publish function: :DeactivateDisk, type: "void (string, boolean)"
+    publish function: :ProbeDisks, type: "void ()"
+    publish function: :FormatDisks, type: "void (list <string>, integer)"
+    publish function: :GetPartitionInfo, type: "string (string)"
+    publish function: :GetModified, type: "boolean ()"
+    publish variable: :proposal_valid, type: "boolean"
+    publish function: :SetModified, type: "void (boolean)"
+    publish function: :IsValidChannel, type: "boolean (string)"
+    publish function: :FormatChannel, type: "string (string)"
+    publish function: :Read, type: "boolean ()"
+    publish function: :Write, type: "boolean ()"
+    publish function: :Import, type: "boolean (map)"
+    publish function: :Export, type: "map <string, list> ()"
+    publish function: :GetDevices, type: "map <integer, map <string, any>> ()"
+    publish function: :GetFilteredDevices, type: "map <integer, map <string, any>> ()"
+    publish function: :AddDevice, type: "void (map <string, any>)"
+    publish function: :RemoveDevice, type: "void (integer)"
+    publish function: :GetDeviceIndex, type: "integer (string)"
+    publish function: :Summary, type: "list <string> ()"
+    publish function: :AutoPackages, type: "map ()"
+    publish function: :IsAvailable, type: "boolean ()"
   end
 
   DASDController = DASDControllerClass.new

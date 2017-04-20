@@ -165,14 +165,14 @@ module Yast
       true
     end
 
-    publish :variable => :modified, :type => "boolean"
-    publish :variable => :force, :type => "boolean"
-    publish :variable => :start, :type => "boolean"
-    publish :variable => :mountpoint, :type => "string"
-    publish :variable => :fstype, :type => "string"
-    publish :function => :ReadSysconfig, :type => "boolean ()"
-    publish :function => :Read, :type => "boolean ()"
-    publish :function => :Write, :type => "boolean ()"
+    publish variable: :modified, type: "boolean"
+    publish variable: :force, type: "boolean"
+    publish variable: :start, type: "boolean"
+    publish variable: :mountpoint, type: "string"
+    publish variable: :fstype, type: "string"
+    publish function: :ReadSysconfig, type: "boolean ()"
+    publish function: :Read, type: "boolean ()"
+    publish function: :Write, type: "boolean ()"
   end
 
   Xpram = XpramClass.new

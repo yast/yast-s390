@@ -319,18 +319,18 @@ module Yast
       true
     end
 
-    publish :variable => :VMCMD_MAX_ROWS, :type => "const integer"
-    publish :variable => :VMCMD_MAX_CHARS, :type => "const integer"
-    publish :variable => :modified, :type => "boolean"
-    publish :variable => :start, :type => "boolean"
-    publish :variable => :on_panic, :type => "string"
-    publish :variable => :delay_min, :type => "integer"
-    publish :variable => :vmcmds, :type => "string"
-    publish :variable => :dump_line, :type => "string"
-    publish :variable => :dump_devices, :type => "list <string>"
-    publish :function => :ReadSysconfig, :type => "boolean ()"
-    publish :function => :Read, :type => "boolean ()"
-    publish :function => :Write, :type => "boolean ()"
+    publish variable: :VMCMD_MAX_ROWS, type: "const integer"
+    publish variable: :VMCMD_MAX_CHARS, type: "const integer"
+    publish variable: :modified, type: "boolean"
+    publish variable: :start, type: "boolean"
+    publish variable: :on_panic, type: "string"
+    publish variable: :delay_min, type: "integer"
+    publish variable: :vmcmds, type: "string"
+    publish variable: :dump_line, type: "string"
+    publish variable: :dump_devices, type: "list <string>"
+    publish function: :ReadSysconfig, type: "boolean ()"
+    publish function: :Read, type: "boolean ()"
+    publish function: :Write, type: "boolean ()"
   end
 
   OnPanic = OnPanicClass.new

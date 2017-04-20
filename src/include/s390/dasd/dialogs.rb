@@ -53,8 +53,8 @@ module Yast
     def ListSelectedDASD
       selected = Convert.convert(
         UI.QueryWidget(Id(:table), :SelectedItems),
-        :from => "any",
-        :to   => "list <integer>"
+        from: "any",
+        to: "list <integer>"
       )
       Builtins.y2milestone("selected %1", selected)
       deep_copy(selected)
@@ -496,8 +496,8 @@ module Yast
 
       selected = Convert.convert(
         UI.QueryWidget(Id(:table), :SelectedItems),
-        :from => "any",
-        :to   => "list <integer>"
+        from: "any",
+        to: "list <integer>"
       )
       UI.ChangeWidget(Id(:table), :Items, items)
       UI.ChangeWidget(Id(:table), :SelectedItems, selected)
