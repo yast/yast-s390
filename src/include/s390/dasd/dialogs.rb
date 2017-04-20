@@ -249,7 +249,7 @@ module Yast
               popup = Builtins.sformat(_("There are %1 unformatted devices. Format them now?"), unformatted_disks.size)
             end
             # for autoinst, format unformatted disks later
-            if (! Mode.autoinst) && Popup.ContinueCancel(popup)
+            if (!Mode.autoinst) && Popup.ContinueCancel(popup)
               devices = unformatted_disks.map do |channel|
                 device = nil
                 cmd = "ls '/sys/bus/ccw/devices/#{channel}/block/' | tr -d '\n'"
