@@ -217,8 +217,8 @@ module Yast
       # Exporting active DASD only.
       # (bnc#887407)
       active_devices = @devices.select do |_nr, device|
-        device.has_key?("resource") &&
-          device["resource"].has_key?("io") &&
+        device.key?("resource") &&
+          device["resource"].key?("io") &&
           !device["resource"]["io"].empty? &&
           device["resource"]["io"].first["active"]
       end
