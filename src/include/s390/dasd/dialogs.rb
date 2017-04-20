@@ -261,7 +261,7 @@ module Yast
                 end
                 device
               end
-              devices.reject! { |d| d.nil? }
+              devices.reject!(&:nil?)
               DASDController.FormatDisks(devices, 8) # don't format more than 8 disks in parallel
               unformatted_disks.each do |channel|
                 diag = !!DASDController.diag[channel]
