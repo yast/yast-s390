@@ -187,7 +187,6 @@ module Yast
     end
 
     def AskNumParallel(max_num_parallel)
-
       UI.OpenDialog(
         VBox(
           IntField(
@@ -208,7 +207,6 @@ module Yast
       UI.CloseDialog()
 
       ret == :ok ? num_parallel : 0
-
     end
 
     def PerformAction(action)
