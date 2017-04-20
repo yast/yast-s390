@@ -41,6 +41,7 @@ module Yast
       Yast.import "Mode"
       Yast.import "Report"
       Yast.import "Popup"
+      Yast.import "Arch"
 
 
       @devices = {}
@@ -367,7 +368,8 @@ module Yast
           Builtins.contains(["sysfs_bus_id"], k)
         end }
 
-        if ret_vmcp != 0 && @controllers.size == 0
+        # zKVM uses virtio devices instead of ZFCP, skip the warning in that case
+        if ret_vmcp != 0 && @controllers.size == 0 && !Arch.is_zkvm
           # TRANSLATORS: warning message
           Report.Warning(_("Cannot evaluate ZFCP controllers (e.g. in LPAR).\nYou will have to set it manually."))
         end
