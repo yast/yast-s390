@@ -147,7 +147,6 @@ module Yast
         ActivateDisk(channel, wwpn, lun)
       end if !Mode.normal
 
-
       if !Mode.installation
         if @disk_configured
           # popup label
