@@ -47,7 +47,7 @@ module Yast
         "id"         => "DASD",
         # Command line help text for the Xcontroller module
         "help"       => _("Configuration of DASD"),
-        "guihandler" => fun_ref(method(:DASDSequence), "symbol ()"),
+        "guihandler" => fun_ref(method(:DASDSequence), "symbol ()")
       }
 
       @ret = CommandLine.Run(@cmdline_description)

@@ -50,7 +50,7 @@ module Yast
         "id"         => "onpanic",
         # Command line help text for the OnPanic module
         "help"       => _("Configuration of OnPanic"),
-        "guihandler" => fun_ref(method(:OnPanicSequence), "symbol ()"),
+        "guihandler" => fun_ref(method(:OnPanicSequence), "symbol ()")
       }
 
       # main ui function

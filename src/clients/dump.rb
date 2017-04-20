@@ -48,7 +48,7 @@ module Yast
         "id"         => "dumpdevices",
         # Command line help text for the Xcontroller module
         "help"       => _("Creation of S/390 dump devices"),
-        "guihandler" => fun_ref(method(:DumpSequence), "symbol ()"),
+        "guihandler" => fun_ref(method(:DumpSequence), "symbol ()")
       }
 
       # main ui function
