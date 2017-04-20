@@ -68,8 +68,8 @@ describe "Yast::ZFCPController" do
       expect(Yast::ZFCPController.Import(import_data)).to eq(true)
       Yast::ZFCPController.filter_max = Yast::ZFCPController.FormatChannel("0.0.FA00")
       Yast::ZFCPController.filter_min = Yast::ZFCPController.FormatChannel("0.0.f900")
-      expect(Yast::ZFCPController.GetFilteredDevices()).to eq(0 => {"detail"=>{"controller_id"=>"0.0.fa00", "wwpn"=>"", "fcp_lun"=>""}},
-                                                                      4 => {"detail"=>{"controller_id"=>"0.0.f900", "wwpn"=>"", "fcp_lun"=>""}})
+      expect(Yast::ZFCPController.GetFilteredDevices()).to eq(0 => {"detail"=>{"controller_id" => "0.0.fa00", "wwpn" => "", "fcp_lun" => ""}},
+                                                                      4 => {"detail"=>{"controller_id" => "0.0.f900", "wwpn" => "", "fcp_lun" => ""}})
     end
   end
 end
