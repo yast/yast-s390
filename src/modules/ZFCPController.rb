@@ -145,8 +145,8 @@ module Yast
         wwpn = Ops.get_string(device, ["detail", "wwpn"], "")
         lun = Ops.get_string(device, ["detail", "fcp_lun"], "")
         ActivateDisk(channel, wwpn, lun)
-      end if !Mode.normal(
-      )
+      end if !Mode.normal
+      
 
       if !Mode.installation
         if @disk_configured

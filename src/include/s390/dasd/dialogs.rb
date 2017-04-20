@@ -327,7 +327,7 @@ module Yast
             return false
           end
 
-          num_parallel = [selected.size(), 8].min
+          num_parallel = [selected.size, 8].min
           if num_parallel > 1
             num_parallel = AskNumParallel(num_parallel)
           end

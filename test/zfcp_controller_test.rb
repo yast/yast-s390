@@ -53,7 +53,7 @@ describe "Yast::ZFCPController" do
       expect(Yast::SCR).to receive(:Read).with(Yast::path(".probe.tape")).once.and_return([])
 
       expect(Yast::ZFCPController.ProbeDisks()).to eq(nil)
-      expect(Yast::ZFCPController.devices()).to eq(load_data("device_list.yml"))
+      expect(Yast::ZFCPController.devices).to eq(load_data("device_list.yml"))
     end
   end
 
