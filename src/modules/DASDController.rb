@@ -32,7 +32,6 @@ require "yast"
 
 module Yast
   class DASDControllerClass < Module
-
     include Yast::Logger
 
     def main
