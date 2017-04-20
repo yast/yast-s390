@@ -251,7 +251,7 @@ module Yast
             end
             # for autoinst, format unformatted disks later
             if (! Mode.autoinst) && Popup.ContinueCancel(popup)
-              devices = unformatted_disks.map do | channel |
+              devices = unformatted_disks.map do |channel|
                 device = nil
                 cmd = "ls '/sys/bus/ccw/devices/#{channel}/block/' | tr -d '\n'"
                 disk = SCR.Execute(path(".target.bash_output"), cmd)
@@ -262,9 +262,9 @@ module Yast
                 end
                 device
               end
-              devices.reject! { | d | d.nil? }
+              devices.reject! { |d| d.nil? }
               DASDController.FormatDisks(devices, 8) # don't format more than 8 disks in parallel
-              unformatted_disks.each do | channel |
+              unformatted_disks.each do |channel|
                 diag = !!DASDController.diag[channel]
                 DASDController.ActivateDisk(channel, diag)
               end
@@ -529,7 +529,7 @@ module Yast
         if ret == :select_all
 
           UI.ChangeWidget(Id(:table), :SelectedItems,
-            UI.QueryWidget(Id(:table), :Items).map { | item | item[0][0] })
+            UI.QueryWidget(Id(:table), :Items).map { |item| item[0][0] })
           ret = nil
         elsif ret == :deselect_all
           UI.ChangeWidget(Id(:table), :SelectedItems, [])

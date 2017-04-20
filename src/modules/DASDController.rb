@@ -152,7 +152,7 @@ module Yast
             message = Builtins.sformat(_("There are %1 unformatted devices. Format them now?"), unformatted_devices.size)
           end
           if Popup.ContinueCancel( message )
-            unformatted_devices.each do | device |
+            unformatted_devices.each do |device|
               to_format << device
               to_reactivate << device
             end
@@ -163,7 +163,7 @@ module Yast
 
         FormatDisks(to_format, 8) if !Builtins.isempty(to_format)
 
-        to_reactivate.each do | device |
+        to_reactivate.each do |device|
           channel = device["channel"] || ""
           do_diag = device["diag"] || false
           # FIXME: general activation error handling - also in sync with above
