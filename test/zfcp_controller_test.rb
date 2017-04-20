@@ -38,9 +38,9 @@ describe "Yast::ZFCPController" do
   describe "#Import" do
     it "Imports the devices from a Hash" do
       import_data = { "devices" => [{ "controller_id" => "0.0.fa00" },
-        { "controller_id" => "0.0.fc00" },
-        { "controller_id" => "0.0.f800" },
-        { "controller_id" => "0.0.f900" }] }
+                                    { "controller_id" => "0.0.fc00" },
+                                    { "controller_id" => "0.0.f800" },
+                                    { "controller_id" => "0.0.f900" }] }
 
       expect(Yast::ZFCPController.Import(import_data)).to eq(true)
       expect(Yast::ZFCPController.GetDeviceIndex("0.0.f800", "", "")).to eq(2)
@@ -60,10 +60,10 @@ describe "Yast::ZFCPController" do
   describe "#GetFilteredDevices" do
     it "Filters the devices" do
       import_data = { "devices" => [{ "controller_id" => "0.0.fa00" },
-        { "controller_id" => "0.0.fb00" },
-        { "controller_id" => "0.0.fc00" },
-        { "controller_id" => "0.0.f800" },
-        { "controller_id" => "0.0.f900" }] }
+                                    { "controller_id" => "0.0.fb00" },
+                                    { "controller_id" => "0.0.fc00" },
+                                    { "controller_id" => "0.0.f800" },
+                                    { "controller_id" => "0.0.f900" }] }
 
       expect(Yast::ZFCPController.Import(import_data)).to eq(true)
       Yast::ZFCPController.filter_max = Yast::ZFCPController.FormatChannel("0.0.FA00")
