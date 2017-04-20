@@ -274,9 +274,9 @@ module Yast
           @ts_member_conf,
           name,
                       type:        :rb_ts_list,
-            rb_ts_list:  [],
-            rb_ts_regex: "",
-            rb_ts_file:  ""
+                      rb_ts_list:  [],
+                      rb_ts_regex: "",
+                      rb_ts_file:  ""
         )
       end
 
