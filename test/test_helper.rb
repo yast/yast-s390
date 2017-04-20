@@ -40,4 +40,3 @@ def load_data(name)
   path = File.join(File.dirname(__FILE__), "data", name)
   YAML.load(File.read(path))
 end
-
