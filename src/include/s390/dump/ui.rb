@@ -51,29 +51,29 @@ module Yast
           "<p><b>Prepare one or more volumes for use as S/390 dump device.</b></p>"
         ) +
           # Dump dialog help 2/8
-          _(
-            "<p>Supported devices are ECKD DASD and ZFCP disks, while multi-volumes are limited to DASD.<br>"
-          ) +
+        _(
+          "<p>Supported devices are ECKD DASD and ZFCP disks, while multi-volumes are limited to DASD.<br>"
+        ) +
           # Dump dialog help 3/8
-          _(
-            "Only whole disks can be used, no partitions. If the device is incompatibly\nformatted or partitioned, activate the checkbox <b>Force overwrite of disk</b>.</p>"
-          ) +
+        _(
+          "Only whole disks can be used, no partitions. If the device is incompatibly\nformatted or partitioned, activate the checkbox <b>Force overwrite of disk</b>.</p>"
+        ) +
           # Dump dialog help 4/8
-          _(
-            "<p>To use DASD and ZFCP devices activate them in the respective YaST DASD or ZFCP dialog.<br>"
-          ) +
+        _(
+          "<p>To use DASD and ZFCP devices activate them in the respective YaST DASD or ZFCP dialog.<br>"
+        ) +
           # Dump dialog help 5/8
-          _(
-            "Devices which are in use or have mounted partitions will not be shown.</p>"
-          ) +
+        _(
+          "Devices which are in use or have mounted partitions will not be shown.</p>"
+        ) +
           # Dump dialog help 6/8
-          _(
-            "<p><b>dumpdevice</b> after a disk indicates that it is a usable dump\ndevice. Multi-volume dump devices are indicated by a list of DASD IDs.</p>"
-          ) +
+        _(
+          "<p><b>dumpdevice</b> after a disk indicates that it is a usable dump\ndevice. Multi-volume dump devices are indicated by a list of DASD IDs.</p>"
+        ) +
           # Dump dialog help 7/8
-          _("<p>ZFCP columns: Device, Size, ID, WWPN, LUN, Dump<br>") +
+        _("<p>ZFCP columns: Device, Size, ID, WWPN, LUN, Dump<br>") +
           # Dump dialog help 8/8
-          _("DASD columns: Device, Size, ID, Dump</p>")
+        _("DASD columns: Device, Size, ID, Dump</p>")
 
       dasd_disks = deep_copy(Dump.dasd_disks)
       zfcp_disks = deep_copy(Dump.zfcp_disks)

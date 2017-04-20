@@ -219,9 +219,9 @@ module Yast
       # (bnc#887407)
       active_devices = @devices.select { |_nr, device|
         device.has_key?("resource") &&
-        device["resource"].has_key?("io") &&
-        !device["resource"]["io"].empty? &&
-        device["resource"]["io"].first["active"]
+          device["resource"].has_key?("io") &&
+          !device["resource"]["io"].empty? &&
+          device["resource"]["io"].first["active"]
       }
 
       if active_devices.empty?
