@@ -257,7 +257,7 @@ module Yast
                 if disk["exit"] == 0 && !disk["stdout"].empty?
                   device = "/dev/#{disk["stdout"]}"
                 else
-                  Popup.Error( Builtins.sformat(_("Couldn't find device for channel %1."), channel))
+                  Popup.Error(Builtins.sformat(_("Couldn't find device for channel %1."), channel))
                 end
                 device
               end

@@ -133,7 +133,7 @@ module Yast
           # FIXME: general activation error handling - also in sync with below
           # for AutoInstall, format unformatted disks later at once
           # even disks manually selected for formatting must be reactivated
-          if Mode.autoinst && act_ret == 8 && ( @format_unformatted || format )
+          if Mode.autoinst && act_ret == 8 && (@format_unformatted || format)
             format = true
             to_reactivate << device
           end
@@ -151,7 +151,7 @@ module Yast
           else
             message = Builtins.sformat(_("There are %1 unformatted devices. Format them now?"), unformatted_devices.size)
           end
-          if Popup.ContinueCancel( message )
+          if Popup.ContinueCancel(message)
             unformatted_devices.each do |device|
               to_format << device
               to_reactivate << device
