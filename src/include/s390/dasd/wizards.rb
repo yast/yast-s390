@@ -26,7 +26,6 @@
 #
 module Yast
   module S390DasdWizardsInclude
-
     def initialize_s390_dasd_wizards(include_target)
       Yast.import "UI"
       textdomain "s390"
@@ -113,6 +112,5 @@ module Yast
 
       ret
     end
-
   end
 end

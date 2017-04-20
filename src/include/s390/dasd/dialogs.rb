@@ -27,7 +27,6 @@
 # $Id$
 module Yast
   module S390DasdDialogsInclude
-
     def initialize_s390_dasd_dialogs(include_target)
       Yast.import "UI"
       textdomain "s390"
@@ -680,6 +679,5 @@ module Yast
 
       :next
     end
-
   end
 end
