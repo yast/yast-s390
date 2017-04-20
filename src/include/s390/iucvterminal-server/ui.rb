@@ -744,10 +744,10 @@ module Yast
           @ts_member_conf = Builtins.add(
             @ts_member_conf,
             username,
-                          type:        :rb_ts_list,
-                          rb_ts_list:  [],
-                          rb_ts_regex: "",
-                          rb_ts_file:  ""
+            type:        :rb_ts_list,
+            rb_ts_list:  [],
+            rb_ts_regex: "",
+            rb_ts_file:  ""
           )
         else
           Popup.Notify(_("Adding the user has failed."))
@@ -831,10 +831,10 @@ module Yast
             @ts_member_conf = Builtins.add(
               @ts_member_conf,
               identification,
-                              type:        :rb_ts_list,
-                              rb_ts_list:  [],
-                              rb_ts_regex: "",
-                              rb_ts_file:  ""
+              type:        :rb_ts_list,
+              rb_ts_list:  [],
+              rb_ts_regex: "",
+              rb_ts_file:  ""
             )
           end
         else
