@@ -315,7 +315,7 @@ module Yast
       if @controllers == nil
         # Checking if it is a z/VM and evaluating all fcp controllers in
         # order to activate
-        ret_vmcp = SCR.Execute(path(".target.bash_output"),"/sbin/vmcp q v fcp")
+        ret_vmcp = SCR.Execute(path(".target.bash_output"), "/sbin/vmcp q v fcp")
         if ret_vmcp["exit"] == 0
           devices = ret_vmcp["stdout"].split("\n").collect do |line|
             columns = line.split

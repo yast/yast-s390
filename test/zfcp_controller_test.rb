@@ -10,7 +10,7 @@ describe "Yast::ZFCPController" do
     it "Activates the given disk" do
       expect(Yast::SCR).to receive(:Execute).with(anything, /\/sbin\/zfcp_host_configure '1' 1/).and_return(0)
       expect(Yast::ZFCPController).to_not receive(:ReportControllerActivationError)
-      Yast::ZFCPController.ActivateDisk(1,"","")
+      Yast::ZFCPController.ActivateDisk(1, "", "")
     end
   end
 
@@ -43,7 +43,7 @@ describe "Yast::ZFCPController" do
         {"controller_id" => "0.0.f900"}]}
 
       expect(Yast::ZFCPController.Import(import_data)).to eq(true)
-      expect(Yast::ZFCPController.GetDeviceIndex("0.0.f800","","")).to eq(2)
+      expect(Yast::ZFCPController.GetDeviceIndex("0.0.f800", "", "")).to eq(2)
     end
   end
 
