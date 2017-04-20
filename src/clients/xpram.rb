@@ -32,7 +32,7 @@ module Yast
     def main
       Yast.import "UI"
 
-      #**
+      # **
       # <h3>Configuration of xpram</h3>
 
       textdomain "xpram"

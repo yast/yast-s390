@@ -32,7 +32,7 @@ module Yast
     def main
       Yast.import "UI"
 
-      #**
+      # **
       # <h3>Creation of s390 dump devices</h3>
 
       textdomain "s390"

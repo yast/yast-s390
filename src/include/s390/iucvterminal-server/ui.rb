@@ -1259,7 +1259,7 @@ module Yast
           ts_isnt_empty && Builtins.regexpmatch(@ts_selected_member, "^[^@]")
         )
 
-        #disable the user configuration dialog in case of an empty table
+        # disable the user configuration dialog in case of an empty table
         UI.ChangeWidget(Id(:f_ts_member_conf), :Enabled, ts_isnt_empty)
       end
 
@@ -1466,7 +1466,7 @@ module Yast
 
       # tab handling
       if widget == :t_zvmids
-        #SaveSettings( $[ "ID" : widget ] );
+        # SaveSettings( $[ "ID" : widget ] );
         UI.ReplaceWidget(Id(:tab_content), ZvmIdsDialogContent())
         InitMainDialog(widget)
         Wizard.SetHelpText(Ops.get_string(@HELP, "zvmids", ""))
@@ -1616,7 +1616,7 @@ module Yast
         IUCVTerminalServer.ic_enabled = @ic_enabled
         IUCVTerminalServer.ic_home = @ic_home
 
-        #remove remaining IUCVConn users if disabled
+        # remove remaining IUCVConn users if disabled
         if !@ic_enabled && IUCVTerminalServer.GetIcUsersList != []
           IUCVTerminalServer.SyncIucvConnUsers([], "")
         end

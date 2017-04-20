@@ -42,7 +42,7 @@ module Yast
       @start = false
     end
 
-    #Update the screen according to user input
+    # Update the screen according to user input
     # @param return symbol
     # @return [void]
     def UpdateScreen(ret)

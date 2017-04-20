@@ -6,6 +6,6 @@ if `uname --machine` !~ /s390/
 end
 
 Yast::Tasks.configuration do |conf|
-  #lets ignore license check for now
+  # lets ignore license check for now
   conf.skip_license_check << /.*/
 end

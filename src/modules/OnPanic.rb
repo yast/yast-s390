@@ -67,7 +67,7 @@ module Yast
       @dump_devices = nil
     end
 
-    #Get a List of available Dump Devices
+    # Get a List of available Dump Devices
     # @return [Array<String>] of disks
     def AvailableDumpDevices
       cmd = "mkdump --list-dump"
@@ -86,7 +86,7 @@ module Yast
       deep_copy(dev_names)
     end
 
-    #Converts a MKDump entry to a device parameters map for dumpconf
+    # Converts a MKDump entry to a device parameters map for dumpconf
     # @param mkdump device line
     # @return [Hash] of device parameters
     def ConvertMkdumpToConf(dev_line)
@@ -122,7 +122,7 @@ module Yast
       deep_copy(dev)
     end
 
-    #Converts device parameters of dumpconf to an mkdump entry
+    # Converts device parameters of dumpconf to an mkdump entry
     # @param dumpconf device map
     # @return [String] of a mkdump entry
     def ConvertConfToMkdump(dev)
