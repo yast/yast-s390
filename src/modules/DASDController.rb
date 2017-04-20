@@ -152,7 +152,7 @@ module Yast
             message = Builtins.sformat(_("There are %1 unformatted devices. Format them now?"), unformatted_devices.size)
           end
           if Popup.ContinueCancel( message )
-            unformatted_devices.each do | device | 
+            unformatted_devices.each do | device |
               to_format << device
               to_reactivate << device
             end

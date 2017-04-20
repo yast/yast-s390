@@ -199,7 +199,7 @@ module Yast
           #	    });
           UI.ChangeWidget(Id(:m_points), :Enabled, start)
           UI.ChangeWidget(Id(:brate), :Enabled, start)
-        end 
+        end
         #	if (ret == `test)
         #	{
         #	    TestPopup (mountpoint);

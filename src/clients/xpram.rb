@@ -104,7 +104,7 @@ module Yast
       # Finish
       Builtins.y2milestone("--------- Xpram module finished ---------")
 
-      deep_copy(@ret) 
+      deep_copy(@ret)
 
       # EOF
     end

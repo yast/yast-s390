@@ -111,7 +111,7 @@ module Yast
           _(
             "<p>It is possible to sync the users manually by clicking on <b>Sync</b> or just confirming the changes with <b>Ok</b> while <b>IUCVConn on Login</b> is enabled. </p>"
           )
-      } 
+      }
       # EOF
     end
   end

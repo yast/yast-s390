@@ -269,7 +269,7 @@ module Yast
                 DASDController.ActivateDisk(channel, diag)
               end
             end
-          end           
+          end
           DASDController.ProbeDisks
 
           return true
@@ -527,7 +527,7 @@ module Yast
         ret = Ops.get_symbol(event, "ID")
 
         if ret == :select_all
-          
+
           UI.ChangeWidget(Id(:table), :SelectedItems,
             UI.QueryWidget(Id(:table), :Items).map { | item | item[0][0] })
           ret = nil

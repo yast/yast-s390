@@ -20,7 +20,7 @@ describe "Yast::ZFCPController" do
 
       # Removing all fcp devices from blacklist
       expect(Yast::SCR).to receive(:Execute).with(anything, /\/sbin\/vmcp q v fcp/).and_return(
-        "exit" => 0, 
+        "exit" => 0,
         "stdout" => "FCP  F800 ON FCP   F807 CHPID 1C SUBCHANNEL = 000B\n  F800 TOKEN = 0000000362A42C00")
       expect(Yast::SCR).to receive(:Execute).with(anything, /\/sbin\/cio_ignore -r f800/).and_return(0)
 
@@ -41,7 +41,7 @@ describe "Yast::ZFCPController" do
         {"controller_id" => "0.0.fc00"},
         {"controller_id" => "0.0.f800"},
         {"controller_id" => "0.0.f900"}]}
-        
+
       expect(Yast::ZFCPController.Import(import_data)).to eq(true)
       expect(Yast::ZFCPController.GetDeviceIndex("0.0.f800","","")).to eq(2)
     end
