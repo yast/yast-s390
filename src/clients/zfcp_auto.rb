@@ -91,7 +91,7 @@ module Yast
         Progress.set(false)
         @ret = ZFCPController.Write
         Progress.set(true)
-        else
+      else
         Builtins.y2error("Unknown function: %1", @func)
         @ret = false # Unknown function
       end

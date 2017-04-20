@@ -506,7 +506,7 @@ module Yast
             channel
           )
         )
-        else
+      else
         Report.Error(
           Builtins.sformat(
             # error report, %1 is device identification, %2 is integer code

@@ -91,7 +91,7 @@ module Yast
         Progress.off
         @ret = DASDController.Write
         Progress.on
-        else
+      else
         Builtins.y2error("Unknown function: %1", @func)
         @ret = false # Unknown function
       end
