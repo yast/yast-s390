@@ -26,7 +26,7 @@
 #
 module Yast
   module S390IucvterminalServerHelpsInclude
-    def initialize_s390_iucvterminal_server_helps(include_target)
+    def initialize_s390_iucvterminal_server_helps(_include_target)
       textdomain "s390"
 
       # All helps are here

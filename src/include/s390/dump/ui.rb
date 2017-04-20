@@ -26,7 +26,7 @@
 #
 module Yast
   module S390DumpUiInclude
-    def initialize_s390_dump_ui(include_target)
+    def initialize_s390_dump_ui(_include_target)
       Yast.import "UI"
 
       textdomain "s390"

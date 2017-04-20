@@ -27,7 +27,7 @@
 # $Id$
 module Yast
   module S390XpramUiInclude
-    def initialize_s390_xpram_ui(include_target)
+    def initialize_s390_xpram_ui(_include_target)
       Yast.import "UI"
 
       textdomain "xpram"

@@ -27,7 +27,7 @@
 # $Id$
 module Yast
   module S390ZfcpHelpsInclude
-    def initialize_s390_zfcp_helps(include_target)
+    def initialize_s390_zfcp_helps(_include_target)
       textdomain "s390"
 
       # All helps are here

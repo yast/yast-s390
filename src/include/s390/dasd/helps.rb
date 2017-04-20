@@ -27,7 +27,7 @@
 # $Id$
 module Yast
   module S390DasdHelpsInclude
-    def initialize_s390_dasd_helps(include_target)
+    def initialize_s390_dasd_helps(_include_target)
       textdomain "s390"
 
       # All helps are here

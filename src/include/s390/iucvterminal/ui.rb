@@ -26,7 +26,7 @@
 #
 module Yast
   module S390IucvterminalUiInclude
-    def initialize_s390_iucvterminal_ui(include_target)
+    def initialize_s390_iucvterminal_ui(_include_target)
       Yast.import "UI"
 
       textdomain "s390"

@@ -26,7 +26,7 @@
 #
 module Yast
   module S390OnpanicUiInclude
-    def initialize_s390_onpanic_ui(include_target)
+    def initialize_s390_onpanic_ui(_include_target)
       Yast.import "UI"
 
       textdomain "s390"
