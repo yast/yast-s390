@@ -1133,6 +1133,7 @@ module Yast
       end
       deep_copy(ids)
     end
+
     def HandleEvent(widget)
       if widget == :ic_enabled
         @ic_enabled = Convert.to_boolean(
