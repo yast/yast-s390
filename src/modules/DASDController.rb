@@ -436,9 +436,9 @@ module Yast
     # @param [Fixnum] ret integer exit code of the operation
     def ReportActivationError(channel, ret)
       case ret
-        when 0
+      when 0
 
-        when 1
+      when 1
           Report.Error(
             Builtins.sformat(
               # error report, %1 is device identification
@@ -446,7 +446,7 @@ module Yast
               channel
             )
           )
-        when 2
+      when 2
           Report.Error(
             Builtins.sformat(
               # error report, %1 is device identification
@@ -454,7 +454,7 @@ module Yast
               channel
             )
           )
-        when 3
+      when 3
           Report.Error(
             Builtins.sformat(
               # error report, %1 is device identification
@@ -462,7 +462,7 @@ module Yast
               channel
             )
           )
-        when 4
+      when 4
           Report.Error(
             Builtins.sformat(
               # error report, %1 is device identification
@@ -470,7 +470,7 @@ module Yast
               channel
             )
           )
-        when 5
+      when 5
           # https://bugzilla.novell.com/show_bug.cgi?id=446998#c15
           Report.Error(
             Builtins.sformat(
@@ -479,7 +479,7 @@ module Yast
               channel
             )
           )
-        when 6
+      when 6
           # https://bugzilla.novell.com/show_bug.cgi?id=446998#c15
           Report.Error(
             Builtins.sformat(
@@ -488,7 +488,7 @@ module Yast
               channel
             )
           )
-        when 7
+      when 7
           # http://bugzilla.novell.com/show_bug.cgi?id=561876#c8
           Report.Error(
             Builtins.sformat(
@@ -497,7 +497,7 @@ module Yast
               channel
             )
           )
-        when 8
+      when 8
           # http://bugzilla.novell.com/show_bug.cgi?id=561876#c8
           Report.Error(
             Builtins.sformat(

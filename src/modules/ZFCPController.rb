@@ -411,9 +411,9 @@ module Yast
     # @param [Fixnum] ret integer exit code of the operation
     def ReportActivationError(channel, ret)
       case ret
-        when 0
+      when 0
 
-        when 1
+      when 1
           Report.Error(
             Builtins.sformat(
               # error report, %1 is device identification
@@ -421,7 +421,7 @@ module Yast
               channel
             )
           )
-        when 2
+      when 2
           Report.Error(
             Builtins.sformat(
               # error report, %1 is device identification
@@ -429,7 +429,7 @@ module Yast
               channel
             )
           )
-        when 3
+      when 3
           Report.Error(
             Builtins.sformat(
               # error report, %1 is device identification
@@ -437,7 +437,7 @@ module Yast
               channel
             )
           )
-        when 4
+      when 4
           Report.Error(
             Builtins.sformat(
               # error report, %1 is device identification
@@ -445,7 +445,7 @@ module Yast
               channel
             )
           )
-        when 5
+      when 5
           Report.Error(
             Builtins.sformat(
               # error report, %1 is device identification
@@ -453,7 +453,7 @@ module Yast
               channel
             )
           )
-        when 6
+      when 6
           Report.Error(
             Builtins.sformat(
               # error report, %1 is device identification
@@ -461,7 +461,7 @@ module Yast
               channel
             )
           )
-        when 7
+      when 7
           Report.Error(
             Builtins.sformat(
               # error report, %1 is device identification
@@ -469,7 +469,7 @@ module Yast
               channel
             )
           )
-        when 8
+      when 8
           Report.Error(
             Builtins.sformat(
               # error report, %1 is device identification
@@ -477,7 +477,7 @@ module Yast
               channel
             )
           )
-        when 9
+      when 9
           Report.Error(
             Builtins.sformat(
               # error report, %1 is device identification
@@ -504,9 +504,9 @@ module Yast
     # @param [Fixnum] ret integer exit code of the operation
     def ReportControllerActivationError(channel, ret)
       case ret
-        when 0
+      when 0
 
-        when 1
+      when 1
           Report.Error(
             Builtins.sformat(
               # error report, %1 is device identification
@@ -514,7 +514,7 @@ module Yast
               channel
             )
           )
-        when 2
+      when 2
           Report.Error(
             Builtins.sformat(
               # error report, %1 is device identification
@@ -522,7 +522,7 @@ module Yast
               channel
             )
           )
-        when 3
+      when 3
           Report.Error(
             Builtins.sformat(
               # error report, %1 is device identification
@@ -530,7 +530,7 @@ module Yast
               channel
             )
           )
-        when 4
+      when 4
           Report.Error(
             Builtins.sformat(
               # error report, %1 is device identification
@@ -538,7 +538,7 @@ module Yast
               channel
             )
           )
-        when 5
+      when 5
           Report.Error(
             Builtins.sformat(
               # error report, %1 is device identification
@@ -546,7 +546,7 @@ module Yast
               channel
             )
           )
-        when 6
+      when 6
           Report.Error(
             Builtins.sformat(
               # error report, %1 is device identification
@@ -554,7 +554,7 @@ module Yast
               channel
             )
           )
-        when 10
+      when 10
           Report.Message(
             Builtins.sformat(
               # message, %1 is device identification

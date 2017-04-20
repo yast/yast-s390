@@ -58,35 +58,35 @@ module Yast
       Builtins.y2debug("param=%1", @param)
 
       case @func
-        when "Summary"
+      when "Summary"
           @ret = HTML.List(DASDController.Summary)
-        when "Reset"
+      when "Reset"
           DASDController.Import({})
           DASDController.SetModified(true)
           @ret = {}
-        when "Change"
+      when "Change"
           @ret = DASDAutoSequence()
           DASDController.SetModified(true)
-        when "Import"
+      when "Import"
           @ret = DASDController.Import(@param)
           DASDController.SetModified(true)
-        when "Export"
+      when "Export"
           @ret = DASDController.Export
           DASDController.SetModified(false)
-        when "GetModified"
+      when "GetModified"
           @ret = DASDController.GetModified
-        when "SetModified"
+      when "SetModified"
           DASDController.SetModified(true)
           @ret = true
-        when "Packages"
+      when "Packages"
           @ret = DASDController.AutoPackages
-        when "Read"
+      when "Read"
           Yast.import "Progress"
           Progress.off
           @ret = DASDController.Read
           Progress.on
           DASDController.SetModified(true)
-        when "Write"
+      when "Write"
           Yast.import "Progress"
           Progress.off
           @ret = DASDController.Write

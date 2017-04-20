@@ -58,35 +58,35 @@ module Yast
       Builtins.y2debug("param=%1", @param)
 
       case @func
-        when "Summary"
+      when "Summary"
           @ret = HTML.List(ZFCPController.Summary)
-        when "Reset"
+      when "Reset"
           ZFCPController.Import({})
           ZFCPController.SetModified(true)
           @ret = {}
-        when "Change"
+      when "Change"
           @ret = ZFCPAutoSequence()
           ZFCPController.SetModified(true)
-        when "Import"
+      when "Import"
           @ret = ZFCPController.Import(@param)
           ZFCPController.SetModified(true)
-        when "Export"
+      when "Export"
           @ret = ZFCPController.Export
           ZFCPController.SetModified(false)
-        when "GetModified"
+      when "GetModified"
           @ret = ZFCPController.GetModified
-        when "SetModified"
+      when "SetModified"
           ZFCPController.SetModified(true)
           @ret = true
-        when "Packages"
+      when "Packages"
           @ret = ZFCPController.AutoPackages
-        when "Read"
+      when "Read"
           Yast.import "Progress"
           Progress.set(false)
           @ret = ZFCPController.Read
           Progress.set(true)
           ZFCPController.SetModified(true)
-        when "Write"
+      when "Write"
           Yast.import "Progress"
           Progress.set(false)
           @ret = ZFCPController.Write
