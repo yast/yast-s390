@@ -15,8 +15,8 @@ describe "Yast::DASDController" do
   describe "#Write" do
     it "writes the dasd settings to the target (formating disks)" do
       # bnc 928388
-      data = { "devices" => [{"channel" => "0.0.0100", "diag" => false,
-       "format" => true}], "format_unformatted" => true }
+      data = { "devices" => [{ "channel" => "0.0.0100", "diag" => false,
+       "format" => true }], "format_unformatted" => true }
 
       allow(Yast::Mode).to receive(:normal).and_return(false)
       allow(Yast::Mode).to receive(:installation).and_return(true)
