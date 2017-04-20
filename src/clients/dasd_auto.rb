@@ -62,38 +62,38 @@ module Yast
         @ret = HTML.List(DASDController.Summary)
       when "Reset"
         DASDController.Import({})
-          DASDController.SetModified(true)
-          @ret = {}
+        DASDController.SetModified(true)
+        @ret = {}
       when "Change"
         @ret = DASDAutoSequence()
-          DASDController.SetModified(true)
+        DASDController.SetModified(true)
       when "Import"
         @ret = DASDController.Import(@param)
-          DASDController.SetModified(true)
+        DASDController.SetModified(true)
       when "Export"
         @ret = DASDController.Export
-          DASDController.SetModified(false)
+        DASDController.SetModified(false)
       when "GetModified"
         @ret = DASDController.GetModified
       when "SetModified"
         DASDController.SetModified(true)
-          @ret = true
+        @ret = true
       when "Packages"
         @ret = DASDController.AutoPackages
       when "Read"
         Yast.import "Progress"
-          Progress.off
-          @ret = DASDController.Read
-          Progress.on
-          DASDController.SetModified(true)
+        Progress.off
+        @ret = DASDController.Read
+        Progress.on
+        DASDController.SetModified(true)
       when "Write"
         Yast.import "Progress"
-          Progress.off
-          @ret = DASDController.Write
-          Progress.on
+        Progress.off
+        @ret = DASDController.Write
+        Progress.on
         else
         Builtins.y2error("Unknown function: %1", @func)
-          @ret = false # Unknown function
+        @ret = false # Unknown function
       end
 
       Builtins.y2debug("ret=%1", @ret)
