@@ -146,7 +146,7 @@ module Yast
         lun = Ops.get_string(device, ["detail", "fcp_lun"], "")
         ActivateDisk(channel, wwpn, lun)
       end if !Mode.normal
-      
+
 
       if !Mode.installation
         if @disk_configured
@@ -339,7 +339,8 @@ module Yast
           Ops.get_string(c, "device", "") == "zFCP controller"
         end
 
-        @controllers = Builtins.maplist(@controllers) do |c| Builtins.filter(c) do |k, _v|
+        @controllers = Builtins.maplist(@controllers) do |c|
+                         Builtins.filter(c) do |k, _v|
           Builtins.contains(["sysfs_bus_id"], k)
         end
         end
@@ -390,7 +391,8 @@ module Yast
         to:   "list <map <string, any>>"
       )
 
-      disks_tapes = Builtins.maplist(disks_tapes) do |d| Builtins.filter(d) do |k, _v|
+      disks_tapes = Builtins.maplist(disks_tapes) do |d|
+                      Builtins.filter(d) do |k, _v|
         Builtins.contains(["dev_name", "detail", "vendor", "device"], k)
       end
       end
