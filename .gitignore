@@ -11,6 +11,7 @@ config.status
 config.sub
 configure
 configure.ac
+coverage
 depcomp
 install-sh
 missing
@@ -21,4 +22,3 @@ autom4te.cache
 *.ami
 test-driver
 package/*.bz2
-/testsuite/raw.tmp.err.*
