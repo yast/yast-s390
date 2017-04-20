@@ -43,7 +43,7 @@ module Yast
       aliases = {
         "main"   => -> { DASDDialog() },
         "add"    => -> { AddDASDDiskDialog() },
-        "delete" => lambda { DeleteDASDDiskDialog() }
+        "delete" => -> { DeleteDASDDiskDialog() }
       }
 
       sequence = {
