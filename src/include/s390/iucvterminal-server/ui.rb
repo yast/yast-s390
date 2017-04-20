@@ -1521,7 +1521,7 @@ module Yast
         ret = Convert.to_symbol(UI.UserInput)
         # if ts user/group dialog is active
         if Builtins.contains(
-            [:ts_open_user_dialog, :ts_open_group_dialog],
+          [:ts_open_user_dialog, :ts_open_group_dialog],
             @current_dialog
           )
           if Builtins.contains([:next, :ok, :finish], ret)

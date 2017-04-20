@@ -341,7 +341,7 @@ module Yast
           end
           channels_str = Builtins.mergestring(channels, ", ")
           if !Popup.AnyQuestionRichText(
-              Popup.NoHeadline,
+            Popup.NoHeadline,
               # popup question
               Builtins.sformat(
                 _(
@@ -556,15 +556,15 @@ module Yast
           ret = nil
           next
         elsif Builtins.contains(
-            [
-              :activate,
-              :deactivate,
-              :diag_on,
-              :diag_off,
-              :format,
-              :format_on,
-              :format_off
-            ],
+          [
+            :activate,
+            :deactivate,
+            :diag_on,
+            :diag_off,
+            :format,
+            :format_on,
+            :format_off
+          ],
             ret
           )
           ReloadDASDDialog() if PerformAction(ret)
@@ -624,9 +624,9 @@ module Yast
         if ret == :abort || ret == :cancel
           # yes-no popup
           if !Popup.YesNo(
-              _(
-                "Really leave the DASD disk configuration without saving?\nAll changes will be lost."
-              )
+            _(
+              "Really leave the DASD disk configuration without saving?\nAll changes will be lost."
+            )
             )
             ret = nil
           end

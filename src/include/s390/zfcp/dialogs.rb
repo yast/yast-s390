@@ -229,9 +229,9 @@ module Yast
         elsif ret == :abort || ret == :cancel
           # yes-no popup
           if !Popup.YesNo(
-              _(
-                "Really leave the ZFCP device configuration without saving?\nAll changes will be lost."
-              )
+            _(
+              "Really leave the ZFCP device configuration without saving?\nAll changes will be lost."
+            )
             )
             ret = nil
           end
@@ -381,9 +381,9 @@ module Yast
         elsif ret == :abort || ret == :cancel
           # yes-no popup
           if !Popup.YesNo(
-              _(
-                "Really leave the ZFCP device configuration without saving?\nAll changes will be lost."
-              )
+            _(
+              "Really leave the ZFCP device configuration without saving?\nAll changes will be lost."
+            )
             )
             ret = nil
           end

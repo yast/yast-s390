@@ -257,7 +257,7 @@ module Yast
           if Builtins.contains([:next, :ok, :finish], ret) && @start
             # don't allow dumps if no device is available
             if Builtins.regexpmatch(
-                Convert.to_string(UI.QueryWidget(Id(:onpanic), :Value)),
+              Convert.to_string(UI.QueryWidget(Id(:onpanic), :Value)),
                 "^dump"
               ) &&
                 Convert.to_string(UI.QueryWidget(Id(:dumpdevice), :Value)) == ""
