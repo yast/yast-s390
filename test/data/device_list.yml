@@ -1,0 +1,25 @@
+---
+0:
+  detail:
+    channel: 0
+    controller_id: 0.0.fa00
+    fcp_lun: '0x4010400000000000'
+    host: 0
+    id: 0
+    lun: 0
+    wwpn: '0x500507630500873a'
+  dev_name: "/dev/sda"
+  device: '2107900'
+  vendor: IBM
+1:
+  detail:
+    channel: 0
+    controller_id: 0.0.fa00
+    fcp_lun: '0x401340ec00000000'
+    host: 0
+    id: 0
+    lun: 0
+    wwpn: '0x500507630500873a'
+  dev_name: "/dev/sdb"
+  device: '2107900'
+  vendor: IBM
