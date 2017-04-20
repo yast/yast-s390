@@ -342,7 +342,7 @@ module Yast
         @controllers = Builtins.maplist(@controllers) do |c|
           Builtins.filter(c) do |k, _v|
           Builtins.contains(["sysfs_bus_id"], k)
-        end
+          end
         end
 
         # zKVM uses virtio devices instead of ZFCP, skip the warning in that case
@@ -394,7 +394,7 @@ module Yast
       disks_tapes = Builtins.maplist(disks_tapes) do |d|
         Builtins.filter(d) do |k, _v|
         Builtins.contains(["dev_name", "detail", "vendor", "device"], k)
-      end
+        end
       end
 
       index = -1

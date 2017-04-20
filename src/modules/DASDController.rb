@@ -233,7 +233,7 @@ module Yast
       l = Builtins.maplist(active_devices) do |_i, d|
         Builtins.filter(d) do |k, _v|
     Builtins.contains(["channel", "format", "diag"], k)
-  end
+        end
       end
 
       {

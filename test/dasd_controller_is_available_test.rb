@@ -7,7 +7,7 @@ Yast.import "DASDController"
 describe "Yast::DASDController" do
   describe "#IsAvailable" do
     it "returns true if .probe.disk contains DASDs" do
-      expect(Yast::SCR).to receive(:Read).with(Yast::path(".probe.disk")).once.and_return(load_data("probe_disk_dasd.yml"))
+      expect(Yast::SCR).to receive(:Read).with(Yast.path(".probe.disk")).once.and_return(load_data("probe_disk_dasd.yml"))
       expect(Yast::DASDController.IsAvailable()).to eq(true)
     end
   end

@@ -16,7 +16,7 @@ describe "Yast::ZFCPController" do
 
   describe "#GetControllers" do
     it "Returns all controllers" do
-      expect(Yast::SCR).to receive(:Read).with(Yast::path(".probe.storage")).once.and_return(load_data("probe_storage.yml"))
+      expect(Yast::SCR).to receive(:Read).with(Yast.path(".probe.storage")).once.and_return(load_data("probe_storage.yml"))
 
       # Removing all fcp devices from blacklist
       expect(Yast::SCR).to receive(:Execute).with(anything, /\/sbin\/vmcp q v fcp/).and_return(
@@ -49,8 +49,8 @@ describe "Yast::ZFCPController" do
 
   describe "#ProbeDisks" do
     it "Probing disk" do
-      expect(Yast::SCR).to receive(:Read).with(Yast::path(".probe.disk")).once.and_return(load_data("probe_disk.yml"))
-      expect(Yast::SCR).to receive(:Read).with(Yast::path(".probe.tape")).once.and_return([])
+      expect(Yast::SCR).to receive(:Read).with(Yast.path(".probe.disk")).once.and_return(load_data("probe_disk.yml"))
+      expect(Yast::SCR).to receive(:Read).with(Yast.path(".probe.tape")).once.and_return([])
 
       expect(Yast::ZFCPController.ProbeDisks()).to eq(nil)
       expect(Yast::ZFCPController.devices).to eq(load_data("device_list.yml"))
