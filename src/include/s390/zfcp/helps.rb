@@ -46,8 +46,8 @@ module Yast
         ) +
           # Write dialog help 2/2
           _(
-            "<p><b><big>Aborting Saving:</big></b><br>\n" +
-              "Abort the save procedure by pressing <b>Abort</b>.\n" +
+            "<p><b><big>Aborting Saving:</big></b><br>\n" \
+              "Abort the save procedure by pressing <b>Abort</b>.\n" \
               "An additional dialog will inform you whether it is safe to do so.</p>\n"
           ),
         # Disk selection dialog help 1/3
@@ -63,32 +63,32 @@ module Yast
           # Disk selection dialog Warning
           _("<h1>Warning</h1>") +
           _(
-            "<p>When accessing a ZFCP device\n" +
-              "<b>READ</b>/<b>WRITE</b>, make sure that this access is exclusive.\n" +
+            "<p>When accessing a ZFCP device\n" \
+              "<b>READ</b>/<b>WRITE</b>, make sure that this access is exclusive.\n" \
               "Otherwise there is a potential risk of data corruption.</p>"
           ),
         # Disk add help 1/2
         "disk_add"       => _(
-          "<p><b><big>Add New ZFCP Device</big></b><br>\n" +
-            "Enter the identifier of the device to add, the\n" +
-            "<b>Channel ID</b> of the ZFCP controller, the worldwide port number\n" +
+          "<p><b><big>Add New ZFCP Device</big></b><br>\n" \
+            "Enter the identifier of the device to add, the\n" \
+            "<b>Channel ID</b> of the ZFCP controller, the worldwide port number\n" \
             "(<b>WWPN</b>) and the <b>LUN</b> number.</p>\n"
         ) +
           # Disk add help 2/2, This is HTML, so finally "&lt;devno&gt;" is displayed as "<devno>"
           _(
-            "<p>The <b>Channel ID</b> must be entered with lowercase letters in a sysfs conforming\n" +
-              "format 0.0.&lt;devno&gt;, such as <tt>0.0.5c51</tt>.</p>\n" +
-              "<p>The WWPN must be entered with lowercase letters as a 16-digit hex value, such as\n" +
-              "<tt>0x5005076300c40e5a</tt>.</p>\n" +
-              "<p>The LUN must be entered with lowercase letters as a 16-digit hex value with\n" +
-              "all trailing zeros, such as <tt>0x52ca000000000000</tt>.</p>" +
+            "<p>The <b>Channel ID</b> must be entered with lowercase letters in a sysfs conforming\n" \
+              "format 0.0.&lt;devno&gt;, such as <tt>0.0.5c51</tt>.</p>\n" \
+              "<p>The WWPN must be entered with lowercase letters as a 16-digit hex value, such as\n" \
+              "<tt>0x5005076300c40e5a</tt>.</p>\n" \
+              "<p>The LUN must be entered with lowercase letters as a 16-digit hex value with\n" \
+              "all trailing zeros, such as <tt>0x52ca000000000000</tt>.</p>" \
               "<p>If no WWPN <b>and</b> no LUN have been defined the system is trying to use allow_lun_scan.</p>"
           ) +
           # Disk selection dialog Warning
           _("<h1>Warning</h1>") +
           _(
-            "<p>When accessing a ZFCP device\n" +
-              "<b>READ</b>/<b>WRITE</b>, make sure that this access is exclusive.\n" +
+            "<p>When accessing a ZFCP device\n" \
+              "<b>READ</b>/<b>WRITE</b>, make sure that this access is exclusive.\n" \
               "Otherwise there is a potential risk of data corruption.</p>"
           )
       }

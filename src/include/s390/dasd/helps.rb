@@ -46,8 +46,8 @@ module Yast
         ) +
           # Write dialog help 2/2
           _(
-            "<p><b><big>Aborting Saving:</big></b><br>\n" +
-              "Abort the save procedure by pressing <b>Abort</b>.\n" +
+            "<p><b><big>Aborting Saving:</big></b><br>\n" \
+              "Abort the save procedure by pressing <b>Abort</b>.\n" \
               "An additional dialog will inform you whether it is safe to do so.</p>\n"
           ),
         # Disk selection dialog help 1/4
@@ -82,8 +82,8 @@ module Yast
           ),
         # Disk add help 1/3
         "disk_add_config"       => _(
-          "<p><b><big>Add New DASD Disk</big></b><br>\n" +
-            "To add a disk, enter the <b>Channel ID</b> of the DASD disk as\n" +
+          "<p><b><big>Add New DASD Disk</big></b><br>\n" \
+            "To add a disk, enter the <b>Channel ID</b> of the DASD disk as\n" \
             "identifier.</p>"
         ) +
           # Disk add help 1/3

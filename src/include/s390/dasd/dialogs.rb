@@ -344,8 +344,8 @@ module Yast
             # popup question
             Builtins.sformat(
               _(
-                "Formatting these disks destroys all data on them.<br>\n" +
-                  "Really format the following disks?<br>\n" +
+                "Formatting these disks destroys all data on them.<br>\n" \
+                  "Really format the following disks?<br>\n" \
                   "%1"
               ),
               channels_str
