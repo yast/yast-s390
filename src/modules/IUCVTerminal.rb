@@ -122,7 +122,7 @@ module Yast
       return if existing_num == target_num
 
       if target_num > existing_num
-        for i in (existing_num + 1)..target_num do
+        ((existing_num + 1)..target_num).each do |i|
           service_name = "#{prefix}@#{name}#{i}.service"
           SCR.Execute(path(".target.bash"), "systemctl enable #{service_name}")
           SCR.Execute(path(".target.bash"), "systemctl start #{service_name}")
