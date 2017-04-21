@@ -95,7 +95,7 @@ module Yast
       @zfcp_disks = GetAvailableDisks("zfcp")
 
       Progress.NextStage
-      @dasd_disks != nil && @zfcp_disks != nil
+      !@dasd_disks.nil? && !@zfcp_disks.nil?
     end
 
     # Format a disk as DUMP device

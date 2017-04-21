@@ -900,7 +900,7 @@ module Yast
       UI.ChangeWidget(Id(:ts_table_add_groups), :Items, items)
 
       # change to the old position if possible
-      if ts_group_table_position != nil
+      if !ts_group_table_position.nil?
         UI.ChangeWidget(
           Id(:ts_table_add_groups),
           :CurrentItem,
@@ -1270,7 +1270,7 @@ module Yast
           "/"
         )
         file = UI.AskForExistingFile(file, "", "Select a file with z/VM IDs")
-        if file != nil
+        if !file.nil?
           Ops.set(@ts_member_conf, [@ts_selected_member, :rb_ts_file], file)
           UI.ChangeWidget(Id(:ts_auth_file), :Value, file)
         end
@@ -1287,7 +1287,7 @@ module Yast
         # set default directory
         dir = @ic_home != "" ? @ic_home : "/"
         dir = UI.AskForExistingDirectory(dir, "")
-        if dir != nil
+        if !dir.nil?
           @ic_home = dir
           UI.ChangeWidget(Id(:ic_home), :Value, dir)
         end
@@ -1300,7 +1300,7 @@ module Yast
         # set default directory
         dir = @ts_home != "" ? @ts_home : "/"
         dir = UI.AskForExistingDirectory(dir, "")
-        if dir != nil
+        if !dir.nil?
           @ts_home = dir
           UI.ChangeWidget(Id(:ts_home), :Value, dir)
         end

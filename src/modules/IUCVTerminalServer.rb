@@ -361,7 +361,7 @@ module Yast
         zvm_ids = Convert.to_string(
           SCR.Read(path(".sysconfig.iucv_terminal_server.ZVM_IDS"))
         )
-        @zvm_id_list = Builtins.splitstring(zvm_ids, " ") if zvm_ids != nil
+        @zvm_id_list = Builtins.splitstring(zvm_ids, " ") if !zvm_ids.nil?
 
         @ts_enabled = "true" ==
           Convert.to_string(
@@ -371,7 +371,7 @@ module Yast
           SCR.Read(path(".sysconfig.iucv_terminal_server.TSSHELL_HOME"))
         )
         # use default if not set
-        @ts_home = home if home != nil
+        @ts_home = home if !home.nil?
 
         @ic_enabled = "true" ==
           Convert.to_string(
@@ -381,7 +381,7 @@ module Yast
           SCR.Read(path(".sysconfig.iucv_terminal_server.IUCVCONN_HOME"))
         )
         # user default if not set
-        @ic_home = home if home != nil
+        @ic_home = home if !home.nil?
       end
 
       filename = "/etc/iucvterm/ts-audit-systems.conf"

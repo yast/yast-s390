@@ -644,7 +644,7 @@ module Yast
 
           channel = DASDController.FormatChannel(channel)
 
-          if DASDController.GetDeviceIndex(channel) != nil
+          if !DASDController.GetDeviceIndex(channel).nil?
             # error popup
             Popup.Error(_("Device already exists."))
             ret = nil
