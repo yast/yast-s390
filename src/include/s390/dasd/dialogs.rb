@@ -236,9 +236,7 @@ module Yast
             else
               DASDController.DeactivateDisk(channel, diag)
             end
-            if act_ret == 8 # 8 means disk is not formatted
-              unformatted_disks << channel
-            end
+            unformatted_disks << channel if act_ret == 8 # 8 means disk is not formatted
           end
           if !unformatted_disks.empty?
             if unformatted_disks.size == 1
@@ -328,9 +326,7 @@ module Yast
           end
 
           num_parallel = [selected.size, 8].min
-          if num_parallel > 1
-            num_parallel = AskNumParallel(num_parallel)
-          end
+          num_parallel = AskNumParallel(num_parallel) if num_parallel > 1
 
           return false if num_parallel == 0
 

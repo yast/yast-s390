@@ -597,9 +597,7 @@ module Yast
       index = -1
       reqsize = 10   # The default request size for dasdfmt is 10
       msize = 10     # The "cylinders per hashmark" value must be >= the request size
-      if msize < reqsize
-        msize = reqsize
-      end
+      msize = reqsize if msize < reqsize
       Builtins.foreach(disks_list) do |device|
         index = Ops.add(index, 1)
         Ops.set(disks, index, device)
