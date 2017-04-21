@@ -463,22 +463,20 @@ module Yast
       if Builtins.isempty(selected)
         # error popup message
         Popup.Message(_("No disk selected."))
-      else
-        if Mode.config
-          Builtins.foreach(selected) do |index|
-            ZFCPController.RemoveDevice(index)
-          end
-        else
-          Builtins.foreach(selected) do |index|
-            d = Ops.get(ZFCPController.devices, index, {})
-            channel = Ops.get_string(d, ["detail", "controller_id"], "")
-            wwpn = Ops.get_string(d, ["detail", "wwpn"], "")
-            lun = Ops.get_string(d, ["detail", "fcp_lun"], "")
-            ZFCPController.DeactivateDisk(channel, wwpn, lun)
-          end
-
-          ZFCPController.ProbeDisks
+      elsif Mode.config
+        Builtins.foreach(selected) do |index|
+          ZFCPController.RemoveDevice(index)
         end
+      else
+        Builtins.foreach(selected) do |index|
+          d = Ops.get(ZFCPController.devices, index, {})
+          channel = Ops.get_string(d, ["detail", "controller_id"], "")
+          wwpn = Ops.get_string(d, ["detail", "wwpn"], "")
+          lun = Ops.get_string(d, ["detail", "fcp_lun"], "")
+          ZFCPController.DeactivateDisk(channel, wwpn, lun)
+        end
+
+        ZFCPController.ProbeDisks
       end
 
       :next

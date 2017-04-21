@@ -786,34 +786,32 @@ module Yast
               error
             )
           end
-        else
-          if Ops.get_map(groups, [groupname, "userlist"], {}) != usermap
-            Users.SelectGroupByName(groupname)
-            group = Users.GetCurrentGroup
+        elsif Ops.get_map(groups, [groupname, "userlist"], {}) != usermap
+          Users.SelectGroupByName(groupname)
+          group = Users.GetCurrentGroup
 
-            # filter all TS-Entries from current user list to remove deselected ones
-            non_ts_users_list = Builtins.filter(
-              Ops.get_map(group, "userlist", {})
-            ) do |username, _number|
-              !Builtins.haskey(@ts_member_conf, username)
-            end
-            Ops.set(
-              group,
-              "userlist",
-              Builtins.union(non_ts_users_list, usermap)
+          # filter all TS-Entries from current user list to remove deselected ones
+          non_ts_users_list = Builtins.filter(
+            Ops.get_map(group, "userlist", {})
+          ) do |username, _number|
+            !Builtins.haskey(@ts_member_conf, username)
+          end
+          Ops.set(
+            group,
+            "userlist",
+            Builtins.union(non_ts_users_list, usermap)
+          )
+
+          changes = { "userlist" => group["userlist"] || [] }
+          error = Users.EditGroup(changes)
+          if error == ""
+            Users.CommitGroup
+          else
+            Builtins.y2milestone(
+              "Editing the group %1 failed because of: %2",
+              groupname,
+              error
             )
-
-            changes = { "userlist" => group["userlist"] || [] }
-            error = Users.EditGroup(changes)
-            if error == ""
-              Users.CommitGroup
-            else
-              Builtins.y2milestone(
-                "Editing the group %1 failed because of: %2",
-                groupname,
-                error
-              )
-            end
           end
         end
         # groups start with an @
@@ -831,11 +829,9 @@ module Yast
               rb_ts_file:  ""
             )
           end
-        else
+        elsif !is_ts_auth_group
           # delete group entry if disabled
-          if !is_ts_auth_group
-            @ts_member_conf = Builtins.remove(@ts_member_conf, identification)
-          end
+          @ts_member_conf = Builtins.remove(@ts_member_conf, identification)
         end
       end
 
@@ -1115,12 +1111,10 @@ module Yast
         # activate all if selected
         ids = deep_copy(@zvm_id_entries) if Ops.get(ids, 0) == @TEXT_ALL
         UI.ChangeWidget(Id(widget), :SelectedItems, ids)
-      else
+      elsif Ops.get(ids, 0, "") == @TEXT_ALL
         # activate all if selected and no user change was committed
-        if Ops.get(ids, 0, "") == @TEXT_ALL
-          ids = deep_copy(@zvm_id_entries)
-          UI.ChangeWidget(Id(widget), :SelectedItems, ids)
-        end
+        ids = deep_copy(@zvm_id_entries)
+        UI.ChangeWidget(Id(widget), :SelectedItems, ids)
       end
       deep_copy(ids)
     end

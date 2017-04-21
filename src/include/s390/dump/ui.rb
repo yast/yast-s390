@@ -184,39 +184,38 @@ module Yast
 
           if Builtins.size(device) == 0
             Popup.Notify(_("You haven't selected any device."))
-          else
+          elsif !force ||
             # warn only in case of force
-            if !force ||
-                Popup.YesNo(
-                  Builtins.sformat(
-                    _(
-                      "The disk %1 will be formatted as a dump device. All data on " \
-                        "this device will be lost! Continue?"
-                    ),
-                    device
-                  )
+              Popup.YesNo(
+                Builtins.sformat(
+                  _(
+                    "The disk %1 will be formatted as a dump device. All data on " \
+                      "this device will be lost! Continue?"
+                  ),
+                  device
                 )
-              success = Dump.FormatDisk(device, force)
-              # don't quit in case of failures, error messages are reported by FormatDisk()
-              ret = if success &&
-                  !Popup.YesNo(
-                    _("Operation successful. Initialize another dump device?")
-                  )
-                :cancel
-              else
-                # reinitialize devices
-                :again
-              end
-
-              # reset screen after dump progress bar
-              Wizard.SetContentsButtons(
-                caption,
-                VBox(),
-                help,
-                Label.BackButton,
-                Label.CreateButton
               )
+
+            success = Dump.FormatDisk(device, force)
+            # don't quit in case of failures, error messages are reported by FormatDisk()
+            ret = if success &&
+                !Popup.YesNo(
+                  _("Operation successful. Initialize another dump device?")
+                )
+              :cancel
+            else
+              # reinitialize devices
+              :again
             end
+
+            # reset screen after dump progress bar
+            Wizard.SetContentsButtons(
+              caption,
+              VBox(),
+              help,
+              Label.BackButton,
+              Label.CreateButton
+            )
           end
         end
       end while !Builtins.contains([:abort, :cancel, :again], ret)

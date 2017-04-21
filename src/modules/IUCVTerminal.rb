@@ -265,13 +265,11 @@ module Yast
         # this might overwrite other console options but this is mentioned in the help text
         if @show_kernel_out_on_hvc
           Bootloader.modify_kernel_params("console" => "hvc0")
-        else
+        elsif Bootloader.kernel_param(:common, "console") == "hvc0"
           # remove console entry if there is only one or the last is hvc0
           # otherwise it might not be possible to access it with SetKernelParm
           # make sure not to remove other console tags
-          if Bootloader.kernel_param(:common, "console") == "hvc0"
-            Bootloader.modify_kernel_params("console" => :missing)
-          end
+          Bootloader.modify_kernel_params("console" => :missing)
         end
 
         old_progress = Progress.set(false)
