@@ -84,7 +84,9 @@ module Yast
     def CheckUserGroupName(name)
       Builtins.regexpmatch(
         name,
-        "^[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_][ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.-]*[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.$-]?$"
+        "^[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_][ABCDEFGHIJKLM" \
+        "NOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.-]*[ABCDEFGHIJKLMNO" \
+        "PQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.$-]?$"
       )
     end
 
@@ -164,7 +166,8 @@ module Yast
     end
 
     # Abstract add a new user function
-    # @parm string username, string password, string group_id, string home, string shell,  map<string, string> additional_groups ($[user : "1", user2 : "1" ...]
+    # @parm string username, string password, string group_id, string home, string shell,
+    #  map<string, string> additional_groups ($[user : "1", user2 : "1" ...]
     # @return the new user id as a string
     def AddUser(username, password, group_id, home, shell, additional_groups, force_pw_change)
       additional_groups = deep_copy(additional_groups)
@@ -242,7 +245,8 @@ module Yast
     end
 
     # Add a new TS-Shell user
-    # @parm string username, string password, string home, map<string, string> additional_groups ($[user : "1", user2 : "1" ...]
+    # @parm string username, string password, string home, map<string, string>
+    #   additional_groups ($[user : "1", user2 : "1" ...]
     # @return the new user id as a string
     def AddTsUser(username, password, home, additional_groups, force_pw_change)
       additional_groups = deep_copy(additional_groups)

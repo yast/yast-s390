@@ -242,9 +242,11 @@ module Yast
           end
           if unformatted_disks.size > 0
             if unformatted_disks.size == 1
-              popup = Builtins.sformat(_("Device %1 is not formatted. Format device now?"), unformatted_disks[0])
+              popup = Builtins.sformat(_("Device %1 is not formatted. Format device now?"),
+                unformatted_disks[0])
             else
-              popup = Builtins.sformat(_("There are %1 unformatted devices. Format them now?"), unformatted_disks.size)
+              popup = Builtins.sformat(_("There are %1 unformatted devices. Format them now?"),
+                unformatted_disks.size)
             end
             # for autoinst, format unformatted disks later
             if !Mode.autoinst && Popup.ContinueCancel(popup)

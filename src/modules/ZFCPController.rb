@@ -347,7 +347,8 @@ module Yast
         # zKVM uses virtio devices instead of ZFCP, skip the warning in that case
         if ret_vmcp != 0 && @controllers.size == 0 && !Arch.is_zkvm
           # TRANSLATORS: warning message
-          Report.Warning(_("Cannot evaluate ZFCP controllers (e.g. in LPAR).\nYou will have to set it manually."))
+          Report.Warning(_("Cannot evaluate ZFCP controllers (e.g. in LPAR).\n" \
+            "You will have to set it manually."))
         end
 
         Builtins.y2milestone("probed ZFCP controllers %1", @controllers)

@@ -1088,8 +1088,10 @@ module Yast
       ret
     end
 
-    # Updates the MultiSelectionBoxes of z/VM IDs according to user interaction to de/select all at once
-    # @param list<string> of previous defined ids and the MultiSelectionBox symbol to get the new id selection
+    # Updates the MultiSelectionBoxes of z/VM IDs according to user interaction
+    # to de/select all at once
+    # @param list<string> of previous defined ids and the MultiSelectionBox
+    #   symbol to get the new id selection
     # @return [Array<String>] of items to select
     def UpdateIdSelections(previous_ids, widget)
       previous_ids = deep_copy(previous_ids)

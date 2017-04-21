@@ -123,17 +123,21 @@ module Yast
         _("<p><b>IUCVtty</b></p>") +
         # IUCVTerminal dialog help 3/11
         _(
-          "<p>Several <b>IUCVtty instances</b> can run to provide multiple terminal devices. The instances are distinguished by a terminal ID, which is a combination of the <b>Terminal ID Prefix</b> and the number of the instance.<br>"
+          "<p>Several <b>IUCVtty instances</b> can run to provide multiple terminal devices. " \
+            "The instances are distinguished by a terminal ID, which is a combination of " \
+            "the <b>Terminal ID Prefix</b> and the number of the instance.<br>"
         ) +
         # IUCVTerminal dialog help 4/11
         _(
-          "For example, if you define ten instances with the prefix &quot;<i>lxterm</i>&quot;, the terminal IDs from <i>lxterm0</i> to <i>lxterm9</i> are available.</p>"
+          "For example, if you define ten instances with the prefix &quot;<i>lxterm</i>&quot;, " \
+            "the terminal IDs from <i>lxterm0</i> to <i>lxterm9</i> are available.</p>"
         ) + "<p>&nbsp;</p>" +
         # IUCVTerminal dialog help 5/11
         _("<p><b>HVC</b></p>") +
         # IUCVTerminal dialog help 6/11
         _(
-          "<p>The z/VM IUCV HVC device driver is a kernel module and uses device nodes to enable up to eight HVC terminal devices to communicate with getty and login programs.</p>"
+          "<p>The z/VM IUCV HVC device driver is a kernel module and uses device nodes to " \
+            "enable up to eight HVC terminal devices to communicate with getty and login programs.</p>"
         ) +
         # IUCVTerminal dialog help 7/11
         _(
@@ -145,15 +149,18 @@ module Yast
         ) +
         # IUCVTerminal dialog help 9/11
         _(
-          "<p>Activate <b>route kernel messages to hvc0</b> to route kernel messages to\nthe hvc0 device instead of ttyS0.<br>"
+          "<p>Activate <b>route kernel messages to hvc0</b> to route kernel messages to\n" \
+            "the hvc0 device instead of ttyS0.<br>"
         ) +
         # IUCVTerminal dialog help 10/11
         _(
-          "Should kernel messages still be shown on ttyS0, manually add <b>console=ttyS0</b> to the current boot selection kernel parameter in the <b>YaST bootloader module</b>.</p>"
+          "Should kernel messages still be shown on ttyS0, manually add <b>console=ttyS0</b> " \
+            "to the current boot selection kernel parameter in the <b>YaST bootloader module</b>.</p>"
         ) +
         # IUCVTerminal dialog help 11/11
         _(
-          "<h3>Warning: HVC Terminals stay logged on without a manual logout through the shortcut: ctrl _ d</h3>"
+          "<h3>Warning: HVC Terminals stay logged on without a manual logout through " \
+            "the shortcut: ctrl _ d</h3>"
         )
 
       # Dialog content
@@ -356,7 +363,8 @@ module Yast
         current_restrict_hvc_to_srvs = UI.QueryWidget(Id(:is_hvc_restricted), :Value) ?
           UI.QueryWidget(Id(:restrict_hvc_to_srvs), :Value) : ""
         # check if the bootloader settings need to be adjusted
-        IUCVTerminal.has_bootloader_changed = IUCVTerminal.restrict_hvc_to_srvs != current_restrict_hvc_to_srvs ||
+        IUCVTerminal.has_bootloader_changed =
+          IUCVTerminal.restrict_hvc_to_srvs != current_restrict_hvc_to_srvs ||
           IUCVTerminal.show_kernel_out_on_hvc != UI.QueryWidget(Id(:show_kernel_out_on_hvc), :Value)
 
         if IUCVTerminal.has_bootloader_changed

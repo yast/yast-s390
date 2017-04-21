@@ -56,7 +56,8 @@ module Yast
         ) +
         # Dump dialog help 3/8
         _(
-          "Only whole disks can be used, no partitions. If the device is incompatibly\nformatted or partitioned, activate the checkbox <b>Force overwrite of disk</b>.</p>"
+          "Only whole disks can be used, no partitions. If the device is incompatibly\n" \
+            "formatted or partitioned, activate the checkbox <b>Force overwrite of disk</b>.</p>"
         ) +
         # Dump dialog help 4/8
         _(
@@ -68,7 +69,8 @@ module Yast
         ) +
         # Dump dialog help 6/8
         _(
-          "<p><b>dumpdevice</b> after a disk indicates that it is a usable dump\ndevice. Multi-volume dump devices are indicated by a list of DASD IDs.</p>"
+          "<p><b>dumpdevice</b> after a disk indicates that it is a usable dump\ndevice. " \
+            "Multi-volume dump devices are indicated by a list of DASD IDs.</p>"
         ) +
         # Dump dialog help 7/8
         _("<p>ZFCP columns: Device, Size, ID, WWPN, LUN, Dump<br>") +
@@ -190,7 +192,8 @@ module Yast
                 Popup.YesNo(
                   Builtins.sformat(
                     _(
-                      "The disk %1 will be formatted as a dump device. All data on this device will be lost! Continue?"
+                      "The disk %1 will be formatted as a dump device. All data on " \
+                        "this device will be lost! Continue?"
                     ),
                     device
                   )

@@ -145,8 +145,6 @@ module Yast
           SCR.Write(path(".sysconfig.xpram.XPRAM_START"), "yes")
           bret = Service.Enable("xpram")
           Builtins.y2milestone("Service::Enable (xpram) returns %1", bret)
-          #	map out = (map) SCR::Execute(.target.bash_output,"bash -x /etc/init.d/xpram start", $["TERM":"raw"]);
-          #	y2milestone("got %1", out);
           SCR.Write(path(".sysconfig.xpram"), nil)
           bret = Service.Start("xpram")
           if !bret

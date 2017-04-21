@@ -16,7 +16,8 @@ describe "Yast::ZFCPController" do
 
   describe "#GetControllers" do
     it "Returns all controllers" do
-      expect(Yast::SCR).to receive(:Read).with(Yast.path(".probe.storage")).once.and_return(load_data("probe_storage.yml"))
+      expect(Yast::SCR).to receive(:Read).with(Yast.path(".probe.storage")).once
+        .and_return(load_data("probe_storage.yml"))
 
       # Removing all fcp devices from blacklist
       expect(Yast::SCR).to receive(:Execute).with(anything, /\/sbin\/vmcp q v fcp/).and_return(
@@ -50,7 +51,8 @@ describe "Yast::ZFCPController" do
 
   describe "#ProbeDisks" do
     it "Probing disk" do
-      expect(Yast::SCR).to receive(:Read).with(Yast.path(".probe.disk")).once.and_return(load_data("probe_disk.yml"))
+      expect(Yast::SCR).to receive(:Read).with(Yast.path(".probe.disk")).once
+        .and_return(load_data("probe_disk.yml"))
       expect(Yast::SCR).to receive(:Read).with(Yast.path(".probe.tape")).once.and_return([])
 
       expect(Yast::ZFCPController.ProbeDisks()).to eq(nil)
@@ -69,8 +71,10 @@ describe "Yast::ZFCPController" do
       expect(Yast::ZFCPController.Import(import_data)).to eq(true)
       Yast::ZFCPController.filter_max = Yast::ZFCPController.FormatChannel("0.0.FA00")
       Yast::ZFCPController.filter_min = Yast::ZFCPController.FormatChannel("0.0.f900")
-      expect(Yast::ZFCPController.GetFilteredDevices()).to eq(0 => { "detail"=>{ "controller_id" => "0.0.fa00", "wwpn" => "", "fcp_lun" => "" } },
-                                                              4 => { "detail"=>{ "controller_id" => "0.0.f900", "wwpn" => "", "fcp_lun" => "" } })
+      expect(Yast::ZFCPController.GetFilteredDevices()).to eq(
+        0 => { "detail"=>{ "controller_id" => "0.0.fa00", "wwpn" => "", "fcp_lun" => "" } },
+        4 => { "detail"=>{ "controller_id" => "0.0.f900", "wwpn" => "", "fcp_lun" => "" } }
+      )
     end
   end
 end
