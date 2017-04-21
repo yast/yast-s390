@@ -418,7 +418,7 @@ module Yast
           wwpn = ZFCPController.FormatWWPN(wwpn)
           lun = ZFCPController.FormatLUN(lun)
 
-          if ZFCPController.GetDeviceIndex(channel, wwpn, lun) != nil
+          if !ZFCPController.GetDeviceIndex(channel, wwpn, lun).nil?
             # error popup
             Popup.Error(_("Device already exists."))
             ret = nil
