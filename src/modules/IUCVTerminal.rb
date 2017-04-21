@@ -97,7 +97,7 @@ module Yast
         match = entry.scan(/^#{@IUCV_PREFIX}@(.+)0\.service$/).first
         name = match.first if match
       end
-      name ||= @iucv_name
+      name || @iucv_name
     end
 
     def setup_iucv(target_num)

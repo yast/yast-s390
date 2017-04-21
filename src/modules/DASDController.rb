@@ -711,7 +711,6 @@ module Yast
           end
         end
         index = 0
-        siz = Builtins.size(this_step)
         Builtins.foreach(this_step) do |k, _v|
           UI.ChangeWidget(
             Id(index),

@@ -185,8 +185,6 @@ module Yast
           if Builtins.size(device) == 0
             Popup.Notify(_("You haven't selected any device."))
           else
-            # count devices for proper grammatical number output
-            num_devices = Builtins.size(Builtins.splitstring(device, " "))
             # warn only in case of force
             if !force ||
                 Popup.YesNo(

@@ -142,7 +142,6 @@ module Yast
       Progress.NextStage
 
       if ret != 0
-        err = ""
         err = if ret == 11
           # error description
           _("Invalid or unusable disk (fatal).")

@@ -98,7 +98,6 @@ module Yast
       # Xpram read dialog caption
       caption = _("Saving XPRAM Configuration")
       steps = 2
-      bret = true
 
       Progress.New(
         caption,

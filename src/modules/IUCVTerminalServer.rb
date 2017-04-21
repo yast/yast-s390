@@ -445,7 +445,6 @@ module Yast
           end
         end
       end
-      test = []
 
       Progress.NextStage
       true

@@ -145,7 +145,6 @@ module Yast
     # @param [Hash] options  a list of parameters passed as args
     # @return [Boolean] true on success
     def XpramDisableHandler(options)
-      options = deep_copy(options)
       if Xpram.start
         Xpram.start = false
         Xpram.modified = true

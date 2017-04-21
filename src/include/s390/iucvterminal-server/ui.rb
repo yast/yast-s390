@@ -579,7 +579,6 @@ module Yast
 
     def MainDialogContent
       # draw active tab
-      widgets = nil
       widgets = if @current_main_tab == :t_zvmids
         ZvmIdsDialogContent()
       elsif @current_main_tab == :t_tsshell
@@ -726,7 +725,6 @@ module Yast
           from: "any",
           to:   "list <string>"
         )
-        groups = Builtins.mergestring(grouplist, ",")
         groupmap = Builtins.listmap(grouplist) { |g| { g => "1" } }
 
         force_pw_change = Convert.to_boolean(
@@ -823,10 +821,6 @@ module Yast
         # check if the group should be added and  was not already used for TS auth
         if !Builtins.haskey(@ts_member_conf, identification)
           if is_ts_auth_group
-            group_members = Builtins.mergestring(userlist, ",")
-            group = Users.GetGroupByName(groupname, "")
-            gid = Ops.get_string(group, "gidNumber", "")
-
             # add ts_member_conf
             @ts_member_conf = Builtins.add(
               @ts_member_conf,
@@ -840,7 +834,6 @@ module Yast
         else
           # delete group entry if disabled
           if !is_ts_auth_group
-            i = 0
             @ts_member_conf = Builtins.remove(@ts_member_conf, identification)
           end
         end
@@ -1626,7 +1619,6 @@ module Yast
     # The whole sequence
     # @return sequence result
     def IUCVTerminalServerSequence
-      ret = nil
       Wizard.CreateDialog
       Wizard.SetDesktopIcon("iucvterminal-server")
       IUCVTerminalServer.Read
