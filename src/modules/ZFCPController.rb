@@ -108,7 +108,7 @@ module Yast
     end
 
     def GetNextLUN(lun)
-      lun = "0" if lun == nil || lun == ""
+      lun = "0" if lun.nil? || lun == ""
 
       old_lun = Builtins.tointeger(lun)
       new_lun = old_lun
@@ -311,7 +311,7 @@ module Yast
     # Get available zfcp controllers
     # @return [Array<Hash{String => Object>}] of availabel Controllers
     def GetControllers
-      if @controllers == nil
+      if @controllers.nil?
         # Checking if it is a z/VM and evaluating all fcp controllers in
         # order to activate
         ret_vmcp = SCR.Execute(path(".target.bash_output"), "/sbin/vmcp q v fcp")

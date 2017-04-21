@@ -663,7 +663,7 @@ module Yast
           line = Convert.to_string(
             SCR.Read(path(".process.read_line"), process_id)
           )
-          break if line == nil
+          break if line.nil?
 
           siz = Builtins.tointeger(line)
           siz = 999999999 if siz == 0

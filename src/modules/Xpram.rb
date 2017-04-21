@@ -63,7 +63,7 @@ module Yast
         @mountpoint = Convert.to_string(
           SCR.Read(path(".sysconfig.xpram.XPRAM_MNTPATH"))
         )
-        @mountpoint = "" if @mountpoint == nil
+        @mountpoint = "" if @mountpoint.nil?
 
         @fstype = Convert.to_string(
           SCR.Read(path(".sysconfig.xpram.XPRAM_FORCE"))
@@ -73,7 +73,7 @@ module Yast
         @fstype = Convert.to_string(
           SCR.Read(path(".sysconfig.xpram.XPRAM_FSTYPE"))
         )
-        @fstype = "swap" if @fstype == nil
+        @fstype = "swap" if @fstype.nil?
 
         return true
       end

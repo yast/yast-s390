@@ -202,7 +202,7 @@ module Yast
       ReloadZFCPDialog()
 
       ret = nil
-      while ret == nil
+      while ret.nil?
         ret = Convert.to_symbol(UI.UserInput)
 
         if ret == :filter
@@ -329,7 +329,7 @@ module Yast
       UI.SetFocus(Id(:channel))
 
       ret = nil
-      while ret == nil
+      while ret.nil?
         ret = Convert.to_symbol(UI.UserInput)
 
         if ret == :get_wwpn

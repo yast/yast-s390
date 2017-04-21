@@ -514,7 +514,7 @@ module Yast
       ReloadDASDDialog()
 
       ret = nil
-      while ret == nil
+      while ret.nil?
         event = UI.WaitForEvent
 
         if Event.IsWidgetContextMenuActivated(event) == :table
@@ -619,7 +619,7 @@ module Yast
       UI.SetFocus(Id(:channel))
 
       ret = nil
-      while ret == nil
+      while ret.nil?
         ret = Convert.to_symbol(UI.UserInput)
 
         if ret == :abort || ret == :cancel

@@ -113,7 +113,7 @@ module Yast
       Wizard.HideBackButton
 
       @ret = nil
-      while @ret == nil
+      while @ret.nil?
         @ret = UI.UserInput
         if @ret == :dasd
           WFM.call("dasd")
