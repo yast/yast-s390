@@ -144,7 +144,7 @@ module Yast
     # Command line handler for disabling XpRAM
     # @param [Hash] options  a list of parameters passed as args
     # @return [Boolean] true on success
-    def XpramDisableHandler(options)
+    def XpramDisableHandler(_options)
       if Xpram.start
         Xpram.start = false
         Xpram.modified = true
