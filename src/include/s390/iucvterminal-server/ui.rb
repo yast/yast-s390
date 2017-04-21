@@ -1405,8 +1405,7 @@ module Yast
             to:   "list <term>"
           )
 
-          item = Item(Id(groupname), groupname, @TEXT_YES, "new", "")
-          items = Builtins.add(items, item)
+          items = Builtins.add(items, Item(Id(groupname), groupname, @TEXT_YES, "new", ""))
 
           UpdateTsGroupTable(items)
           # update ts member selection

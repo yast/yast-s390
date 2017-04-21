@@ -128,8 +128,8 @@ module Yast
           SCR.Execute(path(".target.bash"), "systemctl start #{service_name}")
         end
       else
-        existing_num.downto(target_num + 1) do |i|
-          service_name = "#{prefix}@#{name}#{i}.service"
+        existing_num.downto(target_num + 1) do |index|
+          service_name = "#{prefix}@#{name}#{index}.service"
           SCR.Execute(path(".target.bash"), "systemctl disable #{service_name}")
           SCR.Execute(path(".target.bash"), "systemctl stop #{service_name}")
         end

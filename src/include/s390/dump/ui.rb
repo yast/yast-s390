@@ -171,8 +171,8 @@ module Yast
               from: "any",
               to:   "list <string>"
             )
-            Builtins.foreach(selected_items) do |dev_line|
-              entries = Builtins.splitstring(dev_line, "\t")
+            Builtins.foreach(selected_items) do |device_line|
+              entries = Builtins.splitstring(device_line, "\t")
               # prevent leading space
               device = if device != ""
                 Ops.add(Ops.add(device, " "), Ops.get(entries, 0, ""))
