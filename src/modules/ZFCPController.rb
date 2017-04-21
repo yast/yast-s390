@@ -116,11 +116,11 @@ module Yast
       Builtins.foreach(@devices) do |_k, v|
         if old_lun ==
             Builtins.tointeger(Ops.get_string(v, ["detail", "fcp_lun"], ""))
-          if Ops.get_string(v, "vendor", "") == "IBM" &&
+          new_lun = if Ops.get_string(v, "vendor", "") == "IBM" &&
               Ops.get_string(v, "device", "") == "25f03"
-            new_lun = Ops.add(old_lun, 4294967296)
+            Ops.add(old_lun, 4294967296)
           else
-            new_lun = Ops.add(old_lun, 1)
+            Ops.add(old_lun, 1)
           end
         end
       end

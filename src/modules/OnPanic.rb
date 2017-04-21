@@ -194,10 +194,10 @@ module Yast
           )
           if config_entry != ""
             # prevent leading newline
-            if @vmcmds == ""
-              @vmcmds = config_entry
+            @vmcmds = if @vmcmds == ""
+              config_entry
             else
-              @vmcmds = Builtins.mergestring([@vmcmds, config_entry], "\n")
+              Builtins.mergestring([@vmcmds, config_entry], "\n")
             end
           end
         end

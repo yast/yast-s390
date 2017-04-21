@@ -580,12 +580,12 @@ module Yast
     def MainDialogContent
       # draw active tab
       widgets = nil
-      if @current_main_tab == :t_zvmids
-        widgets = ZvmIdsDialogContent()
+      widgets = if @current_main_tab == :t_zvmids
+        ZvmIdsDialogContent()
       elsif @current_main_tab == :t_tsshell
-        widgets = TsShellDialogContent()
+        TsShellDialogContent()
       else
-        widgets = IucvConnDialogContent()
+        IucvConnDialogContent()
       end
 
       contents = VBox(
@@ -1110,12 +1110,12 @@ module Yast
         # check if TEXT_ALL was previously selected
         was_all_selected = Ops.get(previous_ids, 0, "") == @TEXT_ALL
         if was_all_selected
-          if Ops.get(ids, 0, "") == @TEXT_ALL
+          ids = if Ops.get(ids, 0, "") == @TEXT_ALL
             # remove TEXT_ALL entry if something else is deactivated
-            ids = Builtins.remove(ids, 0)
+            Builtins.remove(ids, 0)
           else
             # if TEXT_ALL was explicitly deactivated disable all
-            ids = []
+            []
           end
         end
 

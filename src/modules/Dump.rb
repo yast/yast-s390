@@ -143,26 +143,26 @@ module Yast
 
       if ret != 0
         err = ""
-        if ret == 11
+        err = if ret == 11
           # error description
-          err = _("Invalid or unusable disk (fatal).")
+          _("Invalid or unusable disk (fatal).")
         elsif ret == 12
           # error description
-          err = _(
+          _(
             "Incompatible formatting or partitioning, correct with Force."
           )
         elsif ret == 13
           # error description
-          err = _("Missing support programs.")
+          _("Missing support programs.")
         elsif ret == 14
           # error description
-          err = _("Missing or wrong parameters.")
+          _("Missing or wrong parameters.")
         elsif ret == 15
           # error description
-          err = _("Access problem.")
+          _("Access problem.")
         else
           # error description, %1 is error code (integer)
-          err = Builtins.sformat(_("Error code from support program: %1."), ret)
+          Builtins.sformat(_("Error code from support program: %1."), ret)
         end
         # error report, %1 is device name, %2 error description
         Report.Error(

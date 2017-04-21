@@ -174,10 +174,10 @@ module Yast
             Builtins.foreach(selected_items) do |dev_line|
               entries = Builtins.splitstring(dev_line, "\t")
               # prevent leading space
-              if device != ""
-                device = Ops.add(Ops.add(device, " "), Ops.get(entries, 0, ""))
+              device = if device != ""
+                Ops.add(Ops.add(device, " "), Ops.get(entries, 0, ""))
               else
-                device = Ops.get(entries, 0, "")
+                Ops.get(entries, 0, "")
               end
             end
           end
@@ -200,14 +200,14 @@ module Yast
                 )
               success = Dump.FormatDisk(device, force)
               # don't quit in case of failures, error messages are reported by FormatDisk()
-              if success &&
+              ret = if success &&
                   !Popup.YesNo(
                     _("Operation successful. Initialize another dump device?")
                   )
-                ret = :cancel
+                :cancel
               else
                 # reinitialize devices
-                ret = :again
+                :again
               end
 
               # reset screen after dump progress bar
