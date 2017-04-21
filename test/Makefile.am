@@ -2,7 +2,7 @@
 # Makefile.am for s390/test
 #
 
-TESTS = dasd_controller_is_available_test.rb \
+TESTS = dasd_controller_test.rb \
     zfcp_controller_test.rb
 
 TEST_EXTENSIONS = .rb
