@@ -1501,7 +1501,7 @@ module Yast
       DrawMainDialog()
 
       ret = nil
-      begin
+      loop do
         ret = Convert.to_symbol(UI.UserInput)
         # if ts user/group dialog is active
         if Builtins.contains(
@@ -1585,7 +1585,8 @@ module Yast
             end
           end
         end
-      end while !Builtins.contains([:back, :abort, :cancel, :next, :ok, :finish], ret)
+        break if [:back, :abort, :cancel, :next, :ok, :finish].include?(ret)
+      end
 
       # commit changes
       if IUCVTerminalServer.modified &&

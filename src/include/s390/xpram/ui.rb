@@ -180,7 +180,7 @@ module Yast
       end
 
       ret = nil
-      begin
+      loop do
         ret = Convert.to_symbol(UI.UserInput)
         mountpoint = Convert.to_string(UI.QueryWidget(Id(:m_points), :Value))
         fstype = Convert.to_string(UI.QueryWidget(Id(:brate), :Value))
@@ -207,7 +207,8 @@ module Yast
         #	{
         #	    TestPopup (mountpoint);
         #	}
-      end while !Builtins.contains([:back, :abort, :cancel, :next, :ok], ret)
+        break if Builtins.contains([:back, :abort, :cancel, :next, :ok], ret)
+      end
 
       if ret == :next &&
           (start != Xpram.start || mountpoint != Xpram.mountpoint ||

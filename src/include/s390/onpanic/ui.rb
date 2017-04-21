@@ -236,7 +236,7 @@ module Yast
 
       ret = nil
       UpdateScreen(ret)
-      begin
+      loop do
         ret = Convert.to_symbol(UI.UserInput)
         UpdateScreen(ret)
 
@@ -290,7 +290,9 @@ module Yast
             end
           end
         end
-      end while !Builtins.contains([:back, :abort, :cancel, :next, :ok], ret)
+
+        break if Builtins.contains([:back, :abort, :cancel, :next, :ok], ret)
+      end
 
       # commit changes
       if OnPanic.modified && (ret == :next || ret == :ok || ret == :finish)

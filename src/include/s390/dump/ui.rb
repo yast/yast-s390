@@ -140,7 +140,7 @@ module Yast
 
       force = false
       ret = nil
-      begin
+      loop do
         ret = Convert.to_symbol(UI.UserInput)
 
         if ret == :force
@@ -218,21 +218,22 @@ module Yast
             )
           end
         end
-      end while !Builtins.contains([:abort, :cancel, :again], ret)
+
+        break if Builtins.contains([:abort, :cancel, :again], ret)
+      end
       ret
     end
 
     # The whole squence
     # @return sequence result
     def DumpSequence
-      ret = nil
       # reset dialog if required
       Wizard.CreateDialog
       Wizard.SetDesktopIcon("dump")
-      begin
+      loop do
         Dump.Read
-        ret = DumpDialog()
-      end while ret == :again
+        break if DumpDialog() != :again
+      end
       UI.CloseDialog
 
       ret

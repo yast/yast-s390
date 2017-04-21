@@ -291,7 +291,7 @@ module Yast
       UpdateScreen(:hvc)
 
       ret = nil
-      begin
+      loop do
         ret = UI.UserInput
         UpdateScreen(ret)
 
@@ -352,7 +352,9 @@ module Yast
             end
           end
         end
-      end while ![:back, :abort, :cancel, :next, :ok, :finish].include?(ret)
+
+        break if [:back, :abort, :cancel, :next, :ok, :finish].include?(ret)
+      end
 
       # commit changes
       if IUCVTerminal.modified && [:next, :ok, :finish].include?(ret)
