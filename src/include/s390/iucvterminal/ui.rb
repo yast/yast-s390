@@ -357,11 +357,17 @@ module Yast
       # commit changes
       if IUCVTerminal.modified && [:next, :ok, :finish].include?(ret)
         # set instances to zero if it is disabled
-        current_hvc_instances = UI.QueryWidget(Id(:hvc), :Value) ?
-          UI.QueryWidget(Id(:hvc_instances), :Value) : 0
+        current_hvc_instances = if UI.QueryWidget(Id(:hvc), :Value)
+          UI.QueryWidget(Id(:hvc_instances), :Value)
+        else
+          0
+        end
         # no need to provide allowed terminal servers if disabled
-        current_restrict_hvc_to_srvs = UI.QueryWidget(Id(:is_hvc_restricted), :Value) ?
-          UI.QueryWidget(Id(:restrict_hvc_to_srvs), :Value) : ""
+        current_restrict_hvc_to_srvs = if UI.QueryWidget(Id(:is_hvc_restricted), :Value)
+          UI.QueryWidget(Id(:restrict_hvc_to_srvs), :Value)
+        else
+          ""
+        end
         # check if the bootloader settings need to be adjusted
         IUCVTerminal.has_bootloader_changed =
           IUCVTerminal.restrict_hvc_to_srvs != current_restrict_hvc_to_srvs ||
@@ -375,8 +381,11 @@ module Yast
 
         IUCVTerminal.hvc_instances = current_hvc_instances
         # set instances to zero if it is disabled
-        IUCVTerminal.iucv_instances = UI.QueryWidget(Id(:iucv), :Value) ?
-          UI.QueryWidget(Id(:iucv_instances), :Value) : 0
+        IUCVTerminal.iucv_instances = if UI.QueryWidget(Id(:iucv), :Value)
+          UI.QueryWidget(Id(:iucv_instances), :Value)
+        else
+          0
+        end
 
         IUCVTerminal.iucv_name = UI.QueryWidget(Id(:iucv_name), :Value)
         IUCVTerminal.restrict_hvc_to_srvs = current_restrict_hvc_to_srvs

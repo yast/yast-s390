@@ -461,14 +461,15 @@ module Yast
           )
         ),
         Table(Id(:table), Opt(:multiSelection, :notifyContextMenu), header, []),
-        Mode.config ?
+        if Mode.config
           HBox(
             PushButton(Id(:add), Label.AddButton),
             PushButton(Id(:delete), Label.DeleteButton),
             HStretch(),
             # menu button
             MenuButton(Id(:operation), _("Perform &Action"), PossibleActions())
-          ) :
+          )
+        else
           HBox(
             PushButton(Id(:select_all), _("&Select All")),
             PushButton(Id(:deselect_all), _("&Deselect All")),
@@ -476,6 +477,7 @@ module Yast
             # menu button
             MenuButton(Id(:operation), _("Perform &Action"), PossibleActions())
           )
+        end
       )
 
       # Apply the settings

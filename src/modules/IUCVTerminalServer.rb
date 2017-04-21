@@ -601,9 +601,13 @@ module Yast
       # dis/enable TS-Users if the TS status had changed
       if @ts_has_status_changed
         Builtins.y2milestone("Dis/enabling TS-Shell users.")
-        passwd = @ts_enabled ?
-          "/usr/bin/passwd -u " : # unlock user
-          "/usr/bin/passwd -l " # lock user
+        passwd = if @ts_enabled
+          # unlock user
+          "/usr/bin/passwd -u "
+        else
+          # lock user
+          "/usr/bin/passwd -l "
+        end
         Builtins.foreach(@ts_member_conf) do |name, _entries|
           # groups don't need to be disabled
           if !Builtins.regexpmatch(name, "^@")
