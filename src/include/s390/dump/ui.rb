@@ -185,7 +185,7 @@ module Yast
           if Builtins.size(device) == 0
             Popup.Notify(_("You haven't selected any device."))
           elsif !force ||
-            # warn only in case of force
+              # warn only in case of force
               Popup.YesNo(
                 Builtins.sformat(
                   _(
