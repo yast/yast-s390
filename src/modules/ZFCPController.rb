@@ -244,9 +244,7 @@ module Yast
     def AddDevice(d)
       d = deep_copy(d)
       index = 0
-      while Builtins.haskey(@devices, index)
-        index = Ops.add(index, 1)
-      end
+      index = Ops.add(index, 1) while Builtins.haskey(@devices, index)
       Ops.set(@devices, index, d)
 
       nil
