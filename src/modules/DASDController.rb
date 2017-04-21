@@ -144,7 +144,7 @@ module Yast
           end
         end
 
-        if unformatted_devices.size > 0
+        if !unformatted_devices.empty?
           if unformatted_devices.size == 1
             message = Builtins.sformat(_("Device %1 is not formatted. Format device now?"),
               unformatted_devices[0])

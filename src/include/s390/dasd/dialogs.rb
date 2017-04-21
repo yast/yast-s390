@@ -240,7 +240,7 @@ module Yast
               unformatted_disks << channel
             end
           end
-          if unformatted_disks.size > 0
+          if !unformatted_disks.empty?
             if unformatted_disks.size == 1
               popup = Builtins.sformat(_("Device %1 is not formatted. Format device now?"),
                 unformatted_disks[0])
