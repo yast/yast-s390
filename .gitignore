@@ -1,3 +1,4 @@
+.yardoc
 Makefile
 /Makefile.am
 Makefile.am.common
@@ -13,6 +14,7 @@ configure
 configure.ac
 coverage
 depcomp
+doc
 install-sh
 missing
 mkinstalldirs
@@ -20,5 +22,6 @@ stamp-h
 s390.pot
 autom4te.cache
 *.ami
+*.pot
 test-driver
 package/*.bz2
