@@ -15,7 +15,14 @@ describe "Yast::ZFCPController" do
   end
 
   describe "#GetControllers" do
+    after do
+      # workaround: the GetControllers() result is cached, force reset
+      # after each test
+      Yast::ZFCPController.instance_eval("@controllers = nil")
+    end
+
     it "Returns all controllers" do
+      allow(Yast::Arch).to receive(:is_zkvm).and_return(false)
       expect(Yast::SCR).to receive(:Read).with(Yast.path(".probe.storage")).once
         .and_return(load_data("probe_storage.yml"))
 
@@ -26,7 +33,7 @@ describe "Yast::ZFCPController" do
       )
       expect(Yast::SCR).to receive(:Execute).with(anything, /\/sbin\/cio_ignore -r f800/).and_return(0)
 
-      expect(Yast::ZFCPController.GetControllers()).to eq(
+      expect(Yast::ZFCPController.GetControllers).to eq(
         [
           { "sysfs_bus_id"=>"0.0.f800" },
           { "sysfs_bus_id"=>"0.0.f900" },
@@ -34,6 +41,36 @@ describe "Yast::ZFCPController" do
           { "sysfs_bus_id"=>"0.0.fc00" }
         ]
       )
+    end
+
+    context "no ZFCP controller found" do
+      before do
+        expect(Yast::SCR).to receive(:Read).with(Yast.path(".probe.storage")).once
+          .and_return([])
+
+        # Removing all fcp devices from blacklist
+        expect(Yast::SCR).to receive(:Execute).with(anything, /\/sbin\/vmcp q v fcp/).and_return(
+          "exit"   => -1,
+          "stdout" => ""
+        )
+        expect(Yast::Arch).to receive(:is_zkvm).and_return(is_zkvm)
+      end
+
+      context "outside zKVM" do
+        let(:is_zkvm) { false }
+        it "reports a warning" do
+          expect(Yast::Report).to receive(:Warning).with(/Cannot evaluate ZFCP controllers/)
+          Yast::ZFCPController.GetControllers
+        end
+      end
+
+      context "in zKVM" do
+        let(:is_zkvm) { true }
+        it "does not report a warning" do
+          expect(Yast::Report).to_not receive(:Warning).with(/Cannot evaluate ZFCP controllers/)
+          Yast::ZFCPController.GetControllers
+        end
+      end
     end
   end
 
