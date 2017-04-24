@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Mon Apr 24 13:46:13 UTC 2017 - lslezak@suse.cz
+
+- Skip the ZFCP controller warning when running in zKVM
+  (bsc#1014178)
+- Code cleanup: use Rubocop, support code coverage, move test data
+  to YAML files, removed empty "agents/" subdir
+- 3.2.1
+
+-------------------------------------------------------------------
 Mon Dec 19 11:05:33 CET 2016 - schubi@suse.de
 
 - AutoYaST: Do not call DASD:Write twice (bnc#1014696).
