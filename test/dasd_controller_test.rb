@@ -22,6 +22,8 @@ describe "Yast::DASDController" do
       allow(Yast::Mode).to receive(:normal).and_return(false)
       allow(Yast::Mode).to receive(:installation).and_return(true)
       allow(Yast::Mode).to receive(:autoinst).and_return(true)
+      # speed up the test a bit
+      allow(Yast::Builtins).to receive(:sleep)
       allow(Yast::DASDController).to receive(:ActivateDisk).and_return(0)
       expect(Yast::DASDController).to receive(:GetDeviceName).and_return("/dev/dasda")
       expect(Yast::SCR).to receive(:Execute).with(Yast::Path.new(".process.start_shell"),
