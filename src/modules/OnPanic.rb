@@ -67,7 +67,7 @@ module Yast
       @dump_devices = nil
     end
 
-    #Get a List of available Dump Devices
+    # Get a List of available Dump Devices
     # @return [Array<String>] of disks
     def AvailableDumpDevices
       cmd = "mkdump --list-dump"
@@ -86,7 +86,7 @@ module Yast
       deep_copy(dev_names)
     end
 
-    #Converts a MKDump entry to a device parameters map for dumpconf
+    # Converts a MKDump entry to a device parameters map for dumpconf
     # @param mkdump device line
     # @return [Hash] of device parameters
     def ConvertMkdumpToConf(dev_line)
@@ -122,7 +122,7 @@ module Yast
       deep_copy(dev)
     end
 
-    #Converts device parameters of dumpconf to an mkdump entry
+    # Converts device parameters of dumpconf to an mkdump entry
     # @param dumpconf device map
     # @return [String] of a mkdump entry
     def ConvertConfToMkdump(dev)
@@ -137,10 +137,10 @@ module Yast
             Ops.get(line, 2) == Ops.get(dev, "DEVICE") ||
             # check for fitting zfcp
             type == "fcp" &&
-              Builtins.regexpmatch(Ops.get(line, 0), "^/dev/sd[[:lower:]]+") &&
-              Ops.get(line, 2) == Ops.get(dev, "DEVICE") &&
-              Ops.get(line, 3) == Ops.get(dev, "WWPN") &&
-              Ops.get(line, 4) == Ops.get(dev, "LUN") # check for fitting dasd
+                Builtins.regexpmatch(Ops.get(line, 0), "^/dev/sd[[:lower:]]+") &&
+                Ops.get(line, 2) == Ops.get(dev, "DEVICE") &&
+                Ops.get(line, 3) == Ops.get(dev, "WWPN") &&
+                Ops.get(line, 4) == Ops.get(dev, "LUN") # check for fitting dasd
           mkdump = entry
           Builtins.y2milestone(
             "In /etc/sysconfig/dumpconf configured dump device found: %1",
@@ -156,7 +156,6 @@ module Yast
 
       mkdump
     end
-
 
     # Read OnPanic settings from /etc/sysconfig/dumpconf
     # @return true when file exists
@@ -195,10 +194,10 @@ module Yast
           )
           if config_entry != ""
             # prevent leading newline
-            if @vmcmds == ""
-              @vmcmds = config_entry
+            @vmcmds = if @vmcmds == ""
+              config_entry
             else
-              @vmcmds = Builtins.mergestring([@vmcmds, config_entry], "\n")
+              Builtins.mergestring([@vmcmds, config_entry], "\n")
             end
           end
         end
@@ -320,18 +319,18 @@ module Yast
       true
     end
 
-    publish :variable => :VMCMD_MAX_ROWS, :type => "const integer"
-    publish :variable => :VMCMD_MAX_CHARS, :type => "const integer"
-    publish :variable => :modified, :type => "boolean"
-    publish :variable => :start, :type => "boolean"
-    publish :variable => :on_panic, :type => "string"
-    publish :variable => :delay_min, :type => "integer"
-    publish :variable => :vmcmds, :type => "string"
-    publish :variable => :dump_line, :type => "string"
-    publish :variable => :dump_devices, :type => "list <string>"
-    publish :function => :ReadSysconfig, :type => "boolean ()"
-    publish :function => :Read, :type => "boolean ()"
-    publish :function => :Write, :type => "boolean ()"
+    publish variable: :VMCMD_MAX_ROWS, type: "const integer"
+    publish variable: :VMCMD_MAX_CHARS, type: "const integer"
+    publish variable: :modified, type: "boolean"
+    publish variable: :start, type: "boolean"
+    publish variable: :on_panic, type: "string"
+    publish variable: :delay_min, type: "integer"
+    publish variable: :vmcmds, type: "string"
+    publish variable: :dump_line, type: "string"
+    publish variable: :dump_devices, type: "list <string>"
+    publish function: :ReadSysconfig, type: "boolean ()"
+    publish function: :Read, type: "boolean ()"
+    publish function: :Write, type: "boolean ()"
   end
 
   OnPanic = OnPanicClass.new

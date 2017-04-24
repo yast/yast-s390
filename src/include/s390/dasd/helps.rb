@@ -27,7 +27,7 @@
 # $Id$
 module Yast
   module S390DasdHelpsInclude
-    def initialize_s390_dasd_helps(include_target)
+    def initialize_s390_dasd_helps(_include_target)
       textdomain "s390"
 
       # All helps are here
@@ -38,7 +38,8 @@ module Yast
         ) +
           # Read dialog help 2/2
           _(
-            "<p><b><big>Aborting Initialization:</big></b><br>\nSafely abort the configuration utility by pressing <b>Abort</b> now.</p>"
+            "<p><b><big>Aborting Initialization:</big></b><br>\nSafely abort the " \
+              "configuration utility by pressing <b>Abort</b> now.</p>"
           ),
         # Write dialog help 1/2
         "write"                 => _(
@@ -46,17 +47,19 @@ module Yast
         ) +
           # Write dialog help 2/2
           _(
-            "<p><b><big>Aborting Saving:</big></b><br>\n" +
-              "Abort the save procedure by pressing <b>Abort</b>.\n" +
+            "<p><b><big>Aborting Saving:</big></b><br>\n" \
+              "Abort the save procedure by pressing <b>Abort</b>.\n" \
               "An additional dialog will inform you whether it is safe to do so.</p>\n"
           ),
         # Disk selection dialog help 1/4
         "disk_selection_config" => _(
-          "<p><b><big>Configured DASD Disks</big></b><br>\nIn this dialog, manage DASD disks on your system.</p>"
+          "<p><b><big>Configured DASD Disks</big></b><br>\nIn this dialog, manage DASD " \
+            "disks on your system.</p>"
         ) +
           # Disk selection dialog help 2/4
           _(
-            "<p>To filter the displayed disks, set the <b>Minimum Channel ID</b> and \nthe <b>Maximum Channel ID</b> and click <b>Filter</b>.</p>\n"
+            "<p>To filter the displayed disks, set the <b>Minimum Channel ID</b> and \n" \
+              "the <b>Maximum Channel ID</b> and click <b>Filter</b>.</p>\n"
           ) +
           # Disk selection dialog help 4/4
           _("<p>To configure a new DASD disk, click <b>Add</b>.</p>") +
@@ -66,24 +69,29 @@ module Yast
           ),
         # Disk selection dialog help 1/4
         "disk_selection"        => _(
-          "<p><b><big>Configured DASD Disks</big></b><br>\nIn this dialog, manage DASD disks on your system.</p>"
+          "<p><b><big>Configured DASD Disks</big></b><br>\nIn this dialog, manage DASD disks " \
+            "on your system.</p>"
         ) +
           # Disk selection dialog help 2/4
           _(
-            "<p>To filter the displayed disks, set the <b>Minimum Channel ID</b> and \nthe <b>Maximum Channel ID</b> and click <b>Filter</b>.</p>\n"
+            "<p>To filter the displayed disks, set the <b>Minimum Channel ID</b> and \n" \
+              "the <b>Maximum Channel ID</b> and click <b>Filter</b>.</p>\n"
           ) +
           # Disk selection dialog help 3/4
           _(
-            "<p>To perform actions on multiple disks at once, mark these disks. To select all displayed disk (possibly after applying a filter), click\n<b>Select All</b> or <b>Deselect All</b>.</p>\n"
+            "<p>To perform actions on multiple disks at once, mark these disks. To select " \
+              "all displayed disk (possibly after applying a filter), click\n<b>Select All</b> " \
+              "or <b>Deselect All</b>.</p>\n"
           ) +
           # Disk selection dialog help 4/4
           _(
-            "<p>To perform an action on the selected disks, use <b>Perform Action</b>.\nThe action will be performed immediately!</p>"
+            "<p>To perform an action on the selected disks, use <b>Perform Action</b>.\n" \
+              "The action will be performed immediately!</p>"
           ),
         # Disk add help 1/3
         "disk_add_config"       => _(
-          "<p><b><big>Add New DASD Disk</big></b><br>\n" +
-            "To add a disk, enter the <b>Channel ID</b> of the DASD disk as\n" +
+          "<p><b><big>Add New DASD Disk</big></b><br>\n" \
+            "To add a disk, enter the <b>Channel ID</b> of the DASD disk as\n" \
             "identifier.</p>"
         ) +
           # Disk add help 1/3

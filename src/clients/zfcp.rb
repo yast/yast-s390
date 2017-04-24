@@ -47,7 +47,7 @@ module Yast
         "id"         => "ZFCP",
         # Command line help text for the Xcontroller module
         "help"       => _("Configuration of ZFCP"),
-        "guihandler" => fun_ref(method(:ZFCPSequence), "symbol ()"),
+        "guihandler" => fun_ref(method(:ZFCPSequence), "symbol ()")
       }
 
       @ret = CommandLine.Run(@cmdline_description)

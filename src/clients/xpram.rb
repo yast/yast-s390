@@ -32,7 +32,7 @@ module Yast
     def main
       Yast.import "UI"
 
-      #**
+      # **
       # <h3>Configuration of xpram</h3>
 
       textdomain "xpram"
@@ -96,7 +96,6 @@ module Yast
         }
       }
 
-
       # main ui function
       @ret = CommandLine.Run(@cmdline_description)
 
@@ -105,7 +104,7 @@ module Yast
       # Finish
       Builtins.y2milestone("--------- Xpram module finished ---------")
 
-      deep_copy(@ret) 
+      deep_copy(@ret)
 
       # EOF
     end
@@ -145,8 +144,7 @@ module Yast
     # Command line handler for disabling XpRAM
     # @param [Hash] options  a list of parameters passed as args
     # @return [Boolean] true on success
-    def XpramDisableHandler(options)
-      options = deep_copy(options)
+    def XpramDisableHandler(_options)
       if Xpram.start
         Xpram.start = false
         Xpram.modified = true

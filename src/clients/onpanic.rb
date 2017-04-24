@@ -32,7 +32,7 @@ module Yast
     def main
       Yast.import "UI"
 
-      #**
+      # **
       # <h3>Configuration of onpanic</h3>
 
       textdomain "s390"
@@ -50,9 +50,8 @@ module Yast
         "id"         => "onpanic",
         # Command line help text for the OnPanic module
         "help"       => _("Configuration of OnPanic"),
-        "guihandler" => fun_ref(method(:OnPanicSequence), "symbol ()"),
+        "guihandler" => fun_ref(method(:OnPanicSequence), "symbol ()")
       }
-
 
       # main ui function
       @ret = CommandLine.Run(@cmdline_description)

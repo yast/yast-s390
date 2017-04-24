@@ -43,7 +43,7 @@ module Yast
         "id"         => "iucvterminal",
         # Command line help text for the Xcontroller module
         "help"       => _("Configuration of IUCV terminal settings"),
-        "guihandler" => fun_ref(method(:IUCVTerminalSequence), "symbol ()"),
+        "guihandler" => fun_ref(method(:IUCVTerminalSequence), "symbol ()")
       }
 
       # main ui function

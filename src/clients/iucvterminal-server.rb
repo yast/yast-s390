@@ -46,7 +46,7 @@ module Yast
         "guihandler" => fun_ref(
           method(:IUCVTerminalServerSequence),
           "symbol ()"
-        ),
+        )
       }
 
       # main ui function

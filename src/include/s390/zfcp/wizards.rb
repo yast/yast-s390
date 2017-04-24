@@ -40,41 +40,40 @@ module Yast
     # @return [Symbol] dialog
     def MainZFCPSequence
       aliases = {
-        "main" => lambda { ZFCPDialog() },
-        "add" => lambda { AddZFCPDiskDialog() },
-        "delete" => lambda { DeleteZFCPDiskDialog() }
+        "main"   => -> { ZFCPDialog() },
+        "add"    => -> { AddZFCPDiskDialog() },
+        "delete" => -> { DeleteZFCPDiskDialog() }
       }
 
       sequence = {
         "ws_start" => "main",
         "main"     => {
-          :abort  => :abort,
-          :next   => :next,
-          :add    => "add",
-          :delete => "delete"
+          abort:  :abort,
+          next:   :next,
+          add:    "add",
+          delete: "delete"
         },
-        "add"      => { :abort => :abort, :next => "main" },
-        "delete"   => { :abort => :abort, :next => "main" }
+        "add"      => { abort: :abort, next: "main" },
+        "delete"   => { abort: :abort, next: "main" }
       }
 
       Sequencer.Run(aliases, sequence)
     end
 
-
     # Whole configuration of controller
     # @return sequence result
     def ZFCPSequence
       aliases = {
-        "read"  => [lambda { ReadDialog() }, true],
-        "main"  => lambda { MainZFCPSequence() },
-        "write" => [lambda { WriteDialog() }, true]
+        "read"  => [-> { ReadDialog() }, true],
+        "main"  => -> { MainZFCPSequence() },
+        "write" => [-> { WriteDialog() }, true]
       }
 
       sequence = {
         "ws_start" => "read",
-        "read"     => { :abort => :abort, :next => "main" },
-        "main"     => { :abort => :abort, :next => "write" },
-        "write"    => { :abort => :abort, :next => :next }
+        "read"     => { abort: :abort, next: "main" },
+        "main"     => { abort: :abort, next: "write" },
+        "write"    => { abort: :abort, next: :next }
       }
 
       Wizard.CreateDialog
@@ -86,7 +85,6 @@ module Yast
 
       ret
     end
-
 
     # Whole configuration of controller but without reading and writing.
     # For use with autoinstallation.

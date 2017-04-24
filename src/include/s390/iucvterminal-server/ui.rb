@@ -141,13 +141,13 @@ module Yast
     # @return [Array<Yast::Term>] of items
     def GenerateTsMembersTable
       ts_users_groups = []
-      Builtins.foreach(@ts_member_conf) do |name, conf|
+      Builtins.foreach(@ts_member_conf) do |name, _conf|
         if Builtins.regexpmatch(name, "^@")
           # remove the leading @
           groupname = Builtins.substring(name, 1)
           group = Users.GetGroupByName(groupname, "local")
 
-          userlist = Builtins.maplist(Ops.get_map(group, "userlist", {})) do |k, v|
+          userlist = Builtins.maplist(Ops.get_map(group, "userlist", {})) do |k, _v|
             k
           end
           # filter non ts users
@@ -168,7 +168,7 @@ module Yast
           )
         else
           user = Users.GetUserByName(name, "local")
-          grouplist = Builtins.maplist(Ops.get_map(user, "grouplist", {})) do |k, v|
+          grouplist = Builtins.maplist(Ops.get_map(user, "grouplist", {})) do |k, _v|
             k
           end
           groups = Builtins.mergestring(grouplist, ",")
@@ -434,7 +434,7 @@ module Yast
                       VSpacing(
                         Ops.multiply(
                           @VSPACING,
-                          Convert.convert(2, :from => "integer", :to => "float")
+                          Convert.convert(2, from: "integer", to: "float")
                         )
                       ),
                       Top(
@@ -468,7 +468,7 @@ module Yast
 
     def TsUserDialogContent
       # initialize list with additional groups
-      groups = Builtins.maplist(GetGroupsWithoutUsers()) { |name, v| name }
+      groups = Builtins.maplist(GetGroupsWithoutUsers()) { |name, _v| name }
 
       content = HBox(
         HWeight(
@@ -579,13 +579,12 @@ module Yast
 
     def MainDialogContent
       # draw active tab
-      widgets = nil
-      if @current_main_tab == :t_zvmids
-        widgets = ZvmIdsDialogContent()
+      widgets = if @current_main_tab == :t_zvmids
+        ZvmIdsDialogContent()
       elsif @current_main_tab == :t_tsshell
-        widgets = TsShellDialogContent()
+        TsShellDialogContent()
       else
-        widgets = IucvConnDialogContent()
+        IucvConnDialogContent()
       end
 
       contents = VBox(
@@ -601,7 +600,6 @@ module Yast
       )
       deep_copy(contents)
     end
-
 
     # Initializes the main dialogs (zvmid, ts-shell and iucvconn)
     # @param the symbol of the activated tab
@@ -661,7 +659,7 @@ module Yast
         if !Builtins.haskey(@ts_member_conf, Ops.add("@", name))
           ts_auth_status = @TEXT_NO
         end
-        userlist = Builtins.maplist(Ops.get_map(group, "userlist", {})) do |k, v|
+        userlist = Builtins.maplist(Ops.get_map(group, "userlist", {})) do |k, _v|
           k
         end
         # filter non ts users
@@ -690,7 +688,6 @@ module Yast
 
       nil
     end
-
 
     # Checks the input for the new user and creates it if valid
     # @return true if successful
@@ -725,10 +722,9 @@ module Yast
 
         grouplist = Convert.convert(
           UI.QueryWidget(Id(:ts_additional_groups), :SelectedItems),
-          :from => "any",
-          :to   => "list <string>"
+          from: "any",
+          to:   "list <string>"
         )
-        groups = Builtins.mergestring(grouplist, ",")
         groupmap = Builtins.listmap(grouplist) { |g| { g => "1" } }
 
         force_pw_change = Convert.to_boolean(
@@ -746,12 +742,10 @@ module Yast
           @ts_member_conf = Builtins.add(
             @ts_member_conf,
             username,
-            {
-              :type        => :rb_ts_list,
-              :rb_ts_list  => [],
-              :rb_ts_regex => "",
-              :rb_ts_file  => ""
-            }
+            type:        :rb_ts_list,
+            rb_ts_list:  [],
+            rb_ts_regex: "",
+            rb_ts_file:  ""
           )
         else
           Popup.Notify(_("Adding the user has failed."))
@@ -767,8 +761,8 @@ module Yast
     def CommitTsGroupDialogSettings
       items = Convert.convert(
         UI.QueryWidget(Id(:ts_table_add_groups), :Items),
-        :from => "any",
-        :to   => "list <term>"
+        from: "any",
+        to:   "list <term>"
       )
       groups = IUCVTerminalServer.GetGroups(true)
 
@@ -792,34 +786,32 @@ module Yast
               error
             )
           end
-        else
-          if Ops.get_map(groups, [groupname, "userlist"], {}) != usermap
-            Users.SelectGroupByName(groupname)
-            group = Users.GetCurrentGroup
+        elsif Ops.get_map(groups, [groupname, "userlist"], {}) != usermap
+          Users.SelectGroupByName(groupname)
+          group = Users.GetCurrentGroup
 
-            # filter all TS-Entries from current user list to remove deselected ones
-            non_ts_users_list = Builtins.filter(
-              Ops.get_map(group, "userlist", {})
-            ) do |username, number|
-              !Builtins.haskey(@ts_member_conf, username)
-            end
-            Ops.set(
-              group,
-              "userlist",
-              Builtins.union(non_ts_users_list, usermap)
+          # filter all TS-Entries from current user list to remove deselected ones
+          non_ts_users_list = Builtins.filter(
+            Ops.get_map(group, "userlist", {})
+          ) do |username, _number|
+            !Builtins.haskey(@ts_member_conf, username)
+          end
+          Ops.set(
+            group,
+            "userlist",
+            Builtins.union(non_ts_users_list, usermap)
+          )
+
+          changes = { "userlist" => group["userlist"] || [] }
+          error = Users.EditGroup(changes)
+          if error == ""
+            Users.CommitGroup
+          else
+            Builtins.y2milestone(
+              "Editing the group %1 failed because of: %2",
+              groupname,
+              error
             )
-
-            changes = { "userlist" => group["userlist"] || [] }
-            error = Users.EditGroup(changes)
-            if error == ""
-              Users.CommitGroup
-            else
-              Builtins.y2milestone(
-                "Editing the group %1 failed because of: %2",
-                groupname,
-                error
-              )
-            end
           end
         end
         # groups start with an @
@@ -827,34 +819,24 @@ module Yast
         # check if the group should be added and  was not already used for TS auth
         if !Builtins.haskey(@ts_member_conf, identification)
           if is_ts_auth_group
-            group_members = Builtins.mergestring(userlist, ",")
-            group = Users.GetGroupByName(groupname, "")
-            gid = Ops.get_string(group, "gidNumber", "")
-
             # add ts_member_conf
             @ts_member_conf = Builtins.add(
               @ts_member_conf,
               identification,
-              {
-                :type        => :rb_ts_list,
-                :rb_ts_list  => [],
-                :rb_ts_regex => "",
-                :rb_ts_file  => ""
-              }
+              type:        :rb_ts_list,
+              rb_ts_list:  [],
+              rb_ts_regex: "",
+              rb_ts_file:  ""
             )
           end
-        else
+        elsif !is_ts_auth_group
           # delete group entry if disabled
-          if !is_ts_auth_group
-            i = 0
-            @ts_member_conf = Builtins.remove(@ts_member_conf, identification)
-          end
+          @ts_member_conf = Builtins.remove(@ts_member_conf, identification)
         end
       end
 
       nil
     end
-
 
     def DrawMainDialog
       Wizard.SetContentsButtons(
@@ -905,7 +887,6 @@ module Yast
       nil
     end
 
-
     # Updates the TS-Shell Group table widget with new items and tries to keep the current selection
     # @param list<term> of table items
     # @return [void]
@@ -919,7 +900,7 @@ module Yast
       UI.ChangeWidget(Id(:ts_table_add_groups), :Items, items)
 
       # change to the old position if possible
-      if ts_group_table_position != nil
+      if !ts_group_table_position.nil?
         UI.ChangeWidget(
           Id(:ts_table_add_groups),
           :CurrentItem,
@@ -939,8 +920,8 @@ module Yast
       # get table items and position
       items = Convert.convert(
         UI.QueryWidget(Id(:ts_table_add_groups), :Items),
-        :from => "any",
-        :to   => "list <term>"
+        from: "any",
+        to:   "list <term>"
       )
       current_group = Convert.to_string(
         UI.QueryWidget(Id(:ts_table_add_groups), :CurrentItem)
@@ -966,8 +947,8 @@ module Yast
       # get table items and position
       items = Convert.convert(
         UI.QueryWidget(Id(:ts_table_add_groups), :Items),
-        :from => "any",
-        :to   => "list <term>"
+        from: "any",
+        to:   "list <term>"
       )
       current_group = Convert.to_string(
         UI.QueryWidget(Id(:ts_table_add_groups), :CurrentItem)
@@ -987,7 +968,6 @@ module Yast
 
       nil
     end
-
 
     def CheckPassword(field1, field2)
       pw1 = Convert.to_string(UI.QueryWidget(Id(field1), :Value))
@@ -1097,15 +1077,17 @@ module Yast
       ret
     end
 
-    # Updates the MultiSelectionBoxes of z/VM IDs according to user interaction to de/select all at once
-    # @param list<string> of previous defined ids and the MultiSelectionBox symbol to get the new id selection
+    # Updates the MultiSelectionBoxes of z/VM IDs according to user interaction
+    # to de/select all at once
+    # @param list<string> of previous defined ids and the MultiSelectionBox
+    #   symbol to get the new id selection
     # @return [Array<String>] of items to select
     def UpdateIdSelections(previous_ids, widget)
       previous_ids = deep_copy(previous_ids)
       ids = Convert.convert(
         UI.QueryWidget(Id(widget), :SelectedItems),
-        :from => "any",
-        :to   => "list <string>"
+        from: "any",
+        to:   "list <string>"
       )
 
       # make sure that only available ids are compared
@@ -1117,27 +1099,26 @@ module Yast
         # check if TEXT_ALL was previously selected
         was_all_selected = Ops.get(previous_ids, 0, "") == @TEXT_ALL
         if was_all_selected
-          if Ops.get(ids, 0, "") == @TEXT_ALL
+          ids = if Ops.get(ids, 0, "") == @TEXT_ALL
             # remove TEXT_ALL entry if something else is deactivated
-            ids = Builtins.remove(ids, 0)
+            Builtins.remove(ids, 0)
           else
             # if TEXT_ALL was explicitly deactivated disable all
-            ids = []
+            []
           end
         end
 
         # activate all if selected
         ids = deep_copy(@zvm_id_entries) if Ops.get(ids, 0) == @TEXT_ALL
         UI.ChangeWidget(Id(widget), :SelectedItems, ids)
-      else
+      elsif Ops.get(ids, 0, "") == @TEXT_ALL
         # activate all if selected and no user change was committed
-        if Ops.get(ids, 0, "") == @TEXT_ALL
-          ids = deep_copy(@zvm_id_entries)
-          UI.ChangeWidget(Id(widget), :SelectedItems, ids)
-        end
+        ids = deep_copy(@zvm_id_entries)
+        UI.ChangeWidget(Id(widget), :SelectedItems, ids)
       end
       deep_copy(ids)
     end
+
     def HandleEvent(widget)
       if widget == :ic_enabled
         @ic_enabled = Convert.to_boolean(
@@ -1194,7 +1175,6 @@ module Yast
           Convert.to_string(UI.QueryWidget(Id(:ts_auth_regex), :Value))
         )
       end
-
 
       if widget == :ts_users_groups
         ts_isnt_empty = Ops.greater_than(
@@ -1265,7 +1245,7 @@ module Yast
           ts_isnt_empty && Builtins.regexpmatch(@ts_selected_member, "^[^@]")
         )
 
-        #disable the user configuration dialog in case of an empty table
+        # disable the user configuration dialog in case of an empty table
         UI.ChangeWidget(Id(:f_ts_member_conf), :Enabled, ts_isnt_empty)
       end
 
@@ -1290,12 +1270,11 @@ module Yast
           "/"
         )
         file = UI.AskForExistingFile(file, "", "Select a file with z/VM IDs")
-        if file != nil
+        if !file.nil?
           Ops.set(@ts_member_conf, [@ts_selected_member, :rb_ts_file], file)
           UI.ChangeWidget(Id(:ts_auth_file), :Value, file)
         end
       end
-
 
       # reset repeated password on change
       UI.ChangeWidget(Id(:ic_pw2), :Value, "") if widget == :ic_pw1
@@ -1308,7 +1287,7 @@ module Yast
         # set default directory
         dir = @ic_home != "" ? @ic_home : "/"
         dir = UI.AskForExistingDirectory(dir, "")
-        if dir != nil
+        if !dir.nil?
           @ic_home = dir
           UI.ChangeWidget(Id(:ic_home), :Value, dir)
         end
@@ -1321,7 +1300,7 @@ module Yast
         # set default directory
         dir = @ts_home != "" ? @ts_home : "/"
         dir = UI.AskForExistingDirectory(dir, "")
-        if dir != nil
+        if !dir.nil?
           @ts_home = dir
           UI.ChangeWidget(Id(:ts_home), :Value, dir)
         end
@@ -1356,8 +1335,8 @@ module Yast
           # remove possible duplicates
           @zvm_id_list = Convert.convert(
             Builtins.union(id_list, id_list),
-            :from => "list",
-            :to   => "list <string>"
+            from: "list",
+            to:   "list <string>"
           )
           # sort list
           @zvm_id_list = Builtins.sort(@zvm_id_list)
@@ -1365,8 +1344,8 @@ module Yast
           # update the zvm_id_entries
           @zvm_id_entries = Convert.convert(
             Builtins.merge([@TEXT_ALL], @zvm_id_list),
-            :from => "list",
-            :to   => "list <string>"
+            from: "list",
+            to:   "list <string>"
           )
         else
           # reset list to prevent saving the previous settings
@@ -1386,8 +1365,8 @@ module Yast
         groups_exist = [] !=
           Convert.convert(
             UI.QueryWidget(Id(:ts_table_add_groups), :Items),
-            :from => "any",
-            :to   => "list <term>"
+            from: "any",
+            to:   "list <term>"
           )
         UI.ChangeWidget(Id(:ts_groups_members), :Enabled, groups_exist)
         UI.ChangeWidget(Id(:ts_groups_select), :Enabled, groups_exist)
@@ -1403,8 +1382,8 @@ module Yast
       if widget == :ts_groups_create
         table_data = Convert.convert(
           UI.QueryWidget(Id(:ts_table_add_groups), :Items),
-          :from => "any",
-          :to   => "list <term>"
+          from: "any",
+          to:   "list <term>"
         )
         groupname = Convert.to_string(
           UI.QueryWidget(Id(:ts_groups_name), :Value)
@@ -1422,12 +1401,11 @@ module Yast
             IUCVTerminalServer.CheckUserGroupName(groupname)
           items = Convert.convert(
             UI.QueryWidget(Id(:ts_table_add_groups), :Items),
-            :from => "any",
-            :to   => "list <term>"
+            from: "any",
+            to:   "list <term>"
           )
 
-          item = Item(Id(groupname), groupname, @TEXT_YES, "new", "")
-          items = Builtins.add(items, item)
+          items = Builtins.add(items, Item(Id(groupname), groupname, @TEXT_YES, "new", ""))
 
           UpdateTsGroupTable(items)
           # update ts member selection
@@ -1441,8 +1419,8 @@ module Yast
       if widget == :ts_groups_select
         items = Convert.convert(
           UI.QueryWidget(Id(:ts_table_add_groups), :Items),
-          :from => "any",
-          :to   => "list <term>"
+          from: "any",
+          to:   "list <term>"
         )
         groupname = Convert.to_string(
           UI.QueryWidget(Id(:ts_table_add_groups), :CurrentItem)
@@ -1465,16 +1443,15 @@ module Yast
       if widget == :ts_groups_members
         user_list = Convert.convert(
           UI.QueryWidget(Id(:ts_groups_members), :SelectedItems),
-          :from => "any",
-          :to   => "list <string>"
+          from: "any",
+          to:   "list <string>"
         )
         SetTSGroupTableUserList(user_list)
       end
 
-
       # tab handling
       if widget == :t_zvmids
-        #SaveSettings( $[ "ID" : widget ] );
+        # SaveSettings( $[ "ID" : widget ] );
         UI.ReplaceWidget(Id(:tab_content), ZvmIdsDialogContent())
         InitMainDialog(widget)
         Wizard.SetHelpText(Ops.get_string(@HELP, "zvmids", ""))
@@ -1516,21 +1493,21 @@ module Yast
       # initialize z/VM IDs
       @zvm_id_entries = Convert.convert(
         Builtins.merge([@TEXT_ALL], @zvm_id_list),
-        :from => "list",
-        :to   => "list <string>"
+        from: "list",
+        to:   "list <string>"
       )
 
       # initialize screen
       DrawMainDialog()
 
       ret = nil
-      begin
+      loop do
         ret = Convert.to_symbol(UI.UserInput)
         # if ts user/group dialog is active
         if Builtins.contains(
-            [:ts_open_user_dialog, :ts_open_group_dialog],
-            @current_dialog
-          )
+          [:ts_open_user_dialog, :ts_open_group_dialog],
+          @current_dialog
+        )
           if Builtins.contains([:next, :ok, :finish], ret)
             ret = :again
             success = true
@@ -1553,8 +1530,8 @@ module Yast
             # ask for confirmation if the ts group dialog has changed
             current_items = Convert.convert(
               UI.QueryWidget(Id(:ts_table_add_groups), :Items),
-              :from => "any",
-              :to   => "list <term>"
+              from: "any",
+              to:   "list <term>"
             )
             if @current_dialog == :ts_open_group_dialog &&
                 @ts_groups_items != current_items &&
@@ -1608,8 +1585,8 @@ module Yast
             end
           end
         end
-      end while !Builtins.contains([:back, :abort, :cancel, :next, :ok, :finish], ret)
-
+        break if [:back, :abort, :cancel, :next, :ok, :finish].include?(ret)
+      end
 
       # commit changes
       if IUCVTerminalServer.modified &&
@@ -1625,7 +1602,7 @@ module Yast
         IUCVTerminalServer.ic_enabled = @ic_enabled
         IUCVTerminalServer.ic_home = @ic_home
 
-        #remove remaining IUCVConn users if disabled
+        # remove remaining IUCVConn users if disabled
         if !@ic_enabled && IUCVTerminalServer.GetIcUsersList != []
           IUCVTerminalServer.SyncIucvConnUsers([], "")
         end
@@ -1636,7 +1613,6 @@ module Yast
     # The whole sequence
     # @return sequence result
     def IUCVTerminalServerSequence
-      ret = nil
       Wizard.CreateDialog
       Wizard.SetDesktopIcon("iucvterminal-server")
       IUCVTerminalServer.Read

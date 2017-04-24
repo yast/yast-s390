@@ -26,8 +26,6 @@
 #
 module Yast
   module S390DasdWizardsInclude
-
-
     def initialize_s390_dasd_wizards(include_target)
       Yast.import "UI"
       textdomain "s390"
@@ -39,46 +37,44 @@ module Yast
       Yast.include include_target, "s390/dasd/dialogs.rb"
     end
 
-
     # Whole configuration of controller
     # @return [Symbol] MainDASDSequence
     def MainDASDSequence
       aliases = {
-        "main" => lambda { DASDDialog() },
-        "add" => lambda { AddDASDDiskDialog() },
-        "delete" => lambda() { DeleteDASDDiskDialog() }
+        "main"   => -> { DASDDialog() },
+        "add"    => -> { AddDASDDiskDialog() },
+        "delete" => -> { DeleteDASDDiskDialog() }
       }
 
       sequence = {
         "ws_start" => "main",
         "main"     => {
-          :abort  => :abort,
-          :next   => :next,
-          :add    => "add",
-          :delete => "delete"
+          abort:  :abort,
+          next:   :next,
+          add:    "add",
+          delete: "delete"
         },
-        "add"      => { :abort => :abort, :next => "main" },
-        "delete"   => { :abort => :abort, :next => "main" }
+        "add"      => { abort: :abort, next: "main" },
+        "delete"   => { abort: :abort, next: "main" }
       }
 
       Sequencer.Run(aliases, sequence)
     end
 
-
     # Whole configuration of controller
     # @return sequence result
     def DASDSequence
       aliases = {
-        "read"  => [lambda { ReadDialog() }, true],
-        "main"  => lambda { MainDASDSequence() },
-        "write" => [lambda { WriteDialog() }, true]
+        "read"  => [-> { ReadDialog() }, true],
+        "main"  => -> { MainDASDSequence() },
+        "write" => [-> { WriteDialog() }, true]
       }
 
       sequence = {
         "ws_start" => "read",
-        "read"     => { :abort => :abort, :next => "main" },
-        "main"     => { :abort => :abort, :next => "write" },
-        "write"    => { :abort => :abort, :next => :next }
+        "read"     => { abort: :abort, next: "main" },
+        "main"     => { abort: :abort, next: "write" },
+        "write"    => { abort: :abort, next: :next }
       }
 
       Wizard.CreateDialog
@@ -90,7 +86,6 @@ module Yast
 
       ret
     end
-
 
     # Whole configuration of controller but without reading and writing.
     # For use with autoinstallation.
@@ -117,7 +112,5 @@ module Yast
 
       ret
     end
-
-
   end
 end

@@ -26,7 +26,7 @@
 #
 module Yast
   module S390OnpanicUiInclude
-    def initialize_s390_onpanic_ui(include_target)
+    def initialize_s390_onpanic_ui(_include_target)
       Yast.import "UI"
 
       textdomain "s390"
@@ -38,12 +38,11 @@ module Yast
       Yast.import "Popup"
       Yast.import "Wizard"
 
-
       # Should dumpconf be started?
       @start = false
     end
 
-    #Update the screen according to user input
+    # Update the screen according to user input
     # @param return symbol
     # @return [void]
     def UpdateScreen(ret)
@@ -114,7 +113,8 @@ module Yast
         ) +
           # OnPanic dialog help 2/11
           _(
-            "<p>The <b>Dumpconf</b> daemon needs to be enabled to influence the behavior during kernel panics.</p>"
+            "<p>The <b>Dumpconf</b> daemon needs to be enabled to influence the behavior " \
+              "during kernel panics.</p>"
           ) +
           # OnPanic dialog help 3/11
           _("<p>The following <b>Panic Actions</b> are possible:<br>") +
@@ -126,22 +126,27 @@ module Yast
           _("<b>reipl</b> Reboot Linux.<br>") +
           # OnPanic dialog help 7/11
           _(
-            "<b>dump_reipl</b> Dump Linux and reboot system. This option is only available\non LPAR with z9(r) machines and later and on z/VMversion 5.3 and later.<br>"
+            "<b>dump_reipl</b> Dump Linux and reboot system. This option is only " \
+              "available\non LPAR with z9(r) machines and later and on z/VMversion 5.3 and later.<br>"
           ) +
           # OnPanic dialog help 8/11
           _("<b>vmcmd</b> Execute specified CP commands and stop system.</p>") +
           # OnPanic dialog help 9/11
           _(
-            "<p>The time defined in <b>Delay Minutes</b> defers activating the specified panic action for a newly started system to prevent loops. If the system crashes before the time has elapsed the default action (stop) is performed.</p>"
+            "<p>The time defined in <b>Delay Minutes</b> defers activating the specified " \
+              "panic action for a newly started system to prevent loops. If the system " \
+              "crashes before the time has elapsed the default action (stop) is performed.</p>"
           ) +
           # OnPanic dialog help 10/11
           _(
-            "<p>The device for dumping the memory can be set with <b>Dump Device</b>. If no device is shown you have to create one with the <b>YaST Dump Devices</b> dialog.</p>"
+            "<p>The device for dumping the memory can be set with <b>Dump Device</b>. If no " \
+             "device is shown you have to create one with the <b>YaST Dump Devices</b> dialog.</p>"
           ),
         # OnPanic dialog help 11/11
         Builtins.sformat(
           _(
-            "<p>With <b>VMCMD</b> specify CP commands to be executed before the Linux system is stopped. Only %1 lines and a total of %2 chars are allowed.</p>"
+            "<p>With <b>VMCMD</b> specify CP commands to be executed before the Linux " \
+              "system is stopped. Only %1 lines and a total of %2 chars are allowed.</p>"
           ),
           OnPanic.VMCMD_MAX_ROWS,
           OnPanic.VMCMD_MAX_CHARS
@@ -209,7 +214,6 @@ module Yast
         HSpacing(3)
       )
 
-
       Wizard.SetContentsButtons(
         caption,
         content,
@@ -232,7 +236,7 @@ module Yast
 
       ret = nil
       UpdateScreen(ret)
-      begin
+      loop do
         ret = Convert.to_symbol(UI.UserInput)
         UpdateScreen(ret)
 
@@ -259,9 +263,9 @@ module Yast
           if Builtins.contains([:next, :ok, :finish], ret) && @start
             # don't allow dumps if no device is available
             if Builtins.regexpmatch(
-                Convert.to_string(UI.QueryWidget(Id(:onpanic), :Value)),
-                "^dump"
-              ) &&
+              Convert.to_string(UI.QueryWidget(Id(:onpanic), :Value)),
+              "^dump"
+            ) &&
                 Convert.to_string(UI.QueryWidget(Id(:dumpdevice), :Value)) == ""
               Popup.Notify(
                 _(
@@ -286,7 +290,9 @@ module Yast
             end
           end
         end
-      end while !Builtins.contains([:back, :abort, :cancel, :next, :ok], ret)
+
+        break if Builtins.contains([:back, :abort, :cancel, :next, :ok], ret)
+      end
 
       # commit changes
       if OnPanic.modified && (ret == :next || ret == :ok || ret == :finish)

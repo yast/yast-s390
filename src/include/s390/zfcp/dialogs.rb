@@ -48,13 +48,12 @@ module Yast
     def ListSelectedZFCP
       selected = Convert.convert(
         UI.QueryWidget(Id(:table), :SelectedItems),
-        :from => "any",
-        :to   => "list <integer>"
+        from: "any",
+        to:   "list <integer>"
       )
       Builtins.y2milestone("selected %1", selected)
       deep_copy(selected)
     end
-
 
     # Read settings dialog
     # @return `abort if aborted and `next otherwise
@@ -64,7 +63,6 @@ module Yast
       ret ? :next : :abort
     end
 
-
     # Write settings dialog
     # @return `abort if aborted and `next otherwise
     def WriteDialog
@@ -72,7 +70,6 @@ module Yast
       ret = ZFCPController.Write
       ret ? :next : :abort
     end
-
 
     # Get the list of items for the table of ZFCP devices
     # @param min_chan integer minimal channel number
@@ -102,7 +99,6 @@ module Yast
 
       deep_copy(items)
     end
-
 
     # Show the ZFCP-Dialog
     def DisplayZFCPDialog
@@ -183,15 +179,14 @@ module Yast
       nil
     end
 
-
     # Restart the ZFCP-Dialog
     def ReloadZFCPDialog
       items = GetZFCPDiskItems()
 
       selected = Convert.convert(
         UI.QueryWidget(Id(:table), :SelectedItems),
-        :from => "any",
-        :to   => "list <integer>"
+        from: "any",
+        to:   "list <integer>"
       )
       UI.ChangeWidget(Id(:table), :Items, items)
       UI.ChangeWidget(Id(:table), :SelectedItems, selected)
@@ -200,7 +195,6 @@ module Yast
       nil
     end
 
-
     # Show the ZFCP-Dialog
     # @return [Symbol] From the dialog
     def ZFCPDialog
@@ -208,7 +202,7 @@ module Yast
       ReloadZFCPDialog()
 
       ret = nil
-      while ret == nil
+      while ret.nil?
         ret = Convert.to_symbol(UI.UserInput)
 
         if ret == :filter
@@ -235,10 +229,10 @@ module Yast
         elsif ret == :abort || ret == :cancel
           # yes-no popup
           if !Popup.YesNo(
-              _(
-                "Really leave the ZFCP device configuration without saving?\nAll changes will be lost."
-              )
+            _(
+              "Really leave the ZFCP device configuration without saving?\nAll changes will be lost."
             )
+          )
             ret = nil
           end
           next
@@ -247,7 +241,6 @@ module Yast
 
       ret
     end
-
 
     # Add ZFCP-Dialog
     # @return [Symbol] the dialog
@@ -263,17 +256,17 @@ module Yast
       luns = []
 
       if Mode.config
-        channels = Builtins.maplist(ZFCPController.devices) do |index, d|
+        channels = Builtins.maplist(ZFCPController.devices) do |_index, d|
           Ops.get_string(d, ["detail", "controller_id"], "")
         end
         channels = Builtins.toset(channels)
 
-        wwpns = Builtins.maplist(ZFCPController.devices) do |index, d|
+        wwpns = Builtins.maplist(ZFCPController.devices) do |_index, d|
           Ops.get_string(d, ["detail", "wwpn"], "")
         end
         wwpns = Builtins.toset(wwpns)
 
-        luns = Builtins.maplist(ZFCPController.devices) do |index, d|
+        luns = Builtins.maplist(ZFCPController.devices) do |_index, d|
           Ops.get_string(d, ["detail", "fcp_lun"], "")
         end
         luns = Builtins.toset(luns)
@@ -304,9 +297,7 @@ module Yast
           VSpacing(2),
           HBox(
             # push button
-            Mode.config ?
-              Empty() :
-              PushButton(Id(:get_wwpn), _("Get WWPNs")),
+            Mode.config ? Empty() : PushButton(Id(:get_wwpn), _("Get WWPNs")),
             HSpacing(3),
             # combo box
             ComboBox(Id(:wwpn), Opt(:hstretch, :editable), _("&WWPN"), wwpns)
@@ -314,9 +305,7 @@ module Yast
           VSpacing(2),
           HBox(
             # push button
-            Mode.config ?
-              Empty() :
-              PushButton(Id(:get_lun), _("Get LUNs")),
+            Mode.config ? Empty() : PushButton(Id(:get_lun), _("Get LUNs")),
             HSpacing(3),
             # combobox
             ComboBox(Id(:lun), Opt(:hstretch, :editable), _("&LUN"), luns)
@@ -340,7 +329,7 @@ module Yast
       UI.SetFocus(Id(:channel))
 
       ret = nil
-      while ret == nil
+      while ret.nil?
         ret = Convert.to_symbol(UI.UserInput)
 
         if ret == :get_wwpn
@@ -388,10 +377,10 @@ module Yast
         elsif ret == :abort || ret == :cancel
           # yes-no popup
           if !Popup.YesNo(
-              _(
-                "Really leave the ZFCP device configuration without saving?\nAll changes will be lost."
-              )
+            _(
+              "Really leave the ZFCP device configuration without saving?\nAll changes will be lost."
             )
+          )
             ret = nil
           end
         elsif ret == :next
@@ -429,7 +418,7 @@ module Yast
           wwpn = ZFCPController.FormatWWPN(wwpn)
           lun = ZFCPController.FormatLUN(lun)
 
-          if ZFCPController.GetDeviceIndex(channel, wwpn, lun) != nil
+          if !ZFCPController.GetDeviceIndex(channel, wwpn, lun).nil?
             # error popup
             Popup.Error(_("Device already exists."))
             ret = nil
@@ -467,7 +456,6 @@ module Yast
       ret
     end
 
-
     # Run the dialog for deleting ZFCPs
     # @return [Symbol] from DeleteZFCPDiskDialog
     def DeleteZFCPDiskDialog
@@ -475,22 +463,20 @@ module Yast
       if Builtins.isempty(selected)
         # error popup message
         Popup.Message(_("No disk selected."))
-      else
-        if Mode.config
-          Builtins.foreach(selected) do |index|
-            ZFCPController.RemoveDevice(index)
-          end
-        else
-          Builtins.foreach(selected) do |index|
-            d = Ops.get(ZFCPController.devices, index, {})
-            channel = Ops.get_string(d, ["detail", "controller_id"], "")
-            wwpn = Ops.get_string(d, ["detail", "wwpn"], "")
-            lun = Ops.get_string(d, ["detail", "fcp_lun"], "")
-            ZFCPController.DeactivateDisk(channel, wwpn, lun)
-          end
-
-          ZFCPController.ProbeDisks
+      elsif Mode.config
+        Builtins.foreach(selected) do |index|
+          ZFCPController.RemoveDevice(index)
         end
+      else
+        Builtins.foreach(selected) do |index|
+          d = Ops.get(ZFCPController.devices, index, {})
+          channel = Ops.get_string(d, ["detail", "controller_id"], "")
+          wwpn = Ops.get_string(d, ["detail", "wwpn"], "")
+          lun = Ops.get_string(d, ["detail", "fcp_lun"], "")
+          ZFCPController.DeactivateDisk(channel, wwpn, lun)
+        end
+
+        ZFCPController.ProbeDisks
       end
 
       :next

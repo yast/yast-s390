@@ -58,42 +58,42 @@ module Yast
       Builtins.y2debug("param=%1", @param)
 
       case @func
-        when "Summary"
-          @ret = HTML.List(ZFCPController.Summary)
-        when "Reset"
-          ZFCPController.Import({})
-          ZFCPController.SetModified(true)
-          @ret = {}
-        when "Change"
-          @ret = ZFCPAutoSequence()
-          ZFCPController.SetModified(true)
-        when "Import"
-          @ret = ZFCPController.Import(@param)
-          ZFCPController.SetModified(true)
-        when "Export"
-          @ret = ZFCPController.Export
-          ZFCPController.SetModified(false)
-        when "GetModified"
-          @ret = ZFCPController.GetModified
-        when "SetModified"
-          ZFCPController.SetModified(true)
-          @ret = true
-        when "Packages"
-          @ret = ZFCPController.AutoPackages
-        when "Read"
-          Yast.import "Progress"
-          Progress.set(false)
-          @ret = ZFCPController.Read
-          Progress.set(true)
-          ZFCPController.SetModified(true)
-        when "Write"
-          Yast.import "Progress"
-          Progress.set(false)
-          @ret = ZFCPController.Write
-          Progress.set(true)
-        else
-          Builtins.y2error("Unknown function: %1", @func)
-          @ret = false # Unknown function
+      when "Summary"
+        @ret = HTML.List(ZFCPController.Summary)
+      when "Reset"
+        ZFCPController.Import({})
+        ZFCPController.SetModified(true)
+        @ret = {}
+      when "Change"
+        @ret = ZFCPAutoSequence()
+        ZFCPController.SetModified(true)
+      when "Import"
+        @ret = ZFCPController.Import(@param)
+        ZFCPController.SetModified(true)
+      when "Export"
+        @ret = ZFCPController.Export
+        ZFCPController.SetModified(false)
+      when "GetModified"
+        @ret = ZFCPController.GetModified
+      when "SetModified"
+        ZFCPController.SetModified(true)
+        @ret = true
+      when "Packages"
+        @ret = ZFCPController.AutoPackages
+      when "Read"
+        Yast.import "Progress"
+        Progress.set(false)
+        @ret = ZFCPController.Read
+        Progress.set(true)
+        ZFCPController.SetModified(true)
+      when "Write"
+        Yast.import "Progress"
+        Progress.set(false)
+        @ret = ZFCPController.Write
+        Progress.set(true)
+      else
+        Builtins.y2error("Unknown function: %1", @func)
+        @ret = false # Unknown function
       end
 
       Builtins.y2debug("ret=%1", @ret)

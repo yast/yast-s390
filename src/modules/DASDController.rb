@@ -32,10 +32,7 @@ require "yast"
 
 module Yast
   class DASDControllerClass < Module
-
-
     include Yast::Logger
-
 
     def main
       Yast.import "UI"
@@ -47,7 +44,6 @@ module Yast
       Yast.import "Popup"
       Yast.import "String"
 
-
       @devices = {}
 
       @filter_min = "0.0.0000"
@@ -55,10 +51,8 @@ module Yast
 
       @diag = {}
 
-
       # Have DASDs been configured so that mkinitrd needs to be run?
       @disk_configured = false
-
 
       # Data was modified?
       @modified = false
@@ -75,27 +69,24 @@ module Yast
       @modified
     end
 
-
     def SetModified(value)
       @modified = value
 
       nil
     end
 
-
     def GetDeviceName(channel)
       dir = Builtins.sformat("/sys/bus/ccw/devices/%1/block/", channel)
       files = Convert.convert(
         SCR.Read(path(".target.dir"), dir),
-        :from => "any",
-        :to   => "list <string>"
+        from: "any",
+        to:   "list <string>"
       )
       if Builtins.size(files) == 1
         return Ops.add("/dev/", Ops.get(files, 0, ""))
       end
       nil
     end
-
 
     def IsValidChannel(channel)
       regexp = "^([[:xdigit:]]{1,2}).([[:xdigit:]]{1}).([[:xdigit:]]{4})$"
@@ -107,7 +98,6 @@ module Yast
 
       Builtins.tolower(channel)
     end
-
 
     # Read all controller settings
     # @return true on success
@@ -126,7 +116,6 @@ module Yast
       true
     end
 
-
     # Write all controller settings
     # @return true on success
     def Write
@@ -135,7 +124,7 @@ module Yast
         to_reactivate = []
         unformatted_devices = []
 
-        Builtins.foreach(@devices) do |index, device|
+        Builtins.foreach(@devices) do |_index, device|
           channel = Ops.get_string(device, "channel", "")
           format = Ops.get_boolean(device, "format", false)
           do_diag = Ops.get_boolean(device, "diag", false)
@@ -143,7 +132,7 @@ module Yast
           # FIXME: general activation error handling - also in sync with below
           # for AutoInstall, format unformatted disks later at once
           # even disks manually selected for formatting must be reactivated
-          if Mode.autoinst && act_ret == 8 && ( @format_unformatted || format )
+          if Mode.autoinst && act_ret == 8 && (@format_unformatted || format)
             format = true
             to_reactivate << device
           end
@@ -155,14 +144,16 @@ module Yast
           end
         end
 
-        if unformatted_devices.size > 0
+        if !unformatted_devices.empty?
           if unformatted_devices.size == 1
-            message = Builtins.sformat(_("Device %1 is not formatted. Format device now?"), unformatted_devices[0])
+            message = Builtins.sformat(_("Device %1 is not formatted. Format device now?"),
+              unformatted_devices[0])
           else
-            message = Builtins.sformat(_("There are %1 unformatted devices. Format them now?"), unformatted_devices.size)
+            message = Builtins.sformat(_("There are %1 unformatted devices. Format them now?"),
+              unformatted_devices.size)
           end
-          if Popup.ContinueCancel( message )
-            unformatted_devices.each do | device | 
+          if Popup.ContinueCancel(message)
+            unformatted_devices.each do |device|
               to_format << device
               to_reactivate << device
             end
@@ -173,7 +164,7 @@ module Yast
 
         FormatDisks(to_format, 8) if !Builtins.isempty(to_format)
 
-        to_reactivate.each do | device |
+        to_reactivate.each do |device|
           channel = device["channel"] || ""
           do_diag = device["diag"] || false
           # FIXME: general activation error handling - also in sync with above
@@ -200,7 +191,6 @@ module Yast
       true
     end
 
-
     # Get all controller settings from the first parameter
     # (For use by autoinstallation.)
     # @param [Hash] settings The YCP structure to be imported.
@@ -211,7 +201,7 @@ module Yast
       @devices = Builtins.listmap(Ops.get_list(settings, "devices", [])) do |d|
         index = Ops.add(index, 1)
         Ops.set(d, "channel", FormatChannel(Ops.get_string(d, "channel", "")))
-        d = Builtins.filter(d) do |k, v|
+        d = Builtins.filter(d) do |k, _v|
           Builtins.contains(["channel", "format", "diag"], k)
         end
         { index => d }
@@ -222,19 +212,18 @@ module Yast
       true
     end
 
-
     # Dump the controller settings to a single map
     # (For use by autoinstallation.)
     # @return [Hash] Dumped settings (later acceptable by Import ())
     def Export
       # Exporting active DASD only.
       # (bnc#887407)
-      active_devices = @devices.select { |nr, device|
-        device.has_key?("resource") &&
-        device["resource"].has_key?("io") &&
-        !device["resource"]["io"].empty? &&
-        device["resource"]["io"].first["active"]
-      }
+      active_devices = @devices.select do |_nr, device|
+        device.key?("resource") &&
+          device["resource"].key?("io") &&
+          !device["resource"]["io"].empty? &&
+          device["resource"]["io"].first["active"]
+      end
 
       if active_devices.empty?
         # If no device is active we are exporting all. So the admin
@@ -243,23 +232,21 @@ module Yast
         active_devices = @devices
       end
 
-      l = Builtins.maplist(active_devices) { |i, d| Builtins.filter(d) do |k, v|
-        Builtins.contains(["channel", "format", "diag"], k)
-      end }
+      l = Builtins.maplist(active_devices) do |_i, d|
+        Builtins.filter(d) do |k, _v|
+          Builtins.contains(["channel", "format", "diag"], k)
+        end
+      end
 
       {
-        "devices" => l,
+        "devices"            => l,
         "format_unformatted" => @format_unformatted
       }
     end
 
-
-
     def GetDevices
       deep_copy(@devices)
     end
-
-
 
     def GetFilteredDevices
       min_strs = Builtins.splitstring(@filter_min, ".")
@@ -274,7 +261,7 @@ module Yast
 
       ret = GetDevices()
 
-      ret = Builtins.filter(ret) do |k, d|
+      ret = Builtins.filter(ret) do |_k, d|
         tmp_strs = Builtins.splitstring(Ops.get_string(d, "channel", ""), ".")
         tmp_css = Builtins.tointeger(Ops.add("0x", Ops.get(tmp_strs, 0, "")))
         tmp_lcss = Builtins.tointeger(Ops.add("0x", Ops.get(tmp_strs, 1, "")))
@@ -290,28 +277,20 @@ module Yast
       deep_copy(ret)
     end
 
-
-
     def AddDevice(d)
       d = deep_copy(d)
       index = 0
-      while Builtins.haskey(@devices, index)
-        index = Ops.add(index, 1)
-      end
+      index = Ops.add(index, 1) while Builtins.haskey(@devices, index)
       Ops.set(@devices, index, d)
 
       nil
     end
-
-
 
     def RemoveDevice(index)
       @devices = Builtins.remove(@devices, index)
 
       nil
     end
-
-
 
     def GetDeviceIndex(channel)
       ret = nil
@@ -321,14 +300,13 @@ module Yast
       ret
     end
 
-
     # Create a textual summary and a list of configured devices
     # @return summary of the current configuration
     def Summary
       ret = []
 
       if Mode.config
-        ret = Builtins.maplist(@devices) do |index, d|
+        ret = Builtins.maplist(@devices) do |_index, d|
           Builtins.sformat(
             _("Channel ID: %1, Format: %2, DIAG: %3"),
             Ops.get_string(d, "channel", ""),
@@ -337,11 +315,11 @@ module Yast
           )
         end
       else
-        active_devices = Builtins.filter(@devices) do |index, device|
+        active_devices = Builtins.filter(@devices) do |_index, device|
           Ops.get_boolean(device, ["resource", "io", 0, "active"], false)
         end
 
-        ret = Builtins.maplist(active_devices) do |index, d|
+        ret = Builtins.maplist(active_devices) do |_index, d|
           Builtins.sformat(
             _("Channel ID: %1, Device: %2, DIAG: %3"),
             Ops.get_string(d, "channel", ""),
@@ -355,7 +333,6 @@ module Yast
       deep_copy(ret)
     end
 
-
     # Return packages needed to be installed and removed during
     # Autoinstallation to insure module has all needed software
     # installed.
@@ -364,16 +341,14 @@ module Yast
       { "install" => [], "remove" => [] }
     end
 
-
     # Check if DASD subsystem is available
     # @return [Boolean] True if more than one disk
     def IsAvailable
       disks = SCR.Read(path(".probe.disk"))
       count = disks.count { |d| d["device"] == "DASD" }
       log.info("number of probed DASD devices #{count}")
-      return count > 0
+      count > 0
     end
-
 
     # Probe for DASD disks
     def ProbeDisks
@@ -382,8 +357,8 @@ module Yast
 
       disks = Convert.convert(
         SCR.Read(path(".probe.disk")),
-        :from => "any",
-        :to   => "list <map <string, any>>"
+        from: "any",
+        to:   "list <map <string, any>>"
       )
       disks = Builtins.filter(disks) do |d|
         Builtins.tolower(Ops.get_string(d, "device", "")) == "dasd"
@@ -425,7 +400,7 @@ module Yast
             Ops.set(@diag, channel, Builtins.substring(use_diag, 0, 1) == "1")
           end
         end
-        d = Builtins.filter(d) do |k, v|
+        d = Builtins.filter(d) do |k, _v|
           Builtins.contains(
             [
               "channel",
@@ -457,96 +432,94 @@ module Yast
       nil
     end
 
-
     # Report error occured during device activation
     # @param [String] channel string channel of the device
     # @param [Fixnum] ret integer exit code of the operation
     def ReportActivationError(channel, ret)
       case ret
-        when 0
+      when 0
 
-        when 1
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: sysfs not mounted."),
-              channel
-            )
+      when 1
+        Report.Error(
+          Builtins.sformat(
+            # error report, %1 is device identification
+            _("%1: sysfs not mounted."),
+            channel
           )
-        when 2
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: Invalid status for <online>."),
-              channel
-            )
+        )
+      when 2
+        Report.Error(
+          Builtins.sformat(
+            # error report, %1 is device identification
+            _("%1: Invalid status for <online>."),
+            channel
           )
-        when 3
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: No device found for <ccwid>."),
-              channel
-            )
+        )
+      when 3
+        Report.Error(
+          Builtins.sformat(
+            # error report, %1 is device identification
+            _("%1: No device found for <ccwid>."),
+            channel
           )
-        when 4
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: Could not change state of the device."),
-              channel
-            )
+        )
+      when 4
+        Report.Error(
+          Builtins.sformat(
+            # error report, %1 is device identification
+            _("%1: Could not change state of the device."),
+            channel
           )
-        when 5
-          # https://bugzilla.novell.com/show_bug.cgi?id=446998#c15
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: Device is not a DASD."),
-              channel
-            )
+        )
+      when 5
+        # https://bugzilla.novell.com/show_bug.cgi?id=446998#c15
+        Report.Error(
+          Builtins.sformat(
+            # error report, %1 is device identification
+            _("%1: Device is not a DASD."),
+            channel
           )
-        when 6
-          # https://bugzilla.novell.com/show_bug.cgi?id=446998#c15
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: Could not load module."),
-              channel
-            )
+        )
+      when 6
+        # https://bugzilla.novell.com/show_bug.cgi?id=446998#c15
+        Report.Error(
+          Builtins.sformat(
+            # error report, %1 is device identification
+            _("%1: Could not load module."),
+            channel
           )
-        when 7
-          # http://bugzilla.novell.com/show_bug.cgi?id=561876#c8
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: Failed to activate DASD."),
-              channel
-            )
+        )
+      when 7
+        # http://bugzilla.novell.com/show_bug.cgi?id=561876#c8
+        Report.Error(
+          Builtins.sformat(
+            # error report, %1 is device identification
+            _("%1: Failed to activate DASD."),
+            channel
           )
-        when 8
-          # http://bugzilla.novell.com/show_bug.cgi?id=561876#c8
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification
-              _("%1: DASD is not formatted."),
-              channel
-            )
+        )
+      when 8
+        # http://bugzilla.novell.com/show_bug.cgi?id=561876#c8
+        Report.Error(
+          Builtins.sformat(
+            # error report, %1 is device identification
+            _("%1: DASD is not formatted."),
+            channel
           )
-        else
-          Report.Error(
-            Builtins.sformat(
-              # error report, %1 is device identification, %2 is integer code
-              _("%1: Unknown error %2."),
-              channel,
-              ret
-            )
+        )
+      else
+        Report.Error(
+          Builtins.sformat(
+            # error report, %1 is device identification, %2 is integer code
+            _("%1: Unknown error %2."),
+            channel,
+            ret
           )
+        )
       end
 
       nil
     end
-
 
     # Activate disk
     # @param [String] channel string Name of the disk to activate
@@ -583,7 +556,6 @@ module Yast
       ret
     end
 
-
     # Deactivate disk
     # @param [String] channel string Name of the disk to deactivate
     # @param [Boolean] diag boolean Activate DIAG or not
@@ -609,7 +581,6 @@ module Yast
       nil
     end
 
-
     # Format disks
     # @param [Array<String>] disks_list list<string> List of disks to be formatted
     # @param [Fixnum] par integer Number of disks that can be formated in parallel
@@ -624,9 +595,7 @@ module Yast
       index = -1
       reqsize = 10   # The default request size for dasdfmt is 10
       msize = 10     # The "cylinders per hashmark" value must be >= the request size
-      if msize < reqsize
-        msize=reqsize
-      end
+      msize = reqsize if msize < reqsize
       Builtins.foreach(disks_list) do |device|
         index = Ops.add(index, 1)
         Ops.set(disks, index, device)
@@ -690,7 +659,7 @@ module Yast
           line = Convert.to_string(
             SCR.Read(path(".process.read_line"), process_id)
           )
-          break if line == nil
+          break if line.nil?
 
           siz = Builtins.tointeger(line)
           siz = 999999999 if siz == 0
@@ -722,7 +691,7 @@ module Yast
         Builtins.foreach(this_step) do |k, v|
           Ops.set(done, k, Ops.add(Ops.get(done, k, 0), v))
         end
-        this_step = Builtins.filter(this_step) do |k, v|
+        this_step = Builtins.filter(this_step) do |k, _v|
           Ops.less_than(Ops.get(done, k, 0), Ops.get(cylinders, k, 0))
         end
         difference = Ops.subtract(
@@ -738,8 +707,7 @@ module Yast
           end
         end
         index = 0
-        siz = Builtins.size(this_step)
-        Builtins.foreach(this_step) do |k, v|
+        Builtins.foreach(this_step) do |k, _v|
           UI.ChangeWidget(
             Id(index),
             :Label,
@@ -801,7 +769,8 @@ module Yast
 
       out = Ops.get_string(outmap, "stdout", "")
 
-      regexp = "^[ \t]*([^ \t]+)[ \t]+([0-9]+)[ \t]+([0-9]+)[ \t]+([0-9]+)[ \t]+([^ \t]+)[ \t]+([^ \t]+([ \t]+[^ \t]+))*[ \t]*$"
+      regexp = "^[ \t]*([^ \t]+)[ \t]+([0-9]+)[ \t]+([0-9]+)[ \t]+([0-9]+)" \
+        "[ \t]+([^ \t]+)[ \t]+([^ \t]+([ \t]+[^ \t]+))*[ \t]*$"
 
       l = Builtins.splitstring(out, "\n")
       l = Builtins.filter(l) { |s| Builtins.regexpmatch(s, regexp) }
@@ -816,32 +785,32 @@ module Yast
       Builtins.mergestring(l, ", ")
     end
 
-    publish :variable => :devices, :type => "map <integer, map <string, any>>"
-    publish :variable => :filter_min, :type => "string"
-    publish :variable => :filter_max, :type => "string"
-    publish :variable => :diag, :type => "map <string, boolean>"
-    publish :function => :ActivateDisk, :type => "integer (string, boolean)"
-    publish :function => :DeactivateDisk, :type => "void (string, boolean)"
-    publish :function => :ProbeDisks, :type => "void ()"
-    publish :function => :FormatDisks, :type => "void (list <string>, integer)"
-    publish :function => :GetPartitionInfo, :type => "string (string)"
-    publish :function => :GetModified, :type => "boolean ()"
-    publish :variable => :proposal_valid, :type => "boolean"
-    publish :function => :SetModified, :type => "void (boolean)"
-    publish :function => :IsValidChannel, :type => "boolean (string)"
-    publish :function => :FormatChannel, :type => "string (string)"
-    publish :function => :Read, :type => "boolean ()"
-    publish :function => :Write, :type => "boolean ()"
-    publish :function => :Import, :type => "boolean (map)"
-    publish :function => :Export, :type => "map <string, list> ()"
-    publish :function => :GetDevices, :type => "map <integer, map <string, any>> ()"
-    publish :function => :GetFilteredDevices, :type => "map <integer, map <string, any>> ()"
-    publish :function => :AddDevice, :type => "void (map <string, any>)"
-    publish :function => :RemoveDevice, :type => "void (integer)"
-    publish :function => :GetDeviceIndex, :type => "integer (string)"
-    publish :function => :Summary, :type => "list <string> ()"
-    publish :function => :AutoPackages, :type => "map ()"
-    publish :function => :IsAvailable, :type => "boolean ()"
+    publish variable: :devices, type: "map <integer, map <string, any>>"
+    publish variable: :filter_min, type: "string"
+    publish variable: :filter_max, type: "string"
+    publish variable: :diag, type: "map <string, boolean>"
+    publish function: :ActivateDisk, type: "integer (string, boolean)"
+    publish function: :DeactivateDisk, type: "void (string, boolean)"
+    publish function: :ProbeDisks, type: "void ()"
+    publish function: :FormatDisks, type: "void (list <string>, integer)"
+    publish function: :GetPartitionInfo, type: "string (string)"
+    publish function: :GetModified, type: "boolean ()"
+    publish variable: :proposal_valid, type: "boolean"
+    publish function: :SetModified, type: "void (boolean)"
+    publish function: :IsValidChannel, type: "boolean (string)"
+    publish function: :FormatChannel, type: "string (string)"
+    publish function: :Read, type: "boolean ()"
+    publish function: :Write, type: "boolean ()"
+    publish function: :Import, type: "boolean (map)"
+    publish function: :Export, type: "map <string, list> ()"
+    publish function: :GetDevices, type: "map <integer, map <string, any>> ()"
+    publish function: :GetFilteredDevices, type: "map <integer, map <string, any>> ()"
+    publish function: :AddDevice, type: "void (map <string, any>)"
+    publish function: :RemoveDevice, type: "void (integer)"
+    publish function: :GetDeviceIndex, type: "integer (string)"
+    publish function: :Summary, type: "list <string> ()"
+    publish function: :AutoPackages, type: "map ()"
+    publish function: :IsAvailable, type: "boolean ()"
   end
 
   DASDController = DASDControllerClass.new

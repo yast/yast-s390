@@ -63,7 +63,7 @@ module Yast
         @mountpoint = Convert.to_string(
           SCR.Read(path(".sysconfig.xpram.XPRAM_MNTPATH"))
         )
-        @mountpoint = "" if @mountpoint == nil
+        @mountpoint = "" if @mountpoint.nil?
 
         @fstype = Convert.to_string(
           SCR.Read(path(".sysconfig.xpram.XPRAM_FORCE"))
@@ -73,7 +73,7 @@ module Yast
         @fstype = Convert.to_string(
           SCR.Read(path(".sysconfig.xpram.XPRAM_FSTYPE"))
         )
-        @fstype = "swap" if @fstype == nil
+        @fstype = "swap" if @fstype.nil?
 
         return true
       end
@@ -98,7 +98,6 @@ module Yast
       # Xpram read dialog caption
       caption = _("Saving XPRAM Configuration")
       steps = 2
-      bret = true
 
       Progress.New(
         caption,
@@ -145,8 +144,6 @@ module Yast
           SCR.Write(path(".sysconfig.xpram.XPRAM_START"), "yes")
           bret = Service.Enable("xpram")
           Builtins.y2milestone("Service::Enable (xpram) returns %1", bret)
-          #	map out = (map) SCR::Execute(.target.bash_output,"bash -x /etc/init.d/xpram start", $["TERM":"raw"]);
-          #	y2milestone("got %1", out);
           SCR.Write(path(".sysconfig.xpram"), nil)
           bret = Service.Start("xpram")
           if !bret
@@ -165,14 +162,14 @@ module Yast
       true
     end
 
-    publish :variable => :modified, :type => "boolean"
-    publish :variable => :force, :type => "boolean"
-    publish :variable => :start, :type => "boolean"
-    publish :variable => :mountpoint, :type => "string"
-    publish :variable => :fstype, :type => "string"
-    publish :function => :ReadSysconfig, :type => "boolean ()"
-    publish :function => :Read, :type => "boolean ()"
-    publish :function => :Write, :type => "boolean ()"
+    publish variable: :modified, type: "boolean"
+    publish variable: :force, type: "boolean"
+    publish variable: :start, type: "boolean"
+    publish variable: :mountpoint, type: "string"
+    publish variable: :fstype, type: "string"
+    publish function: :ReadSysconfig, type: "boolean ()"
+    publish function: :Read, type: "boolean ()"
+    publish function: :Write, type: "boolean ()"
   end
 
   Xpram = XpramClass.new

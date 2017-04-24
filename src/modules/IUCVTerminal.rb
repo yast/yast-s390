@@ -76,7 +76,7 @@ module Yast
     end
 
     def tty_entries(prefix)
-      Dir.entries(@getty_conf_dir).select{ |e| e =~ /^#{prefix}@.+\.service$/ }
+      Dir.entries(@getty_conf_dir).select { |e| e =~ /^#{prefix}@.+\.service$/ }
     end
 
     def get_tty_num(prefix)
@@ -97,7 +97,7 @@ module Yast
         match = entry.scan(/^#{@IUCV_PREFIX}@(.+)0\.service$/).first
         name = match.first if match
       end
-      name ||= @iucv_name
+      name || @iucv_name
     end
 
     def setup_iucv(target_num)
@@ -122,14 +122,14 @@ module Yast
       return if existing_num == target_num
 
       if target_num > existing_num
-        for i in (existing_num + 1)..target_num do
+        ((existing_num + 1)..target_num).each do |i|
           service_name = "#{prefix}@#{name}#{i}.service"
           SCR.Execute(path(".target.bash"), "systemctl enable #{service_name}")
           SCR.Execute(path(".target.bash"), "systemctl start #{service_name}")
         end
       else
-        existing_num.downto(target_num + 1) do |i|
-          service_name = "#{prefix}@#{name}#{i}.service"
+        existing_num.downto(target_num + 1) do |index|
+          service_name = "#{prefix}@#{name}#{index}.service"
           SCR.Execute(path(".target.bash"), "systemctl disable #{service_name}")
           SCR.Execute(path(".target.bash"), "systemctl stop #{service_name}")
         end
@@ -167,7 +167,6 @@ module Yast
         ""
       )
 
-
       # Load IUCVtty settings
       Progress.NextStage
       @iucv_instances = get_iucv_num
@@ -198,8 +197,8 @@ module Yast
           # is only able to read one, cmdline is used as fallback
           parameters = Convert.convert(
             SCR.Read(path(".proc.cmdline")),
-            :from => "any",
-            :to   => "list <string>"
+            from: "any",
+            to:   "list <string>"
           )
           Builtins.foreach(parameters) do |parameter|
             if Builtins.regexpmatch(parameter, "console=hvc0")
@@ -212,7 +211,6 @@ module Yast
       Progress.NextStage
       true
     end
-
 
     # Write all settings
     # @return true on success
@@ -267,13 +265,11 @@ module Yast
         # this might overwrite other console options but this is mentioned in the help text
         if @show_kernel_out_on_hvc
           Bootloader.modify_kernel_params("console" => "hvc0")
-        else
+        elsif Bootloader.kernel_param(:common, "console") == "hvc0"
           # remove console entry if there is only one or the last is hvc0
           # otherwise it might not be possible to access it with SetKernelParm
           # make sure not to remove other console tags
-          if Bootloader.kernel_param(:common, "console") == "hvc0"
-            Bootloader.modify_kernel_params("console" => :missing)
-          end
+          Bootloader.modify_kernel_params("console" => :missing)
         end
 
         old_progress = Progress.set(false)
@@ -285,16 +281,16 @@ module Yast
       true
     end
 
-    publish :variable => :MAX_IUCV_TTYS, :type => "const integer"
-    publish :variable => :modified, :type => "boolean"
-    publish :variable => :iucv_instances, :type => "integer"
-    publish :variable => :iucv_name, :type => "string"
-    publish :variable => :hvc_instances, :type => "integer"
-    publish :variable => :show_kernel_out_on_hvc, :type => "boolean"
-    publish :variable => :restrict_hvc_to_srvs, :type => "string"
-    publish :variable => :has_bootloader_changed, :type => "boolean"
-    publish :function => :Read, :type => "boolean ()"
-    publish :function => :Write, :type => "boolean ()"
+    publish variable: :MAX_IUCV_TTYS, type: "const integer"
+    publish variable: :modified, type: "boolean"
+    publish variable: :iucv_instances, type: "integer"
+    publish variable: :iucv_name, type: "string"
+    publish variable: :hvc_instances, type: "integer"
+    publish variable: :show_kernel_out_on_hvc, type: "boolean"
+    publish variable: :restrict_hvc_to_srvs, type: "string"
+    publish variable: :has_bootloader_changed, type: "boolean"
+    publish function: :Read, type: "boolean ()"
+    publish function: :Write, type: "boolean ()"
   end
 
   IUCVTerminal = IUCVTerminalClass.new

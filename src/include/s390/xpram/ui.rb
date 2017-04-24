@@ -27,7 +27,7 @@
 # $Id$
 module Yast
   module S390XpramUiInclude
-    def initialize_s390_xpram_ui(include_target)
+    def initialize_s390_xpram_ui(_include_target)
       Yast.import "UI"
 
       textdomain "xpram"
@@ -51,7 +51,10 @@ module Yast
       help = _("<p>Here, configure the <b>XPRAM</b> for your computer.</p>") +
         # help text for XPRAM 2/4
         _(
-          "<p>This tool currently only supports assigning the entire XPRAM to one partition. To have multiple partitions, look at \"Device Drivers, Features and Commands November 30, 2004\" for the Linux kernel 2.6 - April 2004 stream.</p><p>In this case disable XPRAM in this module.</p>"
+          "<p>This tool currently only supports assigning the entire XPRAM to one partition. " \
+            "To have multiple partitions, look at \"Device Drivers, Features and Commands " \
+            "November 30, 2004\" for the Linux kernel 2.6 - April 2004 stream.</p>" \
+            "<p>In this case disable XPRAM in this module.</p>"
         ) +
         # help text for XPRAM 3/4
         _("<p>Choose the correct mount point for <b>Mount Point</b>.</p>") +
@@ -177,7 +180,7 @@ module Yast
       end
 
       ret = nil
-      begin
+      loop do
         ret = Convert.to_symbol(UI.UserInput)
         mountpoint = Convert.to_string(UI.QueryWidget(Id(:m_points), :Value))
         fstype = Convert.to_string(UI.QueryWidget(Id(:brate), :Value))
@@ -199,12 +202,13 @@ module Yast
           #	    });
           UI.ChangeWidget(Id(:m_points), :Enabled, start)
           UI.ChangeWidget(Id(:brate), :Enabled, start)
-        end 
+        end
         #	if (ret == `test)
         #	{
         #	    TestPopup (mountpoint);
         #	}
-      end while !Builtins.contains([:back, :abort, :cancel, :next, :ok], ret)
+        break if Builtins.contains([:back, :abort, :cancel, :next, :ok], ret)
+      end
 
       if ret == :next &&
           (start != Xpram.start || mountpoint != Xpram.mountpoint ||

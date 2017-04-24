@@ -74,7 +74,6 @@ module Yast
       # Map of the loaded ts-authorization.conf settings (for saving purposes)
       @ts_authorization_map = {}
 
-
       # Is IUCVConn enabled?
       @ic_enabled = false
 
@@ -85,7 +84,9 @@ module Yast
     def CheckUserGroupName(name)
       Builtins.regexpmatch(
         name,
-        "^[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_][ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.-]*[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.$-]?$"
+        "^[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_][ABCDEFGHIJKLM" \
+        "NOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.-]*[ABCDEFGHIJKLMNO" \
+        "PQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.$-]?$"
       )
     end
 
@@ -95,14 +96,14 @@ module Yast
     def GetUsers(local)
       users = Convert.convert(
         Users.GetUsers("uid", "local"),
-        :from => "map",
-        :to   => "map <string, map>"
+        from: "map",
+        to:   "map <string, map>"
       )
       if !local
         users = Convert.convert(
           Builtins.union(users, Users.GetUsers("uid", "system")),
-          :from => "map",
-          :to   => "map <string, map>"
+          from: "map",
+          to:   "map <string, map>"
         )
       end
       deep_copy(users)
@@ -114,14 +115,14 @@ module Yast
     def GetGroups(local)
       groups = Convert.convert(
         Users.GetGroups("cn", "local"),
-        :from => "map",
-        :to   => "map <string, map>"
+        from: "map",
+        to:   "map <string, map>"
       )
       if !local
         groups = Convert.convert(
           Builtins.union(groups, Users.GetGroups("cn", "system")),
-          :from => "map",
-          :to   => "map <string, map>"
+          from: "map",
+          to:   "map <string, map>"
         )
       end
       deep_copy(groups)
@@ -165,7 +166,8 @@ module Yast
     end
 
     # Abstract add a new user function
-    # @parm string username, string password, string group_id, string home, string shell,  map<string, string> additional_groups ($[user : "1", user2 : "1" ...]
+    # @parm string username, string password, string group_id, string home, string shell,
+    #  map<string, string> additional_groups ($[user : "1", user2 : "1" ...]
     # @return the new user id as a string
     def AddUser(username, password, group_id, home, shell, additional_groups, force_pw_change)
       additional_groups = deep_copy(additional_groups)
@@ -243,7 +245,8 @@ module Yast
     end
 
     # Add a new TS-Shell user
-    # @parm string username, string password, string home, map<string, string> additional_groups ($[user : "1", user2 : "1" ...]
+    # @parm string username, string password, string home, map<string, string>
+    #   additional_groups ($[user : "1", user2 : "1" ...]
     # @return the new user id as a string
     def AddTsUser(username, password, home, additional_groups, force_pw_change)
       additional_groups = deep_copy(additional_groups)
@@ -274,12 +277,10 @@ module Yast
         @ts_member_conf = Builtins.add(
           @ts_member_conf,
           name,
-          {
-            :type        => :rb_ts_list,
-            :rb_ts_list  => [],
-            :rb_ts_regex => "",
-            :rb_ts_file  => ""
-          }
+          type:        :rb_ts_list,
+          rb_ts_list:  [],
+          rb_ts_regex: "",
+          rb_ts_file:  ""
         )
       end
 
@@ -360,7 +361,7 @@ module Yast
         zvm_ids = Convert.to_string(
           SCR.Read(path(".sysconfig.iucv_terminal_server.ZVM_IDS"))
         )
-        @zvm_id_list = Builtins.splitstring(zvm_ids, " ") if zvm_ids != nil
+        @zvm_id_list = Builtins.splitstring(zvm_ids, " ") if !zvm_ids.nil?
 
         @ts_enabled = "true" ==
           Convert.to_string(
@@ -370,7 +371,7 @@ module Yast
           SCR.Read(path(".sysconfig.iucv_terminal_server.TSSHELL_HOME"))
         )
         # use default if not set
-        @ts_home = home if home != nil
+        @ts_home = home if !home.nil?
 
         @ic_enabled = "true" ==
           Convert.to_string(
@@ -380,7 +381,7 @@ module Yast
           SCR.Read(path(".sysconfig.iucv_terminal_server.IUCVCONN_HOME"))
         )
         # user default if not set
-        @ic_home = home if home != nil
+        @ic_home = home if !home.nil?
       end
 
       filename = "/etc/iucvterm/ts-audit-systems.conf"
@@ -394,8 +395,8 @@ module Yast
           # add all if configured
           @ts_audited_ids = Convert.convert(
             Builtins.merge([@TEXT_ALL], @zvm_id_list),
-            :from => "list",
-            :to   => "list <string>"
+            from: "list",
+            to:   "list <string>"
           )
         else
           # only add known ids
@@ -411,8 +412,8 @@ module Yast
         # the settings map is globally kept for saving purposes
         @ts_authorization_map = Convert.convert(
           SCR.Read(path(".etc.iucvterm-ts-authorization.all")),
-          :from => "any",
-          :to   => "map <string, any>"
+          from: "any",
+          to:   "map <string, any>"
         )
         ts_auth_list = Ops.get_list(@ts_authorization_map, "value", [])
         Builtins.foreach(ts_auth_list) do |entry|
@@ -444,7 +445,6 @@ module Yast
           end
         end
       end
-      test = []
 
       Progress.NextStage
       true
@@ -501,7 +501,6 @@ module Yast
       SCR.Write(path(".sysconfig.iucv_terminal_server.TSSHELL_HOME"), @ts_home)
       SCR.Write(path(".sysconfig.iucv_terminal_server"), nil)
 
-
       filename = "/etc/iucvterm/ts-audit-systems.conf"
       Builtins.y2milestone("Writing configuration to %1.", filename)
       if Ops.get(@ts_audited_ids, 0) == @TEXT_ALL
@@ -514,7 +513,6 @@ module Yast
           Builtins.mergestring(@ts_audited_ids, "\n")
         )
       end
-
 
       filename = "/etc/iucvterm/ts-authorization.conf"
       Builtins.y2milestone("Writing configuration to %1.", filename)
@@ -584,7 +582,6 @@ module Yast
       )
       SCR.Write(path(".etc.iucvterm-ts-authorization"), nil)
 
-
       Progress.NextStage
       if Users.Modified
         Builtins.y2milestone("Saving users and groups.")
@@ -604,10 +601,14 @@ module Yast
       # dis/enable TS-Users if the TS status had changed
       if @ts_has_status_changed
         Builtins.y2milestone("Dis/enabling TS-Shell users.")
-        passwd = @ts_enabled ?
-          "/usr/bin/passwd -u " : # unlock user
-          "/usr/bin/passwd -l " # lock user
-        Builtins.foreach(@ts_member_conf) do |name, entries|
+        passwd = if @ts_enabled
+          # unlock user
+          "/usr/bin/passwd -u "
+        else
+          # lock user
+          "/usr/bin/passwd -l "
+        end
+        Builtins.foreach(@ts_member_conf) do |name, _entries|
           # groups don't need to be disabled
           if !Builtins.regexpmatch(name, "^@")
             cmd = Ops.add(passwd, name)
@@ -629,26 +630,26 @@ module Yast
       true
     end
 
-    publish :variable => :TEXT_ALL, :type => "const string"
-    publish :variable => :modified, :type => "boolean"
-    publish :variable => :zvm_id_list, :type => "list <string>"
-    publish :variable => :ts_enabled, :type => "boolean"
-    publish :variable => :ts_home, :type => "string"
-    publish :variable => :ts_audited_ids, :type => "list <string>"
-    publish :variable => :ts_has_status_changed, :type => "boolean"
-    publish :variable => :ts_member_conf, :type => "map <string, map <symbol, any>>"
-    publish :variable => :ic_enabled, :type => "boolean"
-    publish :variable => :ic_home, :type => "string"
-    publish :function => :CheckUserGroupName, :type => "boolean (string)"
-    publish :function => :GetUsers, :type => "map <string, map> (boolean)"
-    publish :function => :GetGroups, :type => "map <string, map> (boolean)"
-    publish :function => :DeleteUser, :type => "boolean (string)"
-    publish :function => :GetTsUsersList, :type => "list <string> ()"
-    publish :function => :GetIcUsersList, :type => "list <string> ()"
-    publish :function => :SyncIucvConnUsers, :type => "void (list <string>, string)"
-    publish :function => :AddTsUser, :type => "string (string, string, string, map <string, string>, boolean)"
-    publish :function => :Read, :type => "boolean ()"
-    publish :function => :Write, :type => "boolean ()"
+    publish variable: :TEXT_ALL, type: "const string"
+    publish variable: :modified, type: "boolean"
+    publish variable: :zvm_id_list, type: "list <string>"
+    publish variable: :ts_enabled, type: "boolean"
+    publish variable: :ts_home, type: "string"
+    publish variable: :ts_audited_ids, type: "list <string>"
+    publish variable: :ts_has_status_changed, type: "boolean"
+    publish variable: :ts_member_conf, type: "map <string, map <symbol, any>>"
+    publish variable: :ic_enabled, type: "boolean"
+    publish variable: :ic_home, type: "string"
+    publish function: :CheckUserGroupName, type: "boolean (string)"
+    publish function: :GetUsers, type: "map <string, map> (boolean)"
+    publish function: :GetGroups, type: "map <string, map> (boolean)"
+    publish function: :DeleteUser, type: "boolean (string)"
+    publish function: :GetTsUsersList, type: "list <string> ()"
+    publish function: :GetIcUsersList, type: "list <string> ()"
+    publish function: :SyncIucvConnUsers, type: "void (list <string>, string)"
+    publish function: :AddTsUser, type: "string (string, string, string, map <string, string>, boolean)"
+    publish function: :Read, type: "boolean ()"
+    publish function: :Write, type: "boolean ()"
   end
 
   IUCVTerminalServer = IUCVTerminalServerClass.new

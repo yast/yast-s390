@@ -67,7 +67,6 @@ module Yast
         return WFM.call("zfcp")
       end
 
-
       # Initialization dialog caption
       @caption = _("S/390 Disk Controller Configuration")
       # Initialization dialog contents
@@ -99,7 +98,6 @@ module Yast
         HWeight(999, HStretch())
       )
 
-
       Label(_("Initializing..."))
 
       Wizard.CreateDialog
@@ -115,7 +113,7 @@ module Yast
       Wizard.HideBackButton
 
       @ret = nil
-      while @ret == nil
+      while @ret.nil?
         @ret = UI.UserInput
         if @ret == :dasd
           WFM.call("dasd")
