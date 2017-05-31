@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed May 31 07:07:45 UTC 2017 - lslezak@suse.cz
+
+- Fixed internal error displayed in the "dump" dialog (bsc#1040944)
+- 3.2.2
+
+-------------------------------------------------------------------
 Mon Apr 24 13:46:13 UTC 2017 - lslezak@suse.cz
 
 - Skip the ZFCP controller warning when running in zKVM

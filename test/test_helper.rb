@@ -5,6 +5,8 @@ ENV["Y2DIR"] = File.expand_path("../../src", __FILE__)
 ENV["LC_ALL"] = "en_US.UTF-8"
 
 require "yast"
+require "yast/rspec"
+
 require "yaml"
 
 RSpec.configure do |config|

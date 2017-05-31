@@ -119,7 +119,7 @@ module Yast
           ),
           VSpacing(0.3),
           Left(
-            CheckBox(Id(:force), Opt(:notify), _("&Force overwrite of disk"))
+            CheckBox(Id(:force), _("&Force overwrite of disk"))
           )
         )
       )
@@ -138,14 +138,11 @@ module Yast
       UI.ChangeWidget(Id(:dasd_disks), :Enabled, @type == :dasd)
       UI.ChangeWidget(Id(:zfcp_disks), :Enabled, @type == :zfcp)
 
-      force = false
       ret = nil
       loop do
         ret = Convert.to_symbol(UI.UserInput)
 
-        if ret == :force
-          force = Convert.to_boolean(UI.QueryWidget(Id(:force), :Value))
-        end
+        force = Convert.to_boolean(UI.QueryWidget(Id(:force), :Value))
 
         # disable inactive area
         if ret == :dasd || ret == :zfcp
@@ -230,11 +227,14 @@ module Yast
       # reset dialog if required
       Wizard.CreateDialog
       Wizard.SetDesktopIcon("dump")
+      ret = nil
+
       loop do
         Dump.Read
-        break if DumpDialog() != :again
+        ret = DumpDialog()
+        break if ret != :again
       end
-      UI.CloseDialog
+      Wizard.CloseDialog
 
       ret
     end
