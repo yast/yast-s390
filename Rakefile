@@ -3,8 +3,6 @@ require "yast/rake"
 # do nothing in osc:build as it can be builds exclusivelly on s390
 Rake::Task["osc:build"].clear_actions if `uname --machine` !~ /s390/
 
-Yast::Tasks.submit_to((ENV["YAST_SUBMIT"] || :factory).to_sym)
-
 Yast::Tasks.configuration do |conf|
   # lets ignore license check for now
   conf.skip_license_check << /.*/
