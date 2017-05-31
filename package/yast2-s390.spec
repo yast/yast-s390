@@ -25,11 +25,12 @@ Source0:        %{name}-%{version}.tar.bz2
 
 Group:		System/YaST
 License:        GPL-2.0
-BuildRequires:	docbook-xsl-stylesheets update-desktop-files
-BuildRequires:	yast2 yast2-testsuite
-BuildRequires:  yast2-devtools >= 3.1.10
+BuildRequires:	yast2
+BuildRequires:	yast2-devtools
 BuildRequires:	yast2-ruby-bindings >= 3.1.7
-BuildRequires:  rubygem(rspec)
+BuildRequires:  rubygem(%rb_default_ruby_abi:rspec)
+BuildRequires:  rubygem(%rb_default_ruby_abi:yast-rake)
+BuildRequires:	update-desktop-files
 ExclusiveArch:  s390 s390x
 Requires:	yast2
 Requires:	yast2-ruby-bindings >= 3.1.7
@@ -44,12 +45,13 @@ S/390-specific features.
 %prep
 %setup -n %{name}-%{version}
 
+%check
+rake test:unit
+
 %build
-%yast_build
 
 %install
-%yast_install
-
+rake install DESTDIR="%{buildroot}"
 
 %files
 %defattr(-,root,root)
