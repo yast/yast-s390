@@ -22,3 +22,6 @@ autom4te.cache
 test-driver
 package/*.bz2
 /testsuite/raw.tmp.err.*
+/doc
+/.yardoc
+*.pot
