@@ -373,7 +373,7 @@ module Yast
           scr_out = Convert.to_map(
             SCR.Execute(
               path(".target.bash_output"),
-              Builtins.sformat("dasdview -x -f '%1' | grep formatted", device)
+              Builtins.sformat("dasdview --extended '%1' | grep formatted", device)
             )
           )
           formatted = false
