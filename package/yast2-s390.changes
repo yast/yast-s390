@@ -2,7 +2,7 @@
 Wed Nov 08 22:44:33 CET 2017 - aschnell@suse.com
 
 - fixed call of dasdview (bsc#1067265)
-- 3.2.3
+- 4.0.0
 
 -------------------------------------------------------------------
 Wed May 31 07:07:45 UTC 2017 - lslezak@suse.cz
