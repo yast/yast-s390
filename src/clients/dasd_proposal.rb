@@ -25,6 +25,10 @@
 # Authors:	Jiri Srain <jsrain@suse.cz>
 #
 # Proposal function dispatcher for dasd configuration.
+
+require "yast"
+require "y2storage"
+
 module Yast
   class DasdProposalClient < Client
     def main
@@ -32,7 +36,6 @@ module Yast
 
       Yast.import "DASDController"
       Yast.import "Wizard"
-      Yast.import "Storage"
 
       @func = Convert.to_string(WFM.Args(0))
       @param = Convert.to_map(WFM.Args(1))
@@ -54,9 +57,14 @@ module Yast
       # Run an interactive workflow
       elsif @func == "AskUser"
         Wizard.CreateDialog
-        Storage.ActivateHld(false)
+        storage = Y2Storage::StorageManager.instance
+        # Deactivate high level devices (RAID, multipath, LVM, encryption...)
+        storage.deactivate
         @sequence = WFM.CallFunction("inst_dasd", [])
-        Storage.ReReadTargetMap
+        # NOTE: the pre-storage-ng code called ReReadTargetMap here,
+        # without any explicit reactivation of the high level devices.
+        # So far, we do the same (calling .probe without calling .activate)
+        storage.probe
         Wizard.CloseDialog
 
         # Fill return map
