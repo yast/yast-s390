@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Dec 12 12:00:24 UTC 2017 - ancor@suse.com
+
+- Clients used during upgrade now rely on yast-storage-ng
+  instead of the old yast2-storage (bsc#1066538).
+- 4.0.1
+
+-------------------------------------------------------------------
 Wed Nov 08 22:44:33 CET 2017 - aschnell@suse.com
 
 - fixed call of dasdview (bsc#1067265)
