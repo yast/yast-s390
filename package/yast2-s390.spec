@@ -17,7 +17,7 @@
 
 
 Name:           yast2-s390
-Version:        4.0.1
+Version:        4.0.2
 Release:        0
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -35,6 +35,7 @@ ExclusiveArch:  s390 s390x
 Requires:	yast2
 Requires:	yast2-ruby-bindings >= 3.1.7
 Requires:	s390-tools
+Supplements:	yast2-storage-ng
 Summary:	YaST2 - S/390 Specific Features Configuration
 Url:		http://github.com/yast/yast-s390/
 
