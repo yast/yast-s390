@@ -29,6 +29,7 @@
 # Representation of the configuration of controller.
 # Input and output routines.
 require "yast"
+require "shellwords"
 
 module Yast
   class DASDControllerClass < Module
@@ -118,7 +119,7 @@ module Yast
 
     def can_be_formatted?(device)
       device_name = device["dev_name"] || GetDeviceName(device["channel"])
-      command = "dasdview -x #{device_name}"
+      command = "/sbin/dasdview --extended #{device_name.shellescape}"
       res = SCR.Execute(path(".target.bash_output"), command)
       Builtins.y2milestone("Command %1 result in %2", command, res)
       # allow to format only ECKD bsc#1070265
