@@ -116,6 +116,15 @@ module Yast
       true
     end
 
+    def can_be_formatted?
+      device_name = device["dev_name"] || GetDeviceName(device["channel"])
+      command = "dasdview -x #{device_name}"
+      res = SCR.Execute(path(".target.bash_output"), command)
+      Builtins.y2milestone("Command %1 result in %2", command, res)
+      # allow to format only ECKD bsc#1070265
+      !res["stdout"].grep(/^type\s.*ECKD/).empty?
+    end
+
     # Write all controller settings
     # @return true on success
     def Write
@@ -136,7 +145,7 @@ module Yast
             format = true
             to_reactivate << device
           end
-          if format
+          if format && can_be_formatted?(device)
             to_format << (device["dev_name"] || GetDeviceName(channel))
           # unformtted disk, manual (not AutoYaST)
           elsif act_ret == 8
@@ -436,7 +445,7 @@ module Yast
     # @param [String] channel string channel of the device
     # @param [Fixnum] ret integer exit code of the operation
     def ReportActivationError(channel, ret)
-      case ret
+      case ret["exitstatus"]
       when 0
 
       when 1
@@ -511,9 +520,11 @@ module Yast
         Report.Error(
           Builtins.sformat(
             # error report, %1 is device identification, %2 is integer code
-            _("%1: Unknown error %2."),
+            _("%1: Unknown error %2.\nstderr:%3\nstdout:%4"),
             channel,
-            ret
+            ret["exitstatus"],
+            ret["stderr"],
+            ret["stdout"]
           )
         )
       end
@@ -533,17 +544,18 @@ module Yast
         diag ? 1 : 0
       )
       Builtins.y2milestone("Running command \"%1\"", command)
-      ret = Convert.to_integer(SCR.Execute(path(".target.bash"), command))
+      ret = SCR.Execute(path(".target.bash_output"), command)
       Builtins.y2milestone(
-        "Command \"%1\" returned with exit code %2",
+        "Command \"%1\" returned %2",
         command,
         ret
       )
 
-      if ret == 8
+      case ret["exitcode"]
+      when 8
         # unformatted disk is now handled now outside this function
         # however, don't issue any error
-      elsif ret == 7
+      when 7
         # when return code is 7, set DASD offline
         # https://bugzilla.novell.com/show_bug.cgi?id=561876#c9
         DeactivateDisk(channel, diag)
@@ -553,7 +565,7 @@ module Yast
 
       @disk_configured = true
 
-      ret
+      ret["exitcode"]
     end
 
     # Deactivate disk
@@ -567,7 +579,7 @@ module Yast
         diag ? 1 : 0
       )
       Builtins.y2milestone("Running command \"%1\"", command)
-      ret = Convert.to_integer(SCR.Execute(path(".target.bash"), command))
+      ret = SCR.Execute(path(".target.bash_output"), command)
       Builtins.y2milestone(
         "Command \"%1\" returned with exit code %2",
         command,
@@ -645,11 +657,18 @@ module Yast
           iret2 = Convert.to_integer(
             SCR.Read(path(".process.status"), process_id)
           )
+          stderr = ""
+          loop do
+            line = SCR.Read(path(".process.read_line_stderr")
+            break unless line
+            stderr << line
+          end
           # error report, %1 is exit code of the command (integer)
           Report.Error(
             Builtins.sformat(
-              _("Disks formatting failed. Exit code: %1."),
-              iret2
+              _("Disks formatting failed. Exit code: %1.\nError output:%2"),
+              iret2,
+              stderr
             )
           )
           return
