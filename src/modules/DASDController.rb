@@ -116,7 +116,7 @@ module Yast
       true
     end
 
-    def can_be_formatted?
+    def can_be_formatted?(device)
       device_name = device["dev_name"] || GetDeviceName(device["channel"])
       command = "dasdview -x #{device_name}"
       res = SCR.Execute(path(".target.bash_output"), command)
