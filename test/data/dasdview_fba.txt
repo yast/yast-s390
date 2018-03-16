@@ -1,0 +1,34 @@
+
+--- general DASD information --------------------------------------------------
+device node            : /dev/dasdh
+busid                  : 0.0.ffff
+type                   : FBA 
+device type            : hex 9336  	dec 37686
+
+--- DASD geometry -------------------------------------------------------------
+number of cylinders    : hex 309  	dec 777
+tracks per cylinder    : hex 10  	dec 16
+blocks per track       : hex 80  	dec 128
+blocksize              : hex 200  	dec 512
+
+--- extended DASD information -------------------------------------------------
+real device number     : hex 0  	dec 0
+subchannel identifier  : hex 1b  	dec 27
+CU type  (SenseID)     : hex 6310  	dec 25360
+CU model (SenseID)     : hex 80  	dec 128
+device type  (SenseID) : hex 9336  	dec 37686
+device model (SenseID) : hex 10  	dec 16
+open count             : hex 1  	dec 1
+req_queue_len          : hex 0  	dec 0
+chanq_len              : hex 0  	dec 0
+status                 : hex 5  	dec 5
+label_block            : hex 1  	dec 1
+FBA_layout             : hex 1  	dec 1
+characteristics_size   : hex 20  	dec 32
+confdata_size          : hex 0  	dec 0
+format                 : hex 1  	dec 1      	LDL formatted
+features               : hex 0  	dec 0      	default
+
+characteristics        : 30082111 02000000  006f0000 03090003
+                         0d400000 00000000  00000000 00000000
+

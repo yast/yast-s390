@@ -43,6 +43,10 @@ if ENV["COVERAGE"]
 end
 
 def load_data(name)
+  YAML.load(load_file(name))
+end
+
+def load_file(name)
   path = File.join(File.dirname(__FILE__), "data", name)
-  YAML.load(File.read(path))
+  File.read(path)
 end

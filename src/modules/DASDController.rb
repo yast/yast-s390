@@ -123,7 +123,7 @@ module Yast
       res = SCR.Execute(path(".target.bash_output"), command)
       Builtins.y2milestone("Command %1 result in %2", command, res)
       # allow to format only ECKD bsc#1070265
-      !res["stdout"].grep(/^type\s.*ECKD/).empty?
+      !res["stdout"].lines.grep(/^type\s.*ECKD/).empty?
     end
 
     # Write all controller settings
@@ -762,9 +762,16 @@ module Yast
       UI.CloseDialog
       iret = Convert.to_integer(SCR.Read(path(".process.status"), process_id))
       if iret != 0
-        # error report, %1 is exit code of the command (integer)
+        stderr = ""
+        loop do
+          line = SCR.Read(path(".process.read_line_stderr"))
+          break unless line
+          stderr << line
+        end
+
+        # error report, %1 is exit code of the command (integer), %2 output of command
         Report.Error(
-          Builtins.sformat(_("Disks formatting failed. Exit code: %1."), iret)
+          Builtins.sformat(_("Disks formatting failed. Exit code: %1.\nError output: %2"), iret, stderr)
         )
       end
 
