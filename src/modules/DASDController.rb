@@ -146,8 +146,18 @@ module Yast
             format = true
             to_reactivate << device
           end
-          if format && can_be_formatted?(device)
-            to_format << (device["dev_name"] || GetDeviceName(channel))
+          if format
+            if can_be_formatted?(device)
+              to_format << (device["dev_name"] || GetDeviceName(channel))
+            else
+              Report.Error(
+                # TRANSLATORS %s is device name
+                format(
+                  _("Cannot format device '%s'. Only ECKD can be formatted."),
+                  device["dev_name"] || GetDeviceName(channel)
+                )
+              )
+            end
           # unformtted disk, manual (not AutoYaST)
           elsif act_ret == 8
             unformatted_devices << (device["dev_name"] || GetDeviceName(channel))
@@ -446,7 +456,7 @@ module Yast
     # @param [String] channel string channel of the device
     # @param [Fixnum] ret integer exit code of the operation
     def ReportActivationError(channel, ret)
-      case ret["exitstatus"]
+      case ret["exit"]
       when 0
 
       when 1
@@ -523,7 +533,7 @@ module Yast
             # error report, %1 is device identification, %2 is integer code
             _("%1: Unknown error %2.\nstderr:%3\nstdout:%4"),
             channel,
-            ret["exitstatus"],
+            ret["exit"],
             ret["stderr"],
             ret["stdout"]
           )
@@ -552,7 +562,7 @@ module Yast
         ret
       )
 
-      case ret["exitcode"]
+      case ret["exit"]
       when 8
         # unformatted disk is now handled now outside this function
         # however, don't issue any error
@@ -566,7 +576,7 @@ module Yast
 
       @disk_configured = true
 
-      ret["exitcode"]
+      ret["exit"]
     end
 
     # Deactivate disk
