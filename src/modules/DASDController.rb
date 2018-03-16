@@ -659,7 +659,7 @@ module Yast
           )
           stderr = ""
           loop do
-            line = SCR.Read(path(".process.read_line_stderr")
+            line = SCR.Read(path(".process.read_line_stderr"))
             break unless line
             stderr << line
           end
