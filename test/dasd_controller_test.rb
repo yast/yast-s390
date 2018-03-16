@@ -21,8 +21,8 @@ describe "Yast::DASDController" do
 
     before do
       allow(Yast::SCR).to receive(:Execute).with(Yast::Path.new(".target.bash_output"),
-        /\/sbin\/dasdview/).
-        and_return({"exitstatus" => 0, "stdout" => load_file("dasdview_eckd.txt"), "stderr" => ""})
+        /\/sbin\/dasdview/)
+        .and_return("exitstatus" => 0, "stdout" => load_file("dasdview_eckd.txt"), "stderr" => "")
 
       allow(Yast::Mode).to receive(:normal).and_return(false)
       allow(Yast::Mode).to receive(:installation).and_return(true)
@@ -44,8 +44,8 @@ describe "Yast::DASDController" do
 
     it "does not format disk for FBA disk" do
       allow(Yast::SCR).to receive(:Execute).with(Yast::Path.new(".target.bash_output"),
-        /\/sbin\/dasdview/).
-        and_return({"exitstatus" => 0, "stdout" => load_file("dasdview_fba.txt"), "stderr" => ""})
+        /\/sbin\/dasdview/)
+        .and_return("exitstatus" => 0, "stdout" => load_file("dasdview_fba.txt"), "stderr" => "")
 
       expect(Yast::SCR).to_not receive(:Execute).with(Yast::Path.new(".process.start_shell"),
         "/sbin/dasdfmt -Y -P 1 -b 4096 -y -r 10 -m 10 -f '/dev/dasda'")
