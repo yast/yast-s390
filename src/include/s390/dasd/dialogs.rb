@@ -306,18 +306,27 @@ module Yast
               [id, "resource", "io", 0, "mode"],
               "ro"
             )
+            channel = Ops.get_string(DASDController.devices, [id, "channel"], "")
             if !active
               # error report, %1 is device identification
               problem = Builtins.sformat(
                 _("Disk %1 is not active."),
-                Ops.get_string(DASDController.devices, [id, "channel"], "")
+                channel
               )
             elsif access != "rw"
               # error report, %1 is device identification
               problem = Builtins.sformat(
                 _("Disk %1 is not accessible for writing."),
-                Ops.get_string(DASDController.devices, [id, "channel"], "")
+                channel
               )
+            elsif !DASDController.can_be_formatted?(DASDController.devices[id])
+              # error report, %1 is device identification
+              problem =
+                # TRANSLATORS %s is device indetification
+                format(
+                  _("Disk %s cannot be formatted. Only ECKD can be formatted."),
+                  channel
+                )
             end
           end
           if !Builtins.isempty(problem)
