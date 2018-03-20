@@ -5,6 +5,8 @@ require_relative "./test_helper"
 Yast.import "DASDController"
 
 describe "Yast::DASDController" do
+  subject { Yast::DASDController }
+
   describe "#IsAvailable" do
     it "returns true if .probe.disk contains DASDs" do
       expect(Yast::SCR).to receive(:Read).with(Yast.path(".probe.disk")).once
@@ -52,6 +54,89 @@ describe "Yast::DASDController" do
 
       expect(Yast::DASDController.Import(data)).to eq(true)
       expect(Yast::DASDController.Write).to eq(true)
+    end
+  end
+
+  describe "#ProbeDisks" do
+    let(:disks) { [disk] }
+
+    let(:disk) do
+      {
+        "device" => "DASD",
+        "sysfs_bus_id" => "0.0.0150",
+        "resource" => {
+           "io" => []
+        }
+      }
+    end
+
+    before do
+      allow(Yast::SCR).to receive(:Read).with(Yast::Path.new(".probe.disk")).and_return(disks)
+    end
+
+    context "there is non-dasd disk" do
+      let(:disk) do
+        {
+          "device" => "ZFCP",
+          "sysfs_bus_id" => "0.0.0150",
+          "resource" => {
+             "io" => []
+          }
+        }
+      end
+
+      it "is not added to devices" do
+        subject.ProbeDisks
+
+        expect(subject.devices).to be_empty
+      end
+    end
+
+    context "there is not activated dasd disk" do
+      let(:disk) do
+        {
+          "device" => "DASD",
+          "sysfs_bus_id" => "0.0.0150",
+          "resource" => {
+             "io" => []
+          }
+        }
+      end
+
+      it "is added to devices with channel entry" do
+        subject.ProbeDisks
+
+        expect(subject.devices.size).to eq 1
+        expect(subject.devices.values.first["channel"]).to eq "0.0.0150"
+      end
+    end
+
+    context "there is activated dasd disk" do
+      let(:disk) do
+        {
+          "device" => "DASD",
+          "dev_name" => "/dev/dasda",
+          "sysfs_bus_id" => "0.0.0150",
+          "resource" => {
+             "io" => ["active" => true]
+          }
+        }
+      end
+
+      before do
+        allow(Yast::FileUtils).to receive(:Exists).and_return(false)
+      end
+
+      it "is added to devices with formatted info" do
+        allow(Yast::SCR).to receive(:Execute).with(Yast::Path.new(".target.bash_output"),
+          /\/sbin\/dasdview/)
+          .and_return("exitstatus" => 0, "stdout" => load_file("dasdview_unformatted.txt"), "stderr" => "")
+
+        subject.ProbeDisks
+
+        expect(subject.devices.size).to eq 1
+        expect(subject.devices.values.first["formatted"]).to eq false
+      end
     end
   end
 end
