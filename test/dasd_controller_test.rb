@@ -62,10 +62,10 @@ describe "Yast::DASDController" do
 
     let(:disk) do
       {
-        "device" => "DASD",
+        "device"       => "DASD",
         "sysfs_bus_id" => "0.0.0150",
-        "resource" => {
-           "io" => []
+        "resource"     => {
+          "io" => []
         }
       }
     end
@@ -77,10 +77,10 @@ describe "Yast::DASDController" do
     context "there is non-dasd disk" do
       let(:disk) do
         {
-          "device" => "ZFCP",
+          "device"       => "ZFCP",
           "sysfs_bus_id" => "0.0.0150",
-          "resource" => {
-             "io" => []
+          "resource"     => {
+            "io" => []
           }
         }
       end
@@ -95,10 +95,10 @@ describe "Yast::DASDController" do
     context "there is not activated dasd disk" do
       let(:disk) do
         {
-          "device" => "DASD",
+          "device"       => "DASD",
           "sysfs_bus_id" => "0.0.0150",
-          "resource" => {
-             "io" => []
+          "resource"     => {
+            "io" => []
           }
         }
       end
@@ -114,11 +114,11 @@ describe "Yast::DASDController" do
     context "there is activated dasd disk" do
       let(:disk) do
         {
-          "device" => "DASD",
-          "dev_name" => "/dev/dasda",
+          "device"       => "DASD",
+          "dev_name"     => "/dev/dasda",
           "sysfs_bus_id" => "0.0.0150",
-          "resource" => {
-             "io" => ["active" => true]
+          "resource"     => {
+            "io" => ["active" => true]
           }
         }
       end
