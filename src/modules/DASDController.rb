@@ -117,6 +117,10 @@ module Yast
       true
     end
 
+    # Returns if device can be formatted
+    #
+    # @param [Hash] device one of the #devices values
+    # @return [Boolean]
     def can_be_formatted?(device)
       device_name = device["dev_name"] || GetDeviceName(device["channel"])
       command = "/sbin/dasdview --extended #{device_name.shellescape}"
@@ -154,7 +158,7 @@ module Yast
               Report.Error(
                 # TRANSLATORS %s is device name
                 format(
-                  _("Cannot format device '%s'. Only ECKD can be formatted."),
+                  _("Cannot format device '%s'. Only ECKD disks can be formatted."),
                   device_name
                 )
               )
@@ -669,18 +673,12 @@ module Yast
           iret2 = Convert.to_integer(
             SCR.Read(path(".process.status"), process_id)
           )
-          stderr = ""
-          loop do
-            line = SCR.Read(path(".process.read_line_stderr"))
-            break unless line
-            stderr << line
-          end
           # error report, %1 is exit code of the command (integer)
           Report.Error(
             Builtins.sformat(
               _("Disks formatting failed. Exit code: %1.\nError output:%2"),
               iret2,
-              stderr
+              stderr_from_proccess
             )
           )
           return
@@ -773,16 +771,9 @@ module Yast
       UI.CloseDialog
       iret = Convert.to_integer(SCR.Read(path(".process.status"), process_id))
       if iret != 0
-        stderr = ""
-        loop do
-          line = SCR.Read(path(".process.read_line_stderr"))
-          break unless line
-          stderr << line
-        end
-
         # error report, %1 is exit code of the command (integer), %2 output of command
         Report.Error(
-          Builtins.sformat(_("Disks formatting failed. Exit code: %1.\nError output: %2"), iret, stderr)
+          Builtins.sformat(_("Disks formatting failed. Exit code: %1.\nError output: %2"), iret, stderr_from_proccess)
         )
       end
 
@@ -849,6 +840,19 @@ module Yast
     publish function: :Summary, type: "list <string> ()"
     publish function: :AutoPackages, type: "map ()"
     publish function: :IsAvailable, type: "boolean ()"
+
+  private
+
+    def stderr_from_proccess
+      stderr = ""
+      loop do
+        line = SCR.Read(path(".process.read_line_stderr"))
+        break unless line
+        stderr << line
+      end
+
+      stderr
+    end
   end
 
   DASDController = DASDControllerClass.new

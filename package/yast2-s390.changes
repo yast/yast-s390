@@ -1,7 +1,7 @@
 -------------------------------------------------------------------
 Tue Mar 20 15:12:15 UTC 2018 - jreidinger@suse.com
 
-- Improve error reporting and logging when underlaying scripts
+- Improve error reporting and logging when underlying scripts
   failed for DASD (bsc#1070265)
 - Allow to format ECKD DASD disk only (bsc#1070265)
 - 4.0.3

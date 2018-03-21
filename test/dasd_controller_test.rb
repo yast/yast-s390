@@ -22,7 +22,7 @@ describe "Yast::DASDController" do
     end
 
     before do
-      allow(Yast::SCR).to receive(:Execute).with(Yast::Path.new(".target.bash_output"),
+      allow(Yast::SCR).to receive(:Execute).with(path(".target.bash_output"),
         /\/sbin\/dasdview/)
         .and_return("exitstatus" => 0, "stdout" => load_file("dasdview_eckd.txt"), "stderr" => "")
 
@@ -37,7 +37,7 @@ describe "Yast::DASDController" do
 
     it "writes the dasd settings to the target (formating disks)" do
       # bnc 928388
-      expect(Yast::SCR).to receive(:Execute).with(Yast::Path.new(".process.start_shell"),
+      expect(Yast::SCR).to receive(:Execute).with(path(".process.start_shell"),
         "/sbin/dasdfmt -Y -P 1 -b 4096 -y -r 10 -m 10 -f '/dev/dasda'")
 
       expect(Yast::DASDController.Import(data)).to eq(true)
@@ -45,12 +45,12 @@ describe "Yast::DASDController" do
     end
 
     it "does not format disk for FBA disk" do
-      allow(Yast::SCR).to receive(:Execute).with(Yast::Path.new(".target.bash_output"),
+      allow(Yast::SCR).to receive(:Execute).with(path(".target.bash_output"),
         /\/sbin\/dasdview/)
         .and_return("exitstatus" => 0, "stdout" => load_file("dasdview_fba.txt"), "stderr" => "")
 
-      expect(Yast::SCR).to_not receive(:Execute).with(Yast::Path.new(".process.start_shell"),
-        "/sbin/dasdfmt -Y -P 1 -b 4096 -y -r 10 -m 10 -f '/dev/dasda'")
+      expect(Yast::SCR).to_not receive(:Execute).with(path(".process.start_shell"),
+        /dasdfmt.*\/dev\/dasda/)
 
       expect(Yast::DASDController.Import(data)).to eq(true)
       expect(Yast::DASDController.Write).to eq(true)
@@ -71,7 +71,7 @@ describe "Yast::DASDController" do
     end
 
     before do
-      allow(Yast::SCR).to receive(:Read).with(Yast::Path.new(".probe.disk")).and_return(disks)
+      allow(Yast::SCR).to receive(:Read).with(path(".probe.disk")).and_return(disks)
     end
 
     context "there is non-dasd disk" do
@@ -128,7 +128,7 @@ describe "Yast::DASDController" do
       end
 
       it "is added to devices with formatted info" do
-        allow(Yast::SCR).to receive(:Execute).with(Yast::Path.new(".target.bash_output"),
+        allow(Yast::SCR).to receive(:Execute).with(path(".target.bash_output"),
           /\/sbin\/dasdview/)
           .and_return("exitstatus" => 0, "stdout" => load_file("dasdview_unformatted.txt"), "stderr" => "")
 
