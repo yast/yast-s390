@@ -320,11 +320,10 @@ module Yast
                 channel
               )
             elsif !DASDController.can_be_formatted?(DASDController.devices[id])
-              # error report, %1 is device identification
               problem =
-                # TRANSLATORS %s is device indetification
+                # TRANSLATORS %s is device idetification
                 format(
-                  _("Disk %s cannot be formatted. Only ECKD can be formatted."),
+                  _("Disk %s cannot be formatted. Only ECKD disks can be formatted."),
                   channel
                 )
             end

@@ -146,21 +146,22 @@ module Yast
             format = true
             to_reactivate << device
           end
+          device_name = device["dev_name"] || GetDeviceName(channel)
           if format
             if can_be_formatted?(device)
-              to_format << (device["dev_name"] || GetDeviceName(channel))
+              to_format << device_name
             else
               Report.Error(
                 # TRANSLATORS %s is device name
                 format(
                   _("Cannot format device '%s'. Only ECKD can be formatted."),
-                  device["dev_name"] || GetDeviceName(channel)
+                  device_name
                 )
               )
             end
-          # unformtted disk, manual (not AutoYaST)
+          # unformatted disk, manual (not AutoYaST)
           elsif act_ret == 8
-            unformatted_devices << (device["dev_name"] || GetDeviceName(channel))
+            unformatted_devices << device_name
           end
         end
 
@@ -454,7 +455,7 @@ module Yast
 
     # Report error occured during device activation
     # @param [String] channel string channel of the device
-    # @param [Fixnum] ret integer exit code of the operation
+    # @param [Hash] ret output of bash_output agent run
     def ReportActivationError(channel, ret)
       case ret["exit"]
       when 0
