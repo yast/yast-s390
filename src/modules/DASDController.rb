@@ -773,7 +773,8 @@ module Yast
       if iret != 0
         # error report, %1 is exit code of the command (integer), %2 output of command
         Report.Error(
-          Builtins.sformat(_("Disks formatting failed. Exit code: %1.\nError output: %2"), iret, stderr_from_proccess)
+          Builtins.sformat(_("Disks formatting failed. Exit code: %1.\nError output: %2"),
+            iret, stderr_from_proccess)
         )
       end
 
