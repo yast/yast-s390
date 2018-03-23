@@ -6,7 +6,7 @@ https://coveralls.io/repos/github/yast/yast-s390/badge.svg?branch=master)](https
 
 ## Resources
 
-For s390 development these resources is used:
+For s390 development these resources are used:
 
 - https://www.ibm.com/developerworks/linux/linux390/documentation_dev.html
 - https://www.ibm.com/developerworks/linux/linux390/documentation_suse.html (for released products)
