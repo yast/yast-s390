@@ -1,4 +1,5 @@
-FROM yastdevel/ruby:sle12-sp3
+FROM yastdevel/ruby:sle12-sp4
+
 COPY . /usr/src/app
 # a workaround to allow package building on a non-s390 machine
 RUN sed -i "/^ExclusiveArch:/d" package/*.spec
