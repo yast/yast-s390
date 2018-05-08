@@ -24,6 +24,9 @@
 # Summary:	Wizards definitions
 # Authors:	Jiri Srain <jsrain@suse.cz>
 #
+
+require "y2storage/inhibitors"
+
 module Yast
   module S390DasdWizardsInclude
     def initialize_s390_dasd_wizards(include_target)
@@ -80,7 +83,13 @@ module Yast
       Wizard.CreateDialog
       Wizard.SetDesktopIcon("dasd")
 
-      ret = Sequencer.Run(aliases, sequence)
+      begin
+        inhibitors = Y2Storage::Inhibitors.new
+        inhibitors.inhibit
+        ret = Sequencer.Run(aliases, sequence)
+      ensure
+        inhibitors.uninhibit
+      end
 
       Wizard.CloseDialog
 
