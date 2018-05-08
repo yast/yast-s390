@@ -17,7 +17,7 @@
 
 
 Name:           yast2-s390
-Version:        4.0.3
+Version:        4.0.4
 Release:        0
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -31,6 +31,11 @@ BuildRequires:	yast2-ruby-bindings >= 3.1.7
 BuildRequires:  rubygem(%rb_default_ruby_abi:rspec)
 BuildRequires:  rubygem(%rb_default_ruby_abi:yast-rake)
 BuildRequires:	update-desktop-files
+
+# Y2Storage::Inhibitors
+BuildRequires: yast2-storage-ng >= 4.0.175
+Requires:      yast2-storage-ng >= 4.0.175
+
 ExclusiveArch:  s390 s390x
 Requires:	yast2
 Requires:	yast2-ruby-bindings >= 3.1.7
