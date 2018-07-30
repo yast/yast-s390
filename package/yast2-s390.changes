@@ -1,7 +1,7 @@
 -------------------------------------------------------------------
-Wed Nov 08 22:44:33 CET 2017 - aschnell@suse.com
+Mon Jul 30 13:07:50 UTC 2018 - knut.anderssen@suse.com
 
-- fixed call of dasdview (bsc#1067265)
+- Backported fix for calling dasdview (bsc#1103059)
 - 3.2.3
 
 -------------------------------------------------------------------
