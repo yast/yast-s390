@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Aug 20 09:20:22 CEST 2018 - schubi@suse.de
+
+- Switched license in spec file from SPDX2 to SPDX3 format.
+
+-------------------------------------------------------------------
 Tue May 08 14:01:56 CEST 2018 - aschnell@suse.com
 
 - disable mdadm auto assemble during DASD dialog (bsc#1089645)
