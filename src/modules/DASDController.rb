@@ -495,26 +495,13 @@ module Yast
         Report.Error(Builtins.sformat(_("%1: DASD is not formatted."), channel))
       when 16
         # https://bugzilla.suse.com/show_bug.cgi?id=1091797#c8
-        headline = _("Error: channel in use")
         # TRANSLATORS: error report, %1 is device identification
         message = Builtins.sformat(_("%1 DASD is in use and cannot be deactivated."), channel)
-        details = output_details(ret)
-
-        if details.empty?
-          Report.Error(message)
-        else
-          message << "\n\n#{_("See details for more info.")}"
-          Yast2::Popup.show(message, headline: headline, details: details)
-        end
+        report_error(_("Error: channel in use"), message, output_details(ret))
       else
-        message = format(
-          # TRANSLATORS: error message, %channel is device identification, %code is an integer code
-          _("%{channel}: Unknown error %{code}\n\nSee details for more info."),
-          channel: channel,
-          code:    ret["exit"]
-        )
-
-        Yast2::Popup.show(message, headline: _("Unknown error"), details: output_details(ret))
+        # TRANSLATORS: error message, %1 is device identification, %2 is an integer code
+        message = Builtins.sformat(_("%1 Unknown error %2"), channel, ret["exit"])
+        report_error(message, _("Unknown error"), output_details(ret))
       end
 
       nil
@@ -826,19 +813,32 @@ module Yast
 
       stderr
     end
-  end
 
-  # Returns an string containing the available stdout and/or stderr
-  #
-  # @param ret [Hash]
-  # @return [String]
-  def output_details(ret)
-    output = {
-      stderr: ret["stderr"].to_s.strip,
-      stdout: ret["stdout"].to_s.strip
-    }
+    # Returns an string containing the available stdout and/or stderr
+    #
+    # @param ret [Hash]
+    # @return [String]
+    def output_details(ret)
+      output = {
+        stderr: ret["stderr"].to_s.strip,
+        stdout: ret["stdout"].to_s.strip
+      }
 
-    output.map { |k, v| "#{k}: #{v}" unless v.empty? }.compact.join("\n\n")
+      output.map { |k, v| "#{k}: #{v}" unless v.empty? }.compact.join("\n\n")
+    end
+
+    # Reports the error in the proper way
+    #
+    # When an error has details to give more feedback, it is preferable to display it in a Popup
+    # unless the code has been executed by AutoYaST, in which case the Yast::Report.Error must be
+    # used to avoid blocking it.
+    def report_error(headline, message, details)
+      if Mode.auto || details.empty?
+        Report.Error("#{message}\n#{details}")
+      else
+        Yast2::Popup.show(message, headline: headline, details: details)
+      end
+    end
   end
 
   DASDController = DASDControllerClass.new

@@ -8,12 +8,14 @@ describe "Yast::DASDController" do
   subject { Yast::DASDController }
 
   describe "#DeactivateDisk" do
+    let(:auto) { false }
     let(:channel) { "0.0.0160" }
     let(:diagnose) { false }
     let(:exit_code) { 0 }
     let(:command_result) { { "exit" => exit_code } }
 
     before do
+      allow(Yast::Mode).to receive(:auto).and_return(auto)
       allow(Yast::Report).to receive(:Error)
       allow(Yast2::Popup).to receive(:show)
       allow(Yast::SCR).to receive(:Execute).and_return(command_result)
@@ -48,35 +50,54 @@ describe "Yast::DASDController" do
 
         subject.DeactivateDisk(channel, diagnose)
       end
+
+      context "but in Mode.auto" do
+        let(:auto) { true }
+
+        it "reports the error throught Yast::Report" do
+          expect(Yast::Report).to receive(:Error)
+
+          subject.DeactivateDisk(channel, diagnose)
+        end
+      end
     end
 
     context "when disk is being in use" do
       let(:exit_code) { 16 }
+      let(:command_result) do
+        {
+          "exit"   => exit_code,
+          "stderr" => "Warning: ECKD DASD 0.0.0150 is in use!\n" \
+                      "The following resources may be affected:\n" \
+                      "- Mount point /mnt\n",
+          "stdout" => "Continue with operation? (yes/no)"
+        }
+      end
 
       it "returns nil" do
         expect(subject.DeactivateDisk(channel, diagnose)).to be_nil
       end
 
-      context "and there are details to show" do
-        let(:command_result) do
-          {
-            "exit"   => exit_code,
-            "stderr" => "Warning: ECKD DASD 0.0.0150 is in use!\n" \
-                        "The following resources may be affected:\n" \
-                        "- Mount point /mnt\n",
-            "stdout" => "Continue with operation? (yes/no)"
-          }
-        end
+      it "reports an error using a popup with details" do
+        expect(Yast2::Popup).to receive(:show).with(anything, hash_including(:headline, :details))
 
-        it "reports an error with details" do
-          expect(Yast2::Popup).to receive(:show).with(anything, hash_including(:headline, :details))
+        subject.DeactivateDisk(channel, diagnose)
+      end
+
+      context "but in Mode.auto" do
+        let(:auto) { true }
+
+        it "reports the error throught Yast::Report" do
+          expect(Yast::Report).to receive(:Error).with(/in use/)
 
           subject.DeactivateDisk(channel, diagnose)
         end
       end
 
-      context "and there are not details to show" do
-        it "reports an error" do
+      context "but there are not details to show" do
+        let(:command_result) { { "exit" => exit_code } }
+
+        it "reports an error throught Yast::Report" do
           expect(Yast::Report).to receive(:Error).with(/in use/)
 
           subject.DeactivateDisk(channel, diagnose)
