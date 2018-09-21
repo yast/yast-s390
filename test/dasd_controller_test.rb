@@ -31,6 +31,25 @@ describe "Yast::DASDController" do
       subject.DeactivateDisk(channel, diagnose)
     end
 
+    context "whit unknown exit code" do
+      let(:command_result) do
+        {
+          "exit"   => exit_code,
+          "stderr" => "Warning: ECKD DASD 0.0.0150 is unknown!\n" \
+                      "The following unknown resources may be affected:\n" \
+                      "- Mount point /unknown\n",
+          "stdout" => "Continue with operation? (yes/no)"
+        }
+      end
+      let(:exit_code) { "unknown" }
+
+      it "reports an error with details" do
+        expect(Yast2::Popup).to receive(:show).with(anything, hash_including(:headline, :details))
+
+        subject.DeactivateDisk(channel, diagnose)
+      end
+    end
+
     context "when disk is being in use" do
       let(:exit_code) { 16 }
 
