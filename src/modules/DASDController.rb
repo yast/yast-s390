@@ -29,6 +29,7 @@
 # Representation of the configuration of controller.
 # Input and output routines.
 require "yast"
+require "yast2/popup"
 require "shellwords"
 
 module Yast
@@ -532,6 +533,21 @@ module Yast
             channel
           )
         )
+      when 16
+        # https://bugzilla.suse.com/show_bug.cgi?id=1091797#c8
+        details = []
+        details << "Stdout:\n #{ret["stdout"]}" unless ret["stdout"].to_s.empty?
+        details << "Stderr:\n #{ret["stderr"]}" unless ret["stderr"].to_s.empty?
+        headline = _("Error: channel in use")
+        # TRANSLATORS: error report, %1 is device identification
+        message = Builtins.sformat(_("%1 DASD is in use and cannot be deactivated."), channel)
+
+        if details.empty?
+          Report.Error(message)
+        else
+          message << "\n\n#{_("See the details for more info.")}"
+          Yast2::Popup.show(message, headline: headline, details: details.join("\n\n"))
+        end
       else
         Report.Error(
           Builtins.sformat(
@@ -589,7 +605,7 @@ module Yast
     # @param [Boolean] diag boolean Activate DIAG or not
     def DeactivateDisk(channel, diag)
       command = Builtins.sformat(
-        "/sbin/dasd_configure '%1' %2 %3",
+        "/sbin/dasd_configure '%1' %2 %3 < /dev/null",
         channel,
         0,
         diag ? 1 : 0
