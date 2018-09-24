@@ -29,6 +29,7 @@
 # Representation of the configuration of controller.
 # Input and output routines.
 require "yast"
+require "yast2/popup"
 require "shellwords"
 
 module Yast
@@ -465,84 +466,42 @@ module Yast
       when 0
 
       when 1
-        Report.Error(
-          Builtins.sformat(
-            # error report, %1 is device identification
-            _("%1: sysfs not mounted."),
-            channel
-          )
-        )
+        # error report, %1 is device identification
+        Report.Error(Builtins.sformat(_("%1: sysfs not mounted."), channel))
       when 2
-        Report.Error(
-          Builtins.sformat(
-            # error report, %1 is device identification
-            _("%1: Invalid status for <online>."),
-            channel
-          )
-        )
+        # error report, %1 is device identification
+        Report.Error(Builtins.sformat(_("%1: Invalid status for <online>."), channel))
       when 3
-        Report.Error(
-          Builtins.sformat(
-            # error report, %1 is device identification
-            _("%1: No device found for <ccwid>."),
-            channel
-          )
-        )
+        # error report, %1 is device identification
+        Report.Error(Builtins.sformat(_("%1: No device found for <ccwid>."), channel))
       when 4
-        Report.Error(
-          Builtins.sformat(
-            # error report, %1 is device identification
-            _("%1: Could not change state of the device."),
-            channel
-          )
-        )
+        # error report, %1 is device identification
+        Report.Error(Builtins.sformat(_("%1: Could not change state of the device."), channel))
       when 5
         # https://bugzilla.novell.com/show_bug.cgi?id=446998#c15
-        Report.Error(
-          Builtins.sformat(
-            # error report, %1 is device identification
-            _("%1: Device is not a DASD."),
-            channel
-          )
-        )
+        # error report, %1 is device identification
+        Report.Error(Builtins.sformat(_("%1: Device is not a DASD."), channel))
       when 6
         # https://bugzilla.novell.com/show_bug.cgi?id=446998#c15
-        Report.Error(
-          Builtins.sformat(
-            # error report, %1 is device identification
-            _("%1: Could not load module."),
-            channel
-          )
-        )
+        # error report, %1 is device identification
+        Report.Error(Builtins.sformat(_("%1: Could not load module."), channel))
       when 7
         # http://bugzilla.novell.com/show_bug.cgi?id=561876#c8
-        Report.Error(
-          Builtins.sformat(
-            # error report, %1 is device identification
-            _("%1: Failed to activate DASD."),
-            channel
-          )
-        )
+        # error report, %1 is device identification
+        Report.Error(Builtins.sformat(_("%1: Failed to activate DASD."), channel))
       when 8
         # http://bugzilla.novell.com/show_bug.cgi?id=561876#c8
-        Report.Error(
-          Builtins.sformat(
-            # error report, %1 is device identification
-            _("%1: DASD is not formatted."),
-            channel
-          )
-        )
+        # error report, %1 is device identification
+        Report.Error(Builtins.sformat(_("%1: DASD is not formatted."), channel))
+      when 16
+        # https://bugzilla.suse.com/show_bug.cgi?id=1091797#c8
+        # TRANSLATORS: error report, %1 is device identification
+        message = Builtins.sformat(_("%1 DASD is in use and cannot be deactivated."), channel)
+        report_error(_("Error: channel in use"), message, output_details(ret))
       else
-        Report.Error(
-          Builtins.sformat(
-            # error report, %1 is device identification, %2 is integer code
-            _("%1: Unknown error %2.\nstderr:%3\nstdout:%4"),
-            channel,
-            ret["exit"],
-            ret["stderr"],
-            ret["stdout"]
-          )
-        )
+        # TRANSLATORS: error message, %1 is device identification, %2 is an integer code
+        message = Builtins.sformat(_("%1 Unknown error %2"), channel, ret["exit"])
+        report_error(message, _("Unknown error"), output_details(ret))
       end
 
       nil
@@ -589,7 +548,7 @@ module Yast
     # @param [Boolean] diag boolean Activate DIAG or not
     def DeactivateDisk(channel, diag)
       command = Builtins.sformat(
-        "/sbin/dasd_configure '%1' %2 %3",
+        "/sbin/dasd_configure '%1' %2 %3 < /dev/null",
         channel,
         0,
         diag ? 1 : 0
@@ -853,6 +812,32 @@ module Yast
       end
 
       stderr
+    end
+
+    # Returns an string containing the available stdout and/or stderr
+    #
+    # @param ret [Hash]
+    # @return [String]
+    def output_details(ret)
+      output = {
+        stderr: ret["stderr"].to_s.strip,
+        stdout: ret["stdout"].to_s.strip
+      }
+
+      output.map { |k, v| "#{k}: #{v}" unless v.empty? }.compact.join("\n\n")
+    end
+
+    # Reports the error in the proper way
+    #
+    # When an error has details to give more feedback, it is preferable to display it in a Popup
+    # unless the code has been executed by AutoYaST, in which case the Yast::Report.Error must be
+    # used to avoid blocking it.
+    def report_error(headline, message, details)
+      if Mode.auto || details.empty?
+        Report.Error("#{message}\n#{details}")
+      else
+        Yast2::Popup.show(message, headline: headline, details: details)
+      end
     end
   end
 

@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Sep 21 11:43:00 UTC 2018 - dgonzalez@suse.com
+
+- Avoid hanging YaST when try to deactivate a DASD in use
+  (bsc#1091797)
+- 4.0.5
+
+-------------------------------------------------------------------
 Mon Aug 20 09:20:22 CEST 2018 - schubi@suse.de
 
 - Switched license in spec file from SPDX2 to SPDX3 format.
