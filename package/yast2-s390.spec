@@ -69,3 +69,4 @@ rake install DESTDIR="%{buildroot}"
 %{yast_desktopdir}/*.desktop
 %{yast_schemadir}/autoyast/rnc/*.rnc
 %doc %{yast_docdir}
+%license COPYING

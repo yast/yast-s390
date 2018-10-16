@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Oct 16 15:14:53 CEST 2018 - schubi@suse.de
+
+- Added license file to spec. 
+
+-------------------------------------------------------------------
 Fri Sep 21 11:43:00 UTC 2018 - dgonzalez@suse.com
 
 - Avoid hanging YaST when try to deactivate a DASD in use
