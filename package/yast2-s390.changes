@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Feb  5 12:44:58 UTC 2019 - jlopez@suse.com
+
+- Added new client for I/O devices pre-configuration (fate#326828).
+- 4.1.0
+
+-------------------------------------------------------------------
 Tue Oct 16 15:14:53 CEST 2018 - schubi@suse.de
 
 - Added license file to spec. 
