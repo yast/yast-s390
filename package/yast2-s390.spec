@@ -65,6 +65,7 @@ rake install DESTDIR="%{buildroot}"
 %{yast_yncludedir}/s390/*
 %{yast_clientdir}/*.rb
 %{yast_moduledir}/*
+%{yast_dir}/lib
 %{yast_scrconfdir}/*.scr
 %{yast_desktopdir}/*.desktop
 %{yast_schemadir}/autoyast/rnc/*.rnc
