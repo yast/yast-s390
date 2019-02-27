@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Feb 26 12:57:12 UTC 2019 - José Iván López González <jlopez@suse.com>
+
+- Version bump (bsc#1124009)
+- 4.1.0
+
+-------------------------------------------------------------------
 Tue Oct 16 15:14:53 CEST 2018 - schubi@suse.de
 
 - Added license file to spec. 
