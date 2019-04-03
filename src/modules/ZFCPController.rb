@@ -557,13 +557,13 @@ module Yast
           )
         )
       when 10
-        Report.Message(
-          Builtins.sformat(
-            # message, %1 is device identification
-            _("%1: This host adapter supports auto LUN scan."),
-            channel
-          )
+        msg = Builtins.sformat(
+          # message, %1 is device identification
+          _("%1: This host adapter supports auto LUN scan."),
+          channel
         )
+        # do not show this during auto install (bsc#1104021)
+        Mode.autoinst ? log.info(msg) : Report.Message(msg)
       else
         Report.Error(
           Builtins.sformat(
