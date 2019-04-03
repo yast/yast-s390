@@ -311,7 +311,7 @@ module Yast
             ComboBox(Id(:lun), Opt(:hstretch, :editable), _("&LUN"), luns)
           ),
           VSpacing(2),
-          Label(_("If no WWPN and no LUN have been defined the system is trying to use allow_lun_scan.")),
+          Label(_("If no WWPN and no LUN have been defined the system is trying to use auto LUN scan.")),
           VStretch()
         ),
         HStretch()
