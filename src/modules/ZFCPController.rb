@@ -560,7 +560,7 @@ module Yast
         Report.Message(
           Builtins.sformat(
             # message, %1 is device identification
-            _("%1: This host adapter supports allow_lun_scan."),
+            _("%1: This host adapter supports auto LUN scan."),
             channel
           )
         )
