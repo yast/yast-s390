@@ -84,7 +84,8 @@ module Yast
               "<p>The LUN must be entered with lowercase letters as a 16-digit hex value with\n" \
               "all trailing zeros, such as <tt>0x52ca000000000000</tt>.</p>" \
               "<p>If no WWPN <b>and</b> no LUN have been defined the system is " \
-              "trying to use allow_lun_scan.</p>"
+              "trying to use auto LUN scan. Auto LUN scan can be turned off using " \
+              "the kernel parameter <tt>allow_lun_scan=0</tt>.</p>"
           ) +
           # Disk selection dialog Warning
           _("<h1>Warning</h1>") +
