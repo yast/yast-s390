@@ -4,7 +4,7 @@ Categories=Settings;System;Qt;X-SuSE-YaST;X-SuSE-YaST-Hardware;
 
 X-KDE-ModuleType=Library
 X-KDE-HasReadOnlyMode=true
-X-SuSE-YaST-Call=dump
+X-SuSE-YaST-Call=xpram
 
 X-SuSE-YaST-Group=Hardware
 X-SuSE-YaST-Argument=
@@ -12,11 +12,12 @@ X-SuSE-YaST-RootOnly=true
 X-SuSE-YaST-AutoInst=
 X-SuSE-YaST-Geometry=
 X-SuSE-YaST-SortKey=
-X-SuSE-YaST-AutoInstResource=
+X-SuSE-YaST-AutoInstResource=xpram
 
-Icon=yast-dump
-Exec=/sbin/yast2 dump
+Icon=yast-xpram
+Exec=xdg-su -c "/sbin/yast2 xpram"
 
-Name=Dump Devices
-GenericName=Configure Dump Devices
+Name=YaST XPRAM
+GenericName=XPRAM device
+Comment=Configure an XpRAM device (XpRAM)
 StartupNotify=true

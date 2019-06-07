@@ -226,7 +226,7 @@ module Yast
     def DumpSequence
       # reset dialog if required
       Wizard.CreateDialog
-      Wizard.SetDesktopIcon("dump")
+      Wizard.SetDesktopIcon("org.opensuse.yast.Dump")
       ret = nil
 
       loop do

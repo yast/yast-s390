@@ -17,6 +17,7 @@ X-SuSE-YaST-AutoInstResource=
 Icon=yast-onpanic
 Exec=/sbin/yast2 onpanic
 
-Name=On Panic
-GenericName=Configures the actions which should be performed after a kernel panic
+Name=YaST On Panic
+GenericName=On Panic
+Comment=Configures the actions which should be performed after a kernel panic
 StartupNotify=true

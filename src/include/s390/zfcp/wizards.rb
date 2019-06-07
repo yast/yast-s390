@@ -77,7 +77,7 @@ module Yast
       }
 
       Wizard.CreateDialog
-      Wizard.SetDesktopIcon("zfcp")
+      Wizard.SetDesktopIcon("org.opensuse.yast.ZFCP")
 
       ret = Sequencer.Run(aliases, sequence)
 
@@ -96,7 +96,7 @@ module Yast
       contents = Label(_("Initializing..."))
 
       Wizard.CreateDialog
-      Wizard.SetDesktopIcon("zfcp")
+      Wizard.SetDesktopIcon("org.opensuse.yast.ZFCP")
       Wizard.SetContentsButtons(
         caption,
         contents,

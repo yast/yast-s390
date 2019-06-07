@@ -315,7 +315,7 @@ module Yast
     # The whole sequence
     def OnPanicSequence
       Wizard.CreateDialog
-      Wizard.SetDesktopIcon("onpanic")
+      Wizard.SetDesktopIcon("org.opensuse.yast.OnPanic")
 
       OnPanic.Read
 

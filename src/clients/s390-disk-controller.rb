@@ -101,7 +101,7 @@ module Yast
       Label(_("Initializing..."))
 
       Wizard.CreateDialog
-      Wizard.SetDesktopIcon("disk")
+      Wizard.SetDesktopIcon("org.opensuse.yast.Disk")
       Wizard.SetContentsButtons(
         @caption,
         @contents,

@@ -12,61 +12,59 @@
 # license that conforms to the Open Source Definition (Version 1.9)
 # published by the Open Source Initiative.
 
-# Please submit bugfixes or comments via http://bugs.opensuse.org/
+# Please submit bugfixes or comments via https://bugs.opensuse.org/
 #
 
 
 Name:           yast2-s390
-Version:        4.1.1
+Version:        4.2.0
 Release:        0
+Group:          System/YaST
+License:        GPL-2.0-only
+Summary:        YaST2 - S/390 Specific Features Configuration
+Url:            https://github.com/yast/yast-s390/
 
-BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 Source0:        %{name}-%{version}.tar.bz2
 
-Group:		System/YaST
-License:        GPL-2.0-only
-BuildRequires:	yast2
-BuildRequires:	yast2-devtools
-BuildRequires:	yast2-ruby-bindings >= 3.1.7
+BuildRequires:  yast2
+BuildRequires:  yast2-devtools
+BuildRequires:  yast2-ruby-bindings >= 3.1.7
 BuildRequires:  rubygem(%rb_default_ruby_abi:rspec)
 BuildRequires:  rubygem(%rb_default_ruby_abi:yast-rake)
-BuildRequires:	update-desktop-files
-
+BuildRequires:  update-desktop-files
 # Y2Storage::Inhibitors
 BuildRequires: yast2-storage-ng >= 4.0.175
 Requires:      yast2-storage-ng >= 4.0.175
+Requires:       yast2
+Requires:       yast2-ruby-bindings >= 3.1.7
+Requires:       s390-tools
+
+Supplements:    yast2-storage-ng
 
 ExclusiveArch:  s390 s390x
-Requires:	yast2
-Requires:	yast2-ruby-bindings >= 3.1.7
-Requires:	s390-tools
-Supplements:	yast2-storage-ng
-Summary:	YaST2 - S/390 Specific Features Configuration
-Url:		http://github.com/yast/yast-s390/
 
 %description
 This package contains the YaST component for configuration of
 S/390-specific features.
 
 %prep
-%setup -n %{name}-%{version}
+%setup -q
 
 %check
-rake test:unit
+%yast_check
 
 %build
 
 %install
-rake install DESTDIR="%{buildroot}"
+%yast_install
+%yast_metainfo
 
 %files
-%defattr(-,root,root)
-%dir %{yast_yncludedir}/s390
-%{yast_yncludedir}/s390/*
-%{yast_clientdir}/*.rb
-%{yast_moduledir}/*
-%{yast_scrconfdir}/*.scr
-%{yast_desktopdir}/*.desktop
-%{yast_schemadir}/autoyast/rnc/*.rnc
+%{yast_yncludedir}
+%{yast_clientdir}
+%{yast_moduledir}
+%{yast_scrconfdir}
+%{yast_desktopdir}
+%{yast_schemadir}
 %doc %{yast_docdir}
 %license COPYING

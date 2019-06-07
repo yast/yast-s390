@@ -17,6 +17,7 @@ X-SuSE-YaST-AutoInstResource=
 Icon=yast-iucvterminal-server
 Exec=/sbin/yast2 iucvterminal-server
 
-Name=IUCV Terminal Server
-GenericName=Configure the IUCV Terminal Server
+Name=YaST IUCV Terminal Server
+GenericName=IUCV Terminal Server
+Comment=Configure the IUCV Terminal Server
 StartupNotify=true

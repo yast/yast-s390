@@ -227,7 +227,7 @@ module Yast
     # @return [Symbol] XpRAMSequence
     def XpRAMSequence
       Wizard.CreateDialog
-      Wizard.SetDesktopIcon("xpram")
+      Wizard.SetDesktopIcon("org.opensuse.yast.XPram")
 
       Xpram.Read
 

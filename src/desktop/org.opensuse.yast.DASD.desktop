@@ -4,21 +4,23 @@ Categories=Settings;System;Qt;X-SuSE-YaST;X-SuSE-YaST-Hardware;
 
 X-KDE-ModuleType=Library
 X-KDE-HasReadOnlyMode=true
-X-SuSE-YaST-Call=zfcp
+X-SuSE-YaST-Call=dasd
 
 X-SuSE-YaST-Group=Hardware
 X-SuSE-YaST-Argument=
 X-SuSE-YaST-RootOnly=true
-X-SuSE-YaST-AutoInst=all
+# Import,Write will be called manually by AY in first stage (bnc#1014696)
+X-SuSE-YaST-AutoInst=configure
 X-SuSE-YaST-Geometry=
 X-SuSE-YaST-SortKey=
-X-SuSE-YaST-AutoInstResource=zfcp
-X-SuSE-YaST-AutoInstSchema=zfcp.rnc
+X-SuSE-YaST-AutoInstResource=dasd
+X-SuSE-YaST-AutoInstSchema=dasd.rnc
 X-SuSE-YaST-AutoInstClonable=true
 
-Icon=yast-zfcp
-Exec=xdg-su -c "/sbin/yast2 zfcp"
+Icon=yast-dasd
+Exec=xdg-su -c "/sbin/yast2 dasd"
 
-Name=ZFCP
-GenericName=Configure ZFCP
+Name=YaST DASD
+GenericName=DASD
+Comment=Configure DASD
 StartupNotify=true
