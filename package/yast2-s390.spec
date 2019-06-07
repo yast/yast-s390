@@ -65,6 +65,7 @@ S/390-specific features.
 %{yast_moduledir}
 %{yast_scrconfdir}
 %{yast_desktopdir}
+%{yast_metainfodir}
 %{yast_schemadir}
 %doc %{yast_docdir}
 %license COPYING
