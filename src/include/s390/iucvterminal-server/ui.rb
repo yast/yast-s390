@@ -1614,7 +1614,7 @@ module Yast
     # @return sequence result
     def IUCVTerminalServerSequence
       Wizard.CreateDialog
-      Wizard.SetDesktopIcon("iucvterminal-server")
+      Wizard.SetDesktopIcon("org.opensuse.yast.IUCVTerminalServer")
       IUCVTerminalServer.Read
       ret = IUCVTerminalServerDialog()
       # only write during

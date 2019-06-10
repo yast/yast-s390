@@ -81,7 +81,7 @@ module Yast
       }
 
       Wizard.CreateDialog
-      Wizard.SetDesktopIcon("dasd")
+      Wizard.SetDesktopIcon("org.opensuse.yast.DASD")
 
       begin
         inhibitors = Y2Storage::Inhibitors.new
@@ -106,7 +106,7 @@ module Yast
       contents = Label(_("Initializing..."))
 
       Wizard.CreateDialog
-      Wizard.SetDesktopIcon("dasd")
+      Wizard.SetDesktopIcon("org.opensuse.yast.DASD")
       Wizard.SetContentsButtons(
         caption,
         contents,

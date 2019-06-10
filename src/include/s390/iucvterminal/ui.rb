@@ -400,7 +400,7 @@ module Yast
     # @return sequence result
     def IUCVTerminalSequence
       Wizard.CreateDialog
-      Wizard.SetDesktopIcon("iucvterminal")
+      Wizard.SetDesktopIcon("org.opensuse.yast.IUCVTerminal")
       IUCVTerminal.Read
       IUCVTerminal.Write if [:next, :ok, :finish].include?(TerminalDialog())
       UI.CloseDialog
