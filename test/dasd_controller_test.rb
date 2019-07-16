@@ -13,7 +13,7 @@ describe "Yast::DASDController" do
     end
   end
 
-  describe "#ProbeDisks" do
+  describe "#GetDevices" do
     it "returns DASDs" do
       expect(Yast::SCR).to receive(:Read).with(Yast.path(".probe.disk")).once
         .and_return(load_data("probe_disk_dasd.yml"))
