@@ -114,6 +114,32 @@ describe "Yast::DASDController" do
     end
   end
 
+  describe "#GetDevices" do
+    it "returns DASDs" do
+      expect(Yast::SCR).to receive(:Read).with(Yast.path(".probe.disk")).once
+        .and_return(load_data("probe_disk_dasd.yml"))
+      expect(Yast::DASDController.ProbeDisks()).to eq(nil)
+      expect(Yast::DASDController.GetDevices()).to eq(
+        0 => { "detail"        => { "cu_model" => 233, "dev_model" => 10, "lcss" => 0 },
+               "device_id"     => 276880,
+               "resource"      => { "io" => [{ "active" => false,
+                                               "length" => 1,
+                                               "mode"   => "rw",
+                                               "start"  => 352 }] },
+               "sub_device_id" => 275344,
+               "channel"       => "0.0.0150" },
+        1 => { "detail"        => { "cu_model" => 233, "dev_model" => 10, "lcss" => 0 },
+               "device_id"     => 276880,
+               "resource"      => { "io" => [{ "active" => false,
+                                               "length" => 1,
+                                               "mode"   => "rw",
+                                               "start"  => 352 }] },
+               "sub_device_id" => 275344,
+               "channel"       => "0.0.0160" }
+      )
+    end
+  end
+
   describe "#Write" do
     let(:data) do
       { "devices" => [{ "channel" => "0.0.0100", "diag" => false,
