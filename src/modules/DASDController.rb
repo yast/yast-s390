@@ -389,6 +389,8 @@ module Yast
         Builtins.tolower(Ops.get_string(d, "device", "")) == "dasd"
       end
 
+      disks.sort_by! { |disk| FormatChannel(disk.fetch("sysfs_bus_id", "0.0.0000")) }
+
       disks = Builtins.maplist(disks) do |d|
         channel = Ops.get_string(d, "sysfs_bus_id", "")
         Ops.set(d, "channel", channel)
