@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Jul 19 11:57:09 CEST 2019 - aschnell@suse.com
+
+- handle setting diag mode on active DASDs (part of bsc#1134927)
+- 3.3.2
+
+-------------------------------------------------------------------
 Tue Jul 16 11:27:09 CEST 2019 - aschnell@suse.com
 
 - sort DASDs by channel ID (part of bsc#1134927)
