@@ -584,7 +584,7 @@ module Yast
     end
 
     # Activate or deactivate diag on active disk
-    # @param [String] channel string Name of the disk to deactivate
+    # @param [String] channel string Name of the disk to operate on
     # @param [Boolean] diag boolean Activate DIAG or not
     def ActivateDiag(channel, diag)
       old_diag = DASDController.diag.fetch(channel, false)
