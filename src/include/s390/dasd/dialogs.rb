@@ -285,8 +285,12 @@ module Yast
               [id, "resource", "io", 0, "active"],
               false
             )
+            old_value = DASDController.diag.fetch(channel, false)
             Ops.set(DASDController.diag, channel, value)
-            DASDController.ActivateDisk(channel, value) if active
+            if active && old_value != value
+              DASDController.DeactivateDisk(channel, old_value)
+              DASDController.ActivateDisk(channel, value)
+            end
           end
           DASDController.ProbeDisks
 
