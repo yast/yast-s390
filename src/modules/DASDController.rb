@@ -570,6 +570,16 @@ module Yast
       nil
     end
 
+    # Activate or deactivate diag on active disk
+    # @param [String] channel string Name of the disk to operate on
+    # @param [Boolean] diag boolean Activate DIAG or not
+    def ActivateDiag(channel, diag)
+      old_diag = DASDController.diag.fetch(channel, false)
+      return if diag == old_diag
+      DeactivateDisk(channel, old_diag)
+      ActivateDisk(channel, diag)
+    end
+
     # Format disks
     # @param [Array<String>] disks_list list<string> List of disks to be formatted
     # @param [Fixnum] par integer Number of disks that can be formated in parallel

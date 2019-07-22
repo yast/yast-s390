@@ -285,8 +285,8 @@ module Yast
               [id, "resource", "io", 0, "active"],
               false
             )
+            DASDController.ActivateDiag(channel, value) if active
             Ops.set(DASDController.diag, channel, value)
-            DASDController.ActivateDisk(channel, value) if active
           end
           DASDController.ProbeDisks
 
