@@ -165,4 +165,13 @@ describe "Yast::DASDController" do
       end
     end
   end
+
+  describe "#ActivateDiag" do
+    it "deactivates and reactivates dasd" do
+      expect(Yast::DASDController).to receive(:DeactivateDisk).ordered
+      expect(Yast::DASDController).to receive(:ActivateDisk).ordered
+      expect(Yast::DASDController.ActivateDiag("0.0.3333", true)).to eq(nil)
+    end
+  end
+
 end
