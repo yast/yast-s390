@@ -321,10 +321,11 @@ module Yast
       if OnPanic.start &&
           (Service.Enabled(KDUMP_SERVICE_NAME) || Service.Active(KDUMP_SERVICE_NAME))
         if Yast::Popup.YesNo(
+          # TRANSLATORS: %{s1},%{s2} are the service names
           _(
-            "The service kdump is active and will conflict with dumpconf.\n" \
-            "Would you like to disable kdump? \n"
-          )
+            "The service %{s1} is active and will conflict with dumpconf.\n" \
+            "Would you like to disable %{s2}? \n"
+          )  % { s1: KDUMP_SERVICE_NAME, s2: KDUMP_SERVICE_NAME}
         )
           Service.Disable(KDUMP_SERVICE_NAME)
           Service.Stop(KDUMP_SERVICE_NAME) if Service.active?(KDUMP_SERVICE_NAME)
@@ -340,7 +341,7 @@ module Yast
       OnPanic.Read
 
       ret = OnPanicDialog()
-      if ret == :next || ret == :finish || ret == :ok
+      if [:next, :finish, :ok].include?(ret)
         check_kdump
         OnPanic.Write
       end

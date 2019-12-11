@@ -53,7 +53,6 @@ describe Yast::S390OnpanicUiInclude do
         subject.OnPanicSequence
       end
     end
-
     context "kdump is not active  while setup dumpconf" do
       it "does not ask the user and does not touch kdump" do
         expect(Yast::OnPanic).to receive(:start).and_return(true)
@@ -64,7 +63,6 @@ describe Yast::S390OnpanicUiInclude do
         subject.OnPanicSequence
       end
     end
-
   end
 
 end
