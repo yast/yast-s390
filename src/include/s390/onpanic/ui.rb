@@ -26,6 +26,8 @@
 #
 module Yast
   module S390OnpanicUiInclude
+    KDUMP_SERVICE_NAME = "kdump".freeze
+
     def initialize_s390_onpanic_ui(_include_target)
       Yast.import "UI"
 
@@ -37,6 +39,7 @@ module Yast
       Yast.import "Package"
       Yast.import "Popup"
       Yast.import "Wizard"
+      Yast.import "Service"
 
       # Should dumpconf be started?
       @start = false
@@ -312,6 +315,24 @@ module Yast
       ret
     end
 
+    # Check if kdump is enabled. If yes, ask the user to disable it
+    # because it conflicts with OnPanic
+    def check_kdump
+      if OnPanic.start &&
+          (Service.Enabled(KDUMP_SERVICE_NAME) || Service.Active(KDUMP_SERVICE_NAME))
+        if Yast::Popup.YesNo(
+          # TRANSLATORS: %{s1},%{s2} are the service names
+          _(
+            "The service %{s1} is active and will conflict with dumpconf.\n" \
+            "Would you like to disable %{s2}? \n"
+          ) % { s1: KDUMP_SERVICE_NAME, s2: KDUMP_SERVICE_NAME }
+        )
+          Service.Disable(KDUMP_SERVICE_NAME)
+          Service.Stop(KDUMP_SERVICE_NAME) if Service.active?(KDUMP_SERVICE_NAME)
+        end
+      end
+    end
+
     # The whole sequence
     def OnPanicSequence
       Wizard.CreateDialog
@@ -320,7 +341,10 @@ module Yast
       OnPanic.Read
 
       ret = OnPanicDialog()
-      OnPanic.Write if ret == :next || ret == :finish || ret == :ok
+      if [:next, :finish, :ok].include?(ret)
+        check_kdump
+        OnPanic.Write
+      end
 
       UI.CloseDialog
       ret
