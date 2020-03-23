@@ -371,7 +371,7 @@ module Yast
         to:   "list <map <string, any>>"
       )
       disks = Builtins.filter(disks) do |d|
-        d["bus"] == "SCSI" && (d["resource"] && d["resource"]["fc"])
+        d["driver"] == "zfcp"
       end
 
       tapes = Convert.convert(
