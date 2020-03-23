@@ -371,7 +371,7 @@ module Yast
         to:   "list <map <string, any>>"
       )
       disks = Builtins.filter(disks) do |d|
-        Ops.get_string(d, "bus", "") == "SCSI"
+        d["driver"] == "zfcp"
       end
 
       tapes = Convert.convert(
@@ -415,11 +415,11 @@ module Yast
       case ret
       when 0
 
-      when 1
+      when 1 # FIXME: check error codes in https://github.com/SUSE/s390-tools/blob/master/zfcp_host_configure#L60
         Report.Error(
           Builtins.sformat(
             # error report, %1 is device identification
-            _("%1: sysfs not mounted."),
+            _("%1: no CCW was specified or sysfs is not mounted."),
             channel
           )
         )

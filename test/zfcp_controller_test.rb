@@ -87,11 +87,13 @@ describe "Yast::ZFCPController" do
   end
 
   describe "#ProbeDisks" do
-    it "Probing disk" do
-      expect(Yast::SCR).to receive(:Read).with(Yast.path(".probe.disk")).once
+    before do
+      allow(Yast::SCR).to receive(:Read).with(Yast.path(".probe.disk")).once
         .and_return(load_data("probe_disk.yml"))
-      expect(Yast::SCR).to receive(:Read).with(Yast.path(".probe.tape")).once.and_return([])
+      allow(Yast::SCR).to receive(:Read).with(Yast.path(".probe.tape")).once.and_return([])
+    end
 
+    it "Probing disk" do
       expect(Yast::ZFCPController.ProbeDisks()).to eq(nil)
       expect(Yast::ZFCPController.devices).to eq(load_data("device_list.yml"))
     end
