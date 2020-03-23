@@ -89,3 +89,43 @@
   sysfs_id: "/class/block/sdb"
   unique_key: XGop.pffu6ea6mm8
   vendor: IBM
+- bus: SCSI
+  bus_hwcfg: scsi
+  class_id: 262
+  detail:
+    channel: 0
+    fcp_lun: '0x0000000000000000'
+    host: 0
+    id: 0
+    lun: 0
+    wwpn: '0x0000000000000000'
+  dev_name: "/dev/sdc"
+  dev_name2: "/dev/sg3"
+  dev_names:
+  - "/dev/sdc"
+  - "/dev/disk/by-path/ip-10.100.12.158:3260-iscsi-iqn.2020-03.iscsi.test:for.test-lun-1"
+  dev_num:
+    major: 8
+    minor: 32
+    range: 16
+    type: b
+  device: VIRTUAL-DISK
+  driver: sd
+  driver_module: sd_mod
+  model: IET VIRTUAL-DISK
+  old_unique_key: K1ot.XFis0A0w1l6
+  resource:
+    disk_log_geo:
+    - cylinders: 20480
+      heads: 64
+      sectors: 32
+    size:
+    - unit: sectors
+      x: 41943080
+      y: 512
+  rev: '0001'
+  sub_class_id: 0
+  sysfs_bus_id: 1:0:0:1
+  sysfs_id: "/class/block/sdc"
+  unique_key: _R2u.eVSycZhnQ60
+  vendor: IET
