@@ -143,8 +143,10 @@ describe "Yast::DASDController" do
   describe "#Write" do
     let(:data) do
       { "devices" => [{ "channel" => "0.0.0100", "diag" => false,
-        "format" => true }], "format_unformatted" => true }
+        "format" => format }], "format_unformatted" => format_unformatted }
     end
+    let(:format_unformatted) { false }
+    let(:format) { true }
 
     before do
       allow(Yast::SCR).to receive(:Execute).with(path(".target.bash_output"),
@@ -160,25 +162,93 @@ describe "Yast::DASDController" do
       allow(Yast::DASDController).to receive(:GetDeviceName).and_return("/dev/dasda")
     end
 
-    it "writes the dasd settings to the target (formating disks)" do
-      # bnc 928388
-      expect(Yast::SCR).to receive(:Execute).with(path(".process.start_shell"),
-        "/sbin/dasdfmt -Y -P 1 -b 4096 -y -r 10 -m 10 -f '/dev/dasda'")
+    context "during autoinstallation" do
+      before do
+        Yast::DASDController.Import(data)
+      end
 
-      expect(Yast::DASDController.Import(data)).to eq(true)
-      expect(Yast::DASDController.Write).to eq(true)
-    end
+      it "activates the disk" do
+        allow(Yast::DASDController).to receive(:FormatDisks)
+        expect(Yast::DASDController).to receive(:ActivateDisk).with("0.0.0100", false)
+        Yast::DASDController.Write
+      end
 
-    it "does not format disk for FBA disk" do
-      allow(Yast::SCR).to receive(:Execute).with(path(".target.bash_output"),
-        /\/sbin\/dasdview/)
-        .and_return("exitstatus" => 0, "stdout" => load_file("dasdview_fba.txt"), "stderr" => "")
+      context "when 'format' is sets to true" do
+        let(:format) { true }
 
-      expect(Yast::SCR).to_not receive(:Execute).with(path(".process.start_shell"),
-        /dasdfmt.*\/dev\/dasda/)
+        it "formats the disk" do
+          # bnc 928388
+          expect(Yast::SCR).to receive(:Execute).with(path(".process.start_shell"),
+            "/sbin/dasdfmt -Y -P 1 -b 4096 -y -r 10 -m 10 -f '/dev/dasda'")
+          expect(Yast::DASDController.Write).to eq(true)
+        end
+      end
 
-      expect(Yast::DASDController.Import(data)).to eq(true)
-      expect(Yast::DASDController.Write).to eq(true)
+      context "when 'format' is set to false" do
+        let(:format) { false }
+
+        it "does not format the disk" do
+          expect(Yast::DASDController).to_not receive(:FormatDisks)
+          Yast::DASDController.Write
+        end
+      end
+
+      context "when the activated device is not formatted" do
+        NOT_FORMATTED_CODE = 8 # means that the device is not formatted
+
+        let(:format) { false }
+
+        before do
+          allow(Yast::DASDController).to receive(:ActivateDisk).with("0.0.0100", false)
+            .and_return(NOT_FORMATTED_CODE)
+        end
+
+        context "and 'format_unformatted' is set to 'true'" do
+          let(:format_unformatted) { true }
+
+          it "formats the device" do
+            expect(Yast::DASDController).to receive(:FormatDisks).with(["/dev/dasda"], anything)
+            Yast::DASDController.Write
+          end
+        end
+
+        context "and 'format_unformatted' is set to 'false'" do
+          let(:format_unformatted) { false }
+
+          it "does not format the device" do
+            expect(Yast::DASDController).to_not receive(:FormatDisks)
+            Yast::DASDController.Write
+          end
+        end
+
+        context "and 'format' is set to 'true'" do
+          let(:format) { true }
+          let(:format_unformatted) { false }
+
+          it "formats the device" do
+            expect(Yast::DASDController).to receive(:FormatDisks).with(["/dev/dasda"], anything)
+            Yast::DASDController.Write
+          end
+
+          it "reactivates the disk" do
+            expect(Yast::DASDController).to receive(:FormatDisks)
+            expect(Yast::DASDController).to receive(:ActivateDisk).twice
+            Yast::DASDController.Write
+          end
+        end
+      end
+
+      it "does not format disk for FBA disk" do
+        allow(Yast::SCR).to receive(:Execute).with(path(".target.bash_output"),
+          /\/sbin\/dasdview/)
+          .and_return("exitstatus" => 0, "stdout" => load_file("dasdview_fba.txt"), "stderr" => "")
+
+        expect(Yast::SCR).to_not receive(:Execute).with(path(".process.start_shell"),
+          /dasdfmt.*\/dev\/dasda/)
+
+        expect(Yast::DASDController.Import(data)).to eq(true)
+        expect(Yast::DASDController.Write).to eq(true)
+      end
     end
   end
 
@@ -242,6 +312,7 @@ describe "Yast::DASDController" do
           "device"       => "DASD",
           "dev_name"     => "/dev/dasda",
           "sysfs_bus_id" => "0.0.0150",
+          "sysfs_id"     => "/class/block/dasda",
           "resource"     => {
             "io" => ["active" => true]
           }
@@ -261,6 +332,25 @@ describe "Yast::DASDController" do
 
         expect(subject.devices.size).to eq 1
         expect(subject.devices.values.first["formatted"]).to eq false
+      end
+
+      context "when the 'use_diag' file exists" do
+        let(:diag_path) { "/sys//class/block/dasda/device/use_diag" }
+
+        before do
+          allow(Yast::FileUtils).to receive(:Exists).with(diag_path)
+            .and_return(true)
+          allow(Yast::SCR).to receive(:Read)
+            .with(Yast::Path.new(".target.string"), diag_path)
+            .and_return("1")
+        end
+
+        it "reads its value" do
+          subject.ProbeDisks
+          device = subject.devices.values.first
+          expect(device["diag"]).to eq(true)
+          expect(subject.diag).to eq("0.0.0150" => true)
+        end
       end
     end
   end
