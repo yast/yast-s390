@@ -578,31 +578,38 @@ module Yast
       nil
     end
 
+    # Activates the controller unless it was already activated
+    #
+    # @param channel [String] channel
+    def activate_controller(channel)
+      return if @activated_controllers[channel]
+
+      command2 = Builtins.sformat(
+        "/sbin/zfcp_host_configure '%1' %2",
+        channel,
+        1
+      )
+      Builtins.y2milestone("Running command \"%1\"", command2)
+      ret2 = Convert.to_integer(SCR.Execute(path(".target.bash"), command2))
+      Builtins.y2milestone(
+        "Command \"%1\" returned with exit code %2",
+        command2,
+        ret2
+      )
+
+      if ret2 != 0
+        ReportControllerActivationError(channel, ret2)
+      else
+        Ops.set(@activated_controllers, channel, true)
+      end
+    end
+
     # Activate a disk
     # @param [String] channel string channel
     # @param [String] wwpn string wwpn (hexa number)
     # @param [String] lun string lun   (hexa number)
     def ActivateDisk(channel, wwpn, lun)
-      if !Ops.get(@activated_controllers, channel, false)
-        command2 = Builtins.sformat(
-          "/sbin/zfcp_host_configure '%1' %2",
-          channel,
-          1
-        )
-        Builtins.y2milestone("Running command \"%1\"", command2)
-        ret2 = Convert.to_integer(SCR.Execute(path(".target.bash"), command2))
-        Builtins.y2milestone(
-          "Command \"%1\" returned with exit code %2",
-          command2,
-          ret2
-        )
-
-        if ret2 != 0
-          ReportControllerActivationError(channel, ret2)
-        else
-          Ops.set(@activated_controllers, channel, true)
-        end
-      end
+      activate_controller(channel)
 
       if wwpn != "" || lun != "" # we are not using allow_lun_scan
         command = Builtins.sformat(

@@ -5,22 +5,52 @@ require_relative "./test_helper"
 Yast.import "ZFCPController"
 
 describe "Yast::ZFCPController" do
+  before do
+    Yast::ZFCPController.main
+  end
 
   describe "#ActivateDisk" do
     it "Activates the given disk" do
-      expect(Yast::SCR).to receive(:Execute).with(anything, /\/sbin\/zfcp_host_configure '1' 1/).and_return(0)
+      expect(Yast::ZFCPController).to receive(:activate_controller).with('0.0.fc00')
+      expect(Yast::SCR).to receive(:Execute)
+        .with(anything, /\/sbin\/zfcp_disk_configure '0.0.fc00' '0x500' '0x401' 1/)
+        .and_return(0)
+      Yast::ZFCPController.ActivateDisk("0.0.fc00", "0x500", "0x401")
+    end
+  end
+
+  describe "#activate_controller" do
+    let(:channel) { "0.0.fc00" }
+
+    it "activates the given controller" do
+      expect(Yast::SCR).to receive(:Execute)
+        .with(anything, /\/sbin\/zfcp_host_configure '0.0.fc00' 1/).and_return(0)
       expect(Yast::ZFCPController).to_not receive(:ReportControllerActivationError)
-      Yast::ZFCPController.ActivateDisk(1, "", "")
+      Yast::ZFCPController.activate_controller(channel)
+    end
+
+    it "does not activate a controller twice" do
+      expect(Yast::SCR).to receive(:Execute)
+        .with(anything, /\/sbin\/zfcp_host_configure '0.0.fc00' 1/).once.and_return(0)
+      Yast::ZFCPController.activate_controller(channel)
+      Yast::ZFCPController.activate_controller(channel)
+    end
+
+    context "when the activation fails" do
+      before do
+        allow(Yast::SCR).to receive(:Execute)
+          .with(anything, /\/sbin\/zfcp_host_configure '0.0.fc00' 1/).and_return(1)
+      end
+
+      it "reports the error" do
+        expect(Yast::ZFCPController).to receive(:ReportControllerActivationError)
+          .with('0.0.fc00', 1)
+        Yast::ZFCPController.activate_controller(channel)
+      end
     end
   end
 
   describe "#GetControllers" do
-    after do
-      # workaround: the GetControllers() result is cached, force reset
-      # after each test
-      Yast::ZFCPController.instance_eval("@controllers = nil")
-    end
-
     it "Returns all controllers" do
       allow(Yast::Arch).to receive(:is_zkvm).and_return(false)
       expect(Yast::SCR).to receive(:Read).with(Yast.path(".probe.storage")).once
