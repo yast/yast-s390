@@ -143,7 +143,7 @@ module Yast
           channel = Ops.get_string(device, "channel", "")
           format = Ops.get_boolean(device, "format", false)
           do_diag = Ops.get_boolean(device, "diag", false)
-          act_ret = ActivateDisk(channel, do_diag)
+          act_ret = activate_disk_if_needed(channel, do_diag)
           # FIXME: general activation error handling - also in sync with below
           # for AutoInstall, format unformatted disks later at once
           # even disks manually selected for formatting must be reactivated
@@ -381,7 +381,7 @@ module Yast
       # popup label
       UI.OpenDialog(Label(_("Reading Configured DASD Disks")))
 
-      disks = find_disks
+      disks = find_disks(true)
 
       index = -1
       @devices = Builtins.listmap(disks) do |d|
@@ -792,12 +792,37 @@ module Yast
       end
     end
 
+    # Activates a disk if its not activated
+    #
+    # When the disk is already activated, it returns '8' if the
+    # disk is unformatted or '0' otherwise. The idea is to mimic
+    # the same API that ActivateDisk.
+    #
+    # @return [Boolean] Returns an error code (8 means 'unformatted').
+    def activate_disk_if_needed(channel, diag)
+      disk = find_disks.find { |d| d["channel"] == channel }
+      return ActivateDisk(channel, diag) unless disk && active_disk?(disk)
+      disk["formatted"] ? 0 : 8
+    end
+
+    # Determines whether the disk is activated or not
+    #
+    # @param disk [Hash]
+    # @return [Boolean]
+    def active_disk?(disk)
+      io = disk.fetch("resource", {}).fetch("io", []).first
+      !!(io && io["active"])
+    end
+
     # Returns the DASD disks
     #
     # Probes and returns the found DASD disks ordered by channel.
+    # It caches the found disks.
     #
+    # @param force_probing [Boolean] Ignore the cached values and probes again.
     # @return [Array<Hash>] Found DASD disks
-    def find_disks
+    def find_disks(force_probing = false)
+      return @disks if @disks && !force_probing
       disks = Convert.convert(
         SCR.Read(path(".probe.disk")),
         from: "any",
@@ -809,7 +834,7 @@ module Yast
 
       disks.sort_by! { |disk| FormatChannel(disk.fetch("sysfs_bus_id", "0.0.0000")) }
 
-      disks = Builtins.maplist(disks) do |d|
+      @disks = Builtins.maplist(disks) do |d|
         channel = Ops.get_string(d, "sysfs_bus_id", "")
         Ops.set(d, "channel", channel)
         active = Ops.get_boolean(d, ["resource", "io", 0, "active"], false)
