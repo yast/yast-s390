@@ -11,7 +11,7 @@ describe "Yast::ZFCPController" do
 
   describe "#ActivateDisk" do
     it "Activates the given disk" do
-      expect(Yast::ZFCPController).to receive(:activate_controller).with('0.0.fc00')
+      expect(Yast::ZFCPController).to receive(:activate_controller).with("0.0.fc00")
       expect(Yast::SCR).to receive(:Execute)
         .with(anything, /\/sbin\/zfcp_disk_configure '0.0.fc00' '0x500' '0x401' 1/)
         .and_return(0)
@@ -21,6 +21,19 @@ describe "Yast::ZFCPController" do
 
   describe "#activate_controller" do
     let(:channel) { "0.0.fc00" }
+
+    before do
+      allow(Yast::Arch).to receive(:is_zkvm).and_return(false)
+      allow(Yast::SCR).to receive(:Read).with(Yast.path(".probe.storage")).once
+        .and_return(load_data("probe_storage.yml"))
+
+      # Removing all fcp devices from blacklist
+      allow(Yast::SCR).to receive(:Execute).with(anything, /\/sbin\/vmcp q v fcp/).and_return(
+        "exit"   => 0,
+        "stdout" => "FCP  F800 ON FCP   F807 CHPID 1C SUBCHANNEL = 000B\n  F800 TOKEN = 0000000362A42C00"
+      )
+      allow(Yast::SCR).to receive(:Execute).with(anything, /\/sbin\/cio_ignore -r f800/).and_return(0)
+    end
 
     it "activates the given controller" do
       expect(Yast::SCR).to receive(:Execute)
@@ -44,7 +57,21 @@ describe "Yast::ZFCPController" do
 
       it "reports the error" do
         expect(Yast::ZFCPController).to receive(:ReportControllerActivationError)
-          .with('0.0.fc00', 1)
+          .with("0.0.fc00", 1)
+        Yast::ZFCPController.activate_controller(channel)
+      end
+    end
+
+    context "when the controller is already activated" do
+      let(:channel) { "0.0.fa00" }
+
+      before do
+        allow(Yast::SCR).to receive(:Read).with(Yast.path(".probe.storage")).once
+          .and_return(load_data("probe_storage.yml"))
+      end
+
+      it "does not activate the controller" do
+        expect(Yast::SCR).to_not receive(:Execute).with(anything, /\/sbin\/zfcp_host_configure/)
         Yast::ZFCPController.activate_controller(channel)
       end
     end
@@ -63,14 +90,14 @@ describe "Yast::ZFCPController" do
       )
       expect(Yast::SCR).to receive(:Execute).with(anything, /\/sbin\/cio_ignore -r f800/).and_return(0)
 
-      expect(Yast::ZFCPController.GetControllers).to eq(
-        [
-          { "sysfs_bus_id"=>"0.0.f800" },
-          { "sysfs_bus_id"=>"0.0.f900" },
-          { "sysfs_bus_id"=>"0.0.fa00" },
-          { "sysfs_bus_id"=>"0.0.fc00" }
-        ]
+      ctrls = Yast::ZFCPController.GetControllers
+      expect(ctrls).to contain_exactly(
+        hash_including("sysfs_bus_id" => "0.0.f800"),
+        hash_including("sysfs_bus_id" => "0.0.f900"),
+        hash_including("sysfs_bus_id" => "0.0.fa00"),
+        hash_including("sysfs_bus_id" => "0.0.fc00")
       )
+      expect(ctrls.first["resource"]).to be_a(Hash)
     end
 
     context "no ZFCP controller found" do

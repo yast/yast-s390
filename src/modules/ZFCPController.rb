@@ -52,7 +52,7 @@ module Yast
 
       @controllers = nil
 
-      @activated_controllers = {}
+      @activated_controllers = nil
 
       @disk_configured = false
 
@@ -338,7 +338,7 @@ module Yast
 
         @controllers = Builtins.maplist(@controllers) do |c|
           Builtins.filter(c) do |k, _v|
-            Builtins.contains(["sysfs_bus_id"], k)
+            Builtins.contains(["sysfs_bus_id", "resource"], k)
           end
         end
 
@@ -582,7 +582,7 @@ module Yast
     #
     # @param channel [String] channel
     def activate_controller(channel)
-      return if @activated_controllers[channel]
+      return if activated_controller?(channel)
 
       command2 = Builtins.sformat(
         "/sbin/zfcp_host_configure '%1' %2",
@@ -600,7 +600,7 @@ module Yast
       if ret2 != 0
         ReportControllerActivationError(channel, ret2)
       else
-        Ops.set(@activated_controllers, channel, true)
+        register_as_activated(channel)
       end
     end
 
@@ -727,6 +727,37 @@ module Yast
     publish function: :DeactivateDisk, type: "void (string, string, string)"
     publish function: :GetWWPNs, type: "list <string> (string)"
     publish function: :GetLUNs, type: "list <string> (string, string)"
+
+  private
+
+    # Finds the activated controllers
+    #
+    # Initially, it reads the activated controllers from hwinfo.
+    #
+    # @return [Array<String>] List of controller channels
+    def activated_controllers
+      return @activated_controllers if @activated_controllers
+      ctrls = GetControllers().select do |ctrl|
+        io = ctrl.fetch("resource", {}).fetch("io", []).first
+        io && io["active"]
+      end
+      @activated_controllers = ctrls.map { |c| c["sysfs_bus_id"] }
+    end
+
+    # Mark a controller as activated
+    #
+    # @param channel [String] Channel
+    def register_as_activated(channel)
+      @activated_controllers << channel
+    end
+
+    # Determines whether a controller is activated or not
+    #
+    # @param channel [String] Channel
+    # @return [Boolean]
+    def activated_controller?(channel)
+      activated_controllers.include?(channel)
+    end
   end
 
   ZFCPController = ZFCPControllerClass.new
