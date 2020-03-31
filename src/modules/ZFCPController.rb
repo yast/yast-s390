@@ -724,7 +724,7 @@ module Yast
     #
     # @param channel [String] Channel
     def register_as_activated(channel)
-      activated_controllers.push(channel)
+      activated_controllers << channel
     end
 
     # Determines whether a controller is activated or not
