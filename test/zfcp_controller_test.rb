@@ -10,12 +10,29 @@ describe "Yast::ZFCPController" do
   end
 
   describe "#ActivateDisk" do
-    it "Activates the given disk" do
-      expect(Yast::ZFCPController).to receive(:activate_controller).with("0.0.fc00")
+    before do
+      allow(Yast::Arch).to receive(:is_zkvm).and_return(false)
+      allow(Yast::SCR).to receive(:Read).with(Yast.path(".probe.storage")).once
+        .and_return(load_data("probe_storage.yml"))
+      allow(Yast::SCR).to receive(:Read).with(Yast.path(".probe.disk")).once
+        .and_return(load_data("probe_disk.yml"))
+      allow(Yast::SCR).to receive(:Read).with(Yast.path(".probe.tape")).once.and_return([])
+    end
+
+    it "activates the controller and the given disk" do
+      expect(Yast::ZFCPController).to receive(:activate_controller).with("0.0.fa00")
       expect(Yast::SCR).to receive(:Execute)
-        .with(anything, /\/sbin\/zfcp_disk_configure '0.0.fc00' '0x500' '0x401' 1/)
+        .with(anything, /\/sbin\/zfcp_disk_configure '0.0.fa00' '0x500\d+' '0x401\d+' 1/)
         .and_return(0)
-      Yast::ZFCPController.ActivateDisk("0.0.fc00", "0x500", "0x401")
+      Yast::ZFCPController.ActivateDisk("0.0.fa00", "0x5000000000000000", "0x4010400000000000")
+    end
+
+    context "when the disk is already active" do
+      it "does not try to active the given disk" do
+        allow(Yast::ZFCPController).to receive(:activate_controller).with("0.0.fa00")
+        expect(Yast::SCR).to_not receive(:Execute)
+        Yast::ZFCPController.ActivateDisk("0.0.fa00", "0x500507630500873a", "0x4010400000000000")
+      end
     end
   end
 

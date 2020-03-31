@@ -365,38 +365,8 @@ module Yast
       # popup label
       UI.OpenDialog(Label(_("Reading Configured ZFCP Devices")))
 
-      disks = Convert.convert(
-        SCR.Read(path(".probe.disk")),
-        from: "any",
-        to:   "list <map <string, any>>"
-      )
-      disks = Builtins.filter(disks) do |d|
-        d["driver"] == "zfcp"
-      end
-
-      tapes = Convert.convert(
-        SCR.Read(path(".probe.tape")),
-        from: "any",
-        to:   "list <map <string, any>>"
-      )
-      tapes = Builtins.filter(tapes) do |d|
-        Ops.get_string(d, "bus", "") == "SCSI"
-      end
-
-      disks_tapes = Convert.convert(
-        Builtins.merge(disks, tapes),
-        from: "list",
-        to:   "list <map <string, any>>"
-      )
-
-      disks_tapes = Builtins.maplist(disks_tapes) do |d|
-        Builtins.filter(d) do |k, _v|
-          Builtins.contains(["dev_name", "detail", "vendor", "device"], k)
-        end
-      end
-
       index = -1
-      @devices = Builtins.listmap(disks_tapes) do |d|
+      @devices = Builtins.listmap(find_disks(true)) do |d|
         index = Ops.add(index, 1)
         { index => d }
       end
@@ -609,9 +579,14 @@ module Yast
     # @param [String] wwpn string wwpn (hexa number)
     # @param [String] lun string lun   (hexa number)
     def ActivateDisk(channel, wwpn, lun)
-      activate_controller(channel)
+      disk = find_disk(channel, wwpn, lun)
+      if disk
+        log.info "Disk #{channel}:#{wwpn}:#{lun} is already active. Skipping activation."
+      else
+        activate_controller(channel)
+      end
 
-      if wwpn != "" || lun != "" # we are not using allow_lun_scan
+      if disk.nil? && (wwpn != "" || lun != "") # we are not using allow_lun_scan
         command = Builtins.sformat(
           "/sbin/zfcp_disk_configure '%1' '%2' '%3' %4",
           channel,
@@ -757,6 +732,68 @@ module Yast
     # @return [Boolean]
     def activated_controller?(channel)
       activated_controllers.include?(channel)
+    end
+
+    # Returns the zFCP disks
+    #
+    # Probes and returns the found zFCP . It caches the found disks.
+    #
+    # @param force_probing [Boolean] Ignore the cached values and probes again.
+    # @return [Array<Hash>] Found zFCP disks
+    def find_disks(force_probing = false)
+      return @disks if @disks && !force_probing
+      disks = Convert.convert(
+        SCR.Read(path(".probe.disk")),
+        from: "any",
+        to:   "list <map <string, any>>"
+      )
+      disks = Builtins.filter(disks) do |d|
+        d["driver"] == "zfcp"
+      end
+
+      tapes = Convert.convert(
+        SCR.Read(path(".probe.tape")),
+        from: "any",
+        to:   "list <map <string, any>>"
+      )
+      tapes = Builtins.filter(tapes) do |d|
+        Ops.get_string(d, "bus", "") == "SCSI"
+      end
+
+      disks_tapes = Convert.convert(
+        Builtins.merge(disks, tapes),
+        from: "list",
+        to:   "list <map <string, any>>"
+      )
+
+      @disks = Builtins.maplist(disks_tapes) do |d|
+        Builtins.filter(d) do |k, _v|
+          Builtins.contains(["dev_name", "detail", "vendor", "device", "io"], k)
+        end
+      end
+    end
+
+    # Determines whether the disk is activated or not
+    #
+    # @param disk [Hash]
+    # @return [Boolean]
+    def active_disk?(disk)
+      io = disk.fetch("resource", {}).fetch("io", []).first
+      !!(io && io["active"])
+    end
+
+    # Finds a disk
+    #
+    # @param [String] channel string channel
+    # @param [String] wwpn string wwpn (hexa number)
+    # @param [String] lun string lun (hexa number)
+    # @return [Hash,nil] Disk information is found; nil is the disk is not found
+    def find_disk(channel, wwpn, lun)
+      find_disks.find do |d|
+        detail = d["detail"]
+        next unless detail
+        detail["controller_id"] == channel && detail["wwpn"] == wwpn && detail["fcp_lun"] == lun
+      end
     end
   end
 
