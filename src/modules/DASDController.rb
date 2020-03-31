@@ -801,8 +801,11 @@ module Yast
     # @return [Boolean] Returns an error code (8 means 'unformatted').
     def activate_disk_if_needed(channel, diag)
       disk = find_disks.find { |d| d["channel"] == channel }
-      return ActivateDisk(channel, diag) unless disk && active_disk?(disk)
-      disk["formatted"] ? 0 : 8
+      if disk && active_disk?(disk)
+        log.info "Disk #{channel} is already active. Skipping the activation."
+        return disk["formatted"] ? 0 : 8
+      end
+      ActivateDisk(channel, diag) unless disk && active_disk?(disk)
     end
 
     # Determines whether the disk is activated or not

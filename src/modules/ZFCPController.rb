@@ -581,7 +581,7 @@ module Yast
     def ActivateDisk(channel, wwpn, lun)
       disk = find_disk(channel, wwpn, lun)
       if disk
-        log.info "Disk #{channel}:#{wwpn}:#{lun} is already active. Skipping activation."
+        log.info "Disk #{channel}:#{wwpn}:#{lun} is already active. Skipping the activation."
       else
         activate_controller(channel)
       end
@@ -716,6 +716,7 @@ module Yast
         io = ctrl.fetch("resource", {}).fetch("io", []).first
         io && io["active"]
       end
+      log.info "Already activated controllers: #{ctrls}"
       @activated_controllers = ctrls.map { |c| c["sysfs_bus_id"] }
     end
 
