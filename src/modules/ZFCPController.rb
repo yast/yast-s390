@@ -366,7 +366,7 @@ module Yast
       UI.OpenDialog(Label(_("Reading Configured ZFCP Devices")))
 
       index = -1
-      @devices = Builtins.listmap(find_disks(true)) do |d|
+      @devices = Builtins.listmap(find_disks(force_probing: true)) do |d|
         index = Ops.add(index, 1)
         { index => d }
       end
@@ -581,7 +581,7 @@ module Yast
     def ActivateDisk(channel, wwpn, lun)
       disk = find_disk(channel, wwpn, lun)
       if disk
-        log.info "Disk #{channel}:#{wwpn}:#{lun} is already active. Skipping the activation."
+        log.info "Disk #{disk.inspect} is already active. Skipping the activation."
       else
         activate_controller(channel)
       end
@@ -724,7 +724,7 @@ module Yast
     #
     # @param channel [String] Channel
     def register_as_activated(channel)
-      @activated_controllers << channel
+      activated_controllers.push(channel)
     end
 
     # Determines whether a controller is activated or not
@@ -741,7 +741,7 @@ module Yast
     #
     # @param force_probing [Boolean] Ignore the cached values and probes again.
     # @return [Array<Hash>] Found zFCP disks
-    def find_disks(force_probing = false)
+    def find_disks(force_probing: false)
       return @disks if @disks && !force_probing
       disks = Convert.convert(
         SCR.Read(path(".probe.disk")),

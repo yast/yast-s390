@@ -381,7 +381,7 @@ module Yast
       # popup label
       UI.OpenDialog(Label(_("Reading Configured DASD Disks")))
 
-      disks = find_disks(true)
+      disks = find_disks(force_probing: true)
 
       index = -1
       @devices = Builtins.listmap(disks) do |d|
@@ -796,19 +796,22 @@ module Yast
     #
     # When the disk is already activated, it returns '8' if the
     # disk is unformatted or '0' otherwise. The idea is to mimic
-    # the same API that ActivateDisk.
+    # the same API than ActivateDisk.
     #
-    # @return [Boolean] Returns an error code (8 means 'unformatted').
+    # @return [Integer] Returns an error code (8 means 'unformatted').
     def activate_disk_if_needed(channel, diag)
       disk = find_disks.find { |d| d["channel"] == channel }
       if disk && active_disk?(disk)
-        log.info "Disk #{channel} is already active. Skipping the activation."
+        log.info "Disk #{disk.inspect} is already active. Skipping the activation."
         return disk["formatted"] ? 0 : 8
       end
-      ActivateDisk(channel, diag) unless disk && active_disk?(disk)
+      ActivateDisk(channel, diag)
     end
 
     # Determines whether the disk is activated or not
+    #
+    # Since any of its IO elements in 'resource' is active, consider the device
+    # as 'active'.
     #
     # @param disk [Hash]
     # @return [Boolean]
@@ -824,7 +827,7 @@ module Yast
     #
     # @param force_probing [Boolean] Ignore the cached values and probes again.
     # @return [Array<Hash>] Found DASD disks
-    def find_disks(force_probing = false)
+    def find_disks(force_probing: false)
       return @disks if @disks && !force_probing
       disks = Convert.convert(
         SCR.Read(path(".probe.disk")),
