@@ -4,7 +4,7 @@ require_relative "./test_helper"
 
 Yast.import "ZFCPController"
 
-describe "Yast::ZFCPController" do
+describe Yast::ZFCPController do
   before do
     Yast::ZFCPController.main
   end
@@ -20,18 +20,18 @@ describe "Yast::ZFCPController" do
     end
 
     it "activates the controller and the given disk" do
-      expect(Yast::ZFCPController).to receive(:activate_controller).with("0.0.fa00")
+      expect(subject).to receive(:activate_controller).with("0.0.fa00")
       expect(Yast::SCR).to receive(:Execute)
         .with(anything, /\/sbin\/zfcp_disk_configure '0.0.fa00' '0x500\d+' '0x401\d+' 1/)
         .and_return(0)
-      Yast::ZFCPController.ActivateDisk("0.0.fa00", "0x5000000000000000", "0x4010400000000000")
+      subject.ActivateDisk("0.0.fa00", "0x5000000000000000", "0x4010400000000000")
     end
 
     context "when the disk is already active" do
       it "does not try to active the given disk" do
-        allow(Yast::ZFCPController).to receive(:activate_controller).with("0.0.fa00")
+        allow(subject).to receive(:activate_controller).with("0.0.fa00")
         expect(Yast::SCR).to_not receive(:Execute)
-        Yast::ZFCPController.ActivateDisk("0.0.fa00", "0x500507630500873a", "0x4010400000000000")
+        subject.ActivateDisk("0.0.fa00", "0x500507630500873a", "0x4010400000000000")
       end
     end
   end
@@ -55,15 +55,15 @@ describe "Yast::ZFCPController" do
     it "activates the given controller" do
       expect(Yast::SCR).to receive(:Execute)
         .with(anything, /\/sbin\/zfcp_host_configure '0.0.fc00' 1/).and_return(0)
-      expect(Yast::ZFCPController).to_not receive(:ReportControllerActivationError)
-      Yast::ZFCPController.activate_controller(channel)
+      expect(subject).to_not receive(:ReportControllerActivationError)
+      subject.activate_controller(channel)
     end
 
     it "does not activate a controller twice" do
       expect(Yast::SCR).to receive(:Execute)
         .with(anything, /\/sbin\/zfcp_host_configure '0.0.fc00' 1/).once.and_return(0)
-      Yast::ZFCPController.activate_controller(channel)
-      Yast::ZFCPController.activate_controller(channel)
+      subject.activate_controller(channel)
+      subject.activate_controller(channel)
     end
 
     context "when the activation fails" do
@@ -73,9 +73,9 @@ describe "Yast::ZFCPController" do
       end
 
       it "reports the error" do
-        expect(Yast::ZFCPController).to receive(:ReportControllerActivationError)
+        expect(subject).to receive(:ReportControllerActivationError)
           .with("0.0.fc00", 1)
-        Yast::ZFCPController.activate_controller(channel)
+        subject.activate_controller(channel)
       end
     end
 
@@ -89,7 +89,7 @@ describe "Yast::ZFCPController" do
 
       it "does not activate the controller" do
         expect(Yast::SCR).to_not receive(:Execute).with(anything, /\/sbin\/zfcp_host_configure/)
-        Yast::ZFCPController.activate_controller(channel)
+        subject.activate_controller(channel)
       end
     end
   end
@@ -107,7 +107,7 @@ describe "Yast::ZFCPController" do
       )
       expect(Yast::SCR).to receive(:Execute).with(anything, /\/sbin\/cio_ignore -r f800/).and_return(0)
 
-      ctrls = Yast::ZFCPController.GetControllers
+      ctrls = subject.GetControllers
       expect(ctrls).to contain_exactly(
         hash_including("sysfs_bus_id" => "0.0.f800"),
         hash_including("sysfs_bus_id" => "0.0.f900"),
@@ -134,7 +134,7 @@ describe "Yast::ZFCPController" do
         let(:is_zkvm) { false }
         it "reports a warning" do
           expect(Yast::Report).to receive(:Warning).with(/Cannot evaluate ZFCP controllers/)
-          Yast::ZFCPController.GetControllers
+          subject.GetControllers
         end
       end
 
@@ -142,7 +142,7 @@ describe "Yast::ZFCPController" do
         let(:is_zkvm) { true }
         it "does not report a warning" do
           expect(Yast::Report).to_not receive(:Warning).with(/Cannot evaluate ZFCP controllers/)
-          Yast::ZFCPController.GetControllers
+          subject.GetControllers
         end
       end
     end
@@ -155,8 +155,8 @@ describe "Yast::ZFCPController" do
                                     { "controller_id" => "0.0.f800" },
                                     { "controller_id" => "0.0.f900" }] }
 
-      expect(Yast::ZFCPController.Import(import_data)).to eq(true)
-      expect(Yast::ZFCPController.GetDeviceIndex("0.0.f800", "", "")).to eq(2)
+      expect(subject.Import(import_data)).to eq(true)
+      expect(subject.GetDeviceIndex("0.0.f800", "", "")).to eq(2)
     end
   end
 
@@ -168,8 +168,8 @@ describe "Yast::ZFCPController" do
     end
 
     it "Probing disk" do
-      expect(Yast::ZFCPController.ProbeDisks()).to eq(nil)
-      expect(Yast::ZFCPController.devices).to eq(load_data("device_list.yml"))
+      expect(subject.ProbeDisks()).to eq(nil)
+      expect(subject.devices).to eq(load_data("device_list.yml"))
     end
   end
 
@@ -181,10 +181,10 @@ describe "Yast::ZFCPController" do
                                     { "controller_id" => "0.0.f800" },
                                     { "controller_id" => "0.0.f900" }] }
 
-      expect(Yast::ZFCPController.Import(import_data)).to eq(true)
-      Yast::ZFCPController.filter_max = Yast::ZFCPController.FormatChannel("0.0.FA00")
-      Yast::ZFCPController.filter_min = Yast::ZFCPController.FormatChannel("0.0.f900")
-      expect(Yast::ZFCPController.GetFilteredDevices()).to eq(
+      expect(subject.Import(import_data)).to eq(true)
+      subject.filter_max = subject.FormatChannel("0.0.FA00")
+      subject.filter_min = subject.FormatChannel("0.0.f900")
+      expect(subject.GetFilteredDevices()).to eq(
         0 => { "detail"=>{ "controller_id" => "0.0.fa00", "wwpn" => "", "fcp_lun" => "" } },
         4 => { "detail"=>{ "controller_id" => "0.0.f900", "wwpn" => "", "fcp_lun" => "" } }
       )

@@ -4,7 +4,7 @@ require_relative "./test_helper"
 
 Yast.import "DASDController"
 
-describe "Yast::DASDController" do
+describe Yast::DASDController do
   subject { Yast::DASDController }
 
   describe "#DeactivateDisk" do
@@ -110,7 +110,7 @@ describe "Yast::DASDController" do
     it "returns true if .probe.disk contains DASDs" do
       expect(Yast::SCR).to receive(:Read).with(Yast.path(".probe.disk")).once
         .and_return(load_data("probe_disk_dasd.yml"))
-      expect(Yast::DASDController.IsAvailable()).to eq(true)
+      expect(subject.IsAvailable()).to eq(true)
     end
   end
 
@@ -118,8 +118,8 @@ describe "Yast::DASDController" do
     it "returns DASDs" do
       expect(Yast::SCR).to receive(:Read).with(Yast.path(".probe.disk")).once
         .and_return(load_data("probe_disk_dasd.yml"))
-      expect(Yast::DASDController.ProbeDisks()).to eq(nil)
-      expect(Yast::DASDController.GetDevices()).to eq(
+      expect(subject.ProbeDisks()).to eq(nil)
+      expect(subject.GetDevices()).to eq(
         0 => { "detail"        => { "cu_model" => 233, "dev_model" => 10, "lcss" => 0 },
                "device_id"     => 276880,
                "resource"      => { "io" => [{ "active" => false,
@@ -158,19 +158,19 @@ describe "Yast::DASDController" do
       allow(Yast::Mode).to receive(:autoinst).and_return(true)
       # speed up the test a bit
       allow(Yast::Builtins).to receive(:sleep)
-      allow(Yast::DASDController).to receive(:ActivateDisk).and_return(0)
-      allow(Yast::DASDController).to receive(:GetDeviceName).and_return("/dev/dasda")
+      allow(subject).to receive(:ActivateDisk).and_return(0)
+      allow(subject).to receive(:GetDeviceName).and_return("/dev/dasda")
     end
 
     context "during autoinstallation" do
       before do
-        Yast::DASDController.Import(data)
+        subject.Import(data)
       end
 
       it "activates the disk" do
-        allow(Yast::DASDController).to receive(:FormatDisks)
-        expect(Yast::DASDController).to receive(:ActivateDisk).with("0.0.0100", false)
-        Yast::DASDController.Write
+        allow(subject).to receive(:FormatDisks)
+        expect(subject).to receive(:ActivateDisk).with("0.0.0100", false)
+        subject.Write
       end
 
       context "when 'format' is sets to true" do
@@ -180,7 +180,7 @@ describe "Yast::DASDController" do
           # bnc 928388
           expect(Yast::SCR).to receive(:Execute).with(path(".process.start_shell"),
             "/sbin/dasdfmt -Y -P 1 -b 4096 -y -r 10 -m 10 -f '/dev/dasda'")
-          expect(Yast::DASDController.Write).to eq(true)
+          expect(subject.Write).to eq(true)
         end
       end
 
@@ -188,8 +188,8 @@ describe "Yast::DASDController" do
         let(:format) { false }
 
         it "does not format the disk" do
-          expect(Yast::DASDController).to_not receive(:FormatDisks)
-          Yast::DASDController.Write
+          expect(subject).to_not receive(:FormatDisks)
+          subject.Write
         end
       end
 
@@ -199,7 +199,7 @@ describe "Yast::DASDController" do
         let(:format) { false }
 
         before do
-          allow(Yast::DASDController).to receive(:ActivateDisk).with("0.0.0100", false)
+          allow(subject).to receive(:ActivateDisk).with("0.0.0100", false)
             .and_return(NOT_FORMATTED_CODE)
         end
 
@@ -207,8 +207,8 @@ describe "Yast::DASDController" do
           let(:format_unformatted) { true }
 
           it "formats the device" do
-            expect(Yast::DASDController).to receive(:FormatDisks).with(["/dev/dasda"], anything)
-            Yast::DASDController.Write
+            expect(subject).to receive(:FormatDisks).with(["/dev/dasda"], anything)
+            subject.Write
           end
         end
 
@@ -216,8 +216,8 @@ describe "Yast::DASDController" do
           let(:format_unformatted) { false }
 
           it "does not format the device" do
-            expect(Yast::DASDController).to_not receive(:FormatDisks)
-            Yast::DASDController.Write
+            expect(subject).to_not receive(:FormatDisks)
+            subject.Write
           end
         end
 
@@ -226,14 +226,14 @@ describe "Yast::DASDController" do
           let(:format_unformatted) { false }
 
           it "formats the device" do
-            expect(Yast::DASDController).to receive(:FormatDisks).with(["/dev/dasda"], anything)
-            Yast::DASDController.Write
+            expect(subject).to receive(:FormatDisks).with(["/dev/dasda"], anything)
+            subject.Write
           end
 
           it "reactivates the disk" do
-            expect(Yast::DASDController).to receive(:FormatDisks)
-            expect(Yast::DASDController).to receive(:ActivateDisk).twice
-            Yast::DASDController.Write
+            expect(subject).to receive(:FormatDisks)
+            expect(subject).to receive(:ActivateDisk).twice
+            subject.Write
           end
         end
       end
@@ -246,8 +246,8 @@ describe "Yast::DASDController" do
         expect(Yast::SCR).to_not receive(:Execute).with(path(".process.start_shell"),
           /dasdfmt.*\/dev\/dasda/)
 
-        expect(Yast::DASDController.Import(data)).to eq(true)
-        expect(Yast::DASDController.Write).to eq(true)
+        expect(subject.Import(data)).to eq(true)
+        expect(subject.Write).to eq(true)
       end
     end
   end
@@ -357,9 +357,9 @@ describe "Yast::DASDController" do
 
   describe "#ActivateDiag" do
     it "deactivates and reactivates dasd" do
-      expect(Yast::DASDController).to receive(:DeactivateDisk).ordered
-      expect(Yast::DASDController).to receive(:ActivateDisk).ordered
-      expect(Yast::DASDController.ActivateDiag("0.0.3333", true)).to eq(nil)
+      expect(subject).to receive(:DeactivateDisk).ordered
+      expect(subject).to receive(:ActivateDisk).ordered
+      expect(subject.ActivateDiag("0.0.3333", true)).to eq(nil)
     end
   end
 
