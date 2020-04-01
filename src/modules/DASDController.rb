@@ -816,8 +816,8 @@ module Yast
     # @param disk [Hash]
     # @return [Boolean]
     def active_disk?(disk)
-      io = disk.fetch("resource", {}).fetch("io", []).first
-      !!(io && io["active"])
+      io = disk.fetch("resource", {}).fetch("io", [])
+      io.any? { |i| i["active"] }
     end
 
     # Returns the DASD disks

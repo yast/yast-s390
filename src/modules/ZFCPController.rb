@@ -713,8 +713,8 @@ module Yast
     def activated_controllers
       return @activated_controllers if @activated_controllers
       ctrls = GetControllers().select do |ctrl|
-        io = ctrl.fetch("resource", {}).fetch("io", []).first
-        io && io["active"]
+        io = ctrl.fetch("resource", {}).fetch("io", [])
+        io.any? { |i| i["active"] }
       end
       log.info "Already activated controllers: #{ctrls}"
       @activated_controllers = ctrls.map { |c| c["sysfs_bus_id"] }
