@@ -485,6 +485,22 @@ module Yast
       ret["exit"]
     end
 
+    # Activates a disk if it is not active
+    #
+    # When the disk is already activated, it returns '8' if the
+    # disk is unformatted or '0' otherwise. The idea is to mimic
+    # the same API than ActivateDisk.
+    #
+    # @return [Integer] Returns an error code (8 means 'unformatted').
+    def activate_disk_if_needed(channel, diag)
+      disk = find_disks.find { |d| d["channel"] == channel }
+      if disk && active_disk?(disk)
+        log.info "Disk #{disk.inspect} is already active. Skipping the activation."
+        return disk["formatted"] ? 0 : 8
+      end
+      ActivateDisk(channel, diag)
+    end
+
     # Deactivate disk
     # @param [String] channel string Name of the disk to deactivate
     # @param [Boolean] diag boolean Activate DIAG or not
@@ -790,22 +806,6 @@ module Yast
       else
         Yast2::Popup.show(message, headline: headline, details: details)
       end
-    end
-
-    # Activates a disk if its not activated
-    #
-    # When the disk is already activated, it returns '8' if the
-    # disk is unformatted or '0' otherwise. The idea is to mimic
-    # the same API than ActivateDisk.
-    #
-    # @return [Integer] Returns an error code (8 means 'unformatted').
-    def activate_disk_if_needed(channel, diag)
-      disk = find_disks.find { |d| d["channel"] == channel }
-      if disk && active_disk?(disk)
-        log.info "Disk #{disk.inspect} is already active. Skipping the activation."
-        return disk["formatted"] ? 0 : 8
-      end
-      ActivateDisk(channel, diag)
     end
 
     # Determines whether the disk is activated or not

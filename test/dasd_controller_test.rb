@@ -47,6 +47,58 @@ describe Yast::DASDController do
     end
   end
 
+  describe "#activate_disk_if_needed" do
+    let(:channel) { "0.0.0150" }
+    let(:formatted) { true }
+    let(:active) { true }
+
+    let(:disk) do
+      {
+        "dev_name"  => "/dev/dasda",
+        "formatted" => formatted,
+        "channel"   => channel,
+        "resource"  => {
+          "io" => [{ "active" => active }]
+        }
+      }
+    end
+
+    before do
+      allow(subject).to receive(:find_disks).and_return([disk])
+    end
+
+    context "when the disk is already active" do
+      it "does not activate the disk" do
+        expect(subject).to_not receive(:ActivateDisk)
+        subject.activate_disk_if_needed(channel, false)
+      end
+
+      context "and it is not formatted" do
+        let(:formatted) { false }
+
+        it "returns 8" do
+          expect(subject.activate_disk_if_needed(channel, false)).to eq(8)
+        end
+      end
+
+      context "and it is formatted" do
+        it "returns 0" do
+          expect(subject.activate_disk_if_needed(channel, false)).to eq(0)
+        end
+      end
+    end
+
+    context "when the disk is not active" do
+      let(:active) { false }
+
+      it "activates the disk" do
+        expect(subject).to receive(:ActivateDisk).with(channel, false)
+          .and_return(0)
+        expect(subject.activate_disk_if_needed(channel, false)).to eq(0)
+      end
+    end
+  end
+
   describe "#DeactivateDisk" do
     let(:auto) { false }
     let(:channel) { "0.0.0160" }
