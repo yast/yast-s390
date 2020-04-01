@@ -7,6 +7,46 @@ Yast.import "DASDController"
 describe Yast::DASDController do
   subject { Yast::DASDController }
 
+  describe "#ActivateDisk" do
+    let(:exit_code) { 8 }
+    let(:channel) { "0.0.0100" }
+
+    before do
+      allow(Yast::SCR).to receive(:Execute).and_return(
+        "exit" => exit_code
+      )
+    end
+
+    it "runs dasd_configure" do
+      expect(Yast::SCR).to receive(:Execute).with(
+        path(".target.bash_output"), "/sbin/dasd_configure '0.0.0100' 1 0"
+      )
+      subject.ActivateDisk(channel, false)
+    end
+
+    it "returns dasd_configure exit value" do
+      expect(subject.ActivateDisk(channel, false)).to eq(exit_code)
+    end
+
+    context "when exit code is 7" do
+      let(:exit_code) { 7 }
+
+      it "deactivates the device" do
+        expect(subject).to receive(:DeactivateDisk).with(channel, false)
+        subject.ActivateDisk(channel, false)
+      end
+    end
+
+    context "when exit code is other than 7 or 8" do
+      let(:exit_code) { 1 }
+
+      it "reports activation error" do
+        expect(subject).to receive(:ReportActivationError).with(channel, "exit" => exit_code)
+        subject.ActivateDisk(channel, false)
+      end
+    end
+  end
+
   describe "#DeactivateDisk" do
     let(:auto) { false }
     let(:channel) { "0.0.0160" }
@@ -140,17 +180,26 @@ describe Yast::DASDController do
     end
   end
 
+  describe "#FormatDisks" do
+    it "formats the given disks using dasdfmt" do
+      expect(Yast::SCR).to receive(:Execute).with(
+        path(".process.start_shell"), "/sbin/dasdfmt -Y -P 1 -b 4096 -y -r 10 -m 10 -f '/dev/dasda'"
+      )
+      subject.FormatDisks(["/dev/dasda"], 8)
+    end
+  end
+
   describe "#Write" do
     let(:data) do
-      { "devices" => [{ "channel" => "0.0.0100", "diag" => false,
+      { "devices" => [{ "channel" => channel, "diag" => false,
         "format" => format }], "format_unformatted" => format_unformatted }
     end
     let(:format_unformatted) { false }
     let(:format) { true }
+    let(:channel) { "0.0.0100" }
 
     before do
-      allow(Yast::SCR).to receive(:Execute).with(path(".target.bash_output"),
-        /\/sbin\/dasdview/)
+      allow(Yast::SCR).to receive(:Execute).with(path(".target.bash_output"), /\/sbin\/dasdview/)
         .and_return("exitstatus" => 0, "stdout" => load_file("dasdview_eckd.txt"), "stderr" => "")
 
       allow(Yast::Mode).to receive(:normal).and_return(false)
@@ -177,9 +226,7 @@ describe Yast::DASDController do
         let(:format) { true }
 
         it "formats the disk" do
-          # bnc 928388
-          expect(Yast::SCR).to receive(:Execute).with(path(".process.start_shell"),
-            "/sbin/dasdfmt -Y -P 1 -b 4096 -y -r 10 -m 10 -f '/dev/dasda'")
+          expect(subject).to receive(:FormatDisks).with(["/dev/dasda"], 8)
           expect(subject.Write).to eq(true)
         end
       end
@@ -199,7 +246,7 @@ describe Yast::DASDController do
         let(:format) { false }
 
         before do
-          allow(subject).to receive(:ActivateDisk).with("0.0.0100", false)
+          allow(subject).to receive(:activate_disk_if_needed).with(channel, false)
             .and_return(NOT_FORMATTED_CODE)
         end
 
@@ -210,6 +257,12 @@ describe Yast::DASDController do
             expect(subject).to receive(:FormatDisks).with(["/dev/dasda"], anything)
             subject.Write
           end
+
+          it "reactivates the disk" do
+            allow(subject).to receive(:FormatDisks)
+            expect(subject).to receive(:ActivateDisk).with(channel, false)
+            subject.Write
+          end
         end
 
         context "and 'format_unformatted' is set to 'false'" do
@@ -217,6 +270,11 @@ describe Yast::DASDController do
 
           it "does not format the device" do
             expect(subject).to_not receive(:FormatDisks)
+            subject.Write
+          end
+
+          it "does not reactivate the disk" do
+            expect(subject).to_not receive(:ActivateDisk)
             subject.Write
           end
         end
@@ -232,7 +290,7 @@ describe Yast::DASDController do
 
           it "reactivates the disk" do
             expect(subject).to receive(:FormatDisks)
-            expect(subject).to receive(:ActivateDisk).twice
+            expect(subject).to receive(:ActivateDisk).with(channel, false)
             subject.Write
           end
         end
@@ -362,5 +420,4 @@ describe Yast::DASDController do
       expect(subject.ActivateDiag("0.0.3333", true)).to eq(nil)
     end
   end
-
 end
