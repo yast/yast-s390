@@ -108,7 +108,7 @@
   old_unique_key: _AAN.6czr7zOIMz1
   resource:
     io:
-    - active: true
+    - active: false
       length: 3
       mode: rw
       start: 64512

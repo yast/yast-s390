@@ -143,7 +143,7 @@ module Yast
           channel = Ops.get_string(device, "channel", "")
           format = Ops.get_boolean(device, "format", false)
           do_diag = Ops.get_boolean(device, "diag", false)
-          act_ret = ActivateDisk(channel, do_diag)
+          act_ret = activate_disk_if_needed(channel, do_diag)
           # FIXME: general activation error handling - also in sync with below
           # for AutoInstall, format unformatted disks later at once
           # even disks manually selected for formatting must be reactivated
@@ -381,76 +381,16 @@ module Yast
       # popup label
       UI.OpenDialog(Label(_("Reading Configured DASD Disks")))
 
-      disks = Convert.convert(
-        SCR.Read(path(".probe.disk")),
-        from: "any",
-        to:   "list <map <string, any>>"
-      )
-      disks = Builtins.filter(disks) do |d|
-        Builtins.tolower(Ops.get_string(d, "device", "")) == "dasd"
-      end
-
-      disks.sort_by! { |disk| FormatChannel(disk.fetch("sysfs_bus_id", "0.0.0000")) }
-
-      disks = Builtins.maplist(disks) do |d|
-        channel = Ops.get_string(d, "sysfs_bus_id", "")
-        Ops.set(d, "channel", channel)
-        active = Ops.get_boolean(d, ["resource", "io", 0, "active"], false)
-        if active
-          device = Ops.get_string(d, "dev_name", "")
-          scr_out = Convert.to_map(
-            SCR.Execute(
-              path(".target.bash_output"),
-              Builtins.sformat("/sbin/dasdview --extended '%1' | grep formatted", device)
-            )
-          )
-          formatted = false
-          if Ops.get_integer(scr_out, "exit", 0) == 0
-            out = Ops.get_string(scr_out, "stdout", "")
-            formatted = !Builtins.regexpmatch(
-              Builtins.toupper(out),
-              "NOT[ \t]*FORMATTED"
-            )
-          end
-          Ops.set(d, "formatted", formatted)
-
-          Ops.set(d, "partition_info", GetPartitionInfo(device)) if formatted
-
-          diag_file = Builtins.sformat(
-            "/sys/%1/device/use_diag",
-            Ops.get_string(d, "sysfs_id", "")
-          )
-          if FileUtils.Exists(diag_file)
-            use_diag = Convert.to_string(
-              SCR.Read(path(".target.string"), diag_file)
-            )
-            Ops.set(d, "diag", Builtins.substring(use_diag, 0, 1) == "1")
-            Ops.set(@diag, channel, Builtins.substring(use_diag, 0, 1) == "1")
-          end
-        end
-        d = Builtins.filter(d) do |k, _v|
-          Builtins.contains(
-            [
-              "channel",
-              "diag",
-              "resource",
-              "formatted",
-              "partition_info",
-              "dev_name",
-              "detail",
-              "device_id",
-              "sub_device_id"
-            ],
-            k
-          )
-        end
-        deep_copy(d)
-      end
+      disks = find_disks(force_probing: true)
 
       index = -1
       @devices = Builtins.listmap(disks) do |d|
         index = Ops.add(index, 1)
         { index => d }
+      end
+
+      disks.each do |dev|
+        @diag[dev["channel"]] = dev["diag"] if dev["diag"]
       end
 
       Builtins.y2milestone("probed DASD devices %1", @devices)
@@ -543,6 +483,22 @@ module Yast
       @disk_configured = true
 
       ret["exit"]
+    end
+
+    # Activates a disk if it is not active
+    #
+    # When the disk is already activated, it returns '8' if the
+    # disk is unformatted or '0' otherwise. The idea is to mimic
+    # the same API than ActivateDisk.
+    #
+    # @return [Integer] Returns an error code (8 means 'unformatted').
+    def activate_disk_if_needed(channel, diag)
+      disk = find_disks.find { |d| d["channel"] == channel }
+      if disk && active_disk?(disk)
+        log.info "Disk #{disk.inspect} is already active. Skipping the activation."
+        return disk["formatted"] ? 0 : 8
+      end
+      ActivateDisk(channel, diag)
     end
 
     # Deactivate disk
@@ -849,6 +805,93 @@ module Yast
         Report.Error("#{message}\n#{details}")
       else
         Yast2::Popup.show(message, headline: headline, details: details)
+      end
+    end
+
+    # Determines whether the disk is activated or not
+    #
+    # Since any of its IO elements in 'resource' is active, consider the device
+    # as 'active'.
+    #
+    # @param disk [Hash]
+    # @return [Boolean]
+    def active_disk?(disk)
+      io = disk.fetch("resource", {}).fetch("io", [])
+      io.any? { |i| i["active"] }
+    end
+
+    # Returns the DASD disks
+    #
+    # Probes and returns the found DASD disks ordered by channel.
+    # It caches the found disks.
+    #
+    # @param force_probing [Boolean] Ignore the cached values and probes again.
+    # @return [Array<Hash>] Found DASD disks
+    def find_disks(force_probing: false)
+      return @disks if @disks && !force_probing
+      disks = Convert.convert(
+        SCR.Read(path(".probe.disk")),
+        from: "any",
+        to:   "list <map <string, any>>"
+      )
+      disks = Builtins.filter(disks) do |d|
+        Builtins.tolower(Ops.get_string(d, "device", "")) == "dasd"
+      end
+
+      disks.sort_by! { |disk| FormatChannel(disk.fetch("sysfs_bus_id", "0.0.0000")) }
+
+      @disks = Builtins.maplist(disks) do |d|
+        channel = Ops.get_string(d, "sysfs_bus_id", "")
+        Ops.set(d, "channel", channel)
+        active = Ops.get_boolean(d, ["resource", "io", 0, "active"], false)
+        if active
+          device = Ops.get_string(d, "dev_name", "")
+          scr_out = Convert.to_map(
+            SCR.Execute(
+              path(".target.bash_output"),
+              Builtins.sformat("/sbin/dasdview --extended '%1' | grep formatted", device)
+            )
+          )
+          formatted = false
+          if Ops.get_integer(scr_out, "exit", 0) == 0
+            out = Ops.get_string(scr_out, "stdout", "")
+            formatted = !Builtins.regexpmatch(
+              Builtins.toupper(out),
+              "NOT[ \t]*FORMATTED"
+            )
+          end
+          Ops.set(d, "formatted", formatted)
+
+          Ops.set(d, "partition_info", GetPartitionInfo(device)) if formatted
+
+          diag_file = Builtins.sformat(
+            "/sys/%1/device/use_diag",
+            Ops.get_string(d, "sysfs_id", "")
+          )
+          if FileUtils.Exists(diag_file)
+            use_diag = Convert.to_string(
+              SCR.Read(path(".target.string"), diag_file)
+            )
+            Ops.set(d, "diag", Builtins.substring(use_diag, 0, 1) == "1")
+          end
+        end
+        d = Builtins.filter(d) do |k, _v|
+          Builtins.contains(
+            [
+              "channel",
+              "diag",
+              "resource",
+              "formatted",
+              "partition_info",
+              "dev_name",
+              "detail",
+              "device_id",
+              "sub_device_id"
+            ],
+            k
+          )
+        end
+        deep_copy(d)
       end
     end
   end
