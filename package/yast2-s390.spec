@@ -40,7 +40,7 @@ Requires:       yast2-ruby-bindings >= 3.1.7
 Requires:       s390-tools
 
 Supplements:    yast2-storage-ng
-supplements:    autoyast(xpram,zfcp,dasd)
+Supplements:    autoyast(xpram,zfcp,dasd)
 
 ExclusiveArch:  s390 s390x
 
