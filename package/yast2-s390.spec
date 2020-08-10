@@ -17,7 +17,7 @@
 
 
 Name:           yast2-s390
-Version:        4.3.0
+Version:        4.3.1
 Release:        0
 Group:          System/YaST
 License:        GPL-2.0-only
@@ -40,6 +40,7 @@ Requires:       yast2-ruby-bindings >= 3.1.7
 Requires:       s390-tools
 
 Supplements:    yast2-storage-ng
+supplements:    autoyast(xpram,zfcp,dasd)
 
 ExclusiveArch:  s390 s390x
 
