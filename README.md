@@ -1,8 +1,10 @@
 # YaST - The S390 Configuration Module
 
-[![Travis Build](https://travis-ci.org/yast/yast-s390.svg?branch=master)](https://travis-ci.org/yast/yast-s390)
-[![Code Coverage Status](
-https://coveralls.io/repos/github/yast/yast-s390/badge.svg?branch=master)](https://coveralls.io/github/yast/yast-s390?branch=master)
+[![Workflow Status](https://github.com/yast/yast-s390/workflows/CI/badge.svg?branch=master)](
+https://github.com/yast/yast-s390/actions?query=branch%3Amaster)
+[![Jenkins Status](https://ci.opensuse.org/buildStatus/icon?job=yast-yast-s390-master)](
+https://ci.opensuse.org/view/Yast/job/yast-yast-s390-master/)
+[![Coverage Status](https://img.shields.io/coveralls/yast/yast-s390.svg)](https://coveralls.io/r/yast/yast-s390?branch=master)
 
 ## Resources
 
