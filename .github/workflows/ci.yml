@@ -60,6 +60,9 @@ jobs:
     - name: Adapt Spec
       run: sed -i "/^ExclusiveArch:/d" package/*.spec
 
+    - name: Mark Spec
+      run: git add package/*.spec
+
     - name: Package Build
       run: yast-ci-ruby -o package
 
