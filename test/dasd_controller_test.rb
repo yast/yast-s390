@@ -234,9 +234,13 @@ describe Yast::DASDController do
 
   describe "#FormatDisks" do
     it "formats the given disks using dasdfmt" do
+      allow(Yast::SCR).to receive(:Read).with(path(".process.running"), 100).and_return(true, false)
+      allow(Yast::SCR).to receive(:Read).with(path(".process.status"), 100).and_return(0)
+      allow(Yast::SCR).to receive(:Read).with(path(".process.read_line"), 100).and_return("0")
+      allow(Yast::SCR).to receive(:Read).with(path(".process.read_line_stderr")).and_return(nil)
       expect(Yast::SCR).to receive(:Execute).with(
         path(".process.start_shell"), "/sbin/dasdfmt -Y -P 1 -b 4096 -y -r 10 -m 10 -f '/dev/dasda'"
-      )
+      ).and_return(100)
       subject.FormatDisks(["/dev/dasda"], 8)
     end
   end
@@ -348,13 +352,15 @@ describe Yast::DASDController do
         end
       end
 
-      it "does not format disk for FBA disk" do
+      it "does not format disk for FBA disk and report error" do
         allow(Yast::SCR).to receive(:Execute).with(path(".target.bash_output"),
           /\/sbin\/dasdview/)
           .and_return("exitstatus" => 0, "stdout" => load_file("dasdview_fba.txt"), "stderr" => "")
 
         expect(Yast::SCR).to_not receive(:Execute).with(path(".process.start_shell"),
           /dasdfmt.*\/dev\/dasda/)
+
+        expect(Yast::Report).to receive(:Error)
 
         expect(subject.Import(data)).to eq(true)
         expect(subject.Write).to eq(true)
