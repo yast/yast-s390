@@ -234,7 +234,7 @@ describe Yast::DASDController do
 
   describe "#FormatDisks" do
     it "formats the given disks using dasdfmt" do
-      allow(Yast::SCR).to receive(:Read).with(path(".process.status"), 100).and_return(true)
+      allow(Yast::SCR).to receive(:Read).with(path(".process.running"), 100).and_return(true)
       expect(Yast::SCR).to receive(:Execute).with(
         path(".process.start_shell"), "/sbin/dasdfmt -Y -P 1 -b 4096 -y -r 10 -m 10 -f '/dev/dasda'"
       ).and_return(100)
