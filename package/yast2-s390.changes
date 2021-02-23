@@ -2,7 +2,7 @@
 Tue Feb 23 20:40:37 UTC 2021 - Josef Reidinger <jreidinger@suse.com>
 
 - Adapted unit test to recent changes in Yast::Report (related to
-  bsc#1179893).
+  bsc#1179893, bsc#1182624).
 - 4.3.3
 
 -------------------------------------------------------------------
