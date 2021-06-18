@@ -368,11 +368,6 @@ module Yast
           end
           DASDController.FormatDisks(devices, num_parallel)
 
-          channels.each do |channel|
-            diag = DASDController.diag.fetch(channel, false)
-            DASDController.ActivateDisk(channel, diag)
-          end
-
           DASDController.ProbeDisks
 
           return true
