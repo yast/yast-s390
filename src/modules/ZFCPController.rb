@@ -28,6 +28,8 @@
 #
 # Representation of the configuration of controller.
 # Input and output routines.
+
+require "yaml"
 require "yast"
 
 module Yast
@@ -705,6 +707,21 @@ module Yast
 
   private
 
+    # In production, call SCR.Read(.probe.disk).
+    # For testing, point YAST2_S390_PROBE_DISK to a YAML file
+    # with the mock value.
+    # Suggesstion:
+    #   YAST2_S390_PROBE_DISK=test/data/probe_disk.yml rake run"[zfcp]"
+    # @return [Array<Hash>] .probe.disk output
+    def probe_or_mock_disks
+      mock_filename = ENV["YAST2_S390_PROBE_DISK"]
+      if mock_filename
+        YAML.load(File.read(mock_filename))
+      else
+        SCR.Read(path(".probe.disk"))
+      end
+    end
+
     # Finds the activated controllers
     #
     # Initially, it reads the activated controllers from hwinfo.
@@ -743,11 +760,7 @@ module Yast
     # @return [Array<Hash>] Found zFCP disks
     def find_disks(force_probing: false)
       return @disks if @disks && !force_probing
-      disks = Convert.convert(
-        SCR.Read(path(".probe.disk")),
-        from: "any",
-        to:   "list <map <string, any>>"
-      )
+      disks = probe_or_mock_disks
       disks = Builtins.filter(disks) do |d|
         d["driver"] == "zfcp"
       end

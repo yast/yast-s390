@@ -31,6 +31,7 @@
 require "yast"
 require "yast2/popup"
 require "shellwords"
+require "yaml"
 
 module Yast
   class DASDControllerClass < Module
@@ -359,6 +360,21 @@ module Yast
       deep_copy(ret)
     end
 
+    # In production, call SCR.Read(.probe.disk).
+    # For testing, point YAST2_S390_PROBE_DISK to a YAML file
+    # with the mock value.
+    # Suggesstion:
+    #   YAST2_S390_PROBE_DISK=test/data/probe_disk_dasd.yml rake run"[dasd]"
+    # @return [Array<Hash>] .probe.disk output
+    def probe_or_mock_disks
+      mock_filename = ENV["YAST2_S390_PROBE_DISK"]
+      if mock_filename
+        YAML.load(File.read(mock_filename))
+      else
+        SCR.Read(path(".probe.disk"))
+      end
+    end
+
     # Return packages needed to be installed and removed during
     # Autoinstallation to insure module has all needed software
     # installed.
@@ -370,7 +386,7 @@ module Yast
     # Check if DASD subsystem is available
     # @return [Boolean] True if more than one disk
     def IsAvailable
-      disks = SCR.Read(path(".probe.disk"))
+      disks = probe_or_mock_disks
       count = disks.count { |d| d["device"] == "DASD" }
       log.info("number of probed DASD devices #{count}")
       count > 0
@@ -829,11 +845,7 @@ module Yast
     # @return [Array<Hash>] Found DASD disks
     def find_disks(force_probing: false)
       return @disks if @disks && !force_probing
-      disks = Convert.convert(
-        SCR.Read(path(".probe.disk")),
-        from: "any",
-        to:   "list <map <string, any>>"
-      )
+      disks = probe_or_mock_disks
       disks = Builtins.filter(disks) do |d|
         Builtins.tolower(Ops.get_string(d, "device", "")) == "dasd"
       end
