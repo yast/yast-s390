@@ -478,4 +478,24 @@ describe Yast::DASDController do
       expect(subject.ActivateDiag("0.0.3333", true)).to eq(nil)
     end
   end
+
+  describe "#GetFilteredDevices" do
+    it "Filters the devices (as a single large number)" do
+      import_data = { "devices" => [{ "channel" => "0.4.fa00" },
+                                    { "channel" => "0.0.fb00" },
+                                    { "channel" => "0.0.fc00" },
+                                    { "channel" => "0.0.f800" },
+                                    { "channel" => "0.0.f900" }] }
+
+      expect(subject.Import(import_data)).to eq(true)
+      subject.filter_max = subject.FormatChannel("10.0.FA00")
+      subject.filter_min = subject.FormatChannel("0.0.f900")
+      expect(subject.GetFilteredDevices()).to eq(
+        0 => { "channel" => "0.4.fa00" },
+        1 => { "channel" => "0.0.fb00" },
+        2 => { "channel" => "0.0.fc00" },
+        4 => { "channel" => "0.0.f900" }
+      )
+    end
+  end
 end
