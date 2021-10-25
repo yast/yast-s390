@@ -28,6 +28,8 @@
 #
 # Representation of the configuration of controller.
 # Input and output routines.
+
+require "yaml"
 require "yast"
 
 module Yast
@@ -209,36 +211,23 @@ module Yast
       deep_copy(@devices)
     end
 
-    def GetFilteredDevices
-      min_strs = Builtins.splitstring(@filter_min, ".")
-      min_css = Builtins.tointeger(Ops.add("0x", Ops.get(min_strs, 0, "")))
-      min_lcss = Builtins.tointeger(Ops.add("0x", Ops.get(min_strs, 1, "")))
-      min_chan = Builtins.tointeger(Ops.add("0x", Ops.get(min_strs, 2, "")))
+    # @param channel [String] "0.0.0000" "ab.c.Def0"
+    # @return [String] "0000000" "abcdef0"
+    def channel_sort_key(channel)
+      parts = channel.downcase.split(".", 3)
+      format("%02s%1s%4s", parts[0], parts[1], parts[2])
+    end
 
-      max_strs = Builtins.splitstring(@filter_max, ".")
-      max_css = Builtins.tointeger(Ops.add("0x", Ops.get(max_strs, 0, "")))
-      max_lcss = Builtins.tointeger(Ops.add("0x", Ops.get(max_strs, 1, "")))
-      max_chan = Builtins.tointeger(Ops.add("0x", Ops.get(max_strs, 2, "")))
+    def GetFilteredDevices
+      min = channel_sort_key(@filter_min)
+      max = channel_sort_key(@filter_max)
 
       ret = GetDevices()
-
-      ret = Builtins.filter(ret) do |_k, d|
-        tmp_strs = Builtins.splitstring(
-          Ops.get_string(d, ["detail", "controller_id"], ""),
-          "."
-        )
-        tmp_css = Builtins.tointeger(Ops.add("0x", Ops.get(tmp_strs, 0, "")))
-        tmp_lcss = Builtins.tointeger(Ops.add("0x", Ops.get(tmp_strs, 1, "")))
-        tmp_chan = Builtins.tointeger(Ops.add("0x", Ops.get(tmp_strs, 2, "")))
-        Ops.greater_or_equal(tmp_css, min_css) &&
-          Ops.greater_or_equal(tmp_lcss, min_lcss) &&
-          Ops.greater_or_equal(tmp_chan, min_chan) &&
-          Ops.less_or_equal(tmp_css, max_css) &&
-          Ops.less_or_equal(tmp_lcss, max_lcss) &&
-          Ops.less_or_equal(tmp_chan, max_chan)
+      Builtins.filter(ret) do |_k, d|
+        channel = Ops.get_string(d, ["detail", "controller_id"], "")
+        key = channel_sort_key(channel)
+        min <= key && key <= max
       end
-
-      deep_copy(ret)
     end
 
     def AddDevice(d)
@@ -705,6 +694,21 @@ module Yast
 
   private
 
+    # In production, call SCR.Read(.probe.disk).
+    # For testing, point YAST2_S390_PROBE_DISK to a YAML file
+    # with the mock value.
+    # Suggesstion:
+    #   YAST2_S390_PROBE_DISK=test/data/probe_disk.yml rake run"[zfcp]"
+    # @return [Array<Hash>] .probe.disk output
+    def probe_or_mock_disks
+      mock_filename = ENV["YAST2_S390_PROBE_DISK"]
+      if mock_filename
+        YAML.load(File.read(mock_filename))
+      else
+        SCR.Read(path(".probe.disk"))
+      end
+    end
+
     # Finds the activated controllers
     #
     # Initially, it reads the activated controllers from hwinfo.
@@ -743,11 +747,7 @@ module Yast
     # @return [Array<Hash>] Found zFCP disks
     def find_disks(force_probing: false)
       return @disks if @disks && !force_probing
-      disks = Convert.convert(
-        SCR.Read(path(".probe.disk")),
-        from: "any",
-        to:   "list <map <string, any>>"
-      )
+      disks = probe_or_mock_disks
       disks = Builtins.filter(disks) do |d|
         d["driver"] == "zfcp"
       end
