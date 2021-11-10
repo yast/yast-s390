@@ -63,6 +63,7 @@ S/390-specific features.
 %files
 %{yast_yncludedir}
 %{yast_clientdir}
+%{yast_libdir}
 %{yast_moduledir}
 %{yast_scrconfdir}
 %{yast_desktopdir}

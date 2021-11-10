@@ -75,10 +75,8 @@ Metrics/BlockLength:
     - 'src/include/s390/iucvterminal/ui.rb'
     - 'src/include/s390/onpanic/ui.rb'
     - 'src/modules/DASDController.rb'
-    - 'test/dasd_controller_test.rb'
-    - 'test/ui_include_test.rb'
-    - 'test/ui_onpanic_include_test.rb'
-    - 'test/zfcp_controller_test.rb'
+    # RSpec is known as DSL with big blocks
+    - 'test/**/*'
 
 # Offense count: 3
 Naming/AccessorMethodName:

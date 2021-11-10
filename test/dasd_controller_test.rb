@@ -7,6 +7,20 @@ Yast.import "DASDController"
 describe Yast::DASDController do
   subject { Yast::DASDController }
 
+  describe "#GetDeviceName" do
+    let(:channel) { "0.0.0150" }
+    let(:device_block_path) { "/sys/bus/ccw/devices/#{channel}/block/" }
+
+    before do
+      allow(Yast::SCR).to receive(:Read).with(Yast.path(".target.dir"), device_block_path)
+        .once.and_return(["dasda"])
+    end
+
+    it "returns the associated device name" do
+      expect(subject.GetDeviceName(channel)).to eq("/dev/dasda")
+    end
+  end
+
   describe "#ActivateDisk" do
     let(:exit_code) { 8 }
     let(:channel) { "0.0.0100" }
@@ -436,7 +450,7 @@ describe Yast::DASDController do
       end
 
       before do
-        allow(Yast::FileUtils).to receive(:Exists).and_return(false)
+        allow(File).to receive(:exist?).and_return(false)
       end
 
       it "is added to devices with formatted info" do
@@ -454,7 +468,7 @@ describe Yast::DASDController do
         let(:diag_path) { "/sys//class/block/dasda/device/use_diag" }
 
         before do
-          allow(Yast::FileUtils).to receive(:Exists).with(diag_path)
+          allow(File).to receive(:exist?).with(diag_path)
             .and_return(true)
           allow(Yast::SCR).to receive(:Read)
             .with(Yast::Path.new(".target.string"), diag_path)
