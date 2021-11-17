@@ -237,11 +237,12 @@ module Yast
       GetDevices().filter { |d| min <= d.hex_id && d.hex_id <= max }
     end
 
-    # Create a textual summary and a list of configured devices
+    # Returns a text list with the summary of the configured devices
+    #
     # @return summary of the current configuration
     def Summary
       require "y2s390/presenters/summary"
-      Y2S390::Presenters::DasdsSummary.new(Yast::Mode.config ? @devices : @devices.active).text
+      Y2S390::Presenters::DasdsSummary.new(Yast::Mode.config ? @devices : @devices.active).list
     end
 
     # In production, call SCR.Read(.probe.disk).
