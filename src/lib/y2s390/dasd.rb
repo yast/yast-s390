@@ -119,7 +119,10 @@ module Y2S390
         "[ \t]+([^ \t]+)[ \t]+([^ \t]+([ \t]+[^ \t]+))*[ \t]*$")
 
       lines = out.split("\n").select { |s| s.match?(regexp) }
-      lines.map { |line| r = line.match(regexp); "#{r[1]} (#{r[6]})" }.join(", ")
+      lines.map do |line|
+        r = line.match(regexp)
+        "#{r[1]} (#{r[6]})"
+      end.join(", ")
     end
 
     def hwinfo
@@ -156,15 +159,6 @@ module Y2S390
       cmd = ["ls", "/sys/bus/ccw/devices/#{id}/block/"]
       disk = Yast::Execute.stdout.on_target!(cmd).strip
       disk.to_s.empty? ? nil : "/dev/#{disk}"
-    end
-
-    def refresh_data!
-      cmd = [LIST_CMD, id]
-      data = Yast::Execute.stdout.locally!(*cmd).split("\n").find { |l| l.start_with? /\d/ }
-
-      return if data.to_s.empty?
-
-      _id, @status, @device_name, _, @type, = data.split(" ")
     end
   end
 end

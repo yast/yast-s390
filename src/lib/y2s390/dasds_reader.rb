@@ -46,8 +46,8 @@ module Y2S390
       a = dasd_entries(offline: offline).each_with_object([]) do |entry, arr|
         next unless entry.start_with?(/\d/)
 
-        id, offline, name, _, type, = entry.split(" ")
-        attrs = Yast::Mode.config ? {} : { status: offline, device_name: name, type: type }
+        id, status, name, _, type, = entry.split(" ")
+        attrs = Yast::Mode.config ? {} : { status: status, device_name: name, type: type }
         dasd = Y2S390::Dasd.new(id, **attrs).tap do |d|
           if Yast::Mode.config
             d.diag = d.use_diag = use_diag?(d)
@@ -61,6 +61,23 @@ module Y2S390
       end
 
       Y2S390::DasdsCollection.new(a)
+    end
+
+    def refresh_data!(dasds)
+      dasd_entries(offline: true).each do |entry|
+        next unless entry.start_with?(/\d/)
+
+        id, status, name, _, type, = entry.split(" ")
+        dasd = dasds.by_id(id)
+        next unless dasd
+
+        dasd.status = status
+        dasd.device_name = name
+        dasd.type = type
+        update_additional_info(dasd)
+      end
+
+      true
     end
 
     def update_info(dasd, extended: false)
@@ -90,7 +107,7 @@ module Y2S390
       if ENV["S390_MOCKING"]
         File.read("test/data/lsdasd.txt")
       else
-        cmd = cmd_for(offline: offline)
+        cmd = cmd_for(offline: offline, dasd: dasd)
         Yast::Execute.stdout.locally!(cmd)
       end.split("\n")
     end
@@ -150,7 +167,10 @@ module Y2S390
         "[ \t]+([^ \t]+)[ \t]+([^ \t]+([ \t]+[^ \t]+))*[ \t]*$")
 
       lines = out.split("\n").select { |s| s.match?(regexp) }
-      lines.map { |line| r = line.match(regexp);  "#{r[1]} (#{r[6]})" }.join(", ")
+      lines.map do |line|
+        r = line.match(regexp)
+        "#{r[1]} (#{r[6]})"
+      end.join(", ")
     end
 
     def device_type_for(dasd)
