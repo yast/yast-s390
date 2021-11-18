@@ -48,8 +48,9 @@ describe Y2S390::DasdsReader do
         expect(reader).to_not receive(:update_additional_info)
         devices = reader.list
         dasd = devices.by_id("0.0.0150")
-        expect(dasd.format).to eq(false)
+        expect(dasd.format_wanted).to eq(false)
         expect(dasd.use_diag).to eq(false)
+        expect(dasd.diag_wanted).to eq(false)
         expect(dasd.type).to be_nil
         expect(dasd.device_name).to be_nil
       end

@@ -50,8 +50,8 @@ module Y2S390
         attrs = Yast::Mode.config ? {} : { status: status, device_name: name, type: type }
         dasd = Y2S390::Dasd.new(id, **attrs).tap do |d|
           if Yast::Mode.config
-            d.diag = d.use_diag = use_diag?(d)
-            d.format = false
+            d.diag_wanted = d.use_diag = use_diag?(d)
+            d.format_wanted = false
           else
             update_additional_info(d)
           end
