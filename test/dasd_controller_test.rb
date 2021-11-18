@@ -6,19 +6,11 @@ Yast.import "DASDController"
 
 describe Yast::DASDController do
   subject { Yast::DASDController }
+  let(:mock_disks) { true }
 
-  describe "#GetDeviceName" do
-    let(:channel) { "0.0.0150" }
-    let(:device_block_path) { "/sys/bus/ccw/devices/#{channel}/block/" }
-
-    before do
-      allow(Yast::SCR).to receive(:Read).with(Yast.path(".target.dir"), device_block_path)
-        .once.and_return(["dasda"])
-    end
-
-    it "returns the associated device name" do
-      expect(subject.GetDeviceName(channel)).to eq("/dev/dasda")
-    end
+  before do
+    allow(ENV).to receive(:[]).and_call_original
+    allow(ENV).to receive(:[]).with("S390_MOCKING").and_return(mock_disks)
   end
 
   describe "#ActivateDisk" do
@@ -61,43 +53,35 @@ describe Yast::DASDController do
     end
   end
 
-  describe "#activate_disk_if_needed" do
+  describe "#activate_if_needed" do
+    let(:dasd) { subject.devices.by_id(channel) }
     let(:channel) { "0.0.0150" }
-    let(:formatted) { true }
     let(:active) { true }
-
-    let(:disk) do
-      {
-        "dev_name"  => "/dev/dasda",
-        "formatted" => formatted,
-        "channel"   => channel,
-        "resource"  => {
-          "io" => [{ "active" => active }]
-        }
-      }
-    end
+    let(:formatted) { true }
 
     before do
-      allow(subject).to receive(:find_disks).and_return([disk])
+      subject.ProbeDisks()
+      allow(dasd).to receive(:io_active?).and_return(active)
+      dasd.formatted = formatted
     end
 
     context "when the disk is already active" do
       it "does not activate the disk" do
         expect(subject).to_not receive(:ActivateDisk)
-        subject.activate_disk_if_needed(channel, false)
+        subject.activate_if_needed(dasd)
       end
 
       context "and it is not formatted" do
         let(:formatted) { false }
 
         it "returns 8" do
-          expect(subject.activate_disk_if_needed(channel, false)).to eq(8)
+          expect(subject.activate_if_needed(dasd)).to eq(8)
         end
       end
 
       context "and it is formatted" do
         it "returns 0" do
-          expect(subject.activate_disk_if_needed(channel, false)).to eq(0)
+          expect(subject.activate_if_needed(dasd)).to eq(0)
         end
       end
     end
@@ -108,7 +92,7 @@ describe Yast::DASDController do
       it "activates the disk" do
         expect(subject).to receive(:ActivateDisk).with(channel, false)
           .and_return(0)
-        expect(subject.activate_disk_if_needed(channel, false)).to eq(0)
+        expect(subject.activate_if_needed(dasd)).to eq(0)
       end
     end
   end
@@ -213,49 +197,37 @@ describe Yast::DASDController do
   end
 
   describe "#IsAvailable" do
+    context "when .probe.disk does not contain DASDS" do
+      let(:mock_disks) { false }
+
+      before do
+        allow(Yast::SCR).to receive(:Read).with(Yast.path(".probe.disk")).and_return({})
+      end
+
+      it "returns false" do
+        expect(subject.IsAvailable()).to eq(false)
+      end
+    end
+
     it "returns true if .probe.disk contains DASDs" do
-      expect(Yast::SCR).to receive(:Read).with(Yast.path(".probe.disk")).once
-        .and_return(load_data("probe_disk_dasd.yml"))
       expect(subject.IsAvailable()).to eq(true)
     end
   end
 
   describe "#GetDevices" do
-    it "returns DASDs" do
-      expect(Yast::SCR).to receive(:Read).with(Yast.path(".probe.disk")).once
-        .and_return(load_data("probe_disk_dasd.yml"))
-      expect(subject.ProbeDisks()).to eq(nil)
-      expect(subject.GetDevices()).to eq(
-        0 => { "detail"        => { "cu_model" => 233, "dev_model" => 10, "lcss" => 0 },
-               "device_id"     => 276880,
-               "resource"      => { "io" => [{ "active" => false,
-                                               "length" => 1,
-                                               "mode"   => "rw",
-                                               "start"  => 352 }] },
-               "sub_device_id" => 275344,
-               "channel"       => "0.0.0150" },
-        1 => { "detail"        => { "cu_model" => 233, "dev_model" => 10, "lcss" => 0 },
-               "device_id"     => 276880,
-               "resource"      => { "io" => [{ "active" => false,
-                                               "length" => 1,
-                                               "mode"   => "rw",
-                                               "start"  => 352 }] },
-               "sub_device_id" => 275344,
-               "channel"       => "0.0.0160" }
-      )
+    it "returns cached DASDs" do
+      expect(subject.GetDevices).to be_a(Y2S390::DasdsCollection)
     end
   end
 
   describe "#FormatDisks" do
-    it "formats the given disks using dasdfmt" do
-      allow(Yast::SCR).to receive(:Read).with(path(".process.running"), 100).and_return(true, false)
-      allow(Yast::SCR).to receive(:Read).with(path(".process.status"), 100).and_return(0)
-      allow(Yast::SCR).to receive(:Read).with(path(".process.read_line"), 100).and_return("0")
-      allow(Yast::SCR).to receive(:Read).with(path(".process.read_line_stderr")).and_return(nil)
-      expect(Yast::SCR).to receive(:Execute).with(
-        path(".process.start_shell"), "/sbin/dasdfmt -Y -P 1 -b 4096 -y -r 10 -m 10 -f '/dev/dasda'"
-      ).and_return(100)
-      subject.FormatDisks(["/dev/dasda"], 8)
+    let(:disks) { Yast::DASDController.devices.by_ids(["0.0.0150"]) }
+    let(:dialog) { Y2S390::Dialogs::FormatDisks }
+
+    it "runs a Format Disk dialog for the given disks" do
+      expect_any_instance_of(dialog).to receive(:run)
+
+      subject.FormatDisks(disks)
     end
   end
 
@@ -276,18 +248,21 @@ describe Yast::DASDController do
       allow(Yast::Mode).to receive(:installation).and_return(true)
       allow(Yast::Mode).to receive(:autoinst).and_return(true)
       # speed up the test a bit
-      allow(Yast::Builtins).to receive(:sleep)
       allow(subject).to receive(:ActivateDisk).and_return(0)
-      allow(subject).to receive(:GetDeviceName).and_return("/dev/dasda")
+      allow(subject).to receive(:FormatDisks)
     end
 
     context "during autoinstallation" do
+      let(:channel) { "0.0.0100" }
+      let(:dasd) { Yast::DASDController.devices.by_id(channel) }
+      let(:can_format) { true }
+
       before do
         subject.Import(data)
+        allow(dasd).to receive(:can_be_formatted?).and_return(can_format) if dasd
       end
 
       it "activates the disk" do
-        allow(subject).to receive(:FormatDisks)
         expect(subject).to receive(:ActivateDisk).with("0.0.0100", false)
         subject.Write
       end
@@ -295,9 +270,11 @@ describe Yast::DASDController do
       context "when 'format' is sets to true" do
         let(:format) { true }
 
-        it "formats the disk" do
-          expect(subject).to receive(:FormatDisks).with(["/dev/dasda"], 8)
-          expect(subject.Write).to eq(true)
+        context "and the disk can be formatted" do
+          it "formats the disk" do
+            expect(subject).to receive(:FormatDisks).with([dasd])
+            expect(subject.Write).to eq(true)
+          end
         end
       end
 
@@ -316,7 +293,7 @@ describe Yast::DASDController do
         let(:format) { false }
 
         before do
-          allow(subject).to receive(:activate_disk_if_needed).with(channel, false)
+          allow(subject).to receive(:activate_if_needed).with(dasd)
             .and_return(NOT_FORMATTED_CODE)
         end
 
@@ -324,7 +301,7 @@ describe Yast::DASDController do
           let(:format_unformatted) { true }
 
           it "formats the device" do
-            expect(subject).to receive(:FormatDisks).with(["/dev/dasda"], anything)
+            expect(subject).to receive(:FormatDisks).with([dasd])
             subject.Write
           end
 
@@ -354,7 +331,7 @@ describe Yast::DASDController do
           let(:format_unformatted) { false }
 
           it "formats the device" do
-            expect(subject).to receive(:FormatDisks).with(["/dev/dasda"], anything)
+            expect(subject).to receive(:FormatDisks).with([dasd])
             subject.Write
           end
 
@@ -366,122 +343,24 @@ describe Yast::DASDController do
         end
       end
 
-      it "does not format disk for FBA disk and report error" do
-        allow(Yast::SCR).to receive(:Execute).with(path(".target.bash_output"),
-          /\/sbin\/dasdview/)
-          .and_return("exitstatus" => 0, "stdout" => load_file("dasdview_fba.txt"), "stderr" => "")
+      context "when the imported disk is a FBA one" do
+        let(:channel) { "0.0.ffff" }
 
-        expect(Yast::SCR).to_not receive(:Execute).with(path(".process.start_shell"),
-          /dasdfmt.*\/dev\/dasda/)
+        it "does not format the disk and report an error" do
+          subject.Import(data)
+          expect(subject).to_not receive(:FormatDisks)
+          expect(Yast::Report).to receive(:Error)
 
-        expect(Yast::Report).to receive(:Error)
-
-        expect(subject.Import(data)).to eq(true)
-        expect(subject.Write).to eq(true)
+          expect(subject.Write).to eq(true)
+        end
       end
     end
   end
 
   describe "#ProbeDisks" do
-    let(:disks) { [disk] }
-
-    let(:disk) do
-      {
-        "device"       => "DASD",
-        "sysfs_bus_id" => "0.0.0150",
-        "resource"     => {
-          "io" => []
-        }
-      }
-    end
-
-    before do
-      allow(Yast::SCR).to receive(:Read).with(path(".probe.disk")).and_return(disks)
-    end
-
-    context "there is non-dasd disk" do
-      let(:disk) do
-        {
-          "device"       => "ZFCP",
-          "sysfs_bus_id" => "0.0.0150",
-          "resource"     => {
-            "io" => []
-          }
-        }
-      end
-
-      it "is not added to devices" do
-        subject.ProbeDisks
-
-        expect(subject.devices).to be_empty
-      end
-    end
-
-    context "there is not activated dasd disk" do
-      let(:disk) do
-        {
-          "device"       => "DASD",
-          "sysfs_bus_id" => "0.0.0150",
-          "resource"     => {
-            "io" => []
-          }
-        }
-      end
-
-      it "is added to devices with channel entry" do
-        subject.ProbeDisks
-
-        expect(subject.devices.size).to eq 1
-        expect(subject.devices.values.first["channel"]).to eq "0.0.0150"
-      end
-    end
-
-    context "there is activated dasd disk" do
-      let(:disk) do
-        {
-          "device"       => "DASD",
-          "dev_name"     => "/dev/dasda",
-          "sysfs_bus_id" => "0.0.0150",
-          "sysfs_id"     => "/class/block/dasda",
-          "resource"     => {
-            "io" => ["active" => true]
-          }
-        }
-      end
-
-      before do
-        allow(File).to receive(:exist?).and_return(false)
-      end
-
-      it "is added to devices with formatted info" do
-        allow(Yast::SCR).to receive(:Execute).with(path(".target.bash_output"),
-          /\/sbin\/dasdview/)
-          .and_return("exitstatus" => 0, "stdout" => load_file("dasdview_unformatted.txt"), "stderr" => "")
-
-        subject.ProbeDisks
-
-        expect(subject.devices.size).to eq 1
-        expect(subject.devices.values.first["formatted"]).to eq false
-      end
-
-      context "when the 'use_diag' file exists" do
-        let(:diag_path) { "/sys//class/block/dasda/device/use_diag" }
-
-        before do
-          allow(File).to receive(:exist?).with(diag_path)
-            .and_return(true)
-          allow(Yast::SCR).to receive(:Read)
-            .with(Yast::Path.new(".target.string"), diag_path)
-            .and_return("1")
-        end
-
-        it "reads its value" do
-          subject.ProbeDisks
-          device = subject.devices.values.first
-          expect(device["diag"]).to eq(true)
-          expect(subject.diag).to eq("0.0.0150" => true)
-        end
-      end
+    it "forces a read of the DASDs information from the system" do
+      expect(subject.reader).to receive(:list).with(force_probing: true).and_call_original
+      subject.ProbeDisks
     end
   end
 
@@ -489,27 +368,22 @@ describe Yast::DASDController do
     it "deactivates and reactivates dasd" do
       expect(subject).to receive(:DeactivateDisk).ordered
       expect(subject).to receive(:ActivateDisk).ordered
-      expect(subject.ActivateDiag("0.0.3333", true)).to eq(nil)
+      expect(subject.ActivateDiag("0.0.0150", true)).to eq(nil)
     end
   end
 
   describe "#GetFilteredDevices" do
-    it "Filters the devices (as a single large number)" do
-      import_data = { "devices" => [{ "channel" => "0.4.fa00" },
-                                    { "channel" => "0.0.fb00" },
-                                    { "channel" => "0.0.fc00" },
-                                    { "channel" => "0.0.f800" },
-                                    { "channel" => "0.0.f900" }] }
+    let(:imported_ids) { ["0.4.fa00", "0.0.fb00", "0.0.fc00", "0.0.f800", "0.0.f900"] }
 
-      expect(subject.Import(import_data)).to eq(true)
+    it "Filters the devices (as a single large number)" do
+      import_data = { "devices" => imported_ids.map { |id| { "channel" => id } } }
+      subject.Import(import_data)
       subject.filter_max = subject.FormatChannel("10.0.FA00")
       subject.filter_min = subject.FormatChannel("0.0.f900")
-      expect(subject.GetFilteredDevices()).to eq(
-        0 => { "channel" => "0.4.fa00" },
-        1 => { "channel" => "0.0.fb00" },
-        2 => { "channel" => "0.0.fc00" },
-        4 => { "channel" => "0.0.f900" }
-      )
+      devices = subject.GetFilteredDevices()
+
+      expect(devices.size).to eq(4)
+      expect(devices.ids).to eq(imported_ids.reject { |id| id == "0.0.f800" })
     end
   end
 end

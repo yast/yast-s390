@@ -63,3 +63,53 @@
   sysfs_id: "/devices/css0/0.0.0001/0.0.0150"
   vendor: IBM
   vendor_id: 286721
+- bus: None
+  bus_hwcfg: none
+  class_id: 262
+  detail:
+    cu_model: 128
+    dev_model: 16
+    lcss: 0
+  dev_name: "/dev/dasdc"
+  dev_names:
+  - "/dev/dasdc"
+  - "/dev/disk/by-id/ccw-TMPDSK"
+  - "/dev/disk/by-path/ccw-0.0.ffff"
+  dev_num:
+    major: 94
+    minor: 8
+    range: 4
+    type: b
+  device: DASD
+  device_id: 287504
+  driver: io_subchannel
+  drivers:
+  - active: true
+    modprobe: true
+    modules:
+    - - dasd_fba_mod
+      - ''
+  model: IBM DASD
+  old_unique_key: bWb9.SmaKL6WXMRD
+  prog_if: 2
+  resource:
+    disk_log_geo:
+    - cylinders: 97
+      heads: 16
+      sectors: 128
+    io:
+    - active: true
+      length: 1
+      mode: rw
+      start: 65535
+    size:
+    - unit: sectors
+      x: 200000
+      y: 512
+  sub_class_id: 0
+  sub_device_id: 299830
+  sysfs_bus_id: 0.0.ffff
+  sysfs_id: "/class/block/dasdc"
+  unique_key: "+yTa.QXpeV9WJ_32"
+  vendor: IBM
+  vendor_id: 286721

@@ -23,6 +23,10 @@
 # Authors:  Jiri Srain <jsrain@suse.cz>
 #
 # $Id$
+#
+require "y2s390/dialogs/dasd_read"
+require "y2s390/dasd_actions"
+
 module Yast
   module S390DasdDialogsInclude
     def initialize_s390_dasd_dialogs(include_target)
@@ -48,12 +52,8 @@ module Yast
     # List DASD devices that are currently being selected
     # @return [Array<Fixnum>] list of IDs of selected DASD devices
     def ListSelectedDASD
-      selected = Convert.convert(
-        UI.QueryWidget(Id(:table), :SelectedItems),
-        from: "any",
-        to:   "list <integer>"
-      )
-      Builtins.y2milestone("selected %1", selected)
+      selected = UI.QueryWidget(Id(:table), :SelectedItems) || []
+      log.info("selected #{selected}")
       deep_copy(selected)
     end
 
@@ -73,6 +73,24 @@ module Yast
       ret ? :next : :abort
     end
 
+    def yes_no(value)
+      String.YesNo(value)
+    end
+
+    def item_elements_for(dasd)
+      item_id = Id(dasd.id)
+      diag = yes_no(Mode.config ? dasd.diag_wanted : dasd.use_diag)
+      formatted = yes_no(dasd.formatted?)
+
+      return [item_id, dasd.id, d.format, diag] if Mode.config
+      return [item_id, dasd.id, "--", "--", "--", diag, "--", "--"] unless dasd.active?
+
+      [
+        item_id, dasd.id, dasd.device_name, dasd.access_type.to_s.upcase,
+        dasd.device_type, diag, formatted, dasd.partition_info
+      ]
+    end
+
     # Get the list of items for the table of DASD devices
     # @param min_chan integer minimal channel number
     # @param max_chan integer maximal channel number
@@ -80,78 +98,7 @@ module Yast
     def GetDASDDiskItems
       devices = DASDController.GetFilteredDevices
 
-      items = if Mode.config
-        Builtins.maplist(devices) do |k, d|
-          channel = Ops.get_string(d, "channel", "")
-          diag = String.YesNo(Ops.get_boolean(d, "diag", false))
-          format = String.YesNo(Ops.get_boolean(d, "format", false))
-          Item(Id(k), channel, format, diag)
-        end
-      else
-        Builtins.maplist(devices) do |k, d|
-          active = Ops.get_boolean(d, ["resource", "io", 0, "active"], false)
-          channel = Ops.get_string(d, "channel", "")
-          access = Builtins.toupper(
-            Ops.get_string(d, ["resource", "io", 0, "mode"], "RO")
-          )
-          diag = String.YesNo(Ops.get(DASDController.diag, channel, false))
-          device = Ops.get_string(d, "dev_name", "")
-          type = Builtins.toupper(
-            Builtins.sformat(
-              "%1/%2, %3/%4",
-              Builtins.substring(
-                Builtins.tohexstring(
-                  Ops.bitwise_and(Ops.get_integer(d, "device_id", 0), 65535),
-                  4
-                ),
-                2
-              ),
-              Builtins.substring(
-                Builtins.tohexstring(
-                  Ops.get_integer(d, ["detail", "cu_model"], 0),
-                  4
-                ),
-                4
-              ),
-              Builtins.substring(
-                Builtins.tohexstring(
-                  Ops.bitwise_and(Ops.get_integer(d, "sub_device_id", 0), 65535),
-                  4
-                ),
-                2
-              ),
-              Builtins.substring(
-                Builtins.tohexstring(
-                  Ops.get_integer(d, ["detail", "dev_model"], 0),
-                  4
-                ),
-                4
-              )
-            )
-          )
-          formatted = String.YesNo(Ops.get_boolean(d, "formatted", false))
-          partition_info = Ops.get_string(d, "partition_info", "--")
-          if !active
-            type = "--"
-            access = "--"
-            formatted = "--"
-            partition_info = "--"
-            device = "--"
-          end
-          Item(
-            Id(k),
-            channel,
-            device,
-            type,
-            access,
-            diag,
-            formatted,
-            partition_info
-          )
-        end
-      end
-
-      deep_copy(items)
+      devices.map { |d| Item(*item_elements_for(d)) }
     end
 
     def PossibleActions
@@ -182,217 +129,25 @@ module Yast
       end
     end
 
-    def AskNumParallel(max_num_parallel)
-      UI.OpenDialog(
-        VBox(
-          IntField(
-            # integer field (count of disks formatted parallel)
-            Id(:num_parallel), _("&Parallel Formatted Disks"),
-            1, max_num_parallel, max_num_parallel
-          ),
-          ButtonBox(
-            PushButton(Id(:ok), Label.OKButton),
-            PushButton(Id(:cancel), Label.CancelButton)
-          )
-        )
-      )
+    def action_class_for(action)
+      name = action.to_s.split("_").map(&:capitalize).join
+      "Y2S390::DasdActions::#{name}"
+    end
 
-      ret = UI.UserInput()
-      num_parallel = UI.QueryWidget(Id(:num_parallel), :Value).to_i
-
-      UI.CloseDialog()
-
-      (ret == :ok) ? num_parallel : 0
+    def run(action, selected)
+      Object.const_get(action_class_for(action)).run(selected)
     end
 
     def PerformAction(action)
-      selected = ListSelectedDASD()
-      if Builtins.isempty(selected)
+      selected = DASDController.devices.by_ids(ListSelectedDASD())
+
+      if selected.empty?
         # error popup message
         Popup.Message(_("No disk selected."))
         return false
       end
 
-      if !Mode.config
-        case action
-        when :activate, :deactivate
-          value = action == :activate
-          unformatted_disks = []
-
-          Builtins.foreach(selected) do |id|
-            channel = Ops.get_string(
-              DASDController.devices,
-              [id, "channel"],
-              ""
-            )
-            act_ret = 0
-            diag = Ops.get(DASDController.diag, channel, false)
-            if value
-              act_ret = DASDController.ActivateDisk(channel, diag)
-            else
-              DASDController.DeactivateDisk(channel, diag)
-            end
-            unformatted_disks << channel if act_ret == 8 # 8 means disk is not formatted
-          end
-          if !unformatted_disks.empty?
-            popup = if unformatted_disks.size == 1
-              Builtins.sformat(_("Device %1 is not formatted. Format device now?"),
-                unformatted_disks[0])
-            else
-              Builtins.sformat(_("There are %1 unformatted devices. Format them now?"),
-                unformatted_disks.size)
-            end
-            # for autoinst, format unformatted disks later
-            if !Mode.autoinst && Popup.ContinueCancel(popup)
-              devices = unformatted_disks.map do |channel|
-                device = nil
-                cmd = "ls '/sys/bus/ccw/devices/#{channel}/block/' | tr -d '\n'"
-                disk = SCR.Execute(path(".target.bash_output"), cmd)
-                if disk["exit"] == 0 && !disk["stdout"].empty?
-                  device = "/dev/#{disk["stdout"]}"
-                else
-                  Popup.Error(Builtins.sformat(_("Couldn't find device for channel %1."), channel))
-                end
-                device
-              end
-              devices.reject!(&:nil?)
-              DASDController.FormatDisks(devices, 8) # don't format more than 8 disks in parallel
-              unformatted_disks.each do |channel|
-                diag = !!DASDController.diag[channel]
-                DASDController.ActivateDisk(channel, diag)
-              end
-            end
-          end
-          DASDController.ProbeDisks
-
-          return true
-
-        when :diag_off, :diag_on
-          value = action == :diag_on
-
-          Builtins.foreach(selected) do |id|
-            channel = Ops.get_string(
-              DASDController.devices,
-              [id, "channel"],
-              ""
-            )
-            active = Ops.get_boolean(
-              DASDController.devices,
-              [id, "resource", "io", 0, "active"],
-              false
-            )
-            DASDController.ActivateDiag(channel, value) if active
-            Ops.set(DASDController.diag, channel, value)
-          end
-          DASDController.ProbeDisks
-
-          return true
-
-        when :format
-          # check if disks are R/W and active
-          problem = ""
-          Builtins.foreach(selected) do |id|
-            active = Ops.get_boolean(
-              DASDController.devices,
-              [id, "resource", "io", 0, "active"],
-              false
-            )
-            access = Ops.get_string(
-              DASDController.devices,
-              [id, "resource", "io", 0, "mode"],
-              "ro"
-            )
-            channel = Ops.get_string(DASDController.devices, [id, "channel"], "")
-            if !active
-              # error report, %1 is device identification
-              problem = Builtins.sformat(
-                _("Disk %1 is not active."),
-                channel
-              )
-            elsif access != "rw"
-              # error report, %1 is device identification
-              problem = Builtins.sformat(
-                _("Disk %1 is not accessible for writing."),
-                channel
-              )
-            elsif !DASDController.can_be_formatted?(DASDController.devices[id])
-              problem =
-                # TRANSLATORS %s is device idetification
-                format(
-                  _("Disk %s cannot be formatted. Only ECKD disks can be formatted."),
-                  channel
-                )
-            end
-          end
-          if !Builtins.isempty(problem)
-            Popup.Message(problem)
-            return false
-          end
-
-          num_parallel = [selected.size, 8].min
-          num_parallel = AskNumParallel(num_parallel) if num_parallel > 1
-
-          return false if num_parallel == 0
-
-          # final confirmation before formatting the discs
-          channels = Builtins.maplist(selected) do |id|
-            Ops.get_string(DASDController.devices, [id, "channel"], "")
-          end
-          channels_str = Builtins.mergestring(channels, ", ")
-          if !Popup.AnyQuestionRichText(
-            Popup.NoHeadline,
-            # popup question
-            Builtins.sformat(
-              _(
-                "Formatting these disks destroys all data on them.<br>\n" \
-                  "Really format the following disks?<br>\n" \
-                  "%1"
-              ),
-              channels_str
-            ),
-            60,
-            20,
-            Label.YesButton,
-            Label.NoButton,
-            :focus_no
-          )
-            return false
-          end
-
-          devices = Builtins.maplist(selected) do |id|
-            Ops.get_string(DASDController.devices, [id, "dev_name"], "")
-          end
-          DASDController.FormatDisks(devices, num_parallel)
-
-          # We used to explicitly activate the DASD devices here, don't do
-          # it - see bsc#1187012.
-
-          DASDController.ProbeDisks
-
-          return true
-        end
-      else
-        case action
-        when :diag_off, :diag_on
-          value = action == :diag_on
-
-          Builtins.foreach(selected) do |id|
-            Ops.set(DASDController.devices, [id, "diag"], value)
-          end
-
-          return true
-        when :format_off, :format_on
-          value = action == :format_on
-
-          Builtins.foreach(selected) do |id|
-            Ops.set(DASDController.devices, [id, "format"], value)
-          end
-
-          return true
-        end
-      end
-
-      false
+      run(action, selected)
     end
 
     # Draw the DASD dialog
@@ -400,7 +155,7 @@ module Yast
       help_key = Mode.config ? "disk_selection_config" : "disk_selection"
 
       # Minimal text for the help
-      help = Ops.get_string(@DASD_HELPS, help_key, "")
+      help = @DASD_HELPS.fetch(help_key, "")
 
       # Dialog caption
       caption = _("DASD Disk Management")
@@ -491,11 +246,7 @@ module Yast
     def ReloadDASDDialog
       items = GetDASDDiskItems()
 
-      selected = Convert.convert(
-        UI.QueryWidget(Id(:table), :SelectedItems),
-        from: "any",
-        to:   "list <integer>"
-      )
+      selected = UI.QueryWidget(Id(:table), :SelectedItems) || []
       UI.ChangeWidget(Id(:table), :Items, items)
       UI.ChangeWidget(Id(:table), :SelectedItems, selected)
       UI.SetFocus(:table)
@@ -656,9 +407,12 @@ module Yast
 
         channel = DASDController.FormatChannel(channel)
 
-        d = { "channel" => channel, "format" => format, "diag" => diag }
+        dasd_new = Y2S390::Dasd.new(channel).tap do |dasd|
+          dasd.format_watend = format
+          dasd.diag_wanted = diag
+        end
 
-        DASDController.AddDevice(d)
+        DASDController.devices.add(dasd_new)
       end
 
       ret
@@ -668,11 +422,11 @@ module Yast
     # @return [Symbol] from DeleteDASDDiskDialog
     def DeleteDASDDiskDialog
       selected = ListSelectedDASD()
-      if Builtins.isempty(selected)
+      if selected.empty?
         # error popup message
         Popup.Message(_("No disk selected."))
       else
-        Builtins.foreach(selected) { |index| DASDController.RemoveDevice(index) }
+        selected { |id| DASDController.devices.delete(id) }
       end
 
       :next
