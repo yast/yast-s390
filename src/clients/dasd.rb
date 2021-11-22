@@ -19,10 +19,10 @@
 # To contact Novell about this file by physical or electronic mail, you may
 # find current contact information at www.novell.com.
 
-# File:	clients/controller.ycp
-# Package:	Configuration of controller
-# Summary:	Main file
-# Authors:	Jiri Srain <jsrain@suse.cz>
+# File:  clients/controller.ycp
+# Package:  Configuration of controller
+# Summary:  Main file
+# Authors:  Jiri Srain <jsrain@suse.cz>
 #
 # Main file for controller configuration. Uses all other files.
 module Yast

@@ -17,10 +17,10 @@
 # To contact Novell about this file by physical or electronic mail, you may
 # find current contact information at www.novell.com.
 
-# File:	modules/ZFCPController.ycp
-# Package:	Configuration of controller
-# Summary:	Controller settings, input and output functions
-# Authors:	Jiri Srain <jsrain@suse.cz>
+# File:  modules/ZFCPController.ycp
+# Package:  Configuration of controller
+# Summary:  Controller settings, input and output functions
+# Authors:  Jiri Srain <jsrain@suse.cz>
 #
 # $Id$
 #

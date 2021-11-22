@@ -17,10 +17,10 @@
 # To contact Novell about this file by physical or electronic mail, you may
 # find current contact information at www.novell.com.
 
-# File:	clients/onpanic.ycp
-# Package:	Configuration of onpanic
-# Summary:	Main file
-# Authors:	Tim Hardeck <thardeck@suse.de>
+# File:  clients/onpanic.ycp
+# Package:  Configuration of onpanic
+# Summary:  Main file
+# Authors:  Tim Hardeck <thardeck@suse.de>
 #
 # Main file for onpanic configuration. Uses all other files.
 module Yast

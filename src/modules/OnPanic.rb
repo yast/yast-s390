@@ -17,10 +17,10 @@
 # To contact Novell about this file by physical or electronic mail, you may
 # find current contact information at www.novell.com.
 
-# File:	modules/OnPanic.ycp
-# Package:	Configuration of OnPanic
-# Summary:	Configuring OnPanic, input and output functions
-# Authors:	Tim Hardeck <thardeck@suse.de>
+# File:  modules/OnPanic.ycp
+# Package:  Configuration of OnPanic
+# Summary:  Configuring OnPanic, input and output functions
+# Authors:  Tim Hardeck <thardeck@suse.de>
 #
 # Representation of the dumpconf configuration.
 # Input and output routines.

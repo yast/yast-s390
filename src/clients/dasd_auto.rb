@@ -19,10 +19,10 @@
 # To contact Novell about this file by physical or electronic mail, you may
 # find current contact information at www.novell.com.
 
-# File:	clients/controller_auto.ycp
-# Package:	Configuration of controller
-# Summary:	Client for autoinstallation
-# Authors:	Jiri Srain <jsrain@suse.cz>
+# File:  clients/controller_auto.ycp
+# Package:  Configuration of controller
+# Summary:  Client for autoinstallation
+# Authors:  Jiri Srain <jsrain@suse.cz>
 #
 # This is a client for autoinstallation. It takes its arguments,
 # goes through the configuration and return the setting.

@@ -17,10 +17,10 @@
 # To contact Novell about this file by physical or electronic mail, you may
 # find current contact information at www.novell.com.
 
-# File:	modules/Xpram.ycp
-# Package:	Configuration of xpram
-# Summary:	Xpram settings, input and output functions
-# Authors:	Ihno Krumreich <Ihno@suse.de>
+# File:  modules/Xpram.ycp
+# Package:  Configuration of xpram
+# Summary:  Xpram settings, input and output functions
+# Authors:  Ihno Krumreich <Ihno@suse.de>
 #
 # $Id$
 #

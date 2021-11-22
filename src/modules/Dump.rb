@@ -17,10 +17,10 @@
 # To contact Novell about this file by physical or electronic mail, you may
 # find current contact information at www.novell.com.
 
-# File:	modules/Dump.ycp
-# Package:	Creation of s390 dump devices
-# Summary:	Creating s390 dump devices, input and output functions
-# Authors:	Tim Hardeck <thardeck@suse.de>
+# File:  modules/Dump.ycp
+# Package:  Creation of s390 dump devices
+# Summary:  Creating s390 dump devices, input and output functions
+# Authors:  Tim Hardeck <thardeck@suse.de>
 #
 require "yast"
 

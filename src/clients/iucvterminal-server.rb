@@ -17,10 +17,10 @@
 # To contact Novell about this file by physical or electronic mail, you may
 # find current contact information at www.novell.com.
 
-# File:	clients/iucvterminal-server.ycp
-# Package:	Configuration IUCV Terminal Server
-# Summary:	Main file
-# Authors:	Tim Hardeck <thardeck@suse.de>
+# File:  clients/iucvterminal-server.ycp
+# Package:  Configuration IUCV Terminal Server
+# Summary:  Main file
+# Authors:  Tim Hardeck <thardeck@suse.de>
 #
 module Yast
   class IucvterminalServerClient < Client
