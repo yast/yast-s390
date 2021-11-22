@@ -80,8 +80,6 @@ module Yast
     def GetDASDDiskItems
       devices = DASDController.GetFilteredDevices
 
-      items = []
-
       items = if Mode.config
         Builtins.maplist(devices) do |k, d|
           channel = Ops.get_string(d, "channel", "")
@@ -406,8 +404,6 @@ module Yast
 
       # Dialog caption
       caption = _("DASD Disk Management")
-
-      header = Empty()
 
       header = if Mode.config
         Header(

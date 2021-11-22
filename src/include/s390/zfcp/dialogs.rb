@@ -76,8 +76,6 @@ module Yast
     def GetZFCPDiskItems
       devices = ZFCPController.GetFilteredDevices
 
-      items = []
-
       items = if Mode.config
         Builtins.maplist(devices) do |k, d|
           channel = Ops.get_string(d, ["detail", "controller_id"], "")
@@ -105,8 +103,6 @@ module Yast
 
       # Dialog caption
       caption = _("Configured ZFCP Devices")
-
-      header = Empty()
 
       header = if Mode.config
         Header(

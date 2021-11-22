@@ -260,8 +260,6 @@ module Yast
     # Create a textual summary and a list of configured devices
     # @return summary of the current configuration
     def Summary
-      ret = []
-
       ret = if Mode.config
         Builtins.maplist(@devices) do |_index, d|
           Builtins.sformat(
