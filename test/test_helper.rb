@@ -49,7 +49,7 @@ if ENV["COVERAGE"]
 end
 
 def load_data(name)
-  YAML.load(load_file(name))
+  YAML.safe_load(load_file(name))
 end
 
 def load_file(name)

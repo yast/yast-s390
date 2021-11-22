@@ -356,7 +356,7 @@ module Yast
     def probe_or_mock_disks
       mock_filename = ENV["YAST2_S390_PROBE_DISK"]
       if mock_filename
-        YAML.load(File.read(mock_filename))
+        YAML.safe_load(File.read(mock_filename))
       else
         SCR.Read(path(".probe.disk"))
       end

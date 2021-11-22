@@ -128,14 +128,6 @@ Naming/UncommunicativeMethodParamName:
 Naming/VariableName:
   Enabled: false
 
-# Offense count: 3
-# Cop supports --auto-correct.
-Security/YAMLLoad:
-  Exclude:
-    - 'src/modules/DASDController.rb'
-    - 'src/modules/ZFCPController.rb'
-    - 'test/test_helper.rb'
-
 # Offense count: 1
 # Cop supports --auto-correct.
 Style/ExpandPathArguments:
