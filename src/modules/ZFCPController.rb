@@ -140,12 +140,14 @@ module Yast
     # Write all controller settings
     # @return true on success
     def Write
-      Builtins.foreach(@devices) do |_index, device|
-        channel = Ops.get_string(device, ["detail", "controller_id"], "")
-        wwpn = Ops.get_string(device, ["detail", "wwpn"], "")
-        lun = Ops.get_string(device, ["detail", "fcp_lun"], "")
-        ActivateDisk(channel, wwpn, lun)
-      end if !Mode.normal
+      if !Mode.normal
+        Builtins.foreach(@devices) do |_index, device|
+          channel = Ops.get_string(device, ["detail", "controller_id"], "")
+          wwpn = Ops.get_string(device, ["detail", "wwpn"], "")
+          lun = Ops.get_string(device, ["detail", "fcp_lun"], "")
+          ActivateDisk(channel, wwpn, lun)
+        end
+      end
 
       if !Mode.installation
         if @disk_configured

@@ -172,12 +172,6 @@ Style/FormatString:
   Exclude:
     - 'src/include/s390/onpanic/ui.rb'
 
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/MultilineIfModifier:
-  Exclude:
-    - 'src/modules/ZFCPController.rb'
-
 # Offense count: 14
 Style/MultipleComparison:
   Exclude:
