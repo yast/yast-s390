@@ -153,15 +153,6 @@ Style/RedundantReturn:
   Exclude:
     - 'src/include/s390/dasd/dialogs.rb'
 
-# Offense count: 3
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, AllowSafeAssignment.
-# SupportedStyles: require_parentheses, require_no_parentheses, require_parentheses_when_complex
-Style/TernaryParentheses:
-  Exclude:
-    - 'src/include/s390/dasd/dialogs.rb'
-    - 'src/include/s390/iucvterminal-server/ui.rb'
-
 # Offense count: 1
 # Cop supports --auto-correct.
 Style/UnneededSort:

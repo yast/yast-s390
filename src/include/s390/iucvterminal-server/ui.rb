@@ -1283,7 +1283,7 @@ module Yast
       # select home directory
       if widget == :ic_browse_home
         # set default directory
-        dir = @ic_home != "" ? @ic_home : "/"
+        dir = (@ic_home != "") ? @ic_home : "/"
         dir = UI.AskForExistingDirectory(dir, "")
         if !dir.nil?
           @ic_home = dir
@@ -1296,7 +1296,7 @@ module Yast
       # select home directory
       if widget == :ts_browse_home
         # set default directory
-        dir = @ts_home != "" ? @ts_home : "/"
+        dir = (@ts_home != "") ? @ts_home : "/"
         dir = UI.AskForExistingDirectory(dir, "")
         if !dir.nil?
           @ts_home = dir
