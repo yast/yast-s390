@@ -149,15 +149,6 @@ Style/ConditionalAssignment:
     - 'src/modules/IUCVTerminalServer.rb'
     - 'src/modules/ZFCPController.rb'
 
-# Offense count: 4
-# Cop supports --auto-correct.
-Style/Encoding:
-  Exclude:
-    - 'src/clients/dasd.rb'
-    - 'src/clients/dasd_auto.rb'
-    - 'src/include/s390/dasd/dialogs.rb'
-    - 'src/modules/DASDController.rb'
-
 # Offense count: 1
 # Cop supports --auto-correct.
 Style/ExpandPathArguments:
