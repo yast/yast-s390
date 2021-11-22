@@ -70,6 +70,7 @@ module Yast
       # Return human readable titles for the proposal
       elsif @func == "Description"
         return nil if !ZFCPController.IsAvailable
+
         # Fill return map
         @ret =
           # section name in proposal dialog

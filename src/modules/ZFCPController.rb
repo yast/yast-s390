@@ -714,6 +714,7 @@ module Yast
     # @return [Array<String>] List of controller channels
     def activated_controllers
       return @activated_controllers if @activated_controllers
+
       ctrls = GetControllers().select do |ctrl|
         io = ctrl.fetch("resource", {}).fetch("io", [])
         io.any? { |i| i["active"] }
@@ -745,6 +746,7 @@ module Yast
     # @return [Array<Hash>] Found zFCP disks
     def find_disks(force_probing: false)
       return @disks if @disks && !force_probing
+
       disks = probe_or_mock_disks
       disks = Builtins.filter(disks) do |d|
         d["driver"] == "zfcp"
@@ -791,6 +793,7 @@ module Yast
       find_disks.find do |d|
         detail = d["detail"]
         next unless detail
+
         detail["controller_id"] == channel && detail["wwpn"] == wwpn && detail["fcp_lun"] == lun
       end
     end

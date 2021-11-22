@@ -84,6 +84,7 @@ module Yast
         to:   "list <string>"
       )
       return Ops.add("/dev/", Ops.get(files, 0, "")) if Builtins.size(files) == 1
+
       nil
     end
 
@@ -535,6 +536,7 @@ module Yast
     def ActivateDiag(channel, diag)
       old_diag = DASDController.diag.fetch(channel, false)
       return if diag == old_diag
+
       DeactivateDisk(channel, old_diag)
       ActivateDisk(channel, diag)
     end
@@ -775,6 +777,7 @@ module Yast
       loop do
         line = SCR.Read(path(".process.read_line_stderr"))
         break unless line
+
         stderr << line
       end
 
@@ -828,6 +831,7 @@ module Yast
     # @return [Array<Hash>] Found DASD disks
     def find_disks(force_probing: false)
       return @disks if @disks && !force_probing
+
       disks = probe_or_mock_disks
       disks = Builtins.filter(disks) do |d|
         Builtins.tolower(Ops.get_string(d, "device", "")) == "dasd"

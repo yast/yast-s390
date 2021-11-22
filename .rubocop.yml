@@ -62,15 +62,6 @@ Naming/MethodName:
 Style/NumericLiterals:
   MinDigits: 11
 
-# Offense count: 9
-# Cop supports --auto-correct.
-Layout/EmptyLineAfterGuardClause:
-  Exclude:
-    - 'src/clients/dasd_proposal.rb'
-    - 'src/clients/zfcp_proposal.rb'
-    - 'src/modules/DASDController.rb'
-    - 'src/modules/ZFCPController.rb'
-
 # Offense count: 4
 Lint/EmptyWhen:
   Exclude:
