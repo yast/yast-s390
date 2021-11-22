@@ -385,16 +385,16 @@ module Yast
           Convert.to_string(SCR.Read(path(".target.string"), filename)),
           "\n"
         )
-        if Builtins.contains(original_ts_audited_ids, "[*ALL*]")
+        @ts_audited_ids = if Builtins.contains(original_ts_audited_ids, "[*ALL*]")
           # add all if configured
-          @ts_audited_ids = Convert.convert(
+          Convert.convert(
             Builtins.merge([@TEXT_ALL], @zvm_id_list),
             from: "list",
             to:   "list <string>"
           )
         else
           # only add known ids
-          @ts_audited_ids = Builtins.filter(original_ts_audited_ids) do |name|
+          Builtins.filter(original_ts_audited_ids) do |name|
             !Builtins.contains(@zvm_id_list, name)
           end
         end

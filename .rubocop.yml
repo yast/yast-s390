@@ -136,19 +136,6 @@ Security/YAMLLoad:
     - 'src/modules/ZFCPController.rb'
     - 'test/test_helper.rb'
 
-# Offense count: 9
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SingleLineConditionsOnly, IncludeTernaryExpressions.
-# SupportedStyles: assign_to_condition, assign_inside_condition
-Style/ConditionalAssignment:
-  Exclude:
-    - 'src/include/s390/dasd/dialogs.rb'
-    - 'src/include/s390/iucvterminal-server/ui.rb'
-    - 'src/include/s390/zfcp/dialogs.rb'
-    - 'src/modules/DASDController.rb'
-    - 'src/modules/IUCVTerminalServer.rb'
-    - 'src/modules/ZFCPController.rb'
-
 # Offense count: 1
 # Cop supports --auto-correct.
 Style/ExpandPathArguments:

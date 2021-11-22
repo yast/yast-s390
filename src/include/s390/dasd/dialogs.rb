@@ -82,15 +82,15 @@ module Yast
 
       items = []
 
-      if Mode.config
-        items = Builtins.maplist(devices) do |k, d|
+      items = if Mode.config
+        Builtins.maplist(devices) do |k, d|
           channel = Ops.get_string(d, "channel", "")
           diag = String.YesNo(Ops.get_boolean(d, "diag", false))
           format = String.YesNo(Ops.get_boolean(d, "format", false))
           Item(Id(k), channel, format, diag)
         end
       else
-        items = Builtins.maplist(devices) do |k, d|
+        Builtins.maplist(devices) do |k, d|
           active = Ops.get_boolean(d, ["resource", "io", 0, "active"], false)
           channel = Ops.get_string(d, "channel", "")
           access = Builtins.toupper(
@@ -237,11 +237,11 @@ module Yast
             unformatted_disks << channel if act_ret == 8 # 8 means disk is not formatted
           end
           if !unformatted_disks.empty?
-            if unformatted_disks.size == 1
-              popup = Builtins.sformat(_("Device %1 is not formatted. Format device now?"),
+            popup = if unformatted_disks.size == 1
+              Builtins.sformat(_("Device %1 is not formatted. Format device now?"),
                 unformatted_disks[0])
             else
-              popup = Builtins.sformat(_("There are %1 unformatted devices. Format them now?"),
+              Builtins.sformat(_("There are %1 unformatted devices. Format them now?"),
                 unformatted_disks.size)
             end
             # for autoinst, format unformatted disks later
@@ -409,8 +409,8 @@ module Yast
 
       header = Empty()
 
-      if Mode.config
-        header = Header(
+      header = if Mode.config
+        Header(
           # table header
           Right(_("Channel ID")),
           # table header
@@ -419,7 +419,7 @@ module Yast
           _("Use DIAG")
         )
       else
-        header = Header(
+        Header(
           # table header
           Right(_("Channel ID")),
           # table header

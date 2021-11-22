@@ -262,8 +262,8 @@ module Yast
     def Summary
       ret = []
 
-      if Mode.config
-        ret = Builtins.maplist(@devices) do |_index, d|
+      ret = if Mode.config
+        Builtins.maplist(@devices) do |_index, d|
           Builtins.sformat(
             _("Channel ID: %1, WWPN: %2, LUN: %3"),
             Ops.get_string(d, ["detail", "controller_id"], ""),
@@ -272,7 +272,7 @@ module Yast
           )
         end
       else
-        ret = Builtins.maplist(@devices) do |_index, d|
+        Builtins.maplist(@devices) do |_index, d|
           Builtins.sformat(
             _("Channel ID: %1, WWPN: %2, LUN: %3, Device: %4"),
             Ops.get_string(d, ["detail", "controller_id"], ""),

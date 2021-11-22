@@ -1175,12 +1175,12 @@ module Yast
           Builtins.size(GenerateTsMembersTable()),
           0
         )
-        if ts_isnt_empty
-          @ts_selected_member = Convert.to_string(
+        @ts_selected_member = if ts_isnt_empty
+          Convert.to_string(
             UI.QueryWidget(Id(:ts_users_groups), :CurrentItem)
           )
         else
-          @ts_selected_member = ""
+          ""
         end
 
         # show the current selected user

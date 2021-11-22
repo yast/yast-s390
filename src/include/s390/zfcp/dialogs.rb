@@ -78,15 +78,15 @@ module Yast
 
       items = []
 
-      if Mode.config
-        items = Builtins.maplist(devices) do |k, d|
+      items = if Mode.config
+        Builtins.maplist(devices) do |k, d|
           channel = Ops.get_string(d, ["detail", "controller_id"], "")
           wwpn = Ops.get_string(d, ["detail", "wwpn"], "")
           lun = Ops.get_string(d, ["detail", "fcp_lun"], "")
           Item(Id(k), channel, wwpn, lun)
         end
       else
-        items = Builtins.maplist(devices) do |k, d|
+        Builtins.maplist(devices) do |k, d|
           channel = Ops.get_string(d, ["detail", "controller_id"], "")
           wwpn = Ops.get_string(d, ["detail", "wwpn"], "")
           lun = Ops.get_string(d, ["detail", "fcp_lun"], "")
@@ -108,8 +108,8 @@ module Yast
 
       header = Empty()
 
-      if Mode.config
-        header = Header(
+      header = if Mode.config
+        Header(
           # table header
           Right(_("Channel ID")),
           # table header
@@ -118,7 +118,7 @@ module Yast
           Right(_("LUN"))
         )
       else
-        header = Header(
+        Header(
           # table header
           Right(_("Channel ID")),
           # table header
