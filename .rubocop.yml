@@ -119,12 +119,6 @@ Naming/UncommunicativeMethodParamName:
 Naming/VariableName:
   Enabled: false
 
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/ExpandPathArguments:
-  Exclude:
-    - 'test/test_helper.rb'
-
 # Offense count: 14
 Style/MultipleComparison:
   Exclude:

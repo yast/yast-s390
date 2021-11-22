@@ -1,4 +1,4 @@
-ENV["Y2DIR"] = File.expand_path("../../src", __FILE__)
+ENV["Y2DIR"] = File.expand_path('../src', __dir__)
 
 # make sure we run the tests in English locale
 # (some tests check the output which is marked for translation)
