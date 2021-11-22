@@ -321,9 +321,9 @@ module Yast
         if Yast::Popup.YesNo(
           # TRANSLATORS: %{s1},%{s2} are the service names
           format(_(
-            "The service %{s1} is active and will conflict with dumpconf.\n" \
-            "Would you like to disable %{s2}? \n"
-          ), s1: KDUMP_SERVICE_NAME, s2: KDUMP_SERVICE_NAME)
+                   "The service %{s1} is active and will conflict with dumpconf.\n" \
+                   "Would you like to disable %{s2}? \n"
+                 ), s1: KDUMP_SERVICE_NAME, s2: KDUMP_SERVICE_NAME)
         )
           Service.Disable(KDUMP_SERVICE_NAME)
           Service.Stop(KDUMP_SERVICE_NAME) if Service.active?(KDUMP_SERVICE_NAME)
