@@ -146,13 +146,6 @@ Style/MultipleComparison:
     - 'src/include/s390/zfcp/dialogs.rb'
     - 'src/modules/Dump.rb'
 
-# Offense count: 2
-# Cop supports --auto-correct.
-# Configuration parameters: AllowMultipleReturnValues.
-Style/RedundantReturn:
-  Exclude:
-    - 'src/include/s390/dasd/dialogs.rb'
-
 # Offense count: 1
 # Cop supports --auto-correct.
 Style/UnneededSort:

@@ -160,7 +160,7 @@ module Yast
 
     def PossibleActions
       if !Mode.config
-        return [
+        [
           # menu button id
           Item(Id(:activate), _("&Activate")),
           # menu button id
@@ -173,7 +173,7 @@ module Yast
           Item(Id(:format), _("&Format"))
         ]
       else
-        return [
+        [
           # menu button id
           Item(Id(:diag_on), _("Set DIAG O&n")),
           # menu button id
