@@ -133,9 +133,7 @@ module Yast
 
       Builtins.y2milestone("mkdump return value: %1", ret)
       Builtins.y2milestone("mkdump message: %1", message) if message != ""
-      if err_message != ""
-        Builtins.y2milestone("mkdump error message: %1", err_message)
-      end
+      Builtins.y2milestone("mkdump error message: %1", err_message) if err_message != ""
 
       Progress.NextStage
 

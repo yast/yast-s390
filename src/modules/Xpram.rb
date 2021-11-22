@@ -120,9 +120,7 @@ module Yast
 
       Progress.NextStage
 
-      if @mountpoint != ""
-        SCR.Write(path(".sysconfig.xpram.XPRAM_MNTPATH"), @mountpoint)
-      end
+      SCR.Write(path(".sysconfig.xpram.XPRAM_MNTPATH"), @mountpoint) if @mountpoint != ""
       SCR.Write(path(".sysconfig.xpram.XPRAM_FSTYPE"), @fstype)
 
       Progress.NextStage

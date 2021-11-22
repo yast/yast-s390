@@ -282,9 +282,7 @@ module Yast
         UI.ChangeWidget(Id(:hvc_instances), :Value, IUCVTerminal.hvc_instances)
       end
 
-      unless IUCVTerminal.iucv_name.empty?
-        UI.ChangeWidget(Id(:iucv_name), :Value, IUCVTerminal.iucv_name)
-      end
+      UI.ChangeWidget(Id(:iucv_name), :Value, IUCVTerminal.iucv_name) unless IUCVTerminal.iucv_name.empty?
 
       UpdateScreen(:hvc)
 

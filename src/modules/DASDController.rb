@@ -85,9 +85,7 @@ module Yast
         from: "any",
         to:   "list <string>"
       )
-      if Builtins.size(files) == 1
-        return Ops.add("/dev/", Ops.get(files, 0, ""))
-      end
+      return Ops.add("/dev/", Ops.get(files, 0, "")) if Builtins.size(files) == 1
       nil
     end
 
@@ -548,9 +546,7 @@ module Yast
     # @param [Fixnum] par integer Number of disks that can be formated in parallel
     def FormatDisks(disks_list, par)
       disks_list = deep_copy(disks_list)
-      if Ops.greater_than(par, Builtins.size(disks_list))
-        par = Builtins.size(disks_list)
-      end
+      par = Builtins.size(disks_list) if Ops.greater_than(par, Builtins.size(disks_list))
 
       disks = {}
       disks_cmd = []
@@ -727,9 +723,7 @@ module Yast
       )
 
       # if not an eckd-disk it's an fba-disk. fba-disks have only one partition
-      if Ops.get_integer(outmap, "exit", 0) != 0
-        return Builtins.sformat("%11", disk)
-      end
+      return Builtins.sformat("%11", disk) if Ops.get_integer(outmap, "exit", 0) != 0
 
       out = Ops.get_string(outmap, "stdout", "")
 

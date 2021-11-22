@@ -143,9 +143,7 @@ module Yast
       ts_users = []
       local_users = GetUsers(true)
       Builtins.foreach(local_users) do |username, user|
-        if Ops.get(user, "loginShell") == @TSSHELL_SHELL
-          ts_users = Builtins.add(ts_users, username)
-        end
+        ts_users = Builtins.add(ts_users, username) if Ops.get(user, "loginShell") == @TSSHELL_SHELL
       end
       deep_copy(ts_users)
     end
@@ -156,9 +154,7 @@ module Yast
       ic_users = []
       local_users = GetUsers(true)
       Builtins.foreach(local_users) do |username, user|
-        if Ops.get(user, "loginShell") == @IUCVCONN_SHELL
-          ic_users = Builtins.add(ic_users, username)
-        end
+        ic_users = Builtins.add(ic_users, username) if Ops.get(user, "loginShell") == @IUCVCONN_SHELL
       end
       deep_copy(ic_users)
     end
@@ -523,9 +519,7 @@ module Yast
         if type == :rb_ts_list
           selected_ids = Ops.get_list(entries, type, [])
           # remove the TEXT_ALL entry because it is not supported by the configuration
-          if Ops.get(selected_ids, 0, "") == @TEXT_ALL
-            selected_ids = Builtins.remove(selected_ids, 0)
-          end
+          selected_ids = Builtins.remove(selected_ids, 0) if Ops.get(selected_ids, 0, "") == @TEXT_ALL
           value = Ops.add("list:", Builtins.mergestring(selected_ids, ","))
         # Regex
         elsif type == :rb_ts_regex

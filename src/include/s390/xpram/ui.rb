@@ -173,9 +173,7 @@ module Yast
       UI.ChangeWidget(Id(:m_points), :Enabled, start)
 
       UI.ChangeWidget(Id(:brate), :Enabled, start)
-      if Builtins.contains(f_types, fstype)
-        UI.ChangeWidget(Id(:brate), :Value, fstype)
-      end
+      UI.ChangeWidget(Id(:brate), :Value, fstype) if Builtins.contains(f_types, fstype)
 
       ret = nil
       loop do

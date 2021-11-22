@@ -114,21 +114,6 @@ Style/FormatString:
   Exclude:
     - 'src/include/s390/onpanic/ui.rb'
 
-# Offense count: 17
-# Cop supports --auto-correct.
-Style/IfUnlessModifier:
-  Exclude:
-    - 'src/include/s390/iucvterminal-server/ui.rb'
-    - 'src/include/s390/iucvterminal/ui.rb'
-    - 'src/include/s390/xpram/ui.rb'
-    - 'src/modules/DASDController.rb'
-    - 'src/modules/Dump.rb'
-    - 'src/modules/IUCVTerminal.rb'
-    - 'src/modules/IUCVTerminalServer.rb'
-    - 'src/modules/OnPanic.rb'
-    - 'src/modules/Xpram.rb'
-    - 'test/test_helper.rb'
-
 # Offense count: 1
 # Cop supports --auto-correct.
 Style/MultilineIfModifier:

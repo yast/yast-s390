@@ -148,9 +148,7 @@ module Yast
         end
       end
 
-      if mkdump == ""
-        Builtins.y2milestone("Couldn't find the configured dump device.")
-      end
+      Builtins.y2milestone("Couldn't find the configured dump device.") if mkdump == ""
 
       mkdump
     end

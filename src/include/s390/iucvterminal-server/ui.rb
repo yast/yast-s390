@@ -654,9 +654,7 @@ module Yast
         # show if the group is already used for TS-Authentication
         ts_auth_status = @TEXT_YES
         # groups ids start with @
-        if !Builtins.haskey(@ts_member_conf, Ops.add("@", name))
-          ts_auth_status = @TEXT_NO
-        end
+        ts_auth_status = @TEXT_NO if !Builtins.haskey(@ts_member_conf, Ops.add("@", name))
         userlist = Builtins.maplist(Ops.get_map(group, "userlist", {})) do |k, _v|
           k
         end
@@ -1162,9 +1160,7 @@ module Yast
         )
       end
 
-      if widget == :ts_audited_ids
-        @ts_audited_ids = UpdateIdSelections(@ts_audited_ids, :ts_audited_ids)
-      end
+      @ts_audited_ids = UpdateIdSelections(@ts_audited_ids, :ts_audited_ids) if widget == :ts_audited_ids
 
       if widget == :ts_auth_regex
         Ops.set(
