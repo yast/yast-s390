@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # Copyright (c) 2012 Novell, Inc.
 #
 # All Rights Reserved.
@@ -19,10 +17,10 @@
 # To contact Novell about this file by physical or electronic mail, you may
 # find current contact information at www.novell.com.
 
-# File:	modules/IUCVTerminalServer.ycp
-# Package:	Configuration IUCV Terminal Server
-# Summary:	IUCV Terminal Server settings, input and output functions
-# Authors:	Tim Hardeck <thardeck@suse.de>
+# File:  modules/IUCVTerminalServer.ycp
+# Package:  Configuration IUCV Terminal Server
+# Summary:  IUCV Terminal Server settings, input and output functions
+# Authors:  Tim Hardeck <thardeck@suse.de>
 #
 require "yast"
 
@@ -145,9 +143,7 @@ module Yast
       ts_users = []
       local_users = GetUsers(true)
       Builtins.foreach(local_users) do |username, user|
-        if Ops.get(user, "loginShell") == @TSSHELL_SHELL
-          ts_users = Builtins.add(ts_users, username)
-        end
+        ts_users = Builtins.add(ts_users, username) if Ops.get(user, "loginShell") == @TSSHELL_SHELL
       end
       deep_copy(ts_users)
     end
@@ -158,9 +154,7 @@ module Yast
       ic_users = []
       local_users = GetUsers(true)
       Builtins.foreach(local_users) do |username, user|
-        if Ops.get(user, "loginShell") == @IUCVCONN_SHELL
-          ic_users = Builtins.add(ic_users, username)
-        end
+        ic_users = Builtins.add(ic_users, username) if Ops.get(user, "loginShell") == @IUCVCONN_SHELL
       end
       deep_copy(ic_users)
     end
@@ -391,16 +385,16 @@ module Yast
           Convert.to_string(SCR.Read(path(".target.string"), filename)),
           "\n"
         )
-        if Builtins.contains(original_ts_audited_ids, "[*ALL*]")
+        @ts_audited_ids = if Builtins.contains(original_ts_audited_ids, "[*ALL*]")
           # add all if configured
-          @ts_audited_ids = Convert.convert(
+          Convert.convert(
             Builtins.merge([@TEXT_ALL], @zvm_id_list),
             from: "list",
             to:   "list <string>"
           )
         else
           # only add known ids
-          @ts_audited_ids = Builtins.filter(original_ts_audited_ids) do |name|
+          Builtins.filter(original_ts_audited_ids) do |name|
             !Builtins.contains(@zvm_id_list, name)
           end
         end
@@ -525,9 +519,7 @@ module Yast
         if type == :rb_ts_list
           selected_ids = Ops.get_list(entries, type, [])
           # remove the TEXT_ALL entry because it is not supported by the configuration
-          if Ops.get(selected_ids, 0, "") == @TEXT_ALL
-            selected_ids = Builtins.remove(selected_ids, 0)
-          end
+          selected_ids = Builtins.remove(selected_ids, 0) if Ops.get(selected_ids, 0, "") == @TEXT_ALL
           value = Ops.add("list:", Builtins.mergestring(selected_ids, ","))
         # Regex
         elsif type == :rb_ts_regex

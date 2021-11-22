@@ -1,4 +1,4 @@
-ENV["Y2DIR"] = File.expand_path("../../src", __FILE__)
+ENV["Y2DIR"] = File.expand_path("../src", __dir__)
 
 # make sure we run the tests in English locale
 # (some tests check the output which is marked for translation)
@@ -16,9 +16,7 @@ RSpec.configure do |config|
     # https://relishapp.com/rspec/rspec-mocks/v/3-0/docs/verifying-doubles/partial-doubles
     #
     # With graceful degradation for RSpec 2
-    if mocks.respond_to?(:verify_partial_doubles=)
-      mocks.verify_partial_doubles = true
-    end
+    mocks.verify_partial_doubles = true if mocks.respond_to?(:verify_partial_doubles=)
   end
 end
 
@@ -51,7 +49,7 @@ if ENV["COVERAGE"]
 end
 
 def load_data(name)
-  YAML.load(load_file(name))
+  YAML.safe_load(load_file(name))
 end
 
 def load_file(name)

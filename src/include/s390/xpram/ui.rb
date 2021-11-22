@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # Copyright (c) 2012 Novell, Inc.
 #
 # All Rights Reserved.
@@ -19,10 +17,10 @@
 # To contact Novell about this file by physical or electronic mail, you may
 # find current contact information at www.novell.com.
 
-# File:	include/xpram/ui.ycp
-# Package:	Configuration of xpram
-# Summary:	Dialogs definitions
-# Authors:	Ihno Krumreich <Ihno@suse.de>
+# File:  include/xpram/ui.ycp
+# Package:  Configuration of xpram
+# Summary:  Dialogs definitions
+# Authors:  Ihno Krumreich <Ihno@suse.de>
 #
 # $Id$
 module Yast
@@ -125,10 +123,10 @@ module Yast
                   _("&Mount Point"),
                   m_points
                 ),
-                #		`VSpacing (0.5),
-                #		`Right(
-                #		    // button label
-                #		    `PushButton (`id(`test), `opt(`key_F6), _("&Test"))),
+                #    `VSpacing (0.5),
+                #    `Right(
+                #        // button label
+                #        `PushButton (`id(`test), `opt(`key_F6), _("&Test"))),
                 VSpacing(0.5)
               ),
               HSpacing()
@@ -170,14 +168,12 @@ module Yast
       UI.ChangeWidget(Id(:m_points), :Value, mountpoint)
 
       #    foreach (symbol widget, [`m_points, `test],{
-      #	UI::ChangeWidget (`id (widget), `Enabled, start);
+      #  UI::ChangeWidget (`id (widget), `Enabled, start);
       #    });
       UI.ChangeWidget(Id(:m_points), :Enabled, start)
 
       UI.ChangeWidget(Id(:brate), :Enabled, start)
-      if Builtins.contains(f_types, fstype)
-        UI.ChangeWidget(Id(:brate), :Value, fstype)
-      end
+      UI.ChangeWidget(Id(:brate), :Value, fstype) if Builtins.contains(f_types, fstype)
 
       ret = nil
       loop do
@@ -197,16 +193,16 @@ module Yast
               UI.ChangeWidget(Id(:rd), :CurrentButton, :no)
             end
           end
-          #	    foreach (symbol widget, [`m_points, `test], {
-          #		UI::ChangeWidget (`id (widget), `Enabled, start);
-          #	    });
+          #      foreach (symbol widget, [`m_points, `test], {
+          #    UI::ChangeWidget (`id (widget), `Enabled, start);
+          #      });
           UI.ChangeWidget(Id(:m_points), :Enabled, start)
           UI.ChangeWidget(Id(:brate), :Enabled, start)
         end
-        #	if (ret == `test)
-        #	{
-        #	    TestPopup (mountpoint);
-        #	}
+        #  if (ret == `test)
+        #  {
+        #      TestPopup (mountpoint);
+        #  }
         break if Builtins.contains([:back, :abort, :cancel, :next, :ok], ret)
       end
 

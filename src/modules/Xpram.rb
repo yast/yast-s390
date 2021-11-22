@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # Copyright (c) 2012 Novell, Inc.
 #
 # All Rights Reserved.
@@ -19,10 +17,10 @@
 # To contact Novell about this file by physical or electronic mail, you may
 # find current contact information at www.novell.com.
 
-# File:	modules/Xpram.ycp
-# Package:	Configuration of xpram
-# Summary:	Xpram settings, input and output functions
-# Authors:	Ihno Krumreich <Ihno@suse.de>
+# File:  modules/Xpram.ycp
+# Package:  Configuration of xpram
+# Summary:  Xpram settings, input and output functions
+# Authors:  Ihno Krumreich <Ihno@suse.de>
 #
 # $Id$
 #
@@ -122,9 +120,7 @@ module Yast
 
       Progress.NextStage
 
-      if @mountpoint != ""
-        SCR.Write(path(".sysconfig.xpram.XPRAM_MNTPATH"), @mountpoint)
-      end
+      SCR.Write(path(".sysconfig.xpram.XPRAM_MNTPATH"), @mountpoint) if @mountpoint != ""
       SCR.Write(path(".sysconfig.xpram.XPRAM_FSTYPE"), @fstype)
 
       Progress.NextStage

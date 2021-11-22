@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # Copyright (c) 2012 Novell, Inc.
 #
 # All Rights Reserved.
@@ -19,10 +17,10 @@
 # To contact Novell about this file by physical or electronic mail, you may
 # find current contact information at www.novell.com.
 
-# File:	clients/zfcp_proposal.ycp
-# Package:	S/390 specific configuration
-# Summary:	Proposal function dispatcher
-# Authors:	Jiri Srain <jsrain@suse.cz>
+# File:  clients/zfcp_proposal.ycp
+# Package:  S/390 specific configuration
+# Summary:  Proposal function dispatcher
+# Authors:  Jiri Srain <jsrain@suse.cz>
 #
 # Proposal function dispatcher for zfcp configuration.
 
@@ -72,6 +70,7 @@ module Yast
       # Return human readable titles for the proposal
       elsif @func == "Description"
         return nil if !ZFCPController.IsAvailable
+
         # Fill return map
         @ret =
           # section name in proposal dialog

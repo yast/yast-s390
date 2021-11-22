@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # Copyright (c) 2012 Novell, Inc.
 #
 # All Rights Reserved.
@@ -19,10 +17,10 @@
 # To contact Novell about this file by physical or electronic mail, you may
 # find current contact information at www.novell.com.
 
-# File:	modules/IUCVTerminal.ycp
-# Package:	Configuration IUCV Terminal Settings
-# Summary:	IUCV Terminal settings, input and output functions
-# Authors:	Tim Hardeck <thardeck@suse.de>
+# File:  modules/IUCVTerminal.ycp
+# Package:  Configuration IUCV Terminal Settings
+# Summary:  IUCV Terminal settings, input and output functions
+# Authors:  Tim Hardeck <thardeck@suse.de>
 #
 require "yast"
 
@@ -92,7 +90,7 @@ module Yast
     end
 
     def get_iucv_name
-      entry = tty_entries(@IUCV_PREFIX).sort.first
+      entry = tty_entries(@IUCV_PREFIX).min
       if entry
         match = entry.scan(/^#{@IUCV_PREFIX}@(.+)0\.service$/).first
         name = match.first if match
@@ -105,9 +103,7 @@ module Yast
       current_name = get_iucv_name
 
       # make sure to remove the old entries if the terminal name has changed
-      if current_name != @iucv_name
-        setup_tty_instances(0, @IUCV_PREFIX, current_name)
-      end
+      setup_tty_instances(0, @IUCV_PREFIX, current_name) if current_name != @iucv_name
       setup_tty_instances(target_num, @IUCV_PREFIX, @iucv_name)
     end
 
@@ -183,9 +179,7 @@ module Yast
       Progress.set(old_progress)
 
       restrict_hvc_to_srvs_output = Bootloader.kernel_param(:common, "hvc_iucv_allow")
-      if restrict_hvc_to_srvs_output != :missing
-        @restrict_hvc_to_srvs = restrict_hvc_to_srvs_output
-      end
+      @restrict_hvc_to_srvs = restrict_hvc_to_srvs_output if restrict_hvc_to_srvs_output != :missing
 
       console = Bootloader.kernel_param(:common, "console")
       # if console is defined
@@ -201,9 +195,7 @@ module Yast
             to:   "list <string>"
           )
           Builtins.foreach(parameters) do |parameter|
-            if Builtins.regexpmatch(parameter, "console=hvc0")
-              @show_kernel_out_on_hvc = true
-            end
+            @show_kernel_out_on_hvc = true if Builtins.regexpmatch(parameter, "console=hvc0")
           end
         end
       end

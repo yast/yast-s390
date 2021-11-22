@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # Copyright (c) 2012 Novell, Inc.
 #
 # All Rights Reserved.
@@ -19,10 +17,10 @@
 # To contact Novell about this file by physical or electronic mail, you may
 # find current contact information at www.novell.com.
 
-# File:	modules/Dump.ycp
-# Package:	Creation of s390 dump devices
-# Summary:	Creating s390 dump devices, input and output functions
-# Authors:	Tim Hardeck <thardeck@suse.de>
+# File:  modules/Dump.ycp
+# Package:  Creation of s390 dump devices
+# Summary:  Creating s390 dump devices, input and output functions
+# Authors:  Tim Hardeck <thardeck@suse.de>
 #
 require "yast"
 
@@ -135,9 +133,7 @@ module Yast
 
       Builtins.y2milestone("mkdump return value: %1", ret)
       Builtins.y2milestone("mkdump message: %1", message) if message != ""
-      if err_message != ""
-        Builtins.y2milestone("mkdump error message: %1", err_message)
-      end
+      Builtins.y2milestone("mkdump error message: %1", err_message) if err_message != ""
 
       Progress.NextStage
 

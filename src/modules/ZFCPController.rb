@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # Copyright (c) 2012 Novell, Inc.
 #
 # All Rights Reserved.
@@ -19,10 +17,10 @@
 # To contact Novell about this file by physical or electronic mail, you may
 # find current contact information at www.novell.com.
 
-# File:	modules/ZFCPController.ycp
-# Package:	Configuration of controller
-# Summary:	Controller settings, input and output functions
-# Authors:	Jiri Srain <jsrain@suse.cz>
+# File:  modules/ZFCPController.ycp
+# Package:  Configuration of controller
+# Summary:  Controller settings, input and output functions
+# Authors:  Jiri Srain <jsrain@suse.cz>
 #
 # $Id$
 #
@@ -142,12 +140,14 @@ module Yast
     # Write all controller settings
     # @return true on success
     def Write
-      Builtins.foreach(@devices) do |_index, device|
-        channel = Ops.get_string(device, ["detail", "controller_id"], "")
-        wwpn = Ops.get_string(device, ["detail", "wwpn"], "")
-        lun = Ops.get_string(device, ["detail", "fcp_lun"], "")
-        ActivateDisk(channel, wwpn, lun)
-      end if !Mode.normal
+      if !Mode.normal
+        Builtins.foreach(@devices) do |_index, device|
+          channel = Ops.get_string(device, ["detail", "controller_id"], "")
+          wwpn = Ops.get_string(device, ["detail", "wwpn"], "")
+          lun = Ops.get_string(device, ["detail", "fcp_lun"], "")
+          ActivateDisk(channel, wwpn, lun)
+        end
+      end
 
       if !Mode.installation
         if @disk_configured
@@ -230,11 +230,11 @@ module Yast
       end
     end
 
-    def AddDevice(d)
-      d = deep_copy(d)
+    def AddDevice(device)
+      device = deep_copy(device)
       index = 0
       index = Ops.add(index, 1) while Builtins.haskey(@devices, index)
-      Ops.set(@devices, index, d)
+      Ops.set(@devices, index, device)
 
       nil
     end
@@ -260,10 +260,8 @@ module Yast
     # Create a textual summary and a list of configured devices
     # @return summary of the current configuration
     def Summary
-      ret = []
-
-      if Mode.config
-        ret = Builtins.maplist(@devices) do |_index, d|
+      ret = if Mode.config
+        Builtins.maplist(@devices) do |_index, d|
           Builtins.sformat(
             _("Channel ID: %1, WWPN: %2, LUN: %3"),
             Ops.get_string(d, ["detail", "controller_id"], ""),
@@ -272,7 +270,7 @@ module Yast
           )
         end
       else
-        ret = Builtins.maplist(@devices) do |_index, d|
+        Builtins.maplist(@devices) do |_index, d|
           Builtins.sformat(
             _("Channel ID: %1, WWPN: %2, LUN: %3, Device: %4"),
             Ops.get_string(d, ["detail", "controller_id"], ""),
@@ -703,7 +701,7 @@ module Yast
     def probe_or_mock_disks
       mock_filename = ENV["YAST2_S390_PROBE_DISK"]
       if mock_filename
-        YAML.load(File.read(mock_filename))
+        YAML.safe_load(File.read(mock_filename))
       else
         SCR.Read(path(".probe.disk"))
       end
@@ -716,6 +714,7 @@ module Yast
     # @return [Array<String>] List of controller channels
     def activated_controllers
       return @activated_controllers if @activated_controllers
+
       ctrls = GetControllers().select do |ctrl|
         io = ctrl.fetch("resource", {}).fetch("io", [])
         io.any? { |i| i["active"] }
@@ -747,6 +746,7 @@ module Yast
     # @return [Array<Hash>] Found zFCP disks
     def find_disks(force_probing: false)
       return @disks if @disks && !force_probing
+
       disks = probe_or_mock_disks
       disks = Builtins.filter(disks) do |d|
         d["driver"] == "zfcp"
@@ -793,6 +793,7 @@ module Yast
       find_disks.find do |d|
         detail = d["detail"]
         next unless detail
+
         detail["controller_id"] == channel && detail["wwpn"] == wwpn && detail["fcp_lun"] == lun
       end
     end

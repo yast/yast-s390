@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # Copyright (c) 2012 Novell, Inc.
 #
 # All Rights Reserved.
@@ -19,10 +17,10 @@
 # To contact Novell about this file by physical or electronic mail, you may
 # find current contact information at www.novell.com.
 
-# File:	include/s390/iucvterminal-server/ui.ycp
-# Package:	Configuration IUCV Terminal Server
-# Summary:	Dialogs definitions
-# Authors:	Tim Hardeck <thardeck@suse.de>
+# File:  include/s390/iucvterminal-server/ui.ycp
+# Package:  Configuration IUCV Terminal Server
+# Summary:  Dialogs definitions
+# Authors:  Tim Hardeck <thardeck@suse.de>
 #
 module Yast
   module S390IucvterminalServerUiInclude
@@ -656,9 +654,7 @@ module Yast
         # show if the group is already used for TS-Authentication
         ts_auth_status = @TEXT_YES
         # groups ids start with @
-        if !Builtins.haskey(@ts_member_conf, Ops.add("@", name))
-          ts_auth_status = @TEXT_NO
-        end
+        ts_auth_status = @TEXT_NO if !Builtins.haskey(@ts_member_conf, Ops.add("@", name))
         userlist = Builtins.maplist(Ops.get_map(group, "userlist", {})) do |k, _v|
           k
         end
@@ -1164,9 +1160,7 @@ module Yast
         )
       end
 
-      if widget == :ts_audited_ids
-        @ts_audited_ids = UpdateIdSelections(@ts_audited_ids, :ts_audited_ids)
-      end
+      @ts_audited_ids = UpdateIdSelections(@ts_audited_ids, :ts_audited_ids) if widget == :ts_audited_ids
 
       if widget == :ts_auth_regex
         Ops.set(
@@ -1181,12 +1175,12 @@ module Yast
           Builtins.size(GenerateTsMembersTable()),
           0
         )
-        if ts_isnt_empty
-          @ts_selected_member = Convert.to_string(
+        @ts_selected_member = if ts_isnt_empty
+          Convert.to_string(
             UI.QueryWidget(Id(:ts_users_groups), :CurrentItem)
           )
         else
-          @ts_selected_member = ""
+          ""
         end
 
         # show the current selected user
@@ -1285,7 +1279,7 @@ module Yast
       # select home directory
       if widget == :ic_browse_home
         # set default directory
-        dir = @ic_home != "" ? @ic_home : "/"
+        dir = (@ic_home != "") ? @ic_home : "/"
         dir = UI.AskForExistingDirectory(dir, "")
         if !dir.nil?
           @ic_home = dir
@@ -1298,7 +1292,7 @@ module Yast
       # select home directory
       if widget == :ts_browse_home
         # set default directory
-        dir = @ts_home != "" ? @ts_home : "/"
+        dir = (@ts_home != "") ? @ts_home : "/"
         dir = UI.AskForExistingDirectory(dir, "")
         if !dir.nil?
           @ts_home = dir

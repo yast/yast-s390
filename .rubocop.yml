@@ -1,6 +1,6 @@
 # use the shared Yast defaults
 inherit_from:
-  /usr/share/YaST2/data/devtools/data/rubocop_yast_style.yml
+  /usr/share/YaST2/data/devtools/data/rubocop-0.71.0_yast_style.yml
 
 # Offense count: 82
 Metrics/AbcSize:
@@ -9,7 +9,6 @@ Metrics/AbcSize:
 # Offense count: 15
 Metrics/BlockNesting:
   Max: 5
-
 # Offense count: 6
 # Configuration parameters: CountComments.
 Metrics/ClassLength:
@@ -44,23 +43,52 @@ Metrics/ParameterLists:
 Metrics/PerceivedComplexity:
   Max: 54
 
-# Offense count: 3
-Style/AccessorMethodName:
-  Exclude:
-    - 'src/modules/IUCVTerminal.rb'
-
 # Offense count: 40
 Style/Documentation:
   Enabled: false
 
-# Offense count: 1
-Style/DoubleNegation:
+# this needs more testing if we can have frozen string literals
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+# Offense count: 147
+# Configuration parameters: EnforcedStyle, SupportedStyles.
+# SupportedStyles: snake_case, camelCase
+Naming/MethodName:
+  Enabled: false
+
+# Offense count: 4
+Lint/EmptyWhen:
   Exclude:
+    - 'src/modules/DASDController.rb'
+    - 'src/modules/ZFCPController.rb'
+
+# Offense count: 29
+# Configuration parameters: CountComments, Max, ExcludedMethods.
+# ExcludedMethods: refine
+Metrics/BlockLength:
+  Exclude:
+    - '**/*.gemspec'
     - 'src/include/s390/dasd/dialogs.rb'
+    - 'src/include/s390/dump/ui.rb'
+    - 'src/include/s390/iucvterminal-server/ui.rb'
+    - 'src/include/s390/iucvterminal/ui.rb'
+    - 'src/include/s390/onpanic/ui.rb'
+    - 'src/modules/DASDController.rb'
+    - 'test/dasd_controller_test.rb'
+    - 'test/ui_include_test.rb'
+    - 'test/ui_onpanic_include_test.rb'
+    - 'test/zfcp_controller_test.rb'
+
+# Offense count: 3
+Naming/AccessorMethodName:
+  Exclude:
+    - 'src/modules/IUCVTerminal.rb'
 
 # Offense count: 9
-# Configuration parameters: ExpectMatchingDefinition, Regex, IgnoreExecutableScripts.
-Style/FileName:
+# Configuration parameters: ExpectMatchingDefinition, Regex, IgnoreExecutableScripts, 
+#   AllowedAcronyms.
+Naming/FileName:
   Exclude:
     - 'src/clients/iucvterminal-server.rb'
     - 'src/clients/s390-disk-controller.rb'
@@ -72,27 +100,19 @@ Style/FileName:
     - 'src/modules/Xpram.rb'
     - 'src/modules/ZFCPController.rb'
 
-# Offense count: 147
-# Configuration parameters: EnforcedStyle, SupportedStyles.
+# Offense count: 19
+# Configuration parameters: .
 # SupportedStyles: snake_case, camelCase
-Style/MethodName:
+Naming/VariableName:
   Enabled: false
 
-# Offense count: 4
-# Cop supports --auto-correct.
-Style/NumericLiterals:
-  MinDigits: 11
-
-# Offense count: 19
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-# SupportedStyles: snake_case, camelCase
-Style/VariableName:
+# Offense count: 14
+Style/MultipleComparison:
   Exclude:
-    - 'src/include/s390/dasd/helps.rb'
-    - 'src/include/s390/iucvterminal-server/helps.rb'
+    - 'src/include/s390/dasd/dialogs.rb'
+    - 'src/include/s390/dump/ui.rb'
     - 'src/include/s390/iucvterminal-server/ui.rb'
-    - 'src/include/s390/zfcp/helps.rb'
-    - 'src/modules/IUCVTerminal.rb'
-    - 'src/modules/IUCVTerminalServer.rb'
-    - 'src/modules/OnPanic.rb'
-
+    - 'src/include/s390/onpanic/ui.rb'
+    - 'src/include/s390/xpram/ui.rb'
+    - 'src/include/s390/zfcp/dialogs.rb'
+    - 'src/modules/Dump.rb'

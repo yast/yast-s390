@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # Copyright (c) 2012 Novell, Inc.
 #
 # All Rights Reserved.
@@ -19,10 +17,10 @@
 # To contact Novell about this file by physical or electronic mail, you may
 # find current contact information at www.novell.com.
 
-# File:	clients/iucvterminal.ycp
-# Package:	Configuration IUCV Terminal Settings
-# Summary:	Main file
-# Authors:	Tim Hardeck <thardeck@suse.de>
+# File:  clients/iucvterminal.ycp
+# Package:  Configuration IUCV Terminal Settings
+# Summary:  Main file
+# Authors:  Tim Hardeck <thardeck@suse.de>
 #
 module Yast
   class IucvterminalClient < Client

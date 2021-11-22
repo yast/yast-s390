@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # Copyright (c) [2012-2014] Novell, Inc.
 #
 # All Rights Reserved.
@@ -19,10 +17,10 @@
 # To contact Novell about this file by physical or electronic mail, you may
 # find current contact information at www.novell.com.
 
-# File:	modules/DASDController.ycp
-# Package:	Configuration of controller
-# Summary:	Controller settings, input and output functions
-# Authors:	Jiri Srain <jsrain@suse.cz>
+# File:  modules/DASDController.ycp
+# Package:  Configuration of controller
+# Summary:  Controller settings, input and output functions
+# Authors:  Jiri Srain <jsrain@suse.cz>
 #
 # $Id$
 #
@@ -85,9 +83,8 @@ module Yast
         from: "any",
         to:   "list <string>"
       )
-      if Builtins.size(files) == 1
-        return Ops.add("/dev/", Ops.get(files, 0, ""))
-      end
+      return Ops.add("/dev/", Ops.get(files, 0, "")) if Builtins.size(files) == 1
+
       nil
     end
 
@@ -172,11 +169,11 @@ module Yast
         end
 
         if !unformatted_devices.empty?
-          if unformatted_devices.size == 1
-            message = Builtins.sformat(_("Device %1 is not formatted. Format device now?"),
+          message = if unformatted_devices.size == 1
+            Builtins.sformat(_("Device %1 is not formatted. Format device now?"),
               unformatted_devices[0])
           else
-            message = Builtins.sformat(_("There are %1 unformatted devices. Format them now?"),
+            Builtins.sformat(_("There are %1 unformatted devices. Format them now?"),
               unformatted_devices.size)
           end
           if Popup.ContinueCancel(message)
@@ -295,11 +292,11 @@ module Yast
       end
     end
 
-    def AddDevice(d)
-      d = deep_copy(d)
+    def AddDevice(device)
+      device = deep_copy(device)
       index = 0
       index = Ops.add(index, 1) while Builtins.haskey(@devices, index)
-      Ops.set(@devices, index, d)
+      Ops.set(@devices, index, device)
 
       nil
     end
@@ -360,7 +357,7 @@ module Yast
     def probe_or_mock_disks
       mock_filename = ENV["YAST2_S390_PROBE_DISK"]
       if mock_filename
-        YAML.load(File.read(mock_filename))
+        YAML.safe_load(File.read(mock_filename))
       else
         SCR.Read(path(".probe.disk"))
       end
@@ -539,6 +536,7 @@ module Yast
     def ActivateDiag(channel, diag)
       old_diag = DASDController.diag.fetch(channel, false)
       return if diag == old_diag
+
       DeactivateDisk(channel, old_diag)
       ActivateDisk(channel, diag)
     end
@@ -548,9 +546,7 @@ module Yast
     # @param [Fixnum] par integer Number of disks that can be formated in parallel
     def FormatDisks(disks_list, par)
       disks_list = deep_copy(disks_list)
-      if Ops.greater_than(par, Builtins.size(disks_list))
-        par = Builtins.size(disks_list)
-      end
+      par = Builtins.size(disks_list) if Ops.greater_than(par, Builtins.size(disks_list))
 
       disks = {}
       disks_cmd = []
@@ -727,9 +723,7 @@ module Yast
       )
 
       # if not an eckd-disk it's an fba-disk. fba-disks have only one partition
-      if Ops.get_integer(outmap, "exit", 0) != 0
-        return Builtins.sformat("%11", disk)
-      end
+      return Builtins.sformat("%11", disk) if Ops.get_integer(outmap, "exit", 0) != 0
 
       out = Ops.get_string(outmap, "stdout", "")
 
@@ -783,6 +777,7 @@ module Yast
       loop do
         line = SCR.Read(path(".process.read_line_stderr"))
         break unless line
+
         stderr << line
       end
 
@@ -836,6 +831,7 @@ module Yast
     # @return [Array<Hash>] Found DASD disks
     def find_disks(force_probing: false)
       return @disks if @disks && !force_probing
+
       disks = probe_or_mock_disks
       disks = Builtins.filter(disks) do |d|
         Builtins.tolower(Ops.get_string(d, "device", "")) == "dasd"

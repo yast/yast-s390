@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # Copyright (c) 2012 Novell, Inc.
 #
 # All Rights Reserved.
@@ -19,10 +17,10 @@
 # To contact Novell about this file by physical or electronic mail, you may
 # find current contact information at www.novell.com.
 
-# File:	include/s390/iucvterminal/ui.ycp
-# Package:	Configuration IUCV Terminal Settings
-# Summary:	Dialogs definitions
-# Authors:	Tim Hardeck <thardeck@suse.de>
+# File:  include/s390/iucvterminal/ui.ycp
+# Package:  Configuration IUCV Terminal Settings
+# Summary:  Dialogs definitions
+# Authors:  Tim Hardeck <thardeck@suse.de>
 #
 module Yast
   module S390IucvterminalUiInclude
@@ -284,9 +282,7 @@ module Yast
         UI.ChangeWidget(Id(:hvc_instances), :Value, IUCVTerminal.hvc_instances)
       end
 
-      unless IUCVTerminal.iucv_name.empty?
-        UI.ChangeWidget(Id(:iucv_name), :Value, IUCVTerminal.iucv_name)
-      end
+      UI.ChangeWidget(Id(:iucv_name), :Value, IUCVTerminal.iucv_name) unless IUCVTerminal.iucv_name.empty?
 
       UpdateScreen(:hvc)
 

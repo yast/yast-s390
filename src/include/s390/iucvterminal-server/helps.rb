@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # Copyright (c) 2012 Novell, Inc.
 #
 # All Rights Reserved.
@@ -19,10 +17,10 @@
 # To contact Novell about this file by physical or electronic mail, you may
 # find current contact information at www.novell.com.
 
-# File:	include/s390/iucvterminal-server/helps.ycp
-# Package:	Configuration IUCV Terminal Server
-# Summary:	Help texts of all the dialogs
-# Authors:	Tim Hardeck <thardeck@suse.de>
+# File:  include/s390/iucvterminal-server/helps.ycp
+# Package:  Configuration IUCV Terminal Server
+# Summary:  Help texts of all the dialogs
+# Authors:  Tim Hardeck <thardeck@suse.de>
 #
 module Yast
   module S390IucvterminalServerHelpsInclude
