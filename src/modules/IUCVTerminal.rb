@@ -90,7 +90,7 @@ module Yast
     end
 
     def get_iucv_name
-      entry = tty_entries(@IUCV_PREFIX).sort.first
+      entry = tty_entries(@IUCV_PREFIX).min
       if entry
         match = entry.scan(/^#{@IUCV_PREFIX}@(.+)0\.service$/).first
         name = match.first if match

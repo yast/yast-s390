@@ -188,9 +188,3 @@ Style/MultipleComparison:
     - 'src/include/s390/xpram/ui.rb'
     - 'src/include/s390/zfcp/dialogs.rb'
     - 'src/modules/Dump.rb'
-
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/UnneededSort:
-  Exclude:
-    - 'src/modules/IUCVTerminal.rb'
