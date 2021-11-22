@@ -58,11 +58,6 @@ Naming/MethodName:
   Enabled: false
 
 # Offense count: 4
-# Cop supports --auto-correct.
-Style/NumericLiterals:
-  MinDigits: 11
-
-# Offense count: 4
 Lint/EmptyWhen:
   Exclude:
     - 'src/modules/DASDController.rb'
@@ -103,14 +98,6 @@ Naming/FileName:
     - 'src/modules/IUCVTerminalServer.rb'
     - 'src/modules/OnPanic.rb'
     - 'src/modules/Xpram.rb'
-    - 'src/modules/ZFCPController.rb'
-
-# Offense count: 2
-# Configuration parameters: MinNameLength, AllowNamesEndingInNumbers, AllowedNames, ForbiddenNames.
-# AllowedNames: io, id, to, by, on, in, at, ip, db
-Naming/UncommunicativeMethodParamName:
-  Exclude:
-    - 'src/modules/DASDController.rb'
     - 'src/modules/ZFCPController.rb'
 
 # Offense count: 19
