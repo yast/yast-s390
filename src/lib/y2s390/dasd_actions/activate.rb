@@ -4,6 +4,8 @@ module Y2S390
   module DasdActions
     class Activate < Base
       def run
+        textdomain "s390"
+
         unformatted_disks = []
 
         selected.each do |dasd|

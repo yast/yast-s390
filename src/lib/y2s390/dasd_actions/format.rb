@@ -18,6 +18,8 @@ module Y2S390
 
     class Format < Base
       def run
+        textdomain "s390"
+
         return false unless can_be_formatted?
         return false unless really_format?
 

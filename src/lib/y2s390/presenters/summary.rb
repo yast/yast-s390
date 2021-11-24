@@ -36,6 +36,7 @@ module Y2S390
       #
       # @param devices [Y2S390::DasdsCollection]
       def initialize(devices)
+        textdomain "s390"
         @devices = devices
       end
 

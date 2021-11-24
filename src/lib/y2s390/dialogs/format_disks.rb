@@ -4,6 +4,8 @@ module Y2S390
   module Dialogs
     class FormatDisks < FormatDialog
       def dialog_content
+        textdomain "s390"
+
         VBox(
           HSpacing(70),
           *dasds_progress_bars
