@@ -11,8 +11,6 @@ module Y2S390
   module Dialogs
     # Class for displaying progress while formatting one or several DASDs.
     class FormatDialog < ::UI::Dialog
-      include Yast::Logger
-      include ::UI::EventDispatcher
       attr_accessor :fmt_process
       attr_accessor :progress
       attr_accessor :cylinders
@@ -31,20 +29,16 @@ module Y2S390
         @fmt_process = FormatProcess.new(dasds)
       end
 
-      def should_open_dialog?
-        true
-      end
-
       def run
         fmt_process.start
-        sleep(0.2)
+        wait_for_update
         return report_format_failed(fmt_process) unless fmt_process.running?
 
         fmt_process.initialize_summary
         create_dialog
         while fmt_process.running?
           fmt_process.update_summary
-          sleep(0.2)
+          wait_for_update
           update_progress
         end
         close_dialog
@@ -58,6 +52,10 @@ module Y2S390
       end
 
     private
+
+      def wait_for_update
+        sleep(0.2)
+      end
 
       def report_format_failed(process)
         Yast::Report.Error(format(_("Disks formatting failed. Exit code: %s.\nError output:%s"),
