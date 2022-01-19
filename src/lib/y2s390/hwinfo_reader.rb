@@ -21,11 +21,15 @@ module Y2S390
   private
 
     def disks
-      if ENV["S390_MOCKING"]
-        load_data("test/data/probe_disk_dasd.yml")
+      if mock_filename
+        load_data(mock_filename)
       else
         Yast::SCR.Read(Yast.path(".probe.disk")) || []
       end
+    end
+
+    def mock_filename
+      ENV["S390_MOCKING"] ? "test/data/probe_disk_dasd.yml" : ENV["YAST2_S390_PROBE_DISK"]
     end
 
     def data_from_hwinfo

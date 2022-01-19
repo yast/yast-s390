@@ -1,7 +1,27 @@
+# Copyright (c) [2022] SUSE LLC
+#
+# All Rights Reserved.
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of version 2 of the GNU General Public License as published
+# by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+# more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, contact SUSE LLC.
+#
+# To contact SUSE LLC about this file by physical or electronic mail, you may
+# find current contact information at www.suse.com.
+
 require "yast"
 require "yast2/execute"
 
 module Y2S390
+  # This class is responsible for maintaining an specific DASD format progress
   class FormatStatus
     attr_accessor :progress, :cylinders, :dasd
     # Constructor
@@ -16,16 +36,16 @@ module Y2S390
       @size = format_size
     end
 
-    def update_progress
+    # It increments the progress status based on the configured format size
+    def update_progress!
       @progress += @size
     end
 
+    # Return whether the format progress has been completed according to the number of cylinders
+    #
+    # @return [Boolean] whether the format progress has been completed or not
     def done?
       @cylinders <= @progress
-    end
-
-    def step!
-      update_progress
     end
   end
 
@@ -39,22 +59,16 @@ module Y2S390
 
     # Constructor
     #
-    # @param dasds [Integer]
+    # @param dasds [Array<Y2S390::Dasd>]
     def initialize(dasds)
       @dasds = dasds
       @summary = {}
       @updated = {}
     end
 
-    def disks_params
-      dasds.map { |d| "-f /dev/#{d.device_name}" }.join(" ")
-    end
-
     # Convenience method to start with the formatting process
     def start
-      cmd = "/sbin/dasdfmt -Y -P #{dasds.size} -b 4096 -y -r #{SIZE} -m #{SIZE} #{disks_params}"
-
-      @id = Yast::SCR.Execute(Yast.path(".process.start_shell"), cmd)
+      @id = Yast::SCR.Execute(Yast.path(".process.start_shell"), fmt_cmd)
     end
 
     # Checks whether the formatting process is still running or not
@@ -92,10 +106,12 @@ module Y2S390
       stderr
     end
 
+    # Initializes the summary for the DASDs given in the constructor
     def initialize_summary
       dasds.each_with_index { |d, i| @summary[i] = FormatStatus.new(d, read_line.to_i) }
     end
 
+    # Update the summary of the formatting progress reading the output of the format process
     def update_summary
       @updated = {}
 
@@ -108,7 +124,7 @@ module Y2S390
       progress.each do |d|
         next if d.to_s.empty?
 
-        summary[d.to_i]&.update_progress
+        summary[d.to_i]&.update_progress!
         @updated[d.to_i] = summary[d.to_i]
       end
       log.info("The summary is #{summary.inspect}")
@@ -117,13 +133,28 @@ module Y2S390
       updated
     end
 
+    # Total number of cylinders to be formatted
+    #
+    # @return [Integer]
     def cylinders
-      log.info("The summary is #{summary.values.inspect}")
       summary.values.inject(0) { |sum, v| sum + v.cylinders }
     end
 
+    # Current progress according to the cylinders formatted
+    #
+    # @return [Integer]
     def progress
       @summary.values.inject(0) { |sum, v| sum + v.progress }
+    end
+
+  private
+
+    def fmt_cmd
+      "/sbin/dasdfmt -Y -P #{dasds.size} -b 4096 -y -r #{SIZE} -m #{SIZE} #{disks_params}"
+    end
+
+    def disks_params
+      dasds.map { |d| "-f /dev/#{d.device_name}" }.join(" ")
     end
   end
 end

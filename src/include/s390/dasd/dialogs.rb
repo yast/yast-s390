@@ -86,8 +86,8 @@ module Yast
       return [item_id, dasd.id, "--", "--", "--", diag, "--", "--"] unless dasd.active?
 
       [
-        item_id, dasd.id, dasd.device_name, dasd.access_type.to_s.upcase,
-        dasd.device_type, diag, formatted, dasd.partition_info
+        item_id, dasd.id, dasd.device_name, dasd.device_type,
+        dasd.access_type.to_s.upcase, diag, formatted, dasd.partition_info
       ]
     end
 

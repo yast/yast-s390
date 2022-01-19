@@ -10,6 +10,7 @@ describe Y2S390::DasdsReader do
   before do
     allow(reader).to receive(:dasd_entries).and_return(load_file("lsdasd.txt").split("\n"))
     allow(ENV).to receive(:[]).with("S390_MOCKING").and_return(true)
+    allow(ENV).to receive(:[]).with("YAST2_S390_LSDASD").and_return(nil)
   end
 
   describe "#list" do

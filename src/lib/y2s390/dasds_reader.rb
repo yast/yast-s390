@@ -38,7 +38,7 @@ module Y2S390
     # @param offline [Boolean] whether it should obtain the offline devices too or not
     # @param force_probing [Boolean] in case of probing it will fetch the hwinfo if not will use the
     #   information cached when exist
-    # @return [Array<Y2S390::DasdsCollection>] a collection of Dasds read from the system using a
+    # @return [Y2S390::DasdsCollection] a collection of Dasds read from the system using a
     #   comination
     def list(offline: true, force_probing: false)
       HwinfoReader.instance.reset if force_probing
@@ -91,25 +91,31 @@ module Y2S390
       update_additional_info(dasd) if extended
     end
 
-    def update_additional_info(dasd)
-      refresh_extended_data!(dasd)
-    end
-
   private
 
     # In production, call SCR.Read(.probe.disk).
-    # For testing, point YAST2_S390_PROBE_DISK to a YAML file
-    # with the mock value.
+    #
+    # For testing, use S390_MOCKING=1 ENV variable or point YAST2_S390_LSDASD to a txt file
+    # with the mock value with a lsdasd's command output format.
+    #
     # Suggesstion:
-    #   YAST2_S390_PROBE_DISK=test/data/probe_disk_dasd.yml rake run"[dasd]"
+    #   S390_MOCKING=1 rake run"[dasd]"
+    #
     # @return [Array<Hash>] .probe.disk output
     def dasd_entries(offline: true, dasd: nil)
-      if ENV["S390_MOCKING"]
-        File.read("test/data/lsdasd.txt")
+      if mock_filename
+        File.read(mock_filename)
       else
         cmd = cmd_for(offline: offline, dasd: dasd)
         Yast::Execute.stdout.locally!(cmd)
       end.split("\n")
+    end
+
+    # Mock filenam if defined supported environment variables
+    #
+    # @return [String,nil]
+    def mock_filename
+      ENV["S390_MOCKING"] ? "test/data/lsdasd.txt" : ENV["YAST2_S390_LSDASD"]
     end
 
     def cmd_for(offline: true, dasd: nil)
@@ -119,15 +125,11 @@ module Y2S390
       cmd
     end
 
-    def refresh_extended_data!(dasd)
-      reset_extended_data!(dasd) if dasd.offline?
+    def update_additional_info(dasd)
+      dasd.cylinders = nil if dasd.offline?
       dasd.use_diag = use_diag?(dasd)
       dasd.formatted = formatted?(dasd)
       dasd.device_type = device_type_for(dasd)
-    end
-
-    def reset_extended_data!(dasd)
-      dasd.cylinders = nil
     end
 
     # Determines whether a given DASD is formatted or not
