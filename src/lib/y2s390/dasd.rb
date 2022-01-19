@@ -19,7 +19,6 @@
 
 require "yast"
 require "yast2/execute"
-require "y2s390/formatting_status"
 
 module Y2S390
   # This class represents a direct-access storage device (DASD)
@@ -46,9 +45,6 @@ module Y2S390
 
     # @return [Integer] number of cylinders
     attr_accessor :cylinders
-
-    # @return [FormattingStatus] status of the last formatting process
-    attr_accessor :formatting_status
 
     # @return [Boolean]
     attr_accessor :format_wanted

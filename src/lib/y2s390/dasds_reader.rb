@@ -128,7 +128,6 @@ module Y2S390
 
     def reset_extended_data!(dasd)
       dasd.cylinders = nil
-      dasd.formatting_status = nil
     end
 
     # Determines whether a given DASD is formatted or not
