@@ -56,6 +56,12 @@ describe Y2S390::FormatProcess do
   end
 
   let(:dasds) { [dasd_0150, dasd_0160] }
+  let(:process_id) { 35000 }
+
+  before do
+    allow(Yast::SCR).to receive(:Execute)
+      .with(Yast.path(".process.start_shell"), /dasdfmt -Y/).and_return(process_id)
+  end
 
   describe "#start" do
     it "starts a dasdfmt process in parallel with the disks given" do
@@ -67,8 +73,8 @@ describe Y2S390::FormatProcess do
     end
 
     it "returns the process id" do
-      expect(Yast::SCR).to receive(:Execute).with(anything, anything).and_return(3200)
-      expect(subject.start).to eql(3200)
+      expect(Yast::SCR).to receive(:Execute).with(anything, anything).and_return(process_id)
+      expect(subject.start).to eql(process_id)
     end
   end
 
@@ -76,11 +82,111 @@ describe Y2S390::FormatProcess do
     it "returns false if the process has not started" do
       expect(subject.running?).to eql(false)
     end
+
+    it "returns whether the format process is still running or not" do
+      subject.start
+      expect(Yast::SCR).to receive(:Read).with(Yast.path(".process.running"), process_id)
+        .and_return(true, false)
+      expect(subject.running?).to eql(true)
+      expect(subject.running?).to eql(false)
+    end
+  end
+
+  describe "#read" do
+    let(:process_output) { "0|1|0|\n1|0|0" }
+
+    before do
+      allow(Yast::SCR).to receive(:Read)
+        .with(Yast.path(".process.read"), process_id).and_return(process_output)
+    end
+
+    it "returns nil if no process has been started" do
+      expect(subject.read).to eq(nil)
+    end
+
+    it "returns the output of the YaST process agent read" do
+      subject.start
+
+      expect(subject.read).to eq(process_output)
+    end
+  end
+
+  describe "#read_line" do
+    before do
+      allow(Yast::SCR).to receive(:Read)
+        .with(Yast.path(".process.read_line"), process_id).and_return("1500")
+    end
+
+    it "returns nil if no process has been started" do
+      expect(subject.read_line).to eq(nil)
+    end
+
+    it "returns the output of the YaST process agent read_line" do
+      subject.start
+
+      expect(subject.read_line).to eql("1500")
+    end
+  end
+
+  describe "#read_status" do
+    before do
+      allow(Yast::SCR).to receive(:Read)
+        .with(Yast.path(".process.status"), process_id).and_return(0)
+    end
+
+    it "returns nil if no process has been started" do
+      expect(subject.status).to eq(nil)
+    end
+
+    it "returns the output of the YaST process agent status" do
+      subject.start
+
+      expect(subject.status).to eq(0)
+    end
   end
 
   describe "#initialize_summary" do
+    before do
+      allow(subject).to receive(:read_line).and_return("1500", "900")
+    end
+
+    it "initializes the summary with the number of cylinders to be formatted by each DASD" do
+      expect(subject.summary).to eql({})
+      subject.initialize_summary
+      expect(subject.summary.size).to eql(2)
+      expect(subject.summary[0].cylinders).to eql(1500)
+      expect(subject.summary[0].dasd.device_name).to eql("dasda")
+      expect(subject.summary[1].cylinders).to eql(900)
+      expect(subject.summary[1].dasd.device_name).to eql("dasdb")
+    end
   end
 
   describe "#update_summary" do
+    let(:process_output) { "0|1|0|\n1|0|0" }
+
+    before do
+      allow(subject).to receive(:read).and_return(process_output)
+      allow(subject).to receive(:read_line).and_return(10016, 500)
+    end
+
+    it "reads the output of the format process" do
+      expect(subject).to receive(:read)
+      subject.update_summary
+    end
+
+    it "parses the format process output creating a summary of the updated DASDs" do
+      subject.initialize_summary
+      expect(subject.summary[0]).to receive(:update_progress!).exactly(4).times
+      expect(subject.summary[1]).to receive(:update_progress!).twice
+
+      subject.update_summary
+    end
+
+    context "when there is nothing read" do
+      it "returns nil" do
+        expect(subject).to receive(:read).and_return(nil)
+        expect(subject.update_summary).to eql(nil)
+      end
+    end
   end
 end

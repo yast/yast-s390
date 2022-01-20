@@ -81,16 +81,20 @@ module Y2S390
     end
 
     def read_line
-      return "" unless @id
+      return unless @id
 
       Yast::SCR.Read(Yast.path(".process.read_line"), @id)
     end
 
     def read
+      return unless @id
+
       Yast::SCR.Read(Yast.path(".process.read"), @id)
     end
 
     def status
+      return unless @id
+
       Yast::SCR.Read(Yast.path(".process.status"), @id)
     end
 
@@ -120,7 +124,7 @@ module Y2S390
       return unless line
 
       log.info "Updating Summary"
-      progress = line.split("|")
+      progress = line.gsub(/[[:space:]]/, "").split("|")
       progress.each do |d|
         next if d.to_s.empty?
 
