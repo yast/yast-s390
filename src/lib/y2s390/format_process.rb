@@ -153,16 +153,18 @@ module Y2S390
 
       return unless line
 
-      log.info "Updating Summary"
+      log.debug "Updating Summary"
       progress = line.gsub(/[[:space:]]/, "").split("|")
       progress.each do |d|
         next if d.to_s.empty?
 
-        summary[d.to_i]&.update_progress!
-        @updated[d.to_i] = summary[d.to_i]
+        index = d.to_i
+
+        summary[index]&.update_progress!
+        @updated[index] = summary[index]
       end
-      log.info("The summary is #{summary.inspect}")
-      log.info("Updated #{updated.inspect}")
+      log.debug "The summary is #{summary.inspect}"
+      log.debug "Updated #{updated.inspect}"
 
       updated
     end
@@ -178,7 +180,7 @@ module Y2S390
     #
     # @return [Integer]
     def progress
-      @summary.values.inject(0) { |sum, v| sum + v.progress }
+      summary.values.inject(0) { |sum, v| sum + v.progress }
     end
 
   private

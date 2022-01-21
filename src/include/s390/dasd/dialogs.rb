@@ -24,7 +24,6 @@
 #
 # $Id$
 #
-require "y2s390/dialogs/dasd_read"
 require "y2s390/dasd_actions"
 
 module Yast

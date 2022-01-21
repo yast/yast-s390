@@ -13,12 +13,12 @@ describe Y2S390::DasdActions::Deactivate do
 
     before do
       allow(controller).to receive(:ProbeDisks)
-      allow(action).to receive(:deactivate)
+      allow(controller).to receive(:DeactivateDisk)
     end
 
     it "iterates over the the selected DASDs deactivating them" do
-      expect(action).to receive(:deactivate).with(dasd_0150)
-      expect(action).to receive(:deactivate).with(dasd_0fff)
+      expect(controller).to receive(:DeactivateDisk).with(dasd_0150.id, dasd_0150.diag_wanted)
+      expect(controller).to receive(:DeactivateDisk).with(dasd_0fff.id, dasd_0fff.diag_wanted)
 
       action.run
     end

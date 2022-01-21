@@ -23,16 +23,10 @@ module Y2S390
   module DasdActions
     class Deactivate < Base
       def run
-        selected.each { |d| deactivate(d) }
+        selected.each { |d| controller.DeactivateDisk(d.id, d.diag_wanted) }
         controller.ProbeDisks
 
         true
-      end
-
-    private
-
-      def deactivate(dasd)
-        controller.DeactivateDisk(dasd.id, dasd.diag_wanted)
       end
     end
   end
