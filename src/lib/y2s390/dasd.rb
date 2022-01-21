@@ -106,9 +106,9 @@ module Y2S390
     #
     # @return [String]
     def partition_info
-      return "/dev/#{device_name}1" if type != "ECKD"
+      return "#{device_path}1" if type != "ECKD"
 
-      out = Yast::Execute.stdout.on_target!("/sbin/fdasd", "-p", "/dev/#{device_name}")
+      out = Yast::Execute.stdout.on_target!("/sbin/fdasd", "-p", device_path)
       return out if out.empty?
 
       regexp = Regexp.new("^[ \t]*([^ \t]+)[ \t]+([0-9]+)[ \t]+([0-9]+)[ \t]+([0-9]+)" \
@@ -119,6 +119,12 @@ module Y2S390
         r = line.match(regexp)
         "#{r[1]} (#{r[6]})"
       end.join(", ")
+    end
+
+    def device_path
+      return unless device_name
+
+      "/dev/#{device_name}"
     end
 
     def hwinfo

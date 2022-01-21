@@ -51,10 +51,27 @@ module Y2S390
 
   # This class is responsible of formatting a set of DASD volumes maintaining also the status of the
   # progress.
+  #
+  # Once the format process has been started it allows to check the status of the process, the
+  # output and also the stderr.
+  #
+  # @example
+  #
+  #   process = Y2S390::FormatProcess.new(dasds_list)
+  #   process.start
+  #   process.initialize_summary
+  #   while process.running?
+  #     process.update_summary
+  #     sleep(0.2)
+  #   end
+  #   report_error if process.status.to_i != 0
+  #
+  # @see https://github.com/yast/yast-core/blob/master/agent-process/doc/ag_process_example.ycp
   class FormatProcess
     include Yast::Logger
     attr_accessor :id, :dasds, :summary, :updated
 
+    FORMAT_CMD = "/sbin/dasdfmt".freeze
     SIZE = 10
 
     # Constructor
@@ -68,7 +85,7 @@ module Y2S390
 
     # Convenience method to start with the formatting process
     def start
-      @id = Yast::SCR.Execute(Yast.path(".process.start_shell"), fmt_cmd)
+      @id = Yast::SCR.Execute(Yast.path(".process.start_shell"), format_cmd)
     end
 
     # Checks whether the formatting process is still running or not
@@ -80,34 +97,47 @@ module Y2S390
       Yast::SCR.Read(Yast.path(".process.running"), @id)
     end
 
+    # Returns one line from stdout of the process or nil in case of not started.
+    #
+    # @return [String, nil]
     def read_line
       return unless @id
 
       Yast::SCR.Read(Yast.path(".process.read_line"), @id)
     end
 
+    # Returns the output of the process or nil in case of not started. The output could contain
+    # newline characters as it is not line-oriented.
+    #
+    # @return [String, nil]
     def read
       return unless @id
 
       Yast::SCR.Read(Yast.path(".process.read"), @id)
     end
 
+    # Returns the status of the process or nil in case of not started
+    #
+    # @returns [String, nil]
     def status
       return unless @id
 
       Yast::SCR.Read(Yast.path(".process.status"), @id)
     end
 
+    # Returns one line from stderr of the process
+    #
+    # @returns [String]
     def error
-      stderr = ""
+      stderr = []
       loop do
-        line = Yast::SCR.Read(Yast.path(".process.read_line_stderr"))
+        line = Yast::SCR.Read(Yast.path(".process.read_line_stderr"), @id)
         break unless line
 
         stderr << line
       end
 
-      stderr
+      stderr.join(" ")
     end
 
     # Initializes the summary for the DASDs given in the constructor
@@ -153,12 +183,15 @@ module Y2S390
 
   private
 
-    def fmt_cmd
-      "/sbin/dasdfmt -Y -P #{dasds.size} -b 4096 -y -r #{SIZE} -m #{SIZE} #{disks_params}"
+    # Convenience method to obtain the complete format command to be used according to the DASDs
+    # given in the constructor
+    def format_cmd
+      "#{FORMAT_CMD} -Y -P #{dasds.size} -b 4096 -y -r #{SIZE} -m #{SIZE} #{disks_params}"
     end
 
+    # Convenience method to obtain parameter of the devices to be formatted
     def disks_params
-      dasds.map { |d| "-f /dev/#{d.device_name}" }.join(" ")
+      dasds.map { |d| "-f #{d.device_path}" }.join(" ")
     end
   end
 end

@@ -414,51 +414,11 @@ module Yast
       ActivateDisk(dasd.id, value)
     end
 
-    def format_dialog_for(disks_list)
-      if ENV["NEW_FORMAT"]
-        Y2S390::Dialogs::DasdFormat
-      else
-        Y2S390::Dialogs::FormatDisks
-      end.new(disks_list)
-    end
-
     # It formats the given disks showing the progress in a separate dialog
     #
     # @param [S390::DasdsCollection] collection of dasds to be be formatted
     def FormatDisks(disks_list)
       format_dialog_for(disks_list).run
-    end
-
-    # Get partitioninfo
-    # @param [String] disk string Disk to read info from
-    # @return GetPartitionInfo string The info
-    def GetPartitionInfo(disk)
-      outmap = Convert.to_map(
-        SCR.Execute(
-          path(".target.bash_output"),
-          Builtins.sformat("/sbin/fdasd -p '%1'", disk)
-        )
-      )
-
-      # if not an eckd-disk it's an fba-disk. fba-disks have only one partition
-      return Builtins.sformat("%11", disk) if Ops.get_integer(outmap, "exit", 0) != 0
-
-      out = Ops.get_string(outmap, "stdout", "")
-
-      regexp = "^[ \t]*([^ \t]+)[ \t]+([0-9]+)[ \t]+([0-9]+)[ \t]+([0-9]+)" \
-        "[ \t]+([^ \t]+)[ \t]+([^ \t]+([ \t]+[^ \t]+))*[ \t]*$"
-
-      l = Builtins.splitstring(out, "\n")
-      l = Builtins.filter(l) { |s| Builtins.regexpmatch(s, regexp) }
-      l = Builtins.maplist(l) do |s|
-        tokens = Builtins.regexptokenize(s, regexp)
-        Builtins.sformat(
-          "%1 (%2)",
-          Ops.get_string(tokens, 0, ""),
-          Ops.get_string(tokens, 5, "")
-        )
-      end
-      Builtins.mergestring(l, ", ")
     end
 
     publish variable: :devices, type: "map <integer, map <string, any>>"
@@ -469,7 +429,6 @@ module Yast
     publish function: :DeactivateDisk, type: "void (string, boolean)"
     publish function: :ProbeDisks, type: "void ()"
     publish function: :FormatDisks, type: "void (list <string>, integer)"
-    publish function: :GetPartitionInfo, type: "string (string)"
     publish function: :GetModified, type: "boolean ()"
     publish variable: :proposal_valid, type: "boolean"
     publish function: :SetModified, type: "void (boolean)"
@@ -486,6 +445,18 @@ module Yast
     publish function: :IsAvailable, type: "boolean ()"
 
   private
+
+    # It obtains the dialog to be used by the FormatProcess according to the NEW_FORMAT environment
+    # variable
+    #
+    # @param [S390::DasdsCollection] collection of dasds to be be formatted
+    def format_dialog_for(disks_list)
+      if ENV["NEW_FORMAT"]
+        Y2S390::Dialogs::DasdFormat
+      else
+        Y2S390::Dialogs::FormatDisks
+      end.new(disks_list)
+    end
 
     # Convenience method to convert the device ID to integers for filtering purposes
     #

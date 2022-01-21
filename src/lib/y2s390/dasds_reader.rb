@@ -159,9 +159,9 @@ module Y2S390
     # @param [String] disk string Disk to read info from
     # @return GetPartitionInfo string The info
     def partition_info(dasd)
-      return "#{dasd.device_name}1" if dasd.type != "ECKD"
+      return "#{dasd.device_path}1" if dasd.type != "ECKD"
 
-      out = Yast::Execute.stdout.on_target!("/sbin/fdasd", "-p", "/dev/#{dasd.device_name}")
+      out = Yast::Execute.stdout.on_target!("/sbin/fdasd", "-p", dasd.device_path)
       return out if out.empty?
 
       regexp = Regexp.new("^[ \t]*([^ \t]+)[ \t]+([0-9]+)[ \t]+([0-9]+)[ \t]+([0-9]+)" \

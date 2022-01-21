@@ -128,7 +128,7 @@ describe Y2S390::FormatProcess do
     end
   end
 
-  describe "#read_status" do
+  describe "#status" do
     before do
       allow(Yast::SCR).to receive(:Read)
         .with(Yast.path(".process.status"), process_id).and_return(0)
@@ -142,6 +142,25 @@ describe Y2S390::FormatProcess do
       subject.start
 
       expect(subject.status).to eq(0)
+    end
+  end
+
+  describe "#error" do
+    it "returns an empty string if there is no stderr for the format process" do
+      expect(Yast::SCR).to receive(:Read)
+        .with(Yast.path(".process.read_line_stderr"), nil).and_return(nil)
+
+      expect(subject.error).to eq("")
+    end
+
+    it "returns the format process stderr" do
+      error = "dasdfmt: Disk /dev/dasdb is read only!"
+      subject.start
+
+      expect(Yast::SCR).to receive(:Read)
+        .with(Yast.path(".process.read_line_stderr"), process_id).and_return(error, nil)
+
+      expect(subject.error).to eq(error)
     end
   end
 
@@ -187,6 +206,33 @@ describe Y2S390::FormatProcess do
         expect(subject).to receive(:read).and_return(nil)
         expect(subject.update_summary).to eql(nil)
       end
+    end
+  end
+
+  describe "#cylinders" do
+    before do
+      allow(subject).to receive(:read_line).and_return(10016, 500)
+    end
+
+    it "returns the total number of cylinders to be formatted" do
+      subject.initialize_summary
+      expect(subject.cylinders).to eql(10516)
+    end
+  end
+
+  describe "#progress" do
+    let(:process_output) { "0|1|0|\n1|0|0" }
+
+    before do
+      allow(subject).to receive(:read).and_return(process_output)
+      allow(subject).to receive(:read_line).and_return(10016, 500)
+    end
+
+    it "returns the total number of cylinders already formatted" do
+      subject.initialize_summary
+      expect(subject.progress).to eql(0)
+      subject.update_summary
+      expect(subject.progress).to eql(60)
     end
   end
 end
