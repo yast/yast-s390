@@ -384,7 +384,9 @@ module Yast
         return dasd.formatted? ? 0 : 8
       end
 
-      ActivateDisk(dasd.id, !!dasd.diag_wanted)
+      ret = ActivateDisk(dasd.id, !!dasd.diag_wanted)
+      reader.update_info(dasd, extended: true)
+      ret
     end
 
     # Deactivate disk

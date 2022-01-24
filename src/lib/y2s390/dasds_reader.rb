@@ -81,7 +81,7 @@ module Y2S390
     end
 
     def update_info(dasd, extended: false)
-      data = dasd_entries(dasd: dasd).find { |e| e.start_with?(/\d/) }
+      data = dasd_entries(dasd: dasd.id).find { |e| e.start_with?(/\d/) }
       return false if data.to_s.empty?
 
       _, status, name, _, type, = data.split(" ")
@@ -101,6 +101,8 @@ module Y2S390
     # Suggesstion:
     #   S390_MOCKING=1 rake run"[dasd]"
     #
+    # @param offline [Boolean] whether it should obtain the offline devices too or not
+    # @param dasd [Y2S390::Dasd]
     # @return [Array<Hash>] .probe.disk output
     def dasd_entries(offline: true, dasd: nil)
       if mock_filename

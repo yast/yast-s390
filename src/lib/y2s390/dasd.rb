@@ -89,7 +89,7 @@ module Y2S390
 
     # @return [Boolean] whether the DASD device is active or not
     def active?
-      status == :active || status == :read_only
+      [:active, :read_only, :no_format].include?(status)
     end
 
     # @return [Boolean] whether the DASD device is formatted or not
