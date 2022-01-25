@@ -114,7 +114,7 @@ module Y2S390
         progress = fmt_process.progress
         cylinders = fmt_process.cylinders
         update_progress_percent(100 * progress / cylinders) if cylinders > 0
-        fmt_process.updated.values.each { |s| s.done? ? refresh_tables : update_cyl_cell(s) }
+        fmt_process.updated.each_value { |s| s.done? ? refresh_tables : update_cyl_cell(s) }
 
         fmt_process.running? ? :continue : :break
       end
