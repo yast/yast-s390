@@ -109,7 +109,8 @@ module Y2S390
       hwinfo&.resource&.io&.first&.active
     end
 
-
+    # Whether the device is offline based on its status
+    #
     # @return [Boolean] whether the DASD device is offline or not
     def offline?
       status == :offline
