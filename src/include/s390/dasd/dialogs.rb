@@ -73,7 +73,6 @@ module Yast
     # @param dasd [YS390::DASD] a Direct Access Storage Device
     # @return [Array] a collection holding needed information, namely
     def item_elements_for(dasd)
-      byebug
       item_id = Id(dasd.id)
       diag = String.YesNo(Mode.config ? dasd.diag_wanted : dasd.use_diag)
       formatted = String.YesNo(dasd.formatted?)
