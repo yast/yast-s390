@@ -22,9 +22,9 @@ require "y2s390/dasd_actions"
 module Yast
   module S390DasdDialogsInclude
     def initialize_s390_dasd_dialogs(include_target)
-      Yast.import "UI"
       textdomain "s390"
 
+      Yast.import "UI"
       Yast.import "DASDController"
       Yast.import "Label"
       Yast.import "Mode"
@@ -41,8 +41,9 @@ module Yast
       Yast.include include_target, "s390/dasd/helps.rb"
     end
 
-    # List DASD devices that are currently being selected
-    # @return [Array<Fixnum>] list of IDs of selected DASD devices
+    # Returns the ids of currently selected DASD devices
+    #
+    # @return [Array<Integer>] ids of selected DASD devices
     def ListSelectedDASD
       selected = UI.QueryWidget(Id(:table), :SelectedItems) || []
       log.info("selected #{selected}")
@@ -65,14 +66,17 @@ module Yast
       ret ? :next : :abort
     end
 
-    def yes_no(value)
-      String.YesNo(value)
-    end
-
+    # Returns needed information for displaying given DASD in the UI
+    #
+    # @see #GetDASDDiskItems
+    #
+    # @param dasd [YS390::DASD] a Direct Access Storage Device
+    # @return [Array] a collection holding needed information, namely
     def item_elements_for(dasd)
+      byebug
       item_id = Id(dasd.id)
-      diag = yes_no(Mode.config ? dasd.diag_wanted : dasd.use_diag)
-      formatted = yes_no(dasd.formatted?)
+      diag = String.YesNo(Mode.config ? dasd.diag_wanted : dasd.use_diag)
+      formatted = String.YesNo(dasd.formatted?)
 
       return [item_id, dasd.id, d.format, diag] if Mode.config
       return [item_id, dasd.id, "--", "--", "--", diag, "--", "--"] unless dasd.active?
@@ -83,10 +87,11 @@ module Yast
       ]
     end
 
-    # Get the list of items for the table of DASD devices
-    # @param min_chan integer minimal channel number
-    # @param max_chan integer maximal channel number
-    # @return a list of terms for the table
+    # Returns a list of items for the table of DASD devices
+    #
+    # @see DASDController.GetFilteredDevices
+    #
+    # @return [Array<Item>]
     def GetDASDDiskItems
       devices = DASDController.GetFilteredDevices
 
@@ -121,11 +126,19 @@ module Yast
       end
     end
 
+    # Returns the Y2S390::DasdAction class for given action
+    #
+    # @param action [Symbol, String]
+    # @return [Y2S390::DasdAction]
     def action_class_for(action)
       name = action.to_s.split("_").map(&:capitalize).join
       "Y2S390::DasdActions::#{name}"
     end
 
+    # Run given action over selected DASD devices
+    #
+    # @param action [Y2S390::DasdAction] the action to perform
+    # @param selected [Y2S390::DasdsCollection] the collection of DASD devices to work with
     def run(action, selected)
       Object.const_get(action_class_for(action)).run(selected)
     end
@@ -410,8 +423,9 @@ module Yast
       ret
     end
 
-    # Run the dialog for deleting DASDs
-    # @return [Symbol] from DeleteDASDDiskDialog
+    # Run the dialog for deleting DASD devices
+    #
+    # @return [:next]
     def DeleteDASDDiskDialog
       selected = ListSelectedDASD()
       if selected.empty?

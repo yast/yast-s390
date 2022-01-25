@@ -21,6 +21,7 @@ require "y2s390/dasd_actions/base"
 
 module Y2S390
   module DasdActions
+    # Action  for setting format wanted off over selected DASDs
     class FormatOff < Base
       def run
         selected.each { |dasd| dasd.format_wanted = false }
@@ -28,6 +29,7 @@ module Y2S390
       end
     end
 
+    # Action  for setting format wanted on over selected DASDs
     class FormatOn < Base
       def run
         selected.each { |dasd| dasd.format_wanted = true }
@@ -35,6 +37,7 @@ module Y2S390
       end
     end
 
+    # Action for formatting selected DASDs
     class Format < Base
       def run
         textdomain "s390"

@@ -21,6 +21,7 @@ require "y2s390/dasd_actions/base"
 
 module Y2S390
   module DasdActions
+    # Action for activating DASD devices
     class Activate < Base
       def run
         textdomain "s390"

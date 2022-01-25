@@ -25,21 +25,21 @@ require "y2s390/hwinfo_reader"
 Yast.import "Mode"
 
 module Y2S390
-  # This class is reponsible of reading the information about DASD devices
+  # Reads information about DASD devices in the system
   class DasdsReader
     attr_accessor :disks
 
     # Command for displaying configuration of z Systems DASD devices
     LIST_CMD = "/sbin/lsdasd".freeze
+    private_constant :LIST_CMD
 
     # Initializes a collection of DASDs based on the information read using lsdasd output and also
     # the hardware information (hwinfo).
     #
     # @param offline [Boolean] whether it should obtain the offline devices too or not
-    # @param force_probing [Boolean] in case of probing it will fetch the hwinfo if not will use the
-    #   information cached when exist
-    # @return [Y2S390::DasdsCollection] a collection of Dasds read from the system using a
-    #   comination
+    # @param force_probing [Boolean] in case of probing it will fetch the hwinfo;
+    #   if not, it will use the information cached when exist
+    # @return [Y2S390::DasdsCollection] a collection of DASD devices read from the system
     def list(offline: true, force_probing: false)
       HwinfoReader.instance.reset if force_probing
 
@@ -63,6 +63,10 @@ module Y2S390
       Y2S390::DasdsCollection.new(a)
     end
 
+    # Refreshes data of given DASDs
+    #
+    # @param dasds [Y2S390::DasdsCollection] a collection of Y2S90::Dasd
+    # @return [true]
     def refresh_data!(dasds)
       dasd_entries(offline: true).each do |entry|
         next unless entry.start_with?(/\d/)
@@ -80,6 +84,10 @@ module Y2S390
       true
     end
 
+    # Udpates information for given DASD
+    #
+    # @param dasd [Y2S390::Dasd] the DASD representation to be updated
+    # @param extended [Boolean] whether additional information should be updated too
     def update_info(dasd, extended: false)
       data = dasd_entries(dasd: dasd.id).find { |e| e.start_with?(/\d/) }
       return false if data.to_s.empty?
@@ -120,6 +128,12 @@ module Y2S390
       ENV["S390_MOCKING"] ? "test/data/lsdasd.txt" : ENV["YAST2_S390_LSDASD"]
     end
 
+    # Build lsdasd command based on given params
+    #
+    # @params offline [Boolean] true for listing offline devices too; false othewise
+    # @params dasd [Y2S390::Dasd, nil] a Y2S390::Dasd object for specifying the device
+    #
+    # @return [Array<String>] lsdasd command and options based on given params
     def cmd_for(offline: true, dasd: nil)
       cmd = [LIST_CMD]
       cmd << "-a" if offline
@@ -127,6 +141,9 @@ module Y2S390
       cmd
     end
 
+    # Update given DASD representation with extended data
+    #
+    # @param dasd [Y2S390::Dasd]
     def update_additional_info(dasd)
       dasd.cylinders = nil if dasd.offline?
       dasd.use_diag = use_diag?(dasd)

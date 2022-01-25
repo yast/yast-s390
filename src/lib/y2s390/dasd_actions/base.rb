@@ -32,6 +32,7 @@ module Y2S390
 
       # @return [Boolean]
       abstract_method :run
+
       # @return [Y2S390::DasdsCollection]
       attr_accessor :selected
 
@@ -41,9 +42,12 @@ module Y2S390
       #   has to be applied
       def initialize(selected)
         textdomain "s390"
+
         @selected = selected
       end
 
+      # Shortcut for `.new(selected).run`
+      #
       # @params selected [Y2S390::DasdsCollection] the collection of DASDs to which the action
       #   has to be applied
       def self.run(selected)
@@ -60,7 +64,9 @@ module Y2S390
         Yast::Mode.autoinst
       end
 
-      # Convenience method
+      # Convenience method for shortening access to Yast::DASDController
+      #
+      # @return [Yast::DASDController]
       def controller
         Yast::DASDController
       end

@@ -23,9 +23,12 @@ module Y2S390
   module DasdActions
     # Base class for DIAG access actions
     class Diag < Base
+      # @return [Boolean] Whether the DIAG access should be active or not
       attr_accessor :use_diag
 
-      # Activate or Deactivate the use of the DIAG access over the selected DASDs
+      # Activate or deactivate the DIAG access for selected DASDs
+      #
+      # Based on the valud of {#use_diag}. See {DiagOn} and {DiagOff}
       def run
         if Yast::Mode.config
           selected.each { |dasd| dasd.diag_wanted = !!use_diag }
@@ -42,7 +45,7 @@ module Y2S390
       end
     end
 
-    # Set selected DASDs to not use DIAG access
+    # Action for turning off the DIAG access of selected DASDs
     class DiagOff < Diag
       # Constructor
       #
@@ -53,7 +56,7 @@ module Y2S390
       end
     end
 
-    # Set selected DASDs to use DIAG access
+    # Action for turning on the DIAG access of selected DASDs
     class DiagOn < Diag
       # Constructor
       #

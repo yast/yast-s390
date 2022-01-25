@@ -25,49 +25,57 @@ module Y2S390
   class Dasd
     # Command for configuring z Systems specific devices
     CONFIGURE_CMD = "/sbin/dasd_configure".freeze
-    # # Command for displaying configuration of z Systems DASD devices
-    LIST_CMD = "/sbin/lsdasd".freeze
+    private_constant :CONFIGURE_CMD
 
-    # @return [String] dasd type (EKCD, FBA)
+    # Command for displaying configuration of z Systems DASD devices
+    LIST_CMD = "/sbin/lsdasd".freeze
+    private_constant :LIST_CMD
+
+    # @return [Hash<String, Symbol>] a map of known statuses
+    KNOWN_STATUS = {
+      "offline"    => :offline,
+      "active"     => :active,
+      "active(ro)" => :read_only,
+      "n/f"        => :no_format
+    }.freeze
+    private_constant :KNOWN_STATUS
+
+    # @return [String] the DASD type (EKCD, FBA)
     attr_accessor :type
 
-    # @return [String] dasd device type, cpu model...
+    # @return [String] the DASD device type, cpu model...
     attr_accessor :device_type
 
     # @return [String] the device id or channel
     attr_accessor :id
 
-    # @return [String, nil) associated device name
+    # @return [String, nil] the associated device name
     attr_accessor :device_name
 
-    # @return [Symbol] device status (:offline, :active)
+    # @return [Symbol] the device status (:offline, :active, :read_only, :no_format, :unknown)
     attr_reader :status
 
     # @return [Integer] number of cylinders
     attr_accessor :cylinders
 
-    # @return [Boolean]
+    # @return [Boolean] whether the device should be formatted
     attr_accessor :format_wanted
 
-    # @return [Boolean]
+    # @return [Boolean] whether the DIAG access method should be enabled
     attr_accessor :diag_wanted
 
-    # @return [Boolean]
+    # @return [Boolean] whether the device is formatted
     attr_accessor :formatted
 
-    # @return [Boolean]
+    # @return [Boolean] whether the DIAG access method is enabled
     attr_accessor :use_diag
-
-    KNOWN_STATUS = {
-      "offline" => :offline, "active" => :active, "active(ro)" => :read_only, "n/f" => :no_format
-    }.freeze
 
     # Constructor
     #
     # @param id [String]
-    # @param status [String]
-    # @param device_name [String]
-    # @param type [String]
+    # @param status [Symbol, nil]
+    # @param device_name [String, nil]
+    # @param type [String, nil]
     def initialize(id, status: nil, device_name: nil, type: nil)
       @id = id
       @device_name = device_name
@@ -82,17 +90,27 @@ module Y2S390
     # Sets the device status if known or :unknown if not
     #
     # @param value [String] device current status according to lsdasd output
-    # @return [Symbol] device status (:active, :read_only, :offline or :unknown)
+    # @return [Symbol] device status (:active, :read_only, :offline, :no_format, or :unknown)
     def status=(value)
       @status = KNOWN_STATUS[value.to_s.downcase] || :unknown
     end
 
-    # @return [Boolean] whether the DASD device is active or not
+    # Whether the device is active according to its status
+    #
+    # @return [Boolean] true if it is in an active status; false otherwise
     def active?
       [:active, :read_only, :no_format].include?(status)
     end
 
-    # @return [Boolean] whether the DASD device is formatted or not
+    # Whether the device is active according to the IO {#hwinfo}
+    #
+    # @return [Boolean] true if it is active; false otherwise
+    def io_active?
+      hwinfo&.resource&.io&.first&.active
+    end
+
+
+    # @return [Boolean] whether the DASD device is offline or not
     def offline?
       status == :offline
     end
@@ -100,6 +118,13 @@ module Y2S390
     # @return [Boolean] whether the DASD device is formatted or not
     def formatted?
       @formatted || false
+    end
+
+    # Whether the device can be formatted or not
+    #
+    # @return [Boolean] true when the devices is an active ECKD DASD; false otherwise
+    def can_be_formatted?
+      active? && type == "ECKD"
     end
 
     # Return the partitions information
@@ -121,46 +146,43 @@ module Y2S390
       end.join(", ")
     end
 
+    # Returns the path to the device
+    #
+    # @return [String, nil]
     def device_path
       return unless device_name
 
       "/dev/#{device_name}"
     end
 
-    def hwinfo
-      Y2S390::HwinfoReader.instance.for_device(id)
-    end
-
-    # Returns whether the device can be formatted or not
+    # Returns the access type ('rw', 'ro') according to {#hwinfo}
     #
-    # @return [Boolean]
-    def can_be_formatted?
-      active? && type == "ECKD"
-    end
-
-    # Returns whether the device is active according to the IO hwinfo
-    #
-    # @return [Boolean] true if it is active; false otherwise
-    def io_active?
-      hwinfo&.resource&.io&.first&.active
-    end
-
-    # Returns the access type ('rw', 'ro') according to the hwinfo
-    #
-    # @return [Boolean] true if it is active; false otherwise
+    # @return [Boolean, nil] true if it is active; false otherwise
     def access_type
       hwinfo&.resource&.io&.first&.mode
     end
 
-    # @return [Integer]
+    # Returns the access type ('rw', 'ro') according to {#hwinfo}
+    #
+    # @return [Integer, nil]
     def sysfs_id
       hwinfo&.sysfs_id
     end
 
+    # Returns the system device name
+    #
+    # @return [String, nil]
     def sys_device_name
       cmd = ["ls", "/sys/bus/ccw/devices/#{id}/block/"]
       disk = Yast::Execute.stdout.on_target!(cmd).strip
       disk.to_s.empty? ? nil : "/dev/#{disk}"
+    end
+
+    # Returns the device data collected by hwinfo
+    #
+    # @return [Hash]
+    def hwinfo
+      Y2S390::HwinfoReader.instance.for_device(id)
     end
   end
 end

@@ -21,6 +21,7 @@ require "y2s390/dasd_actions/base"
 
 module Y2S390
   module DasdActions
+    # Action for deactivating DASD devices
     class Deactivate < Base
       def run
         selected.each { |d| controller.DeactivateDisk(d.id, d.diag_wanted) }
