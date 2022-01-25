@@ -1,4 +1,4 @@
-# Copyright (c) [2021] SUSE LLC
+# Copyright (c) [2012-2022] SUSE LLC
 #
 # All Rights Reserved.
 #
@@ -16,7 +16,7 @@
 #
 # To contact SUSE LLC about this file by physical or electronic mail, you may
 # find current contact information at www.suse.com.
-#
+
 require "yast"
 require "yast2/popup"
 require "yast2/execute"

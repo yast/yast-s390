@@ -1,4 +1,4 @@
-# Copyright (c) 2012 Novell, Inc.
+# Copyright (c) [2012-2022] SUSE LLC
 #
 # All Rights Reserved.
 #
@@ -12,18 +12,11 @@
 # more details.
 #
 # You should have received a copy of the GNU General Public License along
-# with this program; if not, contact Novell, Inc.
+# with this program; if not, contact SUSE LLC.
 #
-# To contact Novell about this file by physical or electronic mail, you may
-# find current contact information at www.novell.com.
+# To contact SUSE LLC about this file by physical or electronic mail, you may
+# find current contact information at www.suse.com.
 
-# File:  include/controller/dialogs.ycp
-# Package:  Configuration of controller
-# Summary:  Dialogs definitions
-# Authors:  Jiri Srain <jsrain@suse.cz>
-#
-# $Id$
-#
 require "y2s390/dasd_actions"
 
 module Yast
