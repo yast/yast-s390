@@ -26,28 +26,62 @@ require "y2s390"
 describe Y2S390::DasdsCollection do
   include_examples "config base collection"
 
-  describe "#filter" do
-    let(:elements) { [element1, element2, element3] }
-    let(:element1) { Y2S390::Dasd.new("0.0.0150", status: "active", type: "EKCD") }
-    let(:element2) { Y2S390::Dasd.new("0.0.0160", status: "offline", type: "EKCD") }
-    let(:element3) { Y2S390::Dasd.new("0.0.0190", status: "active(ro)", type: "EKCD") }
+  let(:elements) { [element1, element2, element3, element4] }
+  let(:element1) { Y2S390::Dasd.new("0.0.0150", status: "active", type: "EKCD") }
+  let(:element2) { Y2S390::Dasd.new("0.0.0160", status: "offline", type: "EKCD") }
+  let(:element3) { Y2S390::Dasd.new("0.0.0190", status: "active(ro)", type: "EKCD") }
+  let(:element4) { Y2S390::Dasd.new("0.0.0300", status: "n/f", type: "EKCD") }
 
+  describe "#filter" do
     it "returns a new collection with the elements which the block returns true" do
-      expect(subject.size).to eq(3)
+      expect(subject.size).to eq(4)
       collection = subject.filter(&:offline?)
       expect(collection.size).to eq(1)
       expect(collection.by_id("0.0.0160")).to eq(element2)
     end
   end
 
-  describe "#active" do
-    let(:elements) { [element1, element2, element3] }
-    let(:element1) { Y2S390::Dasd.new("0.0.0150", status: "active", type: "EKCD") }
-    let(:element2) { Y2S390::Dasd.new("0.0.0160", status: "offline", type: "EKCD") }
-    let(:element3) { Y2S390::Dasd.new("0.0.0190", status: "active(ro)", type: "EKCD") }
+  describe "#offline" do
+    it "returns a new collection with only the offline elements" do
+      expect(subject.offline.ids).to eql(["0.0.0160"])
+    end
+  end
 
+  describe "#active" do
     it "returns a new collection with only the active elements" do
-      expect(subject.active.ids).to eql(["0.0.0150", "0.0.0190"])
+      expect(subject.active.ids).to eql(["0.0.0150", "0.0.0190", "0.0.0300"])
+    end
+  end
+
+  describe "#unformatted" do
+    it "returns a new collection with only the unformatted elements" do
+      expect(subject.unformatted.ids).to eql(["0.0.0300"])
+    end
+  end
+
+  describe "#to_format" do
+    before do
+      element1.format_wanted = true
+      element2.format_wanted = true
+      element3.formatted = true
+      element4.formatted = false
+    end
+
+    context "when format_unformatted is false" do
+      it "returns a new collection with only the elements that wants to be formatted explicitly" do
+
+        expect(subject.to_format.ids).to eql([element1.id, element2.id])
+      end
+    end
+
+    context "when format_unformatted is true" do
+      it "returns a new collection with elements that wants to be formatted and unformatted ones" do
+        element1.format_wanted = true
+        element2.format_wanted = true
+
+        expect(subject.to_format(format_unformatted: true).ids)
+          .to eql([element1.id, element2.id, element4.id])
+      end
     end
   end
 end

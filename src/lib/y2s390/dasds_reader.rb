@@ -89,7 +89,7 @@ module Y2S390
     # @param dasd [Y2S390::Dasd] the DASD representation to be updated
     # @param extended [Boolean] whether additional information should be updated too
     def update_info(dasd, extended: false)
-      data = dasd_entries(dasd: dasd.id).find { |e| e.start_with?(/\d/) }
+      data = dasd_entries(dasd: dasd).find { |e| e.start_with?(/\d/) }
       return false if data.to_s.empty?
 
       _, status, name, _, type, = data.split(" ")
@@ -113,8 +113,9 @@ module Y2S390
     # @param dasd [Y2S390::Dasd]
     # @return [Array<Hash>] .probe.disk output
     def dasd_entries(offline: true, dasd: nil)
-      if mock_filename
-        File.read(mock_filename)
+      filename = mock_filename
+      if filename
+        File.read(filename)
       else
         cmd = cmd_for(offline: offline, dasd: dasd)
         Yast::Execute.stdout.locally!(cmd)
@@ -137,7 +138,7 @@ module Y2S390
     def cmd_for(offline: true, dasd: nil)
       cmd = [LIST_CMD]
       cmd << "-a" if offline
-      cmd << dasd if dasd
+      cmd << dasd.id if dasd
       cmd
     end
 

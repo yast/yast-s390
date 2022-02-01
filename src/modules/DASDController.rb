@@ -22,12 +22,18 @@ require "yast2/popup"
 require "yast2/execute"
 require "shellwords"
 require "y2s390/dialogs/format"
+require "y2s390/dialogs/mkinitrd"
 require "y2s390/dasds_reader"
+require "y2s390/dasds_writer"
+require "y2issues"
 
 module Yast
   # Dasd controller settings
   class DASDControllerClass < Module
     include Yast::Logger
+
+    # @return [Boolean] whether unformated devices should be formatted upon activation
+    attr_reader :format_unformatted
 
     def main
       Yast.import "UI"
@@ -52,7 +58,6 @@ module Yast
       # Data was modified?
       @modified = false
 
-      # format all unformated devices upon activation?
       @format_unformatted = false
 
       @proposal_valid = false
@@ -100,73 +105,11 @@ module Yast
     # Write all controller settings
     # @return true on success
     def Write
-      if !Mode.normal
-        to_format = []
-        to_reactivate = []
-        unformatted_devices = []
-        reader.refresh_data!(@devices)
+      Y2S390::DasdsWriter.new(@devices).write if !Mode.normal
 
-        @devices.each do |dasd|
-          act_ret = activate_if_needed(dasd)
-          format = !!dasd.format_wanted
-          # FIXME: general activation error handling - also in sync with below
-          # for AutoInstall, format unformatted disks later at once
-          # even disks manually selected for formatting must be reactivated
-          if Mode.autoinst && act_ret == 8 && (@format_unformatted || format)
-            format = true
-            to_reactivate << dasd
-          end
-
-          device_name = dasd.device_name || dasd.sys_device_name
-          if format
-            if dasd.can_be_formatted?
-              to_format << dasd
-            else
-              Report.Error(
-                # TRANSLATORS %s is device name
-                format(
-                  _("Cannot format device '%s'. Only ECKD disks can be formatted."),
-                  device_name
-                )
-              )
-            end
-          # unformatted disk, manual (not AutoYaST)
-          elsif act_ret == 8
-            unformatted_devices << dasd
-          end
-        end
-
-        if !unformatted_devices.empty?
-          message = if unformatted_devices.size == 1
-            format(_("Device %s is not formatted. Format device now?"),
-              unformatted_devices.first.device_name)
-          else
-            format(_("There are %s unformatted devices. Format them now?"),
-              unformatted_devices.size)
-          end
-          if Popup.ContinueCancel(message)
-            unformatted_devices.each do |dasd|
-              to_format << dasd
-              to_reactivate << dasd
-            end
-          end
-        end
-
-        log.info "Disks to format: #{to_format}"
-
-        FormatDisks(to_format) unless to_format.empty?
-
-        to_reactivate.each do |dasd|
-          # FIXME: general activation error handling - also in sync with above
-          ActivateDisk(dasd.id, !!dasd.diag_wanted)
-        end
-      end
-
-      if !Mode.installation
-        if @disk_configured
-          Y2S390::Dialogs::Mkinitrd.new.run
-          @disk_configured = false
-        end
+      if !Mode.installation && @disk_configured
+        Y2S390::Dialogs::Mkinitrd.new.run
+        @disk_configured = false
       end
 
       true
@@ -420,6 +363,8 @@ module Yast
     #
     # @param [S390::DasdsCollection] collection of dasds to be be formatted
     def FormatDisks(disks_list)
+      log.info "Disks to format: #{disks_list}"
+
       format_dialog_for(disks_list).run
     end
 

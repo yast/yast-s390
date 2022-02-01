@@ -257,121 +257,26 @@ describe Yast::DASDController do
     end
     let(:format_unformatted) { false }
     let(:format) { true }
-    let(:channel) { "0.0.0100" }
+    let(:channel) { "0.0.0150" }
 
     before do
-      allow(Yast::SCR).to receive(:Execute).with(path(".target.bash_output"), /\/sbin\/dasdview/)
-        .and_return("exitstatus" => 0, "stdout" => load_file("dasdview_eckd.txt"), "stderr" => "")
-
       allow(Yast::Mode).to receive(:normal).and_return(false)
       allow(Yast::Mode).to receive(:installation).and_return(true)
-      allow(Yast::Mode).to receive(:autoinst).and_return(true)
-      # speed up the test a bit
-      allow(subject).to receive(:ActivateDisk).and_return(0)
-      allow(subject).to receive(:FormatDisks)
     end
 
     context "during autoinstallation" do
-      let(:channel) { "0.0.0100" }
-      let(:dasd) { Yast::DASDController.devices.by_id(channel) }
+      let(:channel) { "0.0.0150" }
+      let(:dasds) { Yast::DASDController.devices }
       let(:can_format) { true }
 
       before do
         subject.Import(data)
-        allow(dasd).to receive(:can_be_formatted?).and_return(can_format) if dasd
       end
 
-      it "activates the disk" do
-        expect(subject).to receive(:ActivateDisk).with("0.0.0100", false)
+      it "calls the dasds writers with the current devices" do
+        expect(Y2S390::DasdsWriter).to receive(:new).with(dasds).and_call_original
+        expect_any_instance_of(Y2S390::DasdsWriter).to receive(:write)
         subject.Write
-      end
-
-      context "when 'format' is sets to true" do
-        let(:format) { true }
-
-        context "and the disk can be formatted" do
-          it "formats the disk" do
-            expect(subject).to receive(:FormatDisks).with([dasd])
-            expect(subject.Write).to eq(true)
-          end
-        end
-      end
-
-      context "when 'format' is set to false" do
-        let(:format) { false }
-
-        it "does not format the disk" do
-          expect(subject).to_not receive(:FormatDisks)
-          subject.Write
-        end
-      end
-
-      context "when the activated device is not formatted" do
-        NOT_FORMATTED_CODE = 8 # means that the device is not formatted
-
-        let(:format) { false }
-
-        before do
-          allow(subject).to receive(:activate_if_needed).with(dasd)
-            .and_return(NOT_FORMATTED_CODE)
-        end
-
-        context "and 'format_unformatted' is set to 'true'" do
-          let(:format_unformatted) { true }
-
-          it "formats the device" do
-            expect(subject).to receive(:FormatDisks).with([dasd])
-            subject.Write
-          end
-
-          it "reactivates the disk" do
-            allow(subject).to receive(:FormatDisks)
-            expect(subject).to receive(:ActivateDisk).with(channel, false)
-            subject.Write
-          end
-        end
-
-        context "and 'format_unformatted' is set to 'false'" do
-          let(:format_unformatted) { false }
-
-          it "does not format the device" do
-            expect(subject).to_not receive(:FormatDisks)
-            subject.Write
-          end
-
-          it "does not reactivate the disk" do
-            expect(subject).to_not receive(:ActivateDisk)
-            subject.Write
-          end
-        end
-
-        context "and 'format' is set to 'true'" do
-          let(:format) { true }
-          let(:format_unformatted) { false }
-
-          it "formats the device" do
-            expect(subject).to receive(:FormatDisks).with([dasd])
-            subject.Write
-          end
-
-          it "reactivates the disk" do
-            expect(subject).to receive(:FormatDisks)
-            expect(subject).to receive(:ActivateDisk).with(channel, false)
-            subject.Write
-          end
-        end
-      end
-
-      context "when the imported disk is a FBA one" do
-        let(:channel) { "0.0.ffff" }
-
-        it "does not format the disk and report an error" do
-          subject.Import(data)
-          expect(subject).to_not receive(:FormatDisks)
-          expect(Yast::Report).to receive(:Error)
-
-          expect(subject.Write).to eq(true)
-        end
       end
     end
   end
