@@ -32,8 +32,7 @@ module Y2S390
           0.45, # top and bottom margin; NCurses rounds this down to 0
           VBox(
             Heading(_("Formatting DASDs")),
-            MinHeight(7, tables),
-            VSpacing(1),
+            MinHeight(min_height, tables),
             ProgressBar(Id(:progress_bar), _("Total Progress"), 100, 0),
             VSpacing(1)
           )
@@ -120,6 +119,14 @@ module Y2S390
       def refresh_tables
         Yast::UI.ChangeWidget(Id(:in_progress_table), :Items, in_progress_items)
         Yast::UI.ChangeWidget(Id(:done_table), :Items, done_items)
+      end
+
+      def min_height
+        (elements > 5) ? 14 : 9
+      end
+
+      def elements
+        @fmt_process.summary.values.size
       end
 
       def update_progress_percent(percent)
