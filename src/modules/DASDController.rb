@@ -365,7 +365,7 @@ module Yast
     def FormatDisks(disks_list)
       log.info "Disks to format: #{disks_list}"
 
-      format_dialog_for(disks_list).run
+      format_dialog.new(disks_list).run
     end
 
     publish variable: :devices, type: "map <integer, map <string, any>>"
@@ -393,16 +393,10 @@ module Yast
 
   private
 
-    # It obtains the dialog to be used by the FormatProcess according to the NEW_FORMAT environment
+    # It obtains the dialog to be used by the FormatProcess according to the OLD_FORMAT environment
     # variable
-    #
-    # @param [S390::DasdsCollection] collection of dasds to be be formatted
-    def format_dialog_for(disks_list)
-      if ENV["NEW_FORMAT"]
-        Y2S390::Dialogs::DasdFormat
-      else
-        Y2S390::Dialogs::FormatDisks
-      end.new(disks_list)
+    def format_dialog
+      ENV["OLD_FORMAT"] ? Y2S390::Dialogs::FormatDisks : Y2S390::Dialogs::DasdFormat
     end
 
     # Convenience method to convert the device ID to integers for filtering purposes

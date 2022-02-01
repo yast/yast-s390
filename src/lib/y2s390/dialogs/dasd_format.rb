@@ -68,7 +68,7 @@ module Y2S390
           Header(
             Right(_("Channel ID")),
             "Device",
-            Right(_("Cyl.") + " " * 6) # reserve some space for more digits
+            Right(_("Cyl.").ljust(12, " ")) # reserve some space for more digits
           ),
           in_progress_items
         )
@@ -109,8 +109,6 @@ module Y2S390
       end
 
       def update_progress
-        fmt_process.update_summary
-        sleep(0.2)
         progress = fmt_process.progress
         cylinders = fmt_process.cylinders
         update_progress_percent(100 * progress / cylinders) if cylinders > 0

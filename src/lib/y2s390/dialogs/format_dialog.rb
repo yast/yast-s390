@@ -50,7 +50,7 @@ module Y2S390
 
       def run
         fmt_process.start
-        wait_for_update
+        wait_for_start
         return report_format_failed(fmt_process) unless fmt_process.running?
 
         fmt_process.initialize_summary
@@ -72,8 +72,12 @@ module Y2S390
 
     private
 
-      def wait_for_update
+      def wait_for_start
         sleep(0.2)
+      end
+
+      def wait_for_update
+        sleep(0.1)
       end
 
       def report_format_failed(process)

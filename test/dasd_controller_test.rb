@@ -241,7 +241,7 @@ describe Yast::DASDController do
 
   describe "#FormatDisks" do
     let(:disks) { Yast::DASDController.devices.by_ids(["0.0.0150"]) }
-    let(:dialog) { Y2S390::Dialogs::FormatDisks }
+    let(:dialog) { Y2S390::Dialogs::DasdFormat }
 
     it "runs a Format Disk dialog for the given disks" do
       expect_any_instance_of(dialog).to receive(:run)
