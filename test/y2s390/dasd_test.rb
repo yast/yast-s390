@@ -24,7 +24,9 @@ require "y2s390"
 
 describe Y2S390::Dasd do
   subject { described_class.new("0.0.0150") }
-  let(:dasda) { described_class.new("0.0.0150", status: "active", device_name: "dasda") }
+  let(:dasda) do
+    described_class.new("0.0.0150", status: "active", device_name: "dasda", type: "ECKD")
+  end
 
   describe "#hex_id" do
     it "returns an integer representation of the channel ID" do
@@ -88,6 +90,44 @@ describe Y2S390::Dasd do
       expect(subject.formatted?).to eql(false)
       subject.formatted = false
       expect(subject.formatted?).to eql(false)
+    end
+  end
+
+  describe "#partition_info" do
+    let(:execute) { instance_double("Yast::Execute", on_target: true) }
+    let(:fdasd) { "" }
+
+    before do
+      allow(Yast::Execute).to receive(:stdout).and_return(execute)
+      allow(execute).to receive(:on_target!).with("/sbin/fdasd", "-p", dasda.device_path)
+        .and_return(fdasd)
+    end
+
+    context "when the DASD type is not ECKD" do
+      let(:dasd_ffff) do
+        described_class.new("0.0.ffff", status: "active(ro)", device_name: "dasda", type: "FBA")
+      end
+
+      it "assumes only one partition returning the device path with a 1 at the end" do
+        expect(dasd_ffff.partition_info).to eql("/dev/dasda1")
+      end
+    end
+
+    context "when the fdasd -p '/dev/device' output  does not contain any partition or is empty" do
+      it "returns an empty string" do
+        expect(dasda.partition_info).to eql("")
+      end
+    end
+
+    context "when the fdasd -p '/dev/device' output contains some partition" do
+      let(:fdasd) { load_file("fdasd_partition.txt") }
+      let(:partition_info) do
+        "/dev/dasda1 (Linux native), /dev/dasda2 (Linux native), /dev/dasda3 (Linux native)"
+      end
+
+      it "returns each partition info like '/dev/dasda1 (Linux native), /dev/dasda2 (Linux...'" do
+        expect(dasda.partition_info).to eql(partition_info)
+      end
     end
   end
 end
