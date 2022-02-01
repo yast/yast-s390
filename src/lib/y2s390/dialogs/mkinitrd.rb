@@ -6,6 +6,7 @@ module Y2S390
       CMD = "/sbin/mkinitrd".freeze
 
       def dialog_content
+        textdomain "s390"
         Label(_("Running mkinitrd."))
       end
 
