@@ -195,10 +195,13 @@ module Y2S390
     end
 
     def device_type_for(dasd)
-      device_type = (dasd&.hwinfo&.device_id.to_i & 65535).to_s(16)
-      cu_model = dasd&.hwinfo&.detail&.cu_model.to_i.to_s(16).rjust(2, "0")
-      sub_device_id = (dasd&.hwinfo&.sub_device_id.to_i & 65535).to_s(16)
-      dev_model = dasd&.hwinfo&.detail&.dev_model.to_i.to_s(16).rjust(2, "0")
+      hwinfo        = dasd&.hwinfo
+      hwinfo_detail = hwinfo&.detail
+
+      device_type   = (hwinfo&.device_id.to_i & 65535).to_s(16)
+      sub_device_id = (hwinfo&.sub_device_id.to_i & 65535).to_s(16)
+      cu_model      = hwinfo_detail&.cu_model.to_i.to_s(16).rjust(2, "0")
+      dev_model     = hwinfo_detail&.dev_model.to_i.to_s(16).rjust(2, "0")
 
       "#{device_type}/#{cu_model} #{sub_device_id}/#{dev_model}".upcase
     end
