@@ -26,7 +26,7 @@ require "y2s390/format_process"
 describe Y2S390::FormatStatus do
   let(:dasd) { Y2S390::Dasd.new("0.0.0150", status: "active", type: "ECKD") }
 
-  subject { described_class.new(dasd, 1500) }
+  subject { described_class.new(dasd, 1016) }
 
   describe "#update_progress!" do
     it "increases the progress by the format size" do
@@ -38,7 +38,11 @@ describe Y2S390::FormatStatus do
   describe "#done?" do
     it "returns true when all the cylinders have been formatted" do
       expect(subject.done?).to eql(false)
-      150.times { subject.update_progress! }
+      100.times { subject.update_progress! }
+      expect(subject.done?).to eql(false)
+      expect(subject.progress).to eql(1000)
+      subject.update_progress!
+      expect(subject.progress).to eql(1010)
       expect(subject.done?).to eql(true)
     end
 

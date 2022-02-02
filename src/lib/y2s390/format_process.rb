@@ -45,7 +45,9 @@ module Y2S390
     #
     # @return [Boolean] whether the format progress has been completed or not
     def done?
-      @cylinders <= @progress
+      # We need to add a partial step to cover the case when the number of cylinders is not
+      # multiple of the format size. e.g: cylinders: 10016, format_size: 10
+      @progress + (@size - 1) >= @cylinders
     end
   end
 
