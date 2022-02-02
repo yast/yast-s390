@@ -67,7 +67,7 @@ module Y2S390
           Header(
             Right(_("Channel ID")),
             "Device",
-            Right(_("Cyl.").ljust(12, " ")) # reserve some space for more digits
+            Right(_("Cylinders").ljust(12, " ")) # reserve some space for more digits
           ),
           in_progress_items
         )
