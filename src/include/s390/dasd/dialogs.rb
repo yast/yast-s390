@@ -17,10 +17,13 @@
 # To contact SUSE LLC about this file by physical or electronic mail, you may
 # find current contact information at www.suse.com.
 
+require "yast"
 require "y2s390/dasd_actions"
 
 module Yast
   module S390DasdDialogsInclude
+    include Yast::Logger
+
     def initialize_s390_dasd_dialogs(include_target)
       textdomain "s390"
 
