@@ -28,6 +28,15 @@ describe Y2S390::Dasd do
     described_class.new("0.0.0150", status: "active", device_name: "dasda", type: "ECKD")
   end
 
+  let(:mock_disks) { true }
+  let(:execute) { instance_double("Yast::Execute") }
+
+  before do
+    allow(ENV).to receive(:[]).and_call_original
+    allow(ENV).to receive(:[]).with("S390_MOCKING").and_return(mock_disks)
+    allow(Yast::Execute).to receive(:stdout).and_return(execute)
+  end
+
   describe "#hex_id" do
     it "returns an integer representation of the channel ID" do
       expect(subject.hex_id).to be_a(Integer)
@@ -94,11 +103,9 @@ describe Y2S390::Dasd do
   end
 
   describe "#partition_info" do
-    let(:execute) { instance_double("Yast::Execute", on_target: true) }
     let(:fdasd) { "" }
 
     before do
-      allow(Yast::Execute).to receive(:stdout).and_return(execute)
       allow(execute).to receive(:on_target!).with("/sbin/fdasd", "-p", dasda.device_path)
         .and_return(fdasd)
     end
@@ -128,6 +135,20 @@ describe Y2S390::Dasd do
       it "returns each partition info like '/dev/dasda1 (Linux native), /dev/dasda2 (Linux...'" do
         expect(dasda.partition_info).to eql(partition_info)
       end
+    end
+  end
+
+  describe "#acces_type" do
+    it "returns the access type ('rw', 'ro')according to the hwinfo" do
+      expect(dasda.access_type).to eql("rw")
+    end
+  end
+
+  describe "#sys_device_name" do
+    it "returns the associated device name read from the sysfs" do
+      allow(execute).to receive(:on_target!).with(["ls", "/sys/bus/ccw/devices/0.0.0150/block/"])
+        .and_return("#{dasda.device_name}\n")
+      expect(dasda.sys_device_name).to eq("/dev/dasda")
     end
   end
 end
