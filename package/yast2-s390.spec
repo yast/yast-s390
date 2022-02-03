@@ -17,7 +17,7 @@
 
 
 Name:           yast2-s390
-Version:        4.4.2
+Version:        4.4.3
 Release:        0
 Group:          System/YaST
 License:        GPL-2.0-only
@@ -63,6 +63,7 @@ S/390-specific features.
 %files
 %{yast_yncludedir}
 %{yast_clientdir}
+%{yast_libdir}
 %{yast_moduledir}
 %{yast_scrconfdir}
 %{yast_desktopdir}

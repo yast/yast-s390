@@ -56,3 +56,7 @@ def load_file(name)
   path = File.join(File.dirname(__FILE__), "data", name)
   File.read(path)
 end
+
+def mock_entries
+  ENV["S390_MOCKING"] = "1"
+end

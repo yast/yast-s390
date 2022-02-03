@@ -1,4 +1,4 @@
-# Copyright (c) [2012-2014] Novell, Inc.
+# Copyright (c) [2012-2022] SUSE LLC
 #
 # All Rights Reserved.
 #
@@ -12,28 +12,28 @@
 # more details.
 #
 # You should have received a copy of the GNU General Public License along
-# with this program; if not, contact Novell, Inc.
+# with this program; if not, contact SUSE LLC.
 #
-# To contact Novell about this file by physical or electronic mail, you may
-# find current contact information at www.novell.com.
+# To contact SUSE LLC about this file by physical or electronic mail, you may
+# find current contact information at www.suse.com.
 
-# File:  modules/DASDController.ycp
-# Package:  Configuration of controller
-# Summary:  Controller settings, input and output functions
-# Authors:  Jiri Srain <jsrain@suse.cz>
-#
-# $Id$
-#
-# Representation of the configuration of controller.
-# Input and output routines.
 require "yast"
 require "yast2/popup"
+require "yast2/execute"
 require "shellwords"
-require "yaml"
+require "y2s390/dialogs/format"
+require "y2s390/dialogs/mkinitrd"
+require "y2s390/dasds_reader"
+require "y2s390/dasds_writer"
+require "y2issues"
 
 module Yast
+  # Dasd controller settings
   class DASDControllerClass < Module
     include Yast::Logger
+
+    # @return [Boolean] whether unformated devices should be formatted upon activation
+    attr_reader :format_unformatted
 
     def main
       Yast.import "UI"
@@ -45,7 +45,7 @@ module Yast
       Yast.import "Popup"
       Yast.import "String"
 
-      @devices = {}
+      @devices = Y2S390::DasdsCollection.new([])
 
       @filter_min = "0.0.0000"
       @filter_max = "ff.f.ffff"
@@ -58,45 +58,39 @@ module Yast
       # Data was modified?
       @modified = false
 
-      # format all unformated devices upon activation?
       @format_unformatted = false
 
       @proposal_valid = false
     end
 
     # Data was modified?
-    # @return true if modified
+    # @return [Boolean] true if modified
     def GetModified
       @modified
     end
 
+    # Set the data as modified or not according to the given parameter
+    #
+    # @param value [Boolean]
     def SetModified(value)
       @modified = value
 
       nil
     end
 
-    def GetDeviceName(channel)
-      dir = Builtins.sformat("/sys/bus/ccw/devices/%1/block/", channel)
-      files = Convert.convert(
-        SCR.Read(path(".target.dir"), dir),
-        from: "any",
-        to:   "list <string>"
-      )
-      return Ops.add("/dev/", Ops.get(files, 0, "")) if Builtins.size(files) == 1
-
-      nil
-    end
-
+    # Returns whether the DASD channel ID is valid or not
+    # @param channel [String]
+    # @return [Boolean]
     def IsValidChannel(channel)
-      regexp = "^([[:xdigit:]]{1,2}).([[:xdigit:]]{1}).([[:xdigit:]]{4})$"
-      Builtins.regexpmatch(channel, regexp)
+      regexp = /^([[:xdigit:]]{1,2}).([[:xdigit:]]{1}).([[:xdigit:]]{4})$/
+      channel.match?(regexp)
     end
 
+    # @param channel [Boolean]
     def FormatChannel(channel)
       return channel if !IsValidChannel(channel)
 
-      Builtins.tolower(channel)
+      channel.downcase
     end
 
     # Read all controller settings
@@ -104,112 +98,18 @@ module Yast
     def Read
       ProbeDisks()
 
-      if !Mode.normal
-        @devices = Builtins.mapmap(@devices) do |index, d|
-          Ops.set(d, "format", Ops.get_boolean(d, "format", false))
-          Ops.set(d, "diag", Ops.get_boolean(d, "diag", false))
-          { index => d }
-        end
-      end
-
       @disk_configured = false
       true
-    end
-
-    # Returns if device can be formatted
-    #
-    # @param [Hash] device one of the #devices values
-    # @return [Boolean]
-    def can_be_formatted?(device)
-      device_name = device["dev_name"] || GetDeviceName(device["channel"])
-      command = "/sbin/dasdview --extended #{device_name.shellescape}"
-      res = SCR.Execute(path(".target.bash_output"), command)
-      Builtins.y2milestone("Command %1 result in %2", command, res)
-      # allow to format only ECKD bsc#1070265
-      !res["stdout"].lines.grep(/^type\s.*ECKD/).empty?
     end
 
     # Write all controller settings
     # @return true on success
     def Write
-      if !Mode.normal
-        to_format = []
-        to_reactivate = []
-        unformatted_devices = []
+      Y2S390::DasdsWriter.new(@devices).write if !Mode.normal
 
-        Builtins.foreach(@devices) do |_index, device|
-          channel = Ops.get_string(device, "channel", "")
-          format = Ops.get_boolean(device, "format", false)
-          do_diag = Ops.get_boolean(device, "diag", false)
-          act_ret = activate_disk_if_needed(channel, do_diag)
-          # FIXME: general activation error handling - also in sync with below
-          # for AutoInstall, format unformatted disks later at once
-          # even disks manually selected for formatting must be reactivated
-          if Mode.autoinst && act_ret == 8 && (@format_unformatted || format)
-            format = true
-            to_reactivate << device
-          end
-          device_name = device["dev_name"] || GetDeviceName(channel)
-          if format
-            if can_be_formatted?(device)
-              to_format << device_name
-            else
-              Report.Error(
-                # TRANSLATORS %s is device name
-                format(
-                  _("Cannot format device '%s'. Only ECKD disks can be formatted."),
-                  device_name
-                )
-              )
-            end
-          # unformatted disk, manual (not AutoYaST)
-          elsif act_ret == 8
-            unformatted_devices << device_name
-          end
-        end
-
-        if !unformatted_devices.empty?
-          message = if unformatted_devices.size == 1
-            Builtins.sformat(_("Device %1 is not formatted. Format device now?"),
-              unformatted_devices[0])
-          else
-            Builtins.sformat(_("There are %1 unformatted devices. Format them now?"),
-              unformatted_devices.size)
-          end
-          if Popup.ContinueCancel(message)
-            unformatted_devices.each do |device|
-              to_format << device
-              to_reactivate << device
-            end
-          end
-        end
-
-        Builtins.y2milestone("Disks to format: %1", to_format)
-
-        FormatDisks(to_format, 8) if !Builtins.isempty(to_format)
-
-        to_reactivate.each do |device|
-          channel = device["channel"] || ""
-          do_diag = device["diag"] || false
-          # FIXME: general activation error handling - also in sync with above
-          ActivateDisk(channel, do_diag)
-        end
-      end
-
-      if !Mode.installation
-        if @disk_configured
-          # popup label
-          UI.OpenDialog(Label(_("Running mkinitrd.")))
-
-          command = "/sbin/mkinitrd"
-          Builtins.y2milestone("Running command %1", command)
-          ret = SCR.Execute(path(".target.bash"), command)
-          Builtins.y2milestone("Exit code: %1", ret)
-
-          UI.CloseDialog
-
-          @disk_configured = false
-        end
+      if !Mode.installation && @disk_configured
+        Y2S390::Dialogs::Mkinitrd.new.run
+        @disk_configured = false
       end
 
       true
@@ -221,15 +121,15 @@ module Yast
     # @return [Boolean] True on success
     def Import(settings)
       settings = deep_copy(settings)
-      index = -1
-      @devices = Builtins.listmap(Ops.get_list(settings, "devices", [])) do |d|
-        index = Ops.add(index, 1)
-        Ops.set(d, "channel", FormatChannel(Ops.get_string(d, "channel", "")))
-        d = Builtins.filter(d) do |k, _v|
-          Builtins.contains(["channel", "format", "diag"], k)
-        end
-        { index => d }
+      imported_devices = settings.fetch("devices", []).map do |device|
+        channel = FormatChannel(device.fetch("channel", ""))
+        d = Y2S390::Dasd.new(channel)
+        d.format_wanted = device.fetch("format", false)
+        d.diag_wanted = device.fetch("diag", false)
+        d
       end
+
+      @devices = Y2S390::DasdsCollection.new(imported_devices)
 
       @format_unformatted = settings["format_unformatted"] || false
 
@@ -242,24 +142,17 @@ module Yast
     def Export
       # Exporting active DASD only.
       # (bnc#887407)
-      active_devices = @devices.select do |_nr, device|
-        device.key?("resource") &&
-          device["resource"].key?("io") &&
-          !device["resource"]["io"].empty? &&
-          device["resource"]["io"].first["active"]
-      end
+      active_devices = @devices.active
 
       if active_devices.empty?
         # If no device is active we are exporting all. So the admin
         # can patch this manually.
-        Builtins.y2milestone("No active DASD found. --> Taking all")
+        log.info("No active DASD found. --> Taking all")
         active_devices = @devices
       end
 
-      l = Builtins.maplist(active_devices) do |_i, d|
-        Builtins.filter(d) do |k, _v|
-          Builtins.contains(["channel", "format", "diag"], k)
-        end
+      l = active_devices.map do |d|
+        { "channel" => d.id, "diag" => d.diag_wanted, "format" => d.format_wanted }.compact
       end
 
       {
@@ -269,7 +162,7 @@ module Yast
     end
 
     def GetDevices
-      deep_copy(@devices)
+      @devices
     end
 
     # @param channel [String] "0.0.0000" "ab.c.Def0"
@@ -281,71 +174,18 @@ module Yast
 
     # @return {GetDevices} but filtered by filter_min and filter_max
     def GetFilteredDevices
-      min = channel_sort_key(@filter_min)
-      max = channel_sort_key(@filter_max)
+      min = channel_sort_key(@filter_min).hex
+      max = channel_sort_key(@filter_max).hex
 
-      ret = GetDevices()
-      Builtins.filter(ret) do |_k, d|
-        channel = d.fetch("channel", "")
-        key = channel_sort_key(channel)
-        min <= key && key <= max
-      end
+      GetDevices().filter { |d| min <= d.hex_id && d.hex_id <= max }
     end
 
-    def AddDevice(device)
-      device = deep_copy(device)
-      index = 0
-      index = Ops.add(index, 1) while Builtins.haskey(@devices, index)
-      Ops.set(@devices, index, device)
-
-      nil
-    end
-
-    def RemoveDevice(index)
-      @devices = Builtins.remove(@devices, index)
-
-      nil
-    end
-
-    def GetDeviceIndex(channel)
-      ret = nil
-      Builtins.foreach(@devices) do |index, d|
-        ret = index if Ops.get_string(d, "channel", "") == channel
-      end
-      ret
-    end
-
-    # Create a textual summary and a list of configured devices
+    # Returns a text list with the summary of the configured devices
+    #
     # @return summary of the current configuration
     def Summary
-      ret = []
-
-      if Mode.config
-        ret = Builtins.maplist(@devices) do |_index, d|
-          Builtins.sformat(
-            _("Channel ID: %1, Format: %2, DIAG: %3"),
-            Ops.get_string(d, "channel", ""),
-            String.YesNo(Ops.get_boolean(d, "format", false)),
-            String.YesNo(Ops.get_boolean(d, "diag", false))
-          )
-        end
-      else
-        active_devices = Builtins.filter(@devices) do |_index, device|
-          Ops.get_boolean(device, ["resource", "io", 0, "active"], false)
-        end
-
-        ret = Builtins.maplist(active_devices) do |_index, d|
-          Builtins.sformat(
-            _("Channel ID: %1, Device: %2, DIAG: %3"),
-            Ops.get_string(d, "channel", ""),
-            Ops.get_string(d, "dev_name", ""),
-            String.YesNo(Ops.get_boolean(d, "diag", false))
-          )
-        end
-      end
-
-      Builtins.y2milestone("Summary: %1", ret)
-      deep_copy(ret)
+      require "y2s390/presenters/summary"
+      Y2S390::Presenters::DasdsSummary.new(Yast::Mode.config ? @devices : @devices.active).list
     end
 
     # In production, call SCR.Read(.probe.disk).
@@ -374,10 +214,14 @@ module Yast
     # Check if DASD subsystem is available
     # @return [Boolean] True if more than one disk
     def IsAvailable
-      disks = probe_or_mock_disks
-      count = disks.count { |d| d["device"] == "DASD" }
+      disks = find_disks(force_probing: true)
+      count = disks.size
       log.info("number of probed DASD devices #{count}")
       count > 0
+    end
+
+    def reader
+      @reader ||= Y2S390::DasdsReader.new
     end
 
     # Probe for DASD disks
@@ -385,19 +229,8 @@ module Yast
       # popup label
       UI.OpenDialog(Label(_("Reading Configured DASD Disks")))
 
-      disks = find_disks(force_probing: true)
-
-      index = -1
-      @devices = Builtins.listmap(disks) do |d|
-        index = Ops.add(index, 1)
-        { index => d }
-      end
-
-      disks.each do |dev|
-        @diag[dev["channel"]] = dev["diag"] if dev["diag"]
-      end
-
-      Builtins.y2milestone("probed DASD devices %1", @devices)
+      @devices = reader.list(force_probing: true)
+      log.info("probed DASD devices #{@devices.inspect}")
 
       UI.CloseDialog
 
@@ -408,9 +241,9 @@ module Yast
     # @param [String] channel string channel of the device
     # @param [Hash] ret output of bash_output agent run
     def ReportActivationError(channel, ret)
-      case ret["exit"]
-      when 0
+      return if ret["exit"] == 0
 
+      case ret["exit"]
       when 1
         # error report, %1 is device identification
         Report.Error(Builtins.sformat(_("%1: sysfs not mounted."), channel))
@@ -458,24 +291,16 @@ module Yast
     # @param [Boolean] diag boolean Activate DIAG or not
     # @return [Integer] exit code of the activation command
     def ActivateDisk(channel, diag)
-      command = Builtins.sformat(
-        "/sbin/dasd_configure '%1' %2 %3",
-        channel,
-        1,
-        diag ? 1 : 0
-      )
+      command = "/sbin/dasd_configure '#{channel}' 1 #{diag ? 1 : 0}"
       Builtins.y2milestone("Running command \"%1\"", command)
       ret = SCR.Execute(path(".target.bash_output"), command)
-      Builtins.y2milestone(
-        "Command \"%1\" returned %2",
-        command,
-        ret
-      )
+      Builtins.y2milestone("Command \"#{command}\" returned #{command}")
 
       case ret["exit"]
       when 8
         # unformatted disk is now handled now outside this function
         # however, don't issue any error
+        log.info("Unformatted disk #{channel}, nothing to do")
       when 7
         # when return code is 7, set DASD offline
         # https://bugzilla.novell.com/show_bug.cgi?id=561876#c9
@@ -496,32 +321,25 @@ module Yast
     # the same API than ActivateDisk.
     #
     # @return [Integer] Returns an error code (8 means 'unformatted').
-    def activate_disk_if_needed(channel, diag)
-      disk = find_disks.find { |d| d["channel"] == channel }
-      if disk && active_disk?(disk)
-        log.info "Disk #{disk.inspect} is already active. Skipping the activation."
-        return disk["formatted"] ? 0 : 8
+    def activate_if_needed(dasd)
+      if dasd.io_active?
+        log.info "Dasd #{dasd.inspect} is already active. Skipping the activation."
+        return dasd.formatted? ? 0 : 8
       end
-      ActivateDisk(channel, diag)
+
+      ret = ActivateDisk(dasd.id, !!dasd.diag_wanted)
+      reader.update_info(dasd, extended: true)
+      ret
     end
 
     # Deactivate disk
     # @param [String] channel string Name of the disk to deactivate
     # @param [Boolean] diag boolean Activate DIAG or not
     def DeactivateDisk(channel, diag)
-      command = Builtins.sformat(
-        "/sbin/dasd_configure '%1' %2 %3 < /dev/null",
-        channel,
-        0,
-        diag ? 1 : 0
-      )
-      Builtins.y2milestone("Running command \"%1\"", command)
+      command = "/sbin/dasd_configure '#{channel}' 0 #{diag ? 1 : 0} < /dev/null"
+      log.info("Running command \"#{command}\"")
       ret = SCR.Execute(path(".target.bash_output"), command)
-      Builtins.y2milestone(
-        "Command \"%1\" returned with exit code %2",
-        command,
-        ret
-      )
+      log.info("Command \"#{command}\" returned with exit code #{ret}")
 
       ReportActivationError(channel, ret)
 
@@ -532,215 +350,22 @@ module Yast
 
     # Activate or deactivate diag on active disk
     # @param [String] channel string Name of the disk to operate on
-    # @param [Boolean] diag boolean Activate DIAG or not
-    def ActivateDiag(channel, diag)
-      old_diag = DASDController.diag.fetch(channel, false)
-      return if diag == old_diag
+    # @param [Boolean] value boolean Activate DIAG or not
+    def ActivateDiag(channel, value)
+      dasd = devices.by_id(channel)
+      return if !dasd || value == dasd.diag_wanted
 
-      DeactivateDisk(channel, old_diag)
-      ActivateDisk(channel, diag)
+      DeactivateDisk(dasd.id, dasd.diag_wanted)
+      ActivateDisk(dasd.id, value)
     end
 
-    # Format disks
-    # @param [Array<String>] disks_list list<string> List of disks to be formatted
-    # @param [Fixnum] par integer Number of disks that can be formated in parallel
-    def FormatDisks(disks_list, par)
-      disks_list = deep_copy(disks_list)
-      par = Builtins.size(disks_list) if Ops.greater_than(par, Builtins.size(disks_list))
+    # It formats the given disks showing the progress in a separate dialog
+    #
+    # @param [S390::DasdsCollection] collection of dasds to be be formatted
+    def FormatDisks(disks_list)
+      log.info "Disks to format: #{disks_list}"
 
-      disks = {}
-      disks_cmd = []
-      index = -1
-      reqsize = 10   # The default request size for dasdfmt is 10
-      msize = 10     # The "cylinders per hashmark" value must be >= the request size
-      msize = reqsize if msize < reqsize
-      Builtins.foreach(disks_list) do |device|
-        index = Ops.add(index, 1)
-        Ops.set(disks, index, device)
-        disks_cmd = Builtins.add(disks_cmd, Builtins.sformat("-f '%1'", device))
-      end
-      disks_param = Builtins.mergestring(disks_cmd, " ")
-      command = Builtins.sformat(
-        "/sbin/dasdfmt -Y -P %1 -b 4096 -y -r %2 -m %3 %4",
-        par,
-        reqsize,
-        msize,
-        disks_param
-      )
-
-      Builtins.y2milestone("Running command %1", command)
-      contents = VBox(HSpacing(70))
-      index = 0
-      while Ops.less_than(index, par)
-        # progress bar
-        contents = Builtins.add(
-          contents,
-          ProgressBar(
-            Id(index),
-            Builtins.sformat(_("Formatting %1:"), Ops.get(disks, index, "")),
-            100,
-            0
-          )
-        )
-        index = Ops.add(index, 1)
-      end
-      UI.OpenDialog(contents)
-      cylinders = {}
-      done = {}
-      # start formatting on background
-      process_id = Convert.to_integer(
-        SCR.Execute(path(".process.start_shell"), command)
-      )
-      Builtins.y2milestone("Process start returned %1", process_id)
-      # get the sizes of all disks
-      index = 0
-      while Ops.less_than(index, Builtins.size(disks))
-        Builtins.y2milestone("Running first formatting cycle")
-        Builtins.sleep(500)
-
-        if !Convert.to_boolean(SCR.Read(path(".process.running"), process_id))
-          UI.CloseDialog
-          iret2 = Convert.to_integer(
-            SCR.Read(path(".process.status"), process_id)
-          )
-          # error report, %1 is exit code of the command (integer)
-          Report.Error(
-            Builtins.sformat(
-              _("Disks formatting failed. Exit code: %1.\nError output:%2"),
-              iret2,
-              stderr_from_proccess
-            )
-          )
-          return
-        end
-
-        while Ops.less_than(index, Builtins.size(disks))
-          line = Convert.to_string(
-            SCR.Read(path(".process.read_line"), process_id)
-          )
-          break if line.nil?
-
-          siz = Builtins.tointeger(line)
-          siz = 999999999 if siz == 0
-          Ops.set(cylinders, index, siz)
-          index = Ops.add(index, 1)
-        end
-      end
-      Builtins.y2milestone("Sizes of disks: %1", cylinders)
-      Builtins.y2milestone("Disks to format: %1", disks)
-      last_step = []
-      last_rest = ""
-      while Convert.to_boolean(SCR.Read(path(".process.running"), process_id))
-        Builtins.sleep(1000)
-        buffer = Convert.to_string(SCR.Read(path(".process.read"), process_id))
-        buffer = Ops.add(last_rest, buffer)
-        progress = Builtins.splitstring(buffer, "|")
-        this_step = {}
-        if Convert.to_boolean(SCR.Read(path(".process.running"), process_id))
-          last = Ops.subtract(Builtins.size(progress), 1)
-          last_rest = Ops.get(progress, last, "")
-          progress = Builtins.remove(progress, last)
-        end
-        Builtins.foreach(progress) do |d|
-          if d != ""
-            i = Builtins.tointeger(d)
-            Ops.set(this_step, i, Ops.add(Ops.get(this_step, i, 0), msize))
-          end
-        end
-        Builtins.foreach(this_step) do |k, v|
-          Ops.set(done, k, Ops.add(Ops.get(done, k, 0), v))
-        end
-        this_step = Builtins.filter(this_step) do |k, _v|
-          Ops.less_than(Ops.get(done, k, 0), Ops.get(cylinders, k, 0))
-        end
-        difference = Ops.subtract(
-          Builtins.size(last_step),
-          Builtins.size(this_step)
-        )
-        index = -1
-        while Ops.greater_than(difference, 0)
-          index = Ops.add(index, 1)
-          if !Builtins.haskey(this_step, Ops.get(last_step, index, 0))
-            difference = Ops.subtract(difference, 1)
-            Ops.set(this_step, Ops.get(last_step, index, 0), 0)
-          end
-        end
-        index = 0
-        Builtins.foreach(this_step) do |k, _v|
-          UI.ChangeWidget(
-            Id(index),
-            :Label,
-            Builtins.sformat(
-              # progress bar, %1 is device name, %2 and %3
-              # integers,
-              # eg. Formatting /dev/dasda: cylinder 123 of 12334 done
-              _("Formatting %1: cylinder %2 of %3 done"),
-              Ops.get(disks, k, ""),
-              Ops.get(done, k, 0),
-              Ops.get(cylinders, k, 0)
-            )
-          )
-          UI.ChangeWidget(
-            Id(index),
-            :Value,
-            Ops.divide(
-              Ops.multiply(100, Ops.get(done, k, 0)),
-              Ops.get(cylinders, k, 1)
-            )
-          )
-          UI.ChangeWidget(Id(index), :Enabled, true)
-          index = Ops.add(index, 1)
-        end
-        while Ops.less_than(index, par)
-          UI.ChangeWidget(Id(index), :Label, "")
-          UI.ChangeWidget(Id(index), :Value, 0)
-          UI.ChangeWidget(Id(index), :Enabled, false)
-          index = Ops.add(index, 1)
-        end
-      end
-      UI.CloseDialog
-      iret = Convert.to_integer(SCR.Read(path(".process.status"), process_id))
-      if iret != 0
-        # error report, %1 is exit code of the command (integer), %2 output of command
-        Report.Error(
-          Builtins.sformat(_("Disks formatting failed. Exit code: %1.\nError output: %2"),
-            iret, stderr_from_proccess)
-        )
-      end
-
-      nil
-    end
-
-    # Get partitioninfo
-    # @param [String] disk string Disk to read info from
-    # @return GetPartitionInfo string The info
-    def GetPartitionInfo(disk)
-      outmap = Convert.to_map(
-        SCR.Execute(
-          path(".target.bash_output"),
-          Builtins.sformat("/sbin/fdasd -p '%1'", disk)
-        )
-      )
-
-      # if not an eckd-disk it's an fba-disk. fba-disks have only one partition
-      return Builtins.sformat("%11", disk) if Ops.get_integer(outmap, "exit", 0) != 0
-
-      out = Ops.get_string(outmap, "stdout", "")
-
-      regexp = "^[ \t]*([^ \t]+)[ \t]+([0-9]+)[ \t]+([0-9]+)[ \t]+([0-9]+)" \
-        "[ \t]+([^ \t]+)[ \t]+([^ \t]+([ \t]+[^ \t]+))*[ \t]*$"
-
-      l = Builtins.splitstring(out, "\n")
-      l = Builtins.filter(l) { |s| Builtins.regexpmatch(s, regexp) }
-      l = Builtins.maplist(l) do |s|
-        tokens = Builtins.regexptokenize(s, regexp)
-        Builtins.sformat(
-          "%1 (%2)",
-          Ops.get_string(tokens, 0, ""),
-          Ops.get_string(tokens, 5, "")
-        )
-      end
-      Builtins.mergestring(l, ", ")
+      format_dialog.new(disks_list).run
     end
 
     publish variable: :devices, type: "map <integer, map <string, any>>"
@@ -751,7 +376,6 @@ module Yast
     publish function: :DeactivateDisk, type: "void (string, boolean)"
     publish function: :ProbeDisks, type: "void ()"
     publish function: :FormatDisks, type: "void (list <string>, integer)"
-    publish function: :GetPartitionInfo, type: "string (string)"
     publish function: :GetModified, type: "boolean ()"
     publish variable: :proposal_valid, type: "boolean"
     publish function: :SetModified, type: "void (boolean)"
@@ -763,25 +387,25 @@ module Yast
     publish function: :Export, type: "map <string, list> ()"
     publish function: :GetDevices, type: "map <integer, map <string, any>> ()"
     publish function: :GetFilteredDevices, type: "map <integer, map <string, any>> ()"
-    publish function: :AddDevice, type: "void (map <string, any>)"
-    publish function: :RemoveDevice, type: "void (integer)"
-    publish function: :GetDeviceIndex, type: "integer (string)"
     publish function: :Summary, type: "list <string> ()"
     publish function: :AutoPackages, type: "map ()"
     publish function: :IsAvailable, type: "boolean ()"
 
   private
 
-    def stderr_from_proccess
-      stderr = ""
-      loop do
-        line = SCR.Read(path(".process.read_line_stderr"))
-        break unless line
+    # It obtains the dialog to be used by the FormatProcess according to the OLD_FORMAT environment
+    # variable
+    def format_dialog
+      ENV["OLD_FORMAT"] ? Y2S390::Dialogs::FormatDisks : Y2S390::Dialogs::DasdFormat
+    end
 
-        stderr << line
-      end
-
-      stderr
+    # Convenience method to convert the device ID to integers for filtering purposes
+    #
+    # @param [String] the DASD id
+    # @return [Array<Integer, Integer, Integer>] the css, lcss and channel in integer format
+    def int_channels(channel_id)
+      css, lcss, chan = channel_id.split(".")
+      [css, lcss, chan].map { |c| "0x#{c}".to_i }
     end
 
     # Returns an string containing the available stdout and/or stderr
@@ -822,6 +446,31 @@ module Yast
       io.any? { |i| i["active"] }
     end
 
+    # Determines whether the disk is formatted or not
+    #
+    # @param disk [Hash]
+    # @return [Boolean]
+    def formatted?(disk)
+      device = disk.fetch("dev_name", "")
+      fmt_out = Yast::Execute.stdout.locally!(
+        ["/sbin/dasdview", "--extended", device], ["grep", "formatted"]
+      )
+      fmt_out.empty? ? false : !fmt_out.upcase.match?(/NOT[ \t]*FORMATTED/)
+    end
+
+    # Determines whether the disk has the DIAG access enabled or not
+    #
+    # @param disk [Hash]
+    # @return [Boolean]
+    def use_diag?(disk)
+      diag_file = "/sys/#{disk["sysfs_id"]}/device/use_diag"
+      use_diag = SCR.Read(path(".target.string"), diag_file) if File.exist?(diag_file)
+      use_diag.to_i == 1
+    end
+
+    DASD_ATTRS = ["channel", "diag", "resource", "formatted", "partition_info", "dev_name",
+                  "detail", "device_id", "sub_device_id"].freeze
+
     # Returns the DASD disks
     #
     # Probes and returns the found DASD disks ordered by channel.
@@ -830,68 +479,9 @@ module Yast
     # @param force_probing [Boolean] Ignore the cached values and probes again.
     # @return [Array<Hash>] Found DASD disks
     def find_disks(force_probing: false)
-      return @disks if @disks && !force_probing
-
-      disks = probe_or_mock_disks
-      disks = Builtins.filter(disks) do |d|
-        Builtins.tolower(Ops.get_string(d, "device", "")) == "dasd"
-      end
-
-      disks.sort_by! { |disk| FormatChannel(disk.fetch("sysfs_bus_id", "0.0.0000")) }
-
-      @disks = Builtins.maplist(disks) do |d|
-        channel = Ops.get_string(d, "sysfs_bus_id", "")
-        Ops.set(d, "channel", channel)
-        active = Ops.get_boolean(d, ["resource", "io", 0, "active"], false)
-        if active
-          device = Ops.get_string(d, "dev_name", "")
-          scr_out = Convert.to_map(
-            SCR.Execute(
-              path(".target.bash_output"),
-              Builtins.sformat("/sbin/dasdview --extended '%1' | grep formatted", device)
-            )
-          )
-          formatted = false
-          if Ops.get_integer(scr_out, "exit", 0) == 0
-            out = Ops.get_string(scr_out, "stdout", "")
-            formatted = !Builtins.regexpmatch(
-              Builtins.toupper(out),
-              "NOT[ \t]*FORMATTED"
-            )
-          end
-          Ops.set(d, "formatted", formatted)
-
-          Ops.set(d, "partition_info", GetPartitionInfo(device)) if formatted
-
-          diag_file = Builtins.sformat(
-            "/sys/%1/device/use_diag",
-            Ops.get_string(d, "sysfs_id", "")
-          )
-          if FileUtils.Exists(diag_file)
-            use_diag = Convert.to_string(
-              SCR.Read(path(".target.string"), diag_file)
-            )
-            Ops.set(d, "diag", Builtins.substring(use_diag, 0, 1) == "1")
-          end
-        end
-        d = Builtins.filter(d) do |k, _v|
-          Builtins.contains(
-            [
-              "channel",
-              "diag",
-              "resource",
-              "formatted",
-              "partition_info",
-              "dev_name",
-              "detail",
-              "device_id",
-              "sub_device_id"
-            ],
-            k
-          )
-        end
-        deep_copy(d)
-      end
+      reader = Y2S390::HwinfoReader.instance
+      reader.reset if force_probing
+      reader.data
     end
   end
 
