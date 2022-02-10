@@ -56,9 +56,11 @@ module Y2S390
       #
       # @param device [Y2S390::Dasd]
       def params(device)
-        return [device.id, device.format, Yast::String.YesNo(device.use_diag)] if Yast::Mode.config
+        format = Yast::String.YesNo(device.format_wanted)
+        use_diag = Yast::String.YesNo(Yast::Mode.config ? device.diag_wanted : device.use_diag)
+        return [device.id, format, use_diag] if Yast::Mode.config
 
-        [device.id, device.device_name, Yast::String.YesNo(device.use_diag)]
+        [device.id, device.device_name, use_diag]
       end
 
       # Return the configuration summary template to be used depending on the {Yast::Mode}

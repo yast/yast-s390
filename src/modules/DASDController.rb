@@ -184,8 +184,8 @@ module Yast
     #
     # @return summary of the current configuration
     def Summary
-      require "y2s390/presenters/summary"
-      Y2S390::Presenters::DasdsSummary.new(Yast::Mode.config ? @devices : @devices.active).list
+      require "y2s390/presenters/dasd_summary"
+      Y2S390::Presenters::DasdSummary.new(Yast::Mode.config ? @devices : @devices.active).list
     end
 
     # In production, call SCR.Read(.probe.disk).

@@ -22,7 +22,7 @@
 require_relative "../../test_helper"
 
 require "cwm/rspec"
-require "y2s390/presenters/summary"
+require "y2s390/presenters/dasd_summary"
 
 describe Y2S390::Presenters::DasdSummary do
   subject { described_class.new(devices) }

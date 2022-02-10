@@ -310,4 +310,33 @@ describe Yast::DASDController do
       expect(devices.ids).to eq(imported_ids.reject { |id| id == "0.0.f800" })
     end
   end
+
+  describe "#Summary" do
+    let(:config_mode) { false }
+
+    before do
+      subject.ProbeDisks
+      allow(Yast::Mode).to receive(:config).and_return(config_mode)
+    end
+
+    it "shows a summary of active devices" do
+      expect(subject.Summary).to include(
+        "Channel ID: 0.0.0160, Device: dasda, DIAG: No",
+        "Channel ID: 0.0.0150, Device: dasdb, DIAG: No"
+      )
+    end
+
+    context "in config Mode" do
+      let(:config_mode) { true }
+
+      it "shows a summary of all the devices" do
+        subject.devices.by_id("0.0.0190").format_wanted = true
+        subject.devices.by_id("0.0.0191").diag_wanted = true
+        expect(subject.Summary).to include(
+          "Channel ID: 0.0.0190, Format: Yes, DIAG: No",
+          "Channel ID: 0.0.0191, Format: No, DIAG: Yes"
+        )
+      end
+    end
+  end
 end
