@@ -1,7 +1,7 @@
 -------------------------------------------------------------------
 Thu Feb 10 10:18:47 UTC 2022 - Knut Anderssen <kanderssen@suse.com>
 
-- Fix DasdsSummary requirement (bsc#1195753)
+- Fix DasdSummary requirement (bsc#1195753)
 - 4.4.4
 
 -------------------------------------------------------------------

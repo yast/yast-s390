@@ -25,7 +25,7 @@ Yast.import "String"
 module Y2S390
   module Presenters
     # This class is responsible of returning a configuration summary of the given devices
-    class DasdsSummary
+    class DasdSummary
       include Yast::Logger
       include Yast::I18n
 
