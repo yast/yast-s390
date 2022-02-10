@@ -22,9 +22,9 @@
 require_relative "../../test_helper"
 
 require "cwm/rspec"
-require "y2s390/presenters/summary"
+require "y2s390/presenters/dasds_summary"
 
-describe Y2S390::Presenters::DasdSummary do
+describe Y2S390::Presenters::DasdsSummary do
   subject { described_class.new(devices) }
   let(:devices) { Yast::DASDController.devices.by_ids(["0.0.0150", "0.0.0160"]) }
 

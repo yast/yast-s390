@@ -184,7 +184,7 @@ module Yast
     #
     # @return summary of the current configuration
     def Summary
-      require "y2s390/presenters/summary"
+      require "y2s390/presenters/dasds_summary"
       Y2S390::Presenters::DasdsSummary.new(Yast::Mode.config ? @devices : @devices.active).list
     end
 
