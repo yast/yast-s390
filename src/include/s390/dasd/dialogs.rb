@@ -78,9 +78,9 @@ module Yast
     def item_elements_for(dasd)
       item_id = Id(dasd.id)
       diag = String.YesNo(Mode.config ? dasd.diag_wanted : dasd.use_diag)
-      formatted = String.YesNo(dasd.formatted?)
+      formatted = String.YesNo(Mode.config ? dasd.format_wanted : dasd.formatted?)
 
-      return [item_id, dasd.id, d.format, diag] if Mode.config
+      return [item_id, dasd.id, formatted, diag] if Mode.config
       return [item_id, dasd.id, "--", "--", "--", diag, "--", "--"] unless dasd.active?
 
       [
