@@ -148,7 +148,7 @@ describe Y2S390::Dasd do
     it "returns the associated device name read from the sysfs" do
       allow(execute).to receive(:on_target!).with(["ls", "/sys/bus/ccw/devices/0.0.0150/block/"])
         .and_return("#{dasda.device_name}\n")
-      expect(dasda.sys_device_name).to eq("/dev/dasda")
+      expect(dasda.sys_device_name).to eq("dasda")
     end
   end
 end
