@@ -17,7 +17,7 @@
 
 
 Name:           yast2-s390
-Version:        4.4.4
+Version:        4.4.5
 Release:        0
 Group:          System/YaST
 License:        GPL-2.0-only

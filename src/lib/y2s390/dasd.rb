@@ -170,13 +170,13 @@ module Y2S390
       hwinfo&.sysfs_id
     end
 
-    # Returns the system device name
+    # Returns the system device name from the sysfs. i.e. 'dasd'
     #
     # @return [String, nil]
     def sys_device_name
       cmd = ["ls", "/sys/bus/ccw/devices/#{id}/block/"]
       disk = Yast::Execute.stdout.on_target!(cmd).strip
-      disk.to_s.empty? ? nil : "/dev/#{disk}"
+      disk.to_s.empty? ? nil : disk
     end
 
     # Returns the device data collected by hwinfo
