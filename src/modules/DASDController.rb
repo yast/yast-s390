@@ -107,7 +107,7 @@ module Yast
     def Write
       Y2S390::DasdsWriter.new(@devices).write if !Mode.normal
 
-      if !Mode.installation && @disk_configured
+      if Mode.normal && @disk_configured
         Y2S390::Dialogs::Mkinitrd.new.run
         @disk_configured = false
       end
