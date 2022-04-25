@@ -83,11 +83,11 @@ jobs:
     - name: Adapt Spec
       run: sed -i "/^ExclusiveArch:/d" package/*.spec
 
-    - name: Mark Spec
-      run: git add package/*.spec
-
     - name: Package Build
       run: yast-ci-ruby -o package
+      env:
+        # ignore the spec file modification done above
+        CHECK_MODIFIED: 0
 
   # downloading the Docker image takes some time so bundling several fast
   # checks into one job avoids that overhead
