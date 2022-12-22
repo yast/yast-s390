@@ -64,9 +64,10 @@ describe Yast::DASDController do
 
     context "when exit code is other than 7 or 8" do
       let(:exit_code) { 1 }
+      let(:exit) { { "exit" => exit_code } }
 
       it "reports activation error" do
-        expect(subject).to receive(:ReportActivationError).with(channel, "exit" => exit_code)
+        expect(subject).to receive(:ReportActivationError).with(channel, exit)
         subject.ActivateDisk(channel, false)
       end
     end
