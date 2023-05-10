@@ -142,7 +142,14 @@ module Yast
     # @param action [Y2S390::DasdAction] the action to perform
     # @param selected [Y2S390::DasdsCollection] the collection of DASD devices to work with
     def run(action, selected)
-      Object.const_get(action_class_for(action)).run(selected)
+      return false if action == :cancel # Ignore closing the context menu (bsc#1211213)
+
+      begin
+        Object.const_get(action_class_for(action)).run(selected)
+      rescue NameError => e
+        log.error("No action for #{action}: #{e}")
+        return false
+      end
     end
 
     def PerformAction(action)
