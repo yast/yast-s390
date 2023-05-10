@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Wed May 10 13:35:34 UTC 2023 - Stefan Hundhammer <shundhammer@suse.com>
+
+- Prevent crash when the user closes the DASD context menu
+  without action (bsc#1211213)
+- Graceful handling of missing actions in the DASD context menu:
+  just log an error, don't crash
+- 4.5.3
+
+-------------------------------------------------------------------
 Thu Dec 22 12:11:10 UTC 2022 - Knut Anderssen <kanderssen@suse.com>
 
 - Fix hash vs keyword arguments in RSpec expectations (bsc#1204871)
