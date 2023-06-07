@@ -29,6 +29,7 @@
 
 require "yaml"
 require "yast"
+require "y2s390/zfcp"
 
 module Yast
   class ZFCPControllerClass < Module
@@ -43,6 +44,8 @@ module Yast
       Yast.import "Popup"
       Yast.import "Arch"
 
+      @zfcp = Y2S390::ZFCP.new
+
       @devices = {}
 
       @filter_min = "0.0.0000"
@@ -50,7 +53,9 @@ module Yast
 
       @previous_settings = {}
 
-      @controllers = nil
+      @probed_controllers = false
+
+      @probed_disks = false
 
       @activated_controllers = nil
 
@@ -296,49 +301,22 @@ module Yast
     # Get available zfcp controllers
     # @return [Array<Hash{String => Object>}] of availabel Controllers
     def GetControllers
-      if @controllers.nil?
-        # Checking if it is a z/VM and evaluating all fcp controllers in
-        # order to activate
-        ret_vmcp = SCR.Execute(path(".target.bash_output"), "/sbin/vmcp q v fcp")
-        if ret_vmcp["exit"] == 0
-          devices = ret_vmcp["stdout"].split("\n").collect do |line|
-            columns = line.split
-            columns[1].downcase if columns[0] == "FCP"
-          end.compact
-
-          # Remove all needed devices from CIO device driver blacklist
-          # in order to see it
-          devices.each do |device|
-            log.info "Removing #{device} from the CIO device driver blacklist"
-            SCR.Execute(path(".target.bash"), "/sbin/cio_ignore -r #{device}")
-          end
-        end
-
-        @controllers = Convert.convert(
-          SCR.Read(path(".probe.storage")),
-          from: "any",
-          to:   "list <map <string, any>>"
-        )
-        @controllers = Builtins.filter(@controllers) do |c|
-          Ops.get_string(c, "device", "") == "zFCP controller"
-        end
-
-        @controllers = Builtins.maplist(@controllers) do |c|
-          Builtins.filter(c) do |k, _v|
-            Builtins.contains(["sysfs_bus_id", "resource"], k)
-          end
-        end
+      if !@probed_controllers
+        zfcp.probe_controllers
 
         # zKVM uses virtio devices instead of ZFCP, skip the warning in that case
-        if ret_vmcp != 0 && @controllers.empty? && !Arch.is_zkvm
+        if zfcp.controllers.none? && !Arch.is_zkvm
           # TRANSLATORS: warning message
           Report.Warning(_("Cannot evaluate ZFCP controllers (e.g. in LPAR).\n" \
             "You will have to set it manually."))
         end
 
-        Builtins.y2milestone("probed ZFCP controllers %1", @controllers)
+        Builtins.y2milestone("probed ZFCP controllers %1", zfcp.controllers)
+
+        @probed_controllers = true
       end
-      deep_copy(@controllers)
+
+      zfcp.controllers
     end
 
     # Check if ZFCP subsystem is available
@@ -541,21 +519,11 @@ module Yast
     def activate_controller(channel)
       return if activated_controller?(channel)
 
-      command2 = Builtins.sformat(
-        "/sbin/zfcp_host_configure '%1' %2",
-        channel,
-        1
-      )
-      Builtins.y2milestone("Running command \"%1\"", command2)
-      ret2 = Convert.to_integer(SCR.Execute(path(".target.bash"), command2))
-      Builtins.y2milestone(
-        "Command \"%1\" returned with exit code %2",
-        command2,
-        ret2
-      )
+      output = zfcp.activate_controller(channel)
+      exit_code = output["exit"]
 
-      if ret2 != 0
-        ReportControllerActivationError(channel, ret2)
+      if exit_code != 0
+        ReportControllerActivationError(channel, exit_code)
       else
         register_as_activated(channel)
       end
@@ -574,22 +542,8 @@ module Yast
       end
 
       if disk.nil? && (wwpn != "" || lun != "") # we are not using allow_lun_scan
-        command = Builtins.sformat(
-          "/sbin/zfcp_disk_configure '%1' '%2' '%3' %4",
-          channel,
-          wwpn,
-          lun,
-          1
-        )
-        Builtins.y2milestone("Running command \"%1\"", command)
-        ret = Convert.to_integer(SCR.Execute(path(".target.bash"), command))
-        Builtins.y2milestone(
-          "Command \"%1\" returned with exit code %2",
-          command,
-          ret
-        )
-
-        ReportActivationError(channel, ret)
+        output = zfcp.activate_disk(channel, wwpn, lun)
+        ReportActivationError(channel, output["exit"])
       end
 
       @disk_configured = true
@@ -602,58 +556,26 @@ module Yast
     # @param [String] wwpn string wwpn (hexa number)
     # @param [String] lun string lun   (hexa number)
     def DeactivateDisk(channel, wwpn, lun)
-      command = Builtins.sformat(
-        "/sbin/zfcp_disk_configure '%1' '%2' '%3' %4",
-        channel,
-        wwpn,
-        lun,
-        0
-      )
-      Builtins.y2milestone("Running command \"%1\"", command)
-      ret = Convert.to_integer(SCR.Execute(path(".target.bash"), command))
-      Builtins.y2milestone(
-        "Command \"%1\" returned with exit code %2",
-        command,
-        ret
-      )
-
-      ReportActivationError(channel, ret)
+      output = zfcp.deactivate_disk(channel, wwpn, lun)
+      ReportActivationError(channel, output["exit"])
 
       @disk_configured = true
 
       nil
     end
 
-    def runCommand(cmd)
-      ret = []
-      cmd_output = Convert.convert(
-        SCR.Execute(path(".target.bash_output"), cmd),
-        from: "any",
-        to:   "map <string, any>"
-      )
-      if Ops.get_integer(cmd_output, "exit", -1) == 0
-        ret = Builtins.splitstring(
-          Ops.get_string(cmd_output, "stdout", ""),
-          "\n"
-        )
-        ret = Builtins.filter(ret) do |row|
-          Ops.greater_than(Builtins.size(row), 0)
-        end
-      else
-        Popup.Error(Ops.get_string(cmd_output, "stderr", ""))
-      end
-      Builtins.y2milestone("command %1, output %2", cmd, cmd_output)
-      deep_copy(ret)
+    def command_result(output)
+      return output["stdout"] if output["exit"] == 0
+
+      Popup.Error(output["stderr"])
     end
 
     def GetWWPNs(busid)
-      runCommand(Builtins.sformat("zfcp_san_disc -b '%1' -W", busid))
+      command_result(zfcp.find_wwpns(busid))
     end
 
     def GetLUNs(busid, wwpn)
-      runCommand(
-        Builtins.sformat("zfcp_san_disc -b '%1' -p '%2' -L", busid, wwpn)
-      )
+      command_result(zfcp.find_luns(busid, wwpn))
     end
 
     publish variable: :devices, type: "map <integer, map <string, any>>"
@@ -692,20 +614,7 @@ module Yast
 
   private
 
-    # In production, call SCR.Read(.probe.disk).
-    # For testing, point YAST2_S390_PROBE_DISK to a YAML file
-    # with the mock value.
-    # Suggesstion:
-    #   YAST2_S390_PROBE_DISK=test/data/probe_disk.yml rake run"[zfcp]"
-    # @return [Array<Hash>] .probe.disk output
-    def probe_or_mock_disks
-      mock_filename = ENV["YAST2_S390_PROBE_DISK"]
-      if mock_filename
-        YAML.safe_load(File.read(mock_filename))
-      else
-        SCR.Read(path(".probe.disk"))
-      end
-    end
+    attr_reader :zfcp
 
     # Finds the activated controllers
     #
@@ -715,12 +624,11 @@ module Yast
     def activated_controllers
       return @activated_controllers if @activated_controllers
 
-      ctrls = GetControllers().select do |ctrl|
-        io = ctrl.fetch("resource", {}).fetch("io", [])
-        io.any? { |i| i["active"] }
-      end
-      log.info "Already activated controllers: #{ctrls}"
-      @activated_controllers = ctrls.map { |c| c["sysfs_bus_id"] }
+      channels = GetControllers().map { |c| c["sysfs_bus_id"] }
+      active_channels = channels.select { |c| zfcp.activated_controller?(c) }
+
+      log.info "Already activated controllers: #{active_channels}"
+      @activated_controllers = active_channels
     end
 
     # Mark a controller as activated
@@ -745,42 +653,12 @@ module Yast
     # @param force_probing [Boolean] Ignore the cached values and probes again.
     # @return [Array<Hash>] Found zFCP disks
     def find_disks(force_probing: false)
-      return @disks if @disks && !force_probing
-
-      disks = probe_or_mock_disks
-      disks = Builtins.filter(disks) do |d|
-        d["driver"] == "zfcp"
+      if !@probed_disks || force_probing
+        zfcp.probe_disks
+        @probed_disks = true
       end
 
-      tapes = Convert.convert(
-        SCR.Read(path(".probe.tape")),
-        from: "any",
-        to:   "list <map <string, any>>"
-      )
-      tapes = Builtins.filter(tapes) do |d|
-        Ops.get_string(d, "bus", "") == "SCSI"
-      end
-
-      disks_tapes = Convert.convert(
-        Builtins.merge(disks, tapes),
-        from: "list",
-        to:   "list <map <string, any>>"
-      )
-
-      @disks = Builtins.maplist(disks_tapes) do |d|
-        Builtins.filter(d) do |k, _v|
-          Builtins.contains(["dev_name", "detail", "vendor", "device", "io"], k)
-        end
-      end
-    end
-
-    # Determines whether the disk is activated or not
-    #
-    # @param disk [Hash]
-    # @return [Boolean]
-    def active_disk?(disk)
-      io = disk.fetch("resource", {}).fetch("io", []).first
-      !!(io && io["active"])
+      zfcp.disks
     end
 
     # Finds a disk
