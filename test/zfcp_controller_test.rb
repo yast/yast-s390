@@ -23,7 +23,7 @@ describe Yast::ZFCPController do
       expect(subject).to receive(:activate_controller).with("0.0.fa00")
       expect(Yast::SCR).to receive(:Execute)
         .with(anything, /\/sbin\/zfcp_disk_configure '0.0.fa00' '0x500\d+' '0x401\d+' 1/)
-        .and_return(0)
+        .and_return("exit" => "0", "stdout" => "")
       subject.ActivateDisk("0.0.fa00", "0x5000000000000000", "0x4010400000000000")
     end
 
@@ -49,27 +49,31 @@ describe Yast::ZFCPController do
         "exit"   => 0,
         "stdout" => "FCP  F800 ON FCP   F807 CHPID 1C SUBCHANNEL = 000B\n  F800 TOKEN = 0000000362A42C00"
       )
-      allow(Yast::SCR).to receive(:Execute).with(anything, /\/sbin\/cio_ignore -r f800/).and_return(0)
+      allow(Yast::SCR).to receive(:Execute).with(anything, /\/sbin\/cio_ignore -r f800/)
+        .and_return("exit" => "0", "stdout" => "")
     end
 
     it "activates the given controller" do
-      expect(Yast::SCR).to receive(:Execute)
-        .with(anything, /\/sbin\/zfcp_host_configure '0.0.fc00' 1/).and_return(0)
+      expect(Yast::SCR)
+        .to receive(:Execute).with(anything, /\/sbin\/zfcp_host_configure '0.0.fc00' 1/)
+        .and_return("exit" => "0", "stdout" => "")
       expect(subject).to_not receive(:ReportControllerActivationError)
       subject.activate_controller(channel)
     end
 
     it "does not activate a controller twice" do
-      expect(Yast::SCR).to receive(:Execute)
-        .with(anything, /\/sbin\/zfcp_host_configure '0.0.fc00' 1/).once.and_return(0)
+      expect(Yast::SCR)
+        .to receive(:Execute).with(anything, /\/sbin\/zfcp_host_configure '0.0.fc00' 1/).once
+        .and_return("exit" => "0", "stdout" => "")
       subject.activate_controller(channel)
       subject.activate_controller(channel)
     end
 
     context "when the activation fails" do
       before do
-        allow(Yast::SCR).to receive(:Execute)
-          .with(anything, /\/sbin\/zfcp_host_configure '0.0.fc00' 1/).and_return(1)
+        allow(Yast::SCR)
+          .to receive(:Execute).with(anything, /\/sbin\/zfcp_host_configure '0.0.fc00' 1/)
+          .and_return("exit" => "1", "stdout" => "")
       end
 
       it "reports the error" do
@@ -105,7 +109,9 @@ describe Yast::ZFCPController do
         "exit"   => 0,
         "stdout" => "FCP  F800 ON FCP   F807 CHPID 1C SUBCHANNEL = 000B\n  F800 TOKEN = 0000000362A42C00"
       )
-      expect(Yast::SCR).to receive(:Execute).with(anything, /\/sbin\/cio_ignore -r f800/).and_return(0)
+      expect(Yast::SCR)
+        .to receive(:Execute).with(anything, /\/sbin\/cio_ignore -r f800/)
+        .and_return("exit" => "0", "stdout" => "")
 
       ctrls = subject.GetControllers
       expect(ctrls).to contain_exactly(
