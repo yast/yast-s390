@@ -107,6 +107,20 @@ module Y2S390
       io.any? { |i| i["active"] }
     end
 
+    # Whether the controller is performing auto LUN scan
+    #
+    # For that, allow_lun_scan must be active and the controller must be running in NPIV mode.
+    #
+    # @param channel [String] E.g., "0.0.fa00"
+    # @return [Boolean]
+    def lun_scan_controller?(channel)
+      file = "/sys/bus/ccw/drivers/zfcp/#{channel}/host0/fc_host/host0/port_type"
+      return false unless allow_lun_scan? && File.exist?(file)
+
+      mode = Yast::SCR.Read(path(".target.string"), file).chomp
+      mode == "NPIV VPORT"
+    end
+
     # Runs the command for activating a zFCP disk
     #
     # @param channel [String] E.g., "0.0.fa00"
