@@ -26,6 +26,9 @@ module Y2S390
     include Yast
     include Yast::Logger
 
+    ALLOW_LUN_SCAN_FILE = "/sys/module/zfcp/parameters/allow_lun_scan".freeze
+    private_constant :ALLOW_LUN_SCAN_FILE
+
     # Detected controllers
     #
     # @return [Array<Hash>] keys for each hash:
@@ -41,6 +44,20 @@ module Y2S390
     def initialize
       @controllers = []
       @disks = []
+    end
+
+    # Whether the allow_lun_scan option is active
+    #
+    # Having allow_lun_scan active has some implications:
+    #   * All LUNs are automatically activated when the controller is activated.
+    #   * LUNs cannot be deactivated.
+    #
+    # @return [Boolean]
+    def allow_lun_scan?
+      return false unless File.exist?(ALLOW_LUN_SCAN_FILE)
+
+      allow = Yast::SCR.Read(path(".target.string"), ALLOW_LUN_SCAN_FILE).chomp
+      allow == "Y"
     end
 
     # Probes the zFCP controllers

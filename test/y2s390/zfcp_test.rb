@@ -23,6 +23,34 @@ require_relative "../test_helper"
 require "y2s390/zfcp"
 
 describe Y2S390::ZFCP do
+  describe "#allow_lun_scan?" do
+    before do
+      allow(File).to receive(:exist?)
+        .with("/sys/module/zfcp/parameters/allow_lun_scan")
+        .and_return(true)
+
+      allow(Yast::SCR).to receive(:Read)
+        .with(anything, "/sys/module/zfcp/parameters/allow_lun_scan")
+        .and_return(allow_lun_scan)
+    end
+
+    context "if allow_lun_scan is active" do
+      let(:allow_lun_scan) { "Y" }
+
+      it "returns true" do
+        expect(subject.allow_lun_scan?).to eq(true)
+      end
+    end
+
+    context "if allow_lun_scan is not active" do
+      let(:allow_lun_scan) { "N" }
+
+      it "returns false" do
+        expect(subject.allow_lun_scan?).to eq(false)
+      end
+    end
+  end
+
   describe "#probe_controllers" do
     before do
       allow(Yast::SCR).to receive(:Read).with(Yast.path(".probe.storage"))
