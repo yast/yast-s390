@@ -22,6 +22,12 @@ require "yaml"
 
 module Y2S390
   # Manager for zFCP devices
+  #
+  # About allow_lun_scan option:
+  #   * It is enabled by default since SLE 12.
+  #   * It can be disabled by means of a kernel parameter (zfcp.allow_lun_scan=0).
+  #   * Configuring it once the system boots is discouraged, see
+  #     https://bugzilla.suse.com/show_bug.cgi?id=1210597#c20
   class ZFCP
     include Yast
     include Yast::Logger
