@@ -23,6 +23,34 @@ require_relative "../test_helper"
 require "y2s390/zfcp"
 
 describe Y2S390::ZFCP do
+  describe "#allow_lun_scan?" do
+    before do
+      allow(File).to receive(:exist?)
+        .with("/sys/module/zfcp/parameters/allow_lun_scan")
+        .and_return(true)
+
+      allow(Yast::SCR).to receive(:Read)
+        .with(anything, "/sys/module/zfcp/parameters/allow_lun_scan")
+        .and_return(allow_lun_scan)
+    end
+
+    context "if allow_lun_scan is active" do
+      let(:allow_lun_scan) { "Y" }
+
+      it "returns true" do
+        expect(subject.allow_lun_scan?).to eq(true)
+      end
+    end
+
+    context "if allow_lun_scan is not active" do
+      let(:allow_lun_scan) { "N" }
+
+      it "returns false" do
+        expect(subject.allow_lun_scan?).to eq(false)
+      end
+    end
+  end
+
   describe "#probe_controllers" do
     before do
       allow(Yast::SCR).to receive(:Read).with(Yast.path(".probe.storage"))
@@ -140,6 +168,70 @@ describe Y2S390::ZFCP do
 
       it "returns false" do
         expect(subject.activated_controller?(channel)).to eq(false)
+      end
+    end
+  end
+
+  describe "#lun_scan_controller?" do
+    before do
+      allow(subject).to receive(:allow_lun_scan?).and_return(allow_lun_scan)
+
+      allow(Yast::SCR).to receive(:Read)
+        .with(anything, "/sys/module/zfcp/parameters/allow_lun_scan")
+        .and_return(allow_lun_scan)
+
+      allow(File).to receive(:exist?)
+        .with("/sys/bus/ccw/drivers/zfcp/0.0.fa00/host0/fc_host/host0/port_type")
+        .and_return(controller_active)
+
+      allow(Yast::SCR).to receive(:Read)
+        .with(anything, "/sys/bus/ccw/drivers/zfcp/0.0.fa00/host0/fc_host/host0/port_type")
+        .and_return(controller_mode)
+    end
+
+    let(:allow_lun_scan) { nil }
+
+    let(:controller_active) { nil }
+
+    let(:controller_mode) { nil }
+
+    context "if allow_lun_scan is not active" do
+      let(:allow_lun_scan) { false }
+
+      it "returns false" do
+        expect(subject.lun_scan_controller?("0.0.fa00")).to eq(false)
+      end
+    end
+
+    context "if allow_lun_scan is active and the controller is not active" do
+      let(:allow_lun_scan) { true }
+
+      let(:controller_active) { false }
+
+      it "returns false" do
+        expect(subject.lun_scan_controller?("0.0.fa00")).to eq(false)
+      end
+    end
+
+    context "if allow_lun_scan is active and the controller is active" do
+      let(:allow_lun_scan) { true }
+
+      let(:controller_active) { true }
+
+      context "and the controller is not running in NPIV mode" do
+        let(:controller_mode) { "" }
+
+        it "returns false" do
+          expect(subject.lun_scan_controller?("0.0.fa00")).to eq(false)
+        end
+      end
+
+      context "and the controller is running in NPIV mode" do
+        let(:controller_mode) { "NPIV VPORT" }
+
+        it "returns true" do
+          expect(subject.lun_scan_controller?("0.0.fa00")).to eq(true)
+        end
       end
     end
   end

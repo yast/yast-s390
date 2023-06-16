@@ -22,9 +22,18 @@ require "yaml"
 
 module Y2S390
   # Manager for zFCP devices
+  #
+  # About allow_lun_scan option:
+  #   * It is enabled by default since SLE 12.
+  #   * It can be disabled by means of a kernel parameter (zfcp.allow_lun_scan=0).
+  #   * Configuring it once the system boots is discouraged, see
+  #     https://bugzilla.suse.com/show_bug.cgi?id=1210597#c20
   class ZFCP
     include Yast
     include Yast::Logger
+
+    ALLOW_LUN_SCAN_FILE = "/sys/module/zfcp/parameters/allow_lun_scan".freeze
+    private_constant :ALLOW_LUN_SCAN_FILE
 
     # Detected controllers
     #
@@ -41,6 +50,20 @@ module Y2S390
     def initialize
       @controllers = []
       @disks = []
+    end
+
+    # Whether the allow_lun_scan option is active
+    #
+    # Having allow_lun_scan active has some implications:
+    #   * All LUNs are automatically activated when the controller is activated.
+    #   * LUNs cannot be deactivated.
+    #
+    # @return [Boolean]
+    def allow_lun_scan?
+      return false unless File.exist?(ALLOW_LUN_SCAN_FILE)
+
+      allow = Yast::SCR.Read(path(".target.string"), ALLOW_LUN_SCAN_FILE).chomp
+      allow == "Y"
     end
 
     # Probes the zFCP controllers
@@ -88,6 +111,20 @@ module Y2S390
 
       io = controller.dig("resource", "io") || []
       io.any? { |i| i["active"] }
+    end
+
+    # Whether the controller is performing auto LUN scan
+    #
+    # For that, allow_lun_scan must be active and the controller must be running in NPIV mode.
+    #
+    # @param channel [String] E.g., "0.0.fa00"
+    # @return [Boolean]
+    def lun_scan_controller?(channel)
+      file = "/sys/bus/ccw/drivers/zfcp/#{channel}/host0/fc_host/host0/port_type"
+      return false unless allow_lun_scan? && File.exist?(file)
+
+      mode = Yast::SCR.Read(path(".target.string"), file).chomp
+      mode == "NPIV VPORT"
     end
 
     # Runs the command for activating a zFCP disk
