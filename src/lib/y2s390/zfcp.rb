@@ -120,11 +120,11 @@ module Y2S390
     # @param channel [String] E.g., "0.0.fa00"
     # @return [Boolean]
     def lun_scan_controller?(channel)
-      file = "/sys/bus/ccw/drivers/zfcp/#{channel}/host0/fc_host/host0/port_type"
-      return false unless allow_lun_scan? && File.exist?(file)
+      files = Dir["/sys/bus/ccw/drivers/zfcp/#{channel}/host*/fc_host/host*/port_type"]
+      return false unless allow_lun_scan? && files.any?
 
-      mode = Yast::SCR.Read(path(".target.string"), file).chomp
-      mode == "NPIV VPORT"
+      port_types = files.map { |f| Yast::SCR.Read(path(".target.string"), f).chomp }
+      port_types.any? { |t| t == "NPIV VPORT" }
     end
 
     # Runs the command for activating a zFCP disk

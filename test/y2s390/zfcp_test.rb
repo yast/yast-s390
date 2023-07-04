@@ -180,18 +180,14 @@ describe Y2S390::ZFCP do
         .with(anything, "/sys/module/zfcp/parameters/allow_lun_scan")
         .and_return(allow_lun_scan)
 
-      allow(File).to receive(:exist?)
-        .with("/sys/bus/ccw/drivers/zfcp/0.0.fa00/host0/fc_host/host0/port_type")
-        .and_return(controller_active)
-
-      allow(Yast::SCR).to receive(:Read)
-        .with(anything, "/sys/bus/ccw/drivers/zfcp/0.0.fa00/host0/fc_host/host0/port_type")
-        .and_return(controller_mode)
+      allow(Dir).to receive(:[])
+        .with("/sys/bus/ccw/drivers/zfcp/0.0.fa00/host*/fc_host/host*/port_type")
+        .and_return(port_type_files)
     end
 
     let(:allow_lun_scan) { nil }
 
-    let(:controller_active) { nil }
+    let(:port_type_files) { [] }
 
     let(:controller_mode) { nil }
 
@@ -206,7 +202,7 @@ describe Y2S390::ZFCP do
     context "if allow_lun_scan is active and the controller is not active" do
       let(:allow_lun_scan) { true }
 
-      let(:controller_active) { false }
+      let(:port_type_files) { [] }
 
       it "returns false" do
         expect(subject.lun_scan_controller?("0.0.fa00")).to eq(false)
@@ -216,7 +212,13 @@ describe Y2S390::ZFCP do
     context "if allow_lun_scan is active and the controller is active" do
       let(:allow_lun_scan) { true }
 
-      let(:controller_active) { true }
+      let(:port_type_files) { ["/sys/bus/ccw/drivers/zfcp/0.0.fa00/host0/fc_host/host0/port_type"] }
+
+      before do
+        allow(Yast::SCR).to receive(:Read)
+          .with(anything, "/sys/bus/ccw/drivers/zfcp/0.0.fa00/host0/fc_host/host0/port_type")
+          .and_return(controller_mode)
+      end
 
       context "and the controller is not running in NPIV mode" do
         let(:controller_mode) { "" }
