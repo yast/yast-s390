@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Sep 01 19:57:03 UTC 2023 - Josef Reidinger <jreidinger@suse.com>
+
+- Branch package for SP6 (bsc#1208913)
+
+-------------------------------------------------------------------
 Wed May 10 13:35:34 UTC 2023 - Stefan Hundhammer <shundhammer@suse.com>
 
 - Prevent crash when the user closes the DASD context menu
