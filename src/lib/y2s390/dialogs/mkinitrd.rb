@@ -3,11 +3,11 @@ require "ui/dialog"
 module Y2S390
   module Dialogs
     class Mkinitrd < ::UI::Dialog
-      CMD = "/sbin/mkinitrd".freeze
+      CMD = ["/usr/bin/dracut", "--force"].freeze
 
       def dialog_content
         textdomain "s390"
-        Label(_("Running mkinitrd."))
+        Label(_("Running dracut."))
       end
 
       def self.run
@@ -16,7 +16,7 @@ module Y2S390
 
       def run
         create_dialog
-        Yast::Execute.on_target(CMD)
+        Yast::Execute.on_target(*CMD)
         close_dialog
       end
     end
