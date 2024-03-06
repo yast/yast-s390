@@ -84,6 +84,7 @@ describe Y2S390::Dialogs::FormatDialog do
     context "when the process is not running after 0.2 seconds of waiting" do
       before do
         allow(fmt_process).to receive(:running?).and_return(false)
+        allow(subject).to receive(:report_format_failed)
       end
 
       it "reports a format failed error" do
@@ -93,6 +94,7 @@ describe Y2S390::Dialogs::FormatDialog do
       end
 
       it "returns nil" do
+        expect(subject.run).to eq nil
       end
     end
 

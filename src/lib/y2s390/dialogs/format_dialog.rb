@@ -43,6 +43,8 @@ module Y2S390
       #
       # @param dasds [Array<Y2S390::Dasd>] list of DASDs to be formatted
       def initialize(dasds)
+        super()
+
         textdomain "s390"
         @dasds = dasds
         @fmt_process = FormatProcess.new(dasds)
