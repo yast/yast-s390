@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Mar  6 09:00:01 UTC 2024 - Josef Reidinger <jreidinger@suse.com>
+
+- Replace 'mkinitrd' with dracut (bsc#1220995)
+- 4.5.4
+
+-------------------------------------------------------------------
 Wed May 10 13:35:34 UTC 2023 - Stefan Hundhammer <shundhammer@suse.com>
 
 - Prevent crash when the user closes the DASD context menu

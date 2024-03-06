@@ -152,9 +152,9 @@ module Yast
       if !Mode.installation
         if @disk_configured
           # popup label
-          UI.OpenDialog(Label(_("Running mkinitrd.")))
+          UI.OpenDialog(Label(_("Running dracut.")))
 
-          command = "/sbin/mkinitrd"
+          command = "/usr/bin/dracut --force"
           Builtins.y2milestone("Running command %1", command)
           ret = SCR.Execute(path(".target.bash"), command)
           Builtins.y2milestone("Exit code: %1", ret)
