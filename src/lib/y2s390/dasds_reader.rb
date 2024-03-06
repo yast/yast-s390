@@ -46,7 +46,7 @@ module Y2S390
       a = dasd_entries(offline: offline).each_with_object([]) do |entry, arr|
         next unless entry.start_with?(/\d/)
 
-        id, status, name, _, type, = entry.split(" ")
+        id, status, name, _, type, = entry.split
         attrs = Yast::Mode.config ? {} : { status: status, device_name: name, type: type }
         dasd = Y2S390::Dasd.new(id, **attrs).tap do |d|
           if Yast::Mode.config
@@ -71,7 +71,7 @@ module Y2S390
       dasd_entries(offline: true).each do |entry|
         next unless entry.start_with?(/\d/)
 
-        id, status, name, _, type, = entry.split(" ")
+        id, status, name, _, type, = entry.split
         dasd = dasds.by_id(id)
         next unless dasd
 
@@ -92,7 +92,7 @@ module Y2S390
       data = dasd_entries(dasd: dasd).find { |e| e.start_with?(/\d/) }
       return false if data.to_s.empty?
 
-      _, status, name, _, type, = data.split(" ")
+      _, status, name, _, type, = data.split
       dasd.status = status
       dasd.device_name = name
       dasd.type = type
@@ -187,7 +187,7 @@ module Y2S390
       regexp = Regexp.new("^[ \t]*([^ \t]+)[ \t]+([0-9]+)[ \t]+([0-9]+)[ \t]+([0-9]+)" \
                           "[ \t]+([^ \t]+)[ \t]+([^ \t]+([ \t]+[^ \t]+))*[ \t]*$")
 
-      lines = out.split("\n").select { |s| s.match?(regexp) }
+      lines = out.split("\n").grep(regexp)
       lines.map do |line|
         r = line.match(regexp)
         "#{r[1]} (#{r[6]})"

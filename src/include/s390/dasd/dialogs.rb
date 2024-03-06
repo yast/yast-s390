@@ -383,7 +383,8 @@ module Yast
       while ret.nil?
         ret = Convert.to_symbol(UI.UserInput)
 
-        if ret == :abort || ret == :cancel
+        case ret
+        when :abort, :cancel
           # yes-no popup
           if !Popup.YesNo(
             _(
@@ -392,7 +393,7 @@ module Yast
           )
             ret = nil
           end
-        elsif ret == :next
+        when :next
           channel = Convert.to_string(UI.QueryWidget(Id(:channel), :Value))
 
           if !DASDController.IsValidChannel(channel)

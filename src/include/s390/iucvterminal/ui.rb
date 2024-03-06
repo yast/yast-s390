@@ -48,15 +48,16 @@ module Yast
       ret = false
 
       restrict_hvc_to_srvs = UI.QueryWidget(Id(:restrict_hvc_to_srvs), :Value)
-      if restrict_hvc_to_srvs =~ /[^[[:lower:]][[:digit:]],]/
+      case restrict_hvc_to_srvs
+      when /[^[[:lower:]][[:digit:]],]/
         Popup.Notify(
           _(
             "Wrong input, only lower case letters, numbers and for separation commas are allowed."
           )
         )
-      elsif restrict_hvc_to_srvs =~ /^,|,,/
+      when /^,|,,/
         Popup.Notify(_("Comma is only a separator."))
-      elsif restrict_hvc_to_srvs =~ /[[[:lower:]][[:digit:]]]{9,}/
+      when /[[[:lower:]][[:digit:]]]{9,}/
         Popup.Notify(_("z/VM IDs do not allow more than eight characters."))
       else
         ret = true

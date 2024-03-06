@@ -577,9 +577,10 @@ module Yast
 
     def MainDialogContent
       # draw active tab
-      widgets = if @current_main_tab == :t_zvmids
+      widgets = case @current_main_tab
+      when :t_zvmids
         ZvmIdsDialogContent()
-      elsif @current_main_tab == :t_tsshell
+      when :t_tsshell
         TsShellDialogContent()
       else
         IucvConnDialogContent()
@@ -605,13 +606,14 @@ module Yast
     def InitMainDialog(tab)
       # remember current tab
       @current_main_tab = tab
-      if tab == :t_zvmids
+      case tab
+      when :t_zvmids
         UI.ChangeWidget(
           Id(:zvmids),
           :Value,
           Builtins.mergestring(@zvm_id_list, "\n")
         )
-      elsif tab == :t_tsshell
+      when :t_tsshell
         # disable frames if TS-Shell is disabled
         HandleEvent(:ts_enabled)
 
@@ -1442,19 +1444,21 @@ module Yast
       end
 
       # tab handling
-      if widget == :t_zvmids
+      case widget
+      when :t_zvmids
         # SaveSettings( $[ "ID" : widget ] );
         UI.ReplaceWidget(Id(:tab_content), ZvmIdsDialogContent())
         InitMainDialog(widget)
         Wizard.SetHelpText(Ops.get_string(@HELP, "zvmids", ""))
-      elsif widget == :t_tsshell || widget == :t_iucvconn
+      when :t_tsshell, :t_iucvconn
         # deactivate other tabs without  valid z/VM ids
         if Ops.greater_than(Builtins.size(@zvm_id_list), 0)
-          if widget == :t_tsshell
+          case widget
+          when :t_tsshell
             UI.ReplaceWidget(Id(:tab_content), TsShellDialogContent())
             InitMainDialog(widget)
             Wizard.SetHelpText(Ops.get_string(@HELP, "ts", ""))
-          elsif widget == :t_iucvconn
+          when :t_iucvconn
             UI.ReplaceWidget(Id(:tab_content), IucvConnDialogContent())
             InitMainDialog(widget)
             Wizard.SetHelpText(Ops.get_string(@HELP, "ic", ""))
@@ -1504,10 +1508,11 @@ module Yast
             ret = :again
             success = true
             # check TS-Shell user dialog settings and commit them if valid
-            if @current_dialog == :ts_open_user_dialog
+            case @current_dialog
+            when :ts_open_user_dialog
               success = CommitTsUserDialogSettings()
             # commit TS-Shell group dialog settings
-            elsif @current_dialog == :ts_open_group_dialog
+            when :ts_open_group_dialog
               CommitTsGroupDialogSettings()
             end
 

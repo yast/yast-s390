@@ -138,21 +138,22 @@ module Yast
       Progress.NextStage
 
       if ret != 0
-        err = if ret == 11
+        err = case ret
+        when 11
           # error description
           _("Invalid or unusable disk (fatal).")
-        elsif ret == 12
+        when 12
           # error description
           _(
             "Incompatible formatting or partitioning, correct with Force."
           )
-        elsif ret == 13
+        when 13
           # error description
           _("Missing support programs.")
-        elsif ret == 14
+        when 14
           # error description
           _("Missing or wrong parameters.")
-        elsif ret == 15
+        when 15
           # error description
           _("Access problem.")
         else

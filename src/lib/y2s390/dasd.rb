@@ -140,7 +140,7 @@ module Y2S390
       regexp = Regexp.new("^[ \t]*([^ \t]+)[ \t]+([0-9]+)[ \t]+([0-9]+)[ \t]+([0-9]+)" \
                           "[ \t]+([^ \t]+)[ \t]+([^ \t]+([ \t]+[^ \t]+))*[ \t]*$")
 
-      lines = out.split("\n").select { |s| s.match?(regexp) }
+      lines = out.split("\n").grep(regexp)
       lines.map do |line|
         r = line.match(regexp)
         "#{r[1]} (#{r[6]})"

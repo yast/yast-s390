@@ -514,16 +514,17 @@ module Yast
         value = ""
         type = Ops.get_symbol(entries, :type)
         # Manual selection
-        if type == :rb_ts_list
+        case type
+        when :rb_ts_list
           selected_ids = Ops.get_list(entries, type, [])
           # remove the TEXT_ALL entry because it is not supported by the configuration
           selected_ids = Builtins.remove(selected_ids, 0) if Ops.get(selected_ids, 0, "") == @TEXT_ALL
           value = Ops.add("list:", Builtins.mergestring(selected_ids, ","))
         # Regex
-        elsif type == :rb_ts_regex
+        when :rb_ts_regex
           value = Ops.add("regex:", Ops.get_string(entries, type, ""))
         # File
-        elsif type == :rb_ts_file
+        when :rb_ts_file
           value = Ops.add("file:", Ops.get_string(entries, type, ""))
         end
         # ignore empty entries(like "list:" or "regex:")
