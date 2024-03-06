@@ -19,7 +19,7 @@
 # To contact SUSE LLC about this file by physical or electronic mail, you may
 # find current contact information at www.suse.com.
 
-require_relative "../../test_helper.rb"
+require_relative "../../test_helper"
 require "y2s390/dasd_actions/base"
 
 describe Y2S390::DasdActions::Base do

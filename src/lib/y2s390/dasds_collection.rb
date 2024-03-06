@@ -57,7 +57,7 @@ module Y2S390
     #
     # @return [DasdsCollection]
     def to_format(format_unformatted: false)
-      filter { |d| d.format_wanted || format_unformatted && !d.formatted? }
+      filter { |d| d.format_wanted || (format_unformatted && !d.formatted?) }
     end
   end
 end

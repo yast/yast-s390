@@ -101,7 +101,18 @@ module Yast
     end
 
     def PossibleActions
-      if !Mode.config
+      if Mode.config
+        [
+          # menu button id
+          Item(Id(:diag_on), _("Set DIAG O&n")),
+          # menu button id
+          Item(Id(:diag_off), _("Set DIAG O&ff")),
+          # menu button id
+          Item(Id(:format_on), _("Set Format On")),
+          # menu button id
+          Item(Id(:format_off), _("Set Format Off"))
+        ]
+      else
         [
           # menu button id
           Item(Id(:activate), _("&Activate")),
@@ -113,17 +124,6 @@ module Yast
           Item(Id(:diag_off), _("Set DIAG O&ff")),
           # menu button id
           Item(Id(:format), _("&Format"))
-        ]
-      else
-        [
-          # menu button id
-          Item(Id(:diag_on), _("Set DIAG O&n")),
-          # menu button id
-          Item(Id(:diag_off), _("Set DIAG O&ff")),
-          # menu button id
-          Item(Id(:format_on), _("Set Format On")),
-          # menu button id
-          Item(Id(:format_off), _("Set Format Off"))
         ]
       end
     end
@@ -148,7 +148,7 @@ module Yast
         Object.const_get(action_class_for(action)).run(selected)
       rescue NameError => e
         log.error("No action for #{action}: #{e}")
-        return false
+        false
       end
     end
 

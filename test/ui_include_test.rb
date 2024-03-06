@@ -2,7 +2,7 @@
 
 require_relative "./test_helper"
 
-require_relative "../src/include/s390/dump/ui.rb"
+require_relative "../src/include/s390/dump/ui"
 
 Yast.import "Wizard"
 Yast.import "Dump"

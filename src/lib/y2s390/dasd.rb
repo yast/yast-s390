@@ -138,7 +138,7 @@ module Y2S390
       return out if out.empty?
 
       regexp = Regexp.new("^[ \t]*([^ \t]+)[ \t]+([0-9]+)[ \t]+([0-9]+)[ \t]+([0-9]+)" \
-        "[ \t]+([^ \t]+)[ \t]+([^ \t]+([ \t]+[^ \t]+))*[ \t]*$")
+                          "[ \t]+([^ \t]+)[ \t]+([^ \t]+([ \t]+[^ \t]+))*[ \t]*$")
 
       lines = out.split("\n").select { |s| s.match?(regexp) }
       lines.map do |line|

@@ -173,7 +173,9 @@ module Yast
       # make sure that the user doesn't already exist
       users = GetUsers(false)
 
-      if !Builtins.haskey(users, username)
+      if Builtins.haskey(users, username)
+        Builtins.y2milestone("The user %1 does already exist.", username)
+      else
         user = {
           "uid"           => username,
           "loginShell"    => shell,
@@ -202,8 +204,6 @@ module Yast
             error
           )
         end
-      else
-        Builtins.y2milestone("The user %1 does already exist.", username)
       end
       new_userid
     end
@@ -249,7 +249,7 @@ module Yast
       group = Users.GetGroupByName("ts-shell", "system")
       group_id = Ops.get_string(group, "gidNumber", "")
 
-      new_uid = AddUser(
+      AddUser(
         username,
         password,
         group_id,
@@ -258,8 +258,6 @@ module Yast
         additional_groups,
         force_pw_change
       )
-
-      new_uid
     end
 
     # Update a configuration entry for TS-Shell users and configured groups

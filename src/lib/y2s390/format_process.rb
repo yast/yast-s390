@@ -24,6 +24,7 @@ module Y2S390
   # This class is responsible for maintaining an specific DASD format progress
   class FormatStatus
     attr_accessor :progress, :cylinders, :dasd
+
     # Constructor
     #
     # @param dasd [Dasd]

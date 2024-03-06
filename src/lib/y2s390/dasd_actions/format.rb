@@ -92,8 +92,8 @@ module Y2S390
           format(
             _(
               "Formatting these disks destroys all data on them.<br>\n" \
-                "Really format the following disks?<br>\n" \
-                "%s"
+              "Really format the following disks?<br>\n" \
+              "%s"
             ), channels_str
           ),
           60,

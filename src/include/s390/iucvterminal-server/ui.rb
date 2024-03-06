@@ -734,7 +734,10 @@ module Yast
           groupmap,
           force_pw_change
         )
-        if new_uid != ""
+        if new_uid == ""
+          Popup.Notify(_("Adding the user has failed."))
+          ret = false
+        else
           @ts_member_conf = Builtins.add(
             @ts_member_conf,
             username,
@@ -743,9 +746,6 @@ module Yast
             rb_ts_regex: "",
             rb_ts_file:  ""
           )
-        else
-          Popup.Notify(_("Adding the user has failed."))
-          ret = false
         end
       end
       ret
@@ -969,9 +969,9 @@ module Yast
       pw1 = Convert.to_string(UI.QueryWidget(Id(field1), :Value))
       if pw1 != "" &&
           pw1 == Convert.to_string(UI.QueryWidget(Id(field2), :Value))
-        return pw1
+        pw1
       else
-        return ""
+        ""
       end
     end
 
@@ -990,7 +990,7 @@ module Yast
         line = Ops.add(line, 1)
         # since alnum allows umlauts too the id is checked against the user name specification
         if Builtins.regexpmatch(zvmid, "[^[:alnum:]]") ||
-            !IUCVTerminalServer.CheckUserGroupName(zvmid) && zvmid != ""
+            (!IUCVTerminalServer.CheckUserGroupName(zvmid) && zvmid != "")
           Popup.Notify(
             Builtins.sformat(
               _(
@@ -1050,24 +1050,22 @@ module Yast
       ret = false
 
       # check if the ic users list is different since the start
-      if @zvm_id_list != IUCVTerminalServer.GetIcUsersList
+      if @zvm_id_list == IUCVTerminalServer.GetIcUsersList
+        ret = true
+      elsif @ic_password == ""
         # check password
-        if @ic_password == ""
-          Popup.Notify(
+        Popup.Notify(
             _(
               "A correctly entered password to sync IUCVConn users is required."
             )
           )
         # check home directory
-        elsif !Builtins.regexpmatch(@ic_home, "^/")
-          Popup.Notify(_("The specified IUCVConn home directory is invalid."))
-        else
-          IUCVTerminalServer.ic_home = @ic_home
-          IUCVTerminalServer.SyncIucvConnUsers(@zvm_id_list, @ic_password)
-          UI.ChangeWidget(Id(:ic_users), :Items, GenerateIcUsersTable())
-          ret = true
-        end
+      elsif !Builtins.regexpmatch(@ic_home, "^/")
+        Popup.Notify(_("The specified IUCVConn home directory is invalid."))
       else
+        IUCVTerminalServer.ic_home = @ic_home
+        IUCVTerminalServer.SyncIucvConnUsers(@zvm_id_list, @ic_password)
+        UI.ChangeWidget(Id(:ic_users), :Items, GenerateIcUsersTable())
         ret = true
       end
       ret
