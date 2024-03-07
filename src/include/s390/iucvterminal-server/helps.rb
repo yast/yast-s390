@@ -36,7 +36,7 @@ module Yast
         ) +
           _(
             "<p>To configure the IUCV terminal server, specify the z/VM IDs to be used.\n<br>" \
-              "They are separated by line breaks.</p>\n"
+            "They are separated by line breaks.</p>\n"
           ),
         # TS-Shell dialog help 1/5
         "ts"       => _(
@@ -44,23 +44,23 @@ module Yast
         ) +
           _(
             "<p>TS-Shell allows to specify <b>Authorization</b> for every TS-Shell user and group. " \
-              "The rights of a group are inherited by its members.</p>"
+            "The rights of a group are inherited by its members.</p>"
           ) +
           # TS-Shell dialog help 2/5
           _(
             "<p>Each allowed z/VM ID can be selected manually under <b>Selection</b>, defined by " \
-              "a <b>Regex</b> or loaded from a <b>File</b> which contains all allowed z/VM IDs " \
-              "separated by line breaks.</p>"
+            "a <b>Regex</b> or loaded from a <b>File</b> which contains all allowed z/VM IDs " \
+            "separated by line breaks.</p>"
           ) +
           # TS-Shell dialog help 3/5
           _(
             "<p>Click on <b>New User</b> to create new TS-Shell users or <b>Delete\nUser</b> " \
-              "to remove users.</p>"
+            "to remove users.</p>"
           ) +
           # TS-Shell dialog help 4/5
           _(
             "<p>To add or remove groups from the TS-Shell authorization table or to change\n" \
-              "the membership of users, go to <b>Manage Groups</b>.</p>"
+            "the membership of users, go to <b>Manage Groups</b>.</p>"
           ) +
           # TS-Shell dialog help 5/5
           _(
@@ -72,8 +72,8 @@ module Yast
         ) +
           _(
             "<p>To create new TS-Shell user the <b>Username</b>, <b>Home Directory</b> and " \
-              "<b>Password</b> has to be provided.\n\t<br>It is also possible to specify " \
-              "<b>Additional Groups</b> by selecting them on the right.</p>"
+            "<b>Password</b> has to be provided.\n\t<br>It is also possible to specify " \
+            "<b>Additional Groups</b> by selecting them on the right.</p>"
           ) +
           # TS-Shell User creation dialog help 2/3
           _(
@@ -83,7 +83,7 @@ module Yast
           # TS-Shell User creation dialog help 3/3
           _(
             "<p>You can specify the same home directory for every TS-Shell user since no\n" \
-              "data will be stored there.</p>"
+            "data will be stored there.</p>"
           ),
         # TS-Shell Managing Groups dialog help 1/5
         "ts-group" => _(
@@ -91,13 +91,13 @@ module Yast
         ) +
           _(
             "<p>Define TS-Shell authorizations per group if you want every TS-Shell \n" \
-              "member of this groups to inherit the same rights.</p>"
+            "member of this groups to inherit the same rights.</p>"
           ) +
           # TS-Shell Managing Groups dialog help 2/5
           _(
             "<p>Existing groups can be added to or removed from the TS-Shell\n" \
-              "authorization. Select the groups in the table and click on <b>Select or Deselect</b>. " \
-              "The current status is shown in the column <b>TS-Auth</b>.</p>"
+            "authorization. Select the groups in the table and click on <b>Select or Deselect</b>. " \
+            "The current status is shown in the column <b>TS-Auth</b>.</p>"
           ) +
           # TS-Shell Managing Groups dialog help 3/5
           _(
@@ -106,8 +106,8 @@ module Yast
           # TS-Shell Managing Groups dialog help 4/5
           _(
             "<p>New groups could be created by entering the name in the <b>New Group</b> input field " \
-              "and confirming with <b>Create</b>.\n\t<br>To delete previously created groups the " \
-              "<b>YaST users</b> dialog has to be used.</p>"
+            "and confirming with <b>Create</b>.\n\t<br>To delete previously created groups the " \
+            "<b>YaST users</b> dialog has to be used.</p>"
           ) +
           # TS-Shell Managing Groups dialog help 5/5
           _(
@@ -119,12 +119,12 @@ module Yast
         ) +
           _(
             "<p>IUCVConn on Login needs one user for every z/VM ID. To create these users " \
-              "a <b>password</b> and <b>home directory</b> has to be provided."
+            "a <b>password</b> and <b>home directory</b> has to be provided."
           ) +
           # IUCVConn on Login dialog help 2/2
           _(
             "<p>It is possible to sync the users manually by clicking on <b>Sync</b> or just " \
-              "confirming the changes with <b>Ok</b> while <b>IUCVConn on Login</b> is enabled. </p>"
+            "confirming the changes with <b>Ok</b> while <b>IUCVConn on Login</b> is enabled. </p>"
           )
       }
       # EOF

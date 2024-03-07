@@ -154,20 +154,18 @@ module Yast
         end
       end
 
-      if !Mode.installation
-        if @disk_configured
-          # popup label
-          UI.OpenDialog(Label(_("Running mkinitrd.")))
+      if !Mode.installation && @disk_configured
+        # popup label
+        UI.OpenDialog(Label(_("Running mkinitrd.")))
 
-          command = "/sbin/mkinitrd"
-          Builtins.y2milestone("Running command %1", command)
-          ret = SCR.Execute(path(".target.bash"), command)
-          Builtins.y2milestone("Exit code: %1", ret)
+        command = "/sbin/mkinitrd"
+        Builtins.y2milestone("Running command %1", command)
+        ret = SCR.Execute(path(".target.bash"), command)
+        Builtins.y2milestone("Exit code: %1", ret)
 
-          UI.CloseDialog
+        UI.CloseDialog
 
-          @disk_configured = false
-        end
+        @disk_configured = false
       end
 
       true
@@ -308,7 +306,7 @@ module Yast
         if zfcp.controllers.none? && !Arch.is_zkvm
           # TRANSLATORS: warning message
           Report.Warning(_("Cannot evaluate ZFCP controllers (e.g. in LPAR).\n" \
-            "You will have to set it manually."))
+                           "You will have to set it manually."))
         end
 
         Builtins.y2milestone("probed ZFCP controllers %1", zfcp.controllers)
@@ -522,10 +520,10 @@ module Yast
       output = zfcp.activate_controller(channel)
       exit_code = output["exit"]
 
-      if exit_code != 0
-        ReportControllerActivationError(channel, exit_code)
-      else
+      if exit_code == 0
         register_as_activated(channel)
+      else
+        ReportControllerActivationError(channel, exit_code)
       end
     end
 

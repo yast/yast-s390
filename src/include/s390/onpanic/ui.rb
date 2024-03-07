@@ -115,7 +115,7 @@ module Yast
           # OnPanic dialog help 2/11
           _(
             "<p>The <b>Dumpconf</b> daemon needs to be enabled to influence the behavior " \
-              "during kernel panics.</p>"
+            "during kernel panics.</p>"
           ) +
           # OnPanic dialog help 3/11
           _("<p>The following <b>Panic Actions</b> are possible:<br>") +
@@ -128,26 +128,26 @@ module Yast
           # OnPanic dialog help 7/11
           _(
             "<b>dump_reipl</b> Dump Linux and reboot system. This option is only " \
-              "available\non LPAR with z9(r) machines and later and on z/VMversion 5.3 and later.<br>"
+            "available\non LPAR with z9(r) machines and later and on z/VMversion 5.3 and later.<br>"
           ) +
           # OnPanic dialog help 8/11
           _("<b>vmcmd</b> Execute specified CP commands and stop system.</p>") +
           # OnPanic dialog help 9/11
           _(
             "<p>The time defined in <b>Delay Minutes</b> defers activating the specified " \
-              "panic action for a newly started system to prevent loops. If the system " \
-              "crashes before the time has elapsed the default action (stop) is performed.</p>"
+            "panic action for a newly started system to prevent loops. If the system " \
+            "crashes before the time has elapsed the default action (stop) is performed.</p>"
           ) +
           # OnPanic dialog help 10/11
           _(
             "<p>The device for dumping the memory can be set with <b>Dump Device</b>. If no " \
-             "device is shown you have to create one with the <b>YaST Dump Devices</b> dialog.</p>"
+            "device is shown you have to create one with the <b>YaST Dump Devices</b> dialog.</p>"
           ),
         # OnPanic dialog help 11/11
         Builtins.sformat(
           _(
             "<p>With <b>VMCMD</b> specify CP commands to be executed before the Linux " \
-              "system is stopped. Only %1 lines and a total of %2 chars are allowed.</p>"
+            "system is stopped. Only %1 lines and a total of %2 chars are allowed.</p>"
           ),
           OnPanic.VMCMD_MAX_ROWS,
           OnPanic.VMCMD_MAX_CHARS
@@ -317,17 +317,15 @@ module Yast
     # because it conflicts with OnPanic
     def check_kdump
       if OnPanic.start &&
-          (Service.Enabled(KDUMP_SERVICE_NAME) || Service.Active(KDUMP_SERVICE_NAME))
-        if Yast::Popup.YesNo(
+          (Service.Enabled(KDUMP_SERVICE_NAME) || Service.Active(KDUMP_SERVICE_NAME)) && Yast::Popup.YesNo(
           # TRANSLATORS: %{s1},%{s2} are the service names
           format(_(
                    "The service %{s1} is active and will conflict with dumpconf.\n" \
                    "Would you like to disable %{s2}? \n"
                  ), s1: KDUMP_SERVICE_NAME, s2: KDUMP_SERVICE_NAME)
         )
-          Service.Disable(KDUMP_SERVICE_NAME)
-          Service.Stop(KDUMP_SERVICE_NAME) if Service.active?(KDUMP_SERVICE_NAME)
-        end
+        Service.Disable(KDUMP_SERVICE_NAME)
+        Service.Stop(KDUMP_SERVICE_NAME) if Service.active?(KDUMP_SERVICE_NAME)
       end
     end
 

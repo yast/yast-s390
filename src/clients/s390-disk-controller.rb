@@ -113,10 +113,11 @@ module Yast
       @ret = nil
       while @ret.nil?
         @ret = UI.UserInput
-        if @ret == :dasd
+        case @ret
+        when :dasd
           WFM.call("dasd")
           @ret = nil
-        elsif @ret == :zfcp
+        when :zfcp
           WFM.call("zfcp")
           @ret = nil
         end

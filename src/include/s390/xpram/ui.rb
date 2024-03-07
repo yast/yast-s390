@@ -50,9 +50,9 @@ module Yast
         # help text for XPRAM 2/4
         _(
           "<p>This tool currently only supports assigning the entire XPRAM to one partition. " \
-            "To have multiple partitions, look at \"Device Drivers, Features and Commands " \
-            "November 30, 2004\" for the Linux kernel 2.6 - April 2004 stream.</p>" \
-            "<p>In this case disable XPRAM in this module.</p>"
+          "To have multiple partitions, look at \"Device Drivers, Features and Commands " \
+          "November 30, 2004\" for the Linux kernel 2.6 - April 2004 stream.</p>" \
+          "<p>In this case disable XPRAM in this module.</p>"
         ) +
         # help text for XPRAM 3/4
         _("<p>Choose the correct mount point for <b>Mount Point</b>.</p>") +

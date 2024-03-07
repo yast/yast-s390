@@ -577,9 +577,10 @@ module Yast
 
     def MainDialogContent
       # draw active tab
-      widgets = if @current_main_tab == :t_zvmids
+      widgets = case @current_main_tab
+      when :t_zvmids
         ZvmIdsDialogContent()
-      elsif @current_main_tab == :t_tsshell
+      when :t_tsshell
         TsShellDialogContent()
       else
         IucvConnDialogContent()
@@ -605,13 +606,14 @@ module Yast
     def InitMainDialog(tab)
       # remember current tab
       @current_main_tab = tab
-      if tab == :t_zvmids
+      case tab
+      when :t_zvmids
         UI.ChangeWidget(
           Id(:zvmids),
           :Value,
           Builtins.mergestring(@zvm_id_list, "\n")
         )
-      elsif tab == :t_tsshell
+      when :t_tsshell
         # disable frames if TS-Shell is disabled
         HandleEvent(:ts_enabled)
 
@@ -734,7 +736,10 @@ module Yast
           groupmap,
           force_pw_change
         )
-        if new_uid != ""
+        if new_uid == ""
+          Popup.Notify(_("Adding the user has failed."))
+          ret = false
+        else
           @ts_member_conf = Builtins.add(
             @ts_member_conf,
             username,
@@ -743,9 +748,6 @@ module Yast
             rb_ts_regex: "",
             rb_ts_file:  ""
           )
-        else
-          Popup.Notify(_("Adding the user has failed."))
-          ret = false
         end
       end
       ret
@@ -969,9 +971,9 @@ module Yast
       pw1 = Convert.to_string(UI.QueryWidget(Id(field1), :Value))
       if pw1 != "" &&
           pw1 == Convert.to_string(UI.QueryWidget(Id(field2), :Value))
-        return pw1
+        pw1
       else
-        return ""
+        ""
       end
     end
 
@@ -990,7 +992,7 @@ module Yast
         line = Ops.add(line, 1)
         # since alnum allows umlauts too the id is checked against the user name specification
         if Builtins.regexpmatch(zvmid, "[^[:alnum:]]") ||
-            !IUCVTerminalServer.CheckUserGroupName(zvmid) && zvmid != ""
+            (!IUCVTerminalServer.CheckUserGroupName(zvmid) && zvmid != "")
           Popup.Notify(
             Builtins.sformat(
               _(
@@ -1050,24 +1052,22 @@ module Yast
       ret = false
 
       # check if the ic users list is different since the start
-      if @zvm_id_list != IUCVTerminalServer.GetIcUsersList
+      if @zvm_id_list == IUCVTerminalServer.GetIcUsersList
+        ret = true
+      elsif @ic_password == ""
         # check password
-        if @ic_password == ""
-          Popup.Notify(
+        Popup.Notify(
             _(
               "A correctly entered password to sync IUCVConn users is required."
             )
           )
         # check home directory
-        elsif !Builtins.regexpmatch(@ic_home, "^/")
-          Popup.Notify(_("The specified IUCVConn home directory is invalid."))
-        else
-          IUCVTerminalServer.ic_home = @ic_home
-          IUCVTerminalServer.SyncIucvConnUsers(@zvm_id_list, @ic_password)
-          UI.ChangeWidget(Id(:ic_users), :Items, GenerateIcUsersTable())
-          ret = true
-        end
+      elsif !Builtins.regexpmatch(@ic_home, "^/")
+        Popup.Notify(_("The specified IUCVConn home directory is invalid."))
       else
+        IUCVTerminalServer.ic_home = @ic_home
+        IUCVTerminalServer.SyncIucvConnUsers(@zvm_id_list, @ic_password)
+        UI.ChangeWidget(Id(:ic_users), :Items, GenerateIcUsersTable())
         ret = true
       end
       ret
@@ -1444,19 +1444,21 @@ module Yast
       end
 
       # tab handling
-      if widget == :t_zvmids
+      case widget
+      when :t_zvmids
         # SaveSettings( $[ "ID" : widget ] );
         UI.ReplaceWidget(Id(:tab_content), ZvmIdsDialogContent())
         InitMainDialog(widget)
         Wizard.SetHelpText(Ops.get_string(@HELP, "zvmids", ""))
-      elsif widget == :t_tsshell || widget == :t_iucvconn
+      when :t_tsshell, :t_iucvconn
         # deactivate other tabs without  valid z/VM ids
         if Ops.greater_than(Builtins.size(@zvm_id_list), 0)
-          if widget == :t_tsshell
+          case widget
+          when :t_tsshell
             UI.ReplaceWidget(Id(:tab_content), TsShellDialogContent())
             InitMainDialog(widget)
             Wizard.SetHelpText(Ops.get_string(@HELP, "ts", ""))
-          elsif widget == :t_iucvconn
+          when :t_iucvconn
             UI.ReplaceWidget(Id(:tab_content), IucvConnDialogContent())
             InitMainDialog(widget)
             Wizard.SetHelpText(Ops.get_string(@HELP, "ic", ""))
@@ -1506,10 +1508,11 @@ module Yast
             ret = :again
             success = true
             # check TS-Shell user dialog settings and commit them if valid
-            if @current_dialog == :ts_open_user_dialog
+            case @current_dialog
+            when :ts_open_user_dialog
               success = CommitTsUserDialogSettings()
             # commit TS-Shell group dialog settings
-            elsif @current_dialog == :ts_open_group_dialog
+            when :ts_open_group_dialog
               CommitTsGroupDialogSettings()
             end
 

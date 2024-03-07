@@ -130,15 +130,15 @@ module Yast
       type = Ops.get_string(dev, "DUMP_TYPE")
       Builtins.foreach(@dump_devices) do |entry|
         line = Builtins.splitstring(entry, "\t")
-        if type == "ccw" &&
+        if (type == "ccw" &&
             Builtins.regexpmatch(Ops.get(line, 0), "^/dev/dasd[[:lower:]]+") &&
-            Ops.get(line, 2) == Ops.get(dev, "DEVICE") ||
+            Ops.get(line, 2) == Ops.get(dev, "DEVICE")) ||
             # check for fitting zfcp
-            type == "fcp" &&
+            (type == "fcp" &&
                 Builtins.regexpmatch(Ops.get(line, 0), "^/dev/sd[[:lower:]]+") &&
                 Ops.get(line, 2) == Ops.get(dev, "DEVICE") &&
                 Ops.get(line, 3) == Ops.get(dev, "WWPN") &&
-                Ops.get(line, 4) == Ops.get(dev, "LUN") # check for fitting dasd
+                Ops.get(line, 4) == Ops.get(dev, "LUN")) # check for fitting dasd
           mkdump = entry
           Builtins.y2milestone(
             "In /etc/sysconfig/dumpconf configured dump device found: %1",

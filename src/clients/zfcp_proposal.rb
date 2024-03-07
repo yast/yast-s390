@@ -40,7 +40,8 @@ module Yast
       @ret = {}
 
       # Make proposal for installation/configuration...
-      if @func == "MakeProposal"
+      case @func
+      when "MakeProposal"
         @summary = ZFCPController.Summary
         if Builtins.isempty(@summary)
           # text for installation summary
@@ -53,7 +54,7 @@ module Yast
           "warning_level" => nil
         }
       # Run an interactive workflow
-      elsif @func == "AskUser"
+      when "AskUser"
         Wizard.CreateDialog
         storage = Y2Storage::StorageManager.instance
         # Deactivate high level devices (RAID, multipath, LVM, encryption...)
@@ -68,7 +69,7 @@ module Yast
         # Fill return map
         @ret = { "workflow_sequence" => @sequence }
       # Return human readable titles for the proposal
-      elsif @func == "Description"
+      when "Description"
         return nil if !ZFCPController.IsAvailable
 
         # Fill return map
@@ -82,7 +83,7 @@ module Yast
             ),
             "id"              => "zfcp"
           }
-      elsif @func == "Write"
+      when "Write"
         ZFCPController.Write
       end
 

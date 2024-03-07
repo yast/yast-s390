@@ -173,7 +173,9 @@ module Yast
       # make sure that the user doesn't already exist
       users = GetUsers(false)
 
-      if !Builtins.haskey(users, username)
+      if Builtins.haskey(users, username)
+        Builtins.y2milestone("The user %1 does already exist.", username)
+      else
         user = {
           "uid"           => username,
           "loginShell"    => shell,
@@ -202,8 +204,6 @@ module Yast
             error
           )
         end
-      else
-        Builtins.y2milestone("The user %1 does already exist.", username)
       end
       new_userid
     end
@@ -249,7 +249,7 @@ module Yast
       group = Users.GetGroupByName("ts-shell", "system")
       group_id = Ops.get_string(group, "gidNumber", "")
 
-      new_uid = AddUser(
+      AddUser(
         username,
         password,
         group_id,
@@ -258,8 +258,6 @@ module Yast
         additional_groups,
         force_pw_change
       )
-
-      new_uid
     end
 
     # Update a configuration entry for TS-Shell users and configured groups
@@ -516,16 +514,17 @@ module Yast
         value = ""
         type = Ops.get_symbol(entries, :type)
         # Manual selection
-        if type == :rb_ts_list
+        case type
+        when :rb_ts_list
           selected_ids = Ops.get_list(entries, type, [])
           # remove the TEXT_ALL entry because it is not supported by the configuration
           selected_ids = Builtins.remove(selected_ids, 0) if Ops.get(selected_ids, 0, "") == @TEXT_ALL
           value = Ops.add("list:", Builtins.mergestring(selected_ids, ","))
         # Regex
-        elsif type == :rb_ts_regex
+        when :rb_ts_regex
           value = Ops.add("regex:", Ops.get_string(entries, type, ""))
         # File
-        elsif type == :rb_ts_file
+        when :rb_ts_file
           value = Ops.add("file:", Ops.get_string(entries, type, ""))
         end
         # ignore empty entries(like "list:" or "regex:")
