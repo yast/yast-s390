@@ -95,7 +95,7 @@ module Yast
         Ops.get(entry, 0),
         "^/dev/dasd[[:lower:]]+$"
       )
-      is_zfcp = Builtins.regexpmatch(Ops.get(entry, 0), "^/dev/sd[[:lower:]]+$")
+      is_zfcp = Builtins.regexpmatch(Ops.get(entry, 0), "^/dev/(sd[[:lower:]]+|mapper/.*)$")
 
       if is_dasd
         dev = Builtins.add(dev, "DUMP_TYPE", "ccw")
@@ -135,7 +135,7 @@ module Yast
             Ops.get(line, 2) == Ops.get(dev, "DEVICE")) ||
             # check for fitting zfcp
             (type == "fcp" &&
-                Builtins.regexpmatch(Ops.get(line, 0), "^/dev/sd[[:lower:]]+") &&
+                Builtins.regexpmatch(Ops.get(line, 0), "^/dev/(sd[[:lower:]]+|mapper/)") &&
                 Ops.get(line, 2) == Ops.get(dev, "DEVICE") &&
                 Ops.get(line, 3) == Ops.get(dev, "WWPN") &&
                 Ops.get(line, 4) == Ops.get(dev, "LUN")) # check for fitting dasd

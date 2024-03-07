@@ -158,7 +158,7 @@ module Yast
         # popup label
         UI.OpenDialog(Label(_("Running mkinitrd.")))
 
-        command = "/sbin/mkinitrd"
+        command = "/usr/bin/dracut --force"
         Builtins.y2milestone("Running command %1", command)
         ret = SCR.Execute(path(".target.bash"), command)
         Builtins.y2milestone("Exit code: %1", ret)
