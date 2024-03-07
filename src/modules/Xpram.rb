@@ -127,9 +127,7 @@ module Yast
 
       bret = Service.Stop("xpram")
       Builtins.y2milestone("Service::Stop (xpram) returns %1", bret)
-      if !bret
-        Report.Error(_("Error stopping xpram. Try \"rcxpram stop\" manually."))
-      else
+      if bret
         if @force
           SCR.Write(path(".sysconfig.xpram.XPRAM_FORCE"), "yes")
         else
@@ -154,6 +152,8 @@ module Yast
         end
 
         Progress.NextStage
+      else
+        Report.Error(_("Error stopping xpram. Try \"rcxpram stop\" manually."))
       end
       true
     end

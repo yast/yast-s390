@@ -199,7 +199,8 @@ module Yast
       while ret.nil?
         ret = Convert.to_symbol(UI.UserInput)
 
-        if ret == :filter
+        case ret
+        when :filter
           filter_min = Convert.to_string(UI.QueryWidget(:min_chan, :Value))
           filter_max = Convert.to_string(UI.QueryWidget(:max_chan, :Value))
 
@@ -217,10 +218,10 @@ module Yast
           ReloadZFCPDialog()
           ret = nil
           next
-        elsif ret == :table
+        when :table
           ret = nil
           next
-        elsif ret == :abort || ret == :cancel
+        when :abort, :cancel
           # yes-no popup
           if !Popup.YesNo(
             _(
@@ -326,7 +327,8 @@ module Yast
       while ret.nil?
         ret = Convert.to_symbol(UI.UserInput)
 
-        if ret == :get_wwpn
+        case ret
+        when :get_wwpn
           channel = Convert.to_string(UI.QueryWidget(:channel, :Value))
 
           if !ZFCPController.IsValidChannel(channel)
@@ -342,7 +344,7 @@ module Yast
           wwpns = ZFCPController.GetWWPNs(channel)
           UI.ChangeWidget(:wwpn, :Items, wwpns)
           ret = nil
-        elsif ret == :get_lun
+        when :get_lun
           channel = Convert.to_string(UI.QueryWidget(:channel, :Value))
           wwpn = Convert.to_string(UI.QueryWidget(:wwpn, :Value))
 
@@ -368,7 +370,7 @@ module Yast
           luns = ZFCPController.GetLUNs(channel, wwpn)
           UI.ChangeWidget(:lun, :Items, luns)
           ret = nil
-        elsif ret == :abort || ret == :cancel
+        when :abort, :cancel
           # yes-no popup
           if !Popup.YesNo(
             _(
@@ -377,7 +379,7 @@ module Yast
           )
             ret = nil
           end
-        elsif ret == :next
+        when :next
           channel = Convert.to_string(UI.QueryWidget(Id(:channel), :Value))
           wwpn = Convert.to_string(UI.QueryWidget(Id(:wwpn), :Value))
           lun = Convert.to_string(UI.QueryWidget(Id(:lun), :Value))

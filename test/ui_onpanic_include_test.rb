@@ -2,7 +2,7 @@
 
 require_relative "./test_helper"
 
-require_relative "../src/include/s390/onpanic/ui.rb"
+require_relative "../src/include/s390/onpanic/ui"
 
 Yast.import "Wizard"
 Yast.import "OnPanic"

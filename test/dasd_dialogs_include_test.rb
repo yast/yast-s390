@@ -2,7 +2,7 @@
 
 require_relative "./test_helper"
 
-require_relative "../src/include/s390/dasd/dialogs.rb"
+require_relative "../src/include/s390/dasd/dialogs"
 
 describe Yast::S390DasdDialogsInclude do
   subject do
