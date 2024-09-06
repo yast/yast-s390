@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Sep 06 07:14:32 UTC 2024 - Ladislav Slezák <lslezak@suse.com>
+
+- Branch package for SP7 (bsc#1230201)
+
+-------------------------------------------------------------------
 Wed Mar  6 09:00:01 UTC 2024 - Josef Reidinger <jreidinger@suse.com>
 
 - Replace 'mkinitrd' with dracut (bsc#1220995)
