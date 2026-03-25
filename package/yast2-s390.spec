@@ -17,7 +17,7 @@
 
 
 Name:           yast2-s390
-Version:        5.0.1
+Version:        5.0.2
 Release:        0
 Group:          System/YaST
 License:        GPL-2.0-only
@@ -31,7 +31,6 @@ BuildRequires:  yast2-devtools
 BuildRequires:  yast2-ruby-bindings >= 3.1.7
 BuildRequires:  rubygem(%rb_default_ruby_abi:rspec)
 BuildRequires:  rubygem(%rb_default_ruby_abi:yast-rake)
-BuildRequires:  update-desktop-files
 # Y2Storage::Inhibitors
 BuildRequires: yast2-storage-ng >= 4.0.175
 Requires:      yast2-storage-ng >= 4.0.175
